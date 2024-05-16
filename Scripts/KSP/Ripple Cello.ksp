@@ -531,8 +531,6 @@ function note_callback()
 						fade_in(note_id, fade_in_time)
 					end if
 
-					// call redraw_all_ripples_in_history
-
 				end if
 			end for
 		end if
@@ -540,36 +538,6 @@ function note_callback()
 end function
 
 function release(channel, note)
-	/*
-	declare e
-	declare event_ids[MAX_NUM_NOTES]
-	get_event_ids(event_ids)
-	for e := 0 to num_elements(event_ids) - 1
-		if event_ids[e] -> source # OUTSIDE_SOURCE ...
-		and get_event_par_arr(event_ids[e], EVENT_PAR_CUSTOM, EVENT.FADING_OUT) = 0
-			if channel = get_event_par_arr(event_ids[e], EVENT_PAR_CUSTOM, EVENT.CHANNEL)
-				declare low_note  := get_event_par_arr(event_ids[e], EVENT_PAR_CUSTOM, EVENT.LOW_NOTE)
-				declare high_note := get_event_par_arr(event_ids[e], EVENT_PAR_CUSTOM, EVENT.HIGH_NOTE)
-				if low_note = note or high_note = note
-					declare artic := get_event_par_arr(event_ids[e], EVENT_PAR_CUSTOM, EVENT.ARTIC)
-					declare history_index := search_for_event_id_in_channel_history(channel, event_ids[e])
-					if history_index > -1
-						declare recorded_pos_in_pulse := event_ids[e] -> play_pos mod recorded_pulse_lengths[artic]
-						declare actual_pos_in_pulse := map_i_2i_2i_i(recorded_pos_in_pulse, 0, recorded_pulse_lengths[artic], 0, ticks_to_ms(pulse_lengths_ticks[artic]))
-						declare fade_out_time := ticks_to_ms(pulse_lengths_ticks[artic]) - actual_pos_in_pulse
-						constrain(fade_out_time, DURATION_SIXTEENTH, ticks_to_ms(pulse_lengths_ticks[artic]) / 4 * 3)
-						fade_out(event_ids[e], fade_out_time, STOP_VOICE_AFTER_FADE_OUT)
-						set_event_par_arr(event_ids[e], EVENT_PAR_CUSTOM, ENGINE_UPTIME, EVENT.RELEASE_TIMESTAMP)
-						set_event_par_arr(event_ids[e], EVENT_PAR_CUSTOM, fade_out_time, EVENT.RELEASE_LENGTH)
-						set_event_par_arr(event_ids[e], EVENT_PAR_CUSTOM, 1, EVENT.FADING_OUT)
-					end if
-				end if
-			end if
-		end if
-	end for
-	*/
-
-
 	declare r
 	for r := 0 to MAX_RIPPLE_HISTORY - 1
 		if ripple_history[r] # 0 ...
@@ -824,18 +792,6 @@ function listener_callback
 				dot[r] -> hide := HIDE_WHOLE_CONTROL
 			end if
 		end for
-
-
-		// call redraw_all_ripples_in_history
-
-		declare @str := ""
-		for i := 0 to MAX_RIPPLE_HISTORY - 1
-			if ripple[i] -> hide = HIDE_PART_NOTHING
-				str := str & "   " & i
-			end if
-		end for
-		// message(str)
-
 
 		if highest_row > 0
 			instructions_opacity := 0.0
