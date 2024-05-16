@@ -1,0 +1,101 @@
+import "utilities"
+
+{#pragma save_compiled_source ..\..\Resources\scripts\script.txt}
+
+on init
+	message("")
+	utilities.icb
+	engine.ICB()
+	tcm.init(1000)
+	SET_CONDITION(TCM_LARGE)
+
+	set_key_pressed_support(1)
+
+	set_snapshot_type(3)
+
+	declare dev_mode[1]
+	load_array(dev_mode, 2)
+
+	make_perfview
+
+	set_listener(NI_SIGNAL_TIMER_MS, 1000)
+
+	{{ CONSTANTS }}
+	define NUM_MACRO_SLIDERS := 4
+	declare const RECORDED_DURATION_QUARTER := 600000
+
+	declare speed_units[300]
+	speed_units[1] := NI_SYNC_UNIT_WHOLE
+	speed_units[2] := NI_SYNC_UNIT_HALF
+	speed_units[4] := NI_SYNC_UNIT_QUARTER
+	speed_units[8] := NI_SYNC_UNIT_8TH
+	speed_units[16] := NI_SYNC_UNIT_16TH
+	speed_units[32] := NI_SYNC_UNIT_32ND
+	speed_units[64] := NI_SYNC_UNIT_64TH
+	speed_units[256] := NI_SYNC_UNIT_256TH
+	
+	define ATTACK := 0
+	define DECAY := 1
+	define SUSTAIN := 2
+	define RELEASE := 3
+
+	define DEFAULT_MOUSE_BEHAVIOR := -450
+
+	declare const MACRO1_CC      := 103
+	declare const MACRO2_CC      := 104
+	declare const MACRO3_CC      := 105
+	declare const MACRO4_CC      := 106
+	declare const MACRO1_CC2     := 113
+	declare const MACRO2_CC2     := 114
+	declare const MACRO3_CC2     := 115
+	declare const MACRO4_CC2     := 116
+	declare const ATTACK_CC      := 107
+	declare const DECAY_CC       := 108
+	declare const SUSTAIN_CC     := 109
+	declare const RELEASE_CC     := 110
+	declare const TIME_CHANGE_CC := 111
+	declare const TIME_RESET_CC  := 112
+	declare const DELAY_CC       := 117
+	declare const REVERB_CC      := 118
+	declare const LEGATO_CC      := 119
+
+	declare main_font := get_font_id("main font")
+	declare main_font_all_caps := get_font_id("main font all caps")
+	declare main_font_darker := get_font_id("main font darker")
+
+
+	{{ VARIABLES }}
+	declare _
+	declare i
+	declare g
+	declare e
+	declare event_ids[512]
+	declare const GROUPS.SIZE := 49
+	declare pers selected[GROUPS.SIZE]
+	declare pers ~speed_multiplier
+	declare num_keys_down
+	declare playable_keys[128]
+	declare read nks_type[NUM_MACRO_SLIDERS]
+
+	declare num_cur_groups
+	declare cur_groups[12]
+
+	// keyswitch variables
+	declare pers cur_ks
+	declare first_ks
+	declare first_patch
+	declare num_ks
+
+
+
+	{{ UI }}
+	import "F2K/UI Code.ksp"
+	import "F2K/UI ID arrays.ksp"
+	import "F2K/Automation.ksp"
+	define UI_HEIGHT := 316
+	define UI_WIDTH := 650
+	set_ui_height_px(UI_HEIGHT + dev_mode[0]*40)
+	set_ui_width_px(UI_WIDTH)
+	set_control_par_str(INST_ICON_ID, CONTROL_PAR_PICTURE, "insticon")
+
+end on

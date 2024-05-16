@@ -1,0 +1,257 @@
+{#pragma save_compiled_source ..\..\Resources\scripts\Risers.txt}
+import "utilities/ep_shorthands.ksp"
+import "utilities/utilities.ksp"
+import "utilities/koala functions.ksp"
+
+on init
+	engine.ICB()
+	utilities.icb
+	tcm.init(1000)
+	SET_CONDITION(TCM_LARGE)
+	SET_CONDITION(NO_SYS_SCRIPT_PEDAL)
+
+	declare dev_mode[1]
+	load_array(dev_mode, 2)
+
+	make_perfview
+	define UI_HEIGHT := 100
+	set_ui_height_px(UI_HEIGHT + dev_mode[0]*50)
+	set_ui_color(9151515h)
+
+	set_listener(NI_SIGNAL_TIMER_MS, 100000)
+	message("")
+
+	// PLACEHOLDER VARIABLES
+	declare prev_pedal
+	declare offset
+	declare i
+	declare g
+	declare key_i
+	declare art_i
+	declare pitch_i
+	declare value
+	declare event_ids[128]
+	declare num_key_active
+	declare first_note
+	declare play_pos
+	declare recent_id
+	declare riser_length
+
+	// VARIABLES
+	declare note_ids[128]
+	declare key_active[128]
+
+
+	// CONSTANTS
+	declare const LOW_KEY := 36
+	declare const HIGH_KEY := 83
+	define NUM_ARTICULATIONS := 4
+	define NUM_PITCHES := 4
+	define NORM := 0
+	define TREM := 1
+	define PONT := 2
+	define PIZZ := 3
+	declare sample_keys[NUM_ARTICULATIONS, NUM_PITCHES]
+	for art_i := 0 to NUM_ARTICULATIONS - 1
+		sample_keys[art_i, 0] := art_i * 12 + 36 + 0
+		sample_keys[art_i, 1] := art_i * 12 + 36 + 2
+		sample_keys[art_i, 2] := art_i * 12 + 36 + 4
+		sample_keys[art_i, 3] := art_i * 12 + 36 + 5
+	end for
+
+	// UI
+	declare pers ui_button legato
+	set_bounds(legato, 50, 10, 60)
+
+	declare pers ui_button reverse
+	set_bounds(reverse, 50, 30, 60)
+
+	declare pers ui_slider start(0, 1000000)
+	set_bounds(start, 150, 10)
+	declare ui_label start_lbl(2,2)
+	set_bounds(start_lbl, start -> pos_x, start -> pos_y + 20, 88)
+	set_label_properties(start_lbl, "Start")
+
+	declare pers ui_slider speed(0, 1000000)
+	set_bounds(speed, 250, 10)
+	speed -> default := 500000
+	declare ui_label speed_lbl(2,2)
+	set_bounds(speed_lbl, speed -> pos_x, speed -> pos_y + 20, 88)
+	set_label_properties(speed_lbl, "Speed")
+
+	declare pers ui_slider reverb(0, 1000000)
+	set_bounds(reverb, 350, 10)
+	reverb -> default := 500000
+	declare ui_label reverb_lbl(2,2)
+	set_bounds(reverb_lbl, reverb -> pos_x, reverb -> pos_y + 20, 88)
+	set_label_properties(reverb_lbl, "Reverb")
+
+	declare pers ui_slider edge(0, 1000000)
+	set_bounds(edge, 450, 10)
+	edge -> default := 500000
+	declare ui_label edge_lbl(2,2)
+	set_bounds(edge_lbl, edge -> pos_x, edge -> pos_y + 20, 88)
+	set_label_properties(edge_lbl, "Edge")
+
+
+
+	// DEVELOPER OPTIONS
+	declare read ui_value_edit spl_length(1, 13000000, 1000000)
+	set_bounds(spl_length, 0, UI_HEIGHT + 5, 170)
+	spl_length -> text := "samples length in seconds"
+
+	define spl_length_seconds := (spl_length / 1000000)
+	if spl_length_seconds = 13
+		speed -> default := 0
+	end if
+
+	declare ep_speeds[14]
+	ep_speeds[3] := 791279
+	ep_speeds[9] := 310052
+	ep_speeds[13] := -100000
+
+end on
+
+function set_key_colors
+	for i := 0 to 127
+		if search(black_keys, i mod 12) = -1
+			set_key_color(i, KEY_COLOR_BLACK)
+		else
+			set_key_color(i, KEY_COLOR_WHITE)
+		end if
+	end for
+	for pitch_i := 0 to NUM_PITCHES - 1
+		set_key_color(sample_keys[NORM, pitch_i], KEY_COLOR_GREEN)
+		set_key_color(sample_keys[TREM, pitch_i], KEY_COLOR_YELLOW)
+		set_key_color(sample_keys[PONT, pitch_i], KEY_COLOR_LIGHT_ORANGE)
+		set_key_color(sample_keys[PIZZ, pitch_i], KEY_COLOR_RED)
+	end for
+end function
+
+
+on persistence_changed
+	call set_key_colors
+end on
+
+
+function count_key_active
+	num_key_active := 0
+	for key_i := 0 to 127
+		if search(_sample_keys, key_i) # -1
+			if key_active[key_i] = 1
+				inc(num_key_active)
+			end if
+		end if
+	end for
+end function
+
+
+on note
+	ignore_event(EVENT_ID)
+	if search(_sample_keys, EVENT_NOTE) # -1
+		if key_active[EVENT_NOTE] = 1
+			exit
+		end if
+		key_active[EVENT_NOTE] := 1
+
+		if reverse = 0
+			riser_length := spl_length - 1000000
+			offset := map_i_2i_2i_i(start, 0, 1000000, 0, riser_length)
+		else
+			offset := map_i_2i_2i_i(start, 0, 1000000, 500000, spl_length)
+		end if
+
+		if legato = 1
+			call count_key_active
+			if num_key_active = 1
+				first_note := EVENT_NOTE
+			else
+				offset := recent_id -> play_pos
+				if reverse = 1
+					offset := spl_length - offset
+				end if
+			end if
+		end if
+
+		note_ids[EVENT_NOTE] := play_note(EVENT_NOTE, EVENT_VELOCITY, offset, -1)
+		recent_id := note_ids[EVENT_NOTE]
+
+		set_event_par_arr(note_ids[EVENT_NOTE], EVENT_PAR_ALLOW_GROUP, 0, ALL_GROUPS)
+		if reverse = 0
+			set_event_par_arr(note_ids[EVENT_NOTE], EVENT_PAR_ALLOW_GROUP, 1, find_group("fwd"))
+		else
+			set_event_par_arr(note_ids[EVENT_NOTE], EVENT_PAR_ALLOW_GROUP, 1, find_group("rev"))
+		end if
+
+	end if
+end on
+
+on release
+	if CC[64] > 10
+		ignore_event(EVENT_ID)
+		exit
+	end if
+
+	key_active[EVENT_NOTE] := 0
+end on
+
+on controller
+	select CC_NUM
+		case 64
+			if prev_pedal > 10 and CC[64] < 10
+				for key_i := 0 to 127
+					if search(_sample_keys, key_i) # -1
+						if KEY_DOWN[key_i] = 0
+							key_active[key_i] := 0
+							note_off(note_ids[key_i])
+						end if
+					end if
+				end for
+			end if
+			prev_pedal := CC[64]
+	end select
+end on
+
+
+
+
+on ui_control (speed)
+	// msg(speed)
+	// group[0].speed := speed
+	for g := 0 to 1
+		if spl_length_seconds = 13
+			group[g].speed := map_i_2i_2i_i(speed, 0, 1000000, ep_speeds[spl_length_seconds], 1000000)
+		else
+			if speed < 500000
+				group[g].speed := map_i_2i_2i_i(speed, 0, 500000, 0, ep_speeds[spl_length_seconds])
+			else
+				group[g].speed := map_i_2i_2i_i(speed, 500000, 1000000, ep_speeds[spl_length_seconds], 1000000)
+			end if
+		end if
+	end for
+end on
+
+on ui_control (reverb)
+	if reverb < 500000
+		insert[7].send_0 := map_i_2i_2i_i(reverb, 0, 1000000, V2E.volume(-25000.0), V2E.volume(0.0))
+	else
+		insert[7].send_0 := map_i_2i_2i_i(reverb, 0, 1000000, V2E.volume(0.0), V2E.volume(12000.0))
+	end if
+end on
+
+on ui_control (edge)
+	if in_range(edge, 500000, 1000000)
+		insert[6].seq_hf_gain := map_i_2i_2i_i(edge, 500000, 1000000, V2E.SGEQGAIN_BASE(0.0), V2E.SGEQGAIN_BASE(100.0))
+	else
+		insert[6].seq_hf_gain := map_i_2i_2i_i(edge, 0, 500000, V2E.SGEQGAIN_BASE(-60.0), V2E.SGEQGAIN_BASE(0.0))
+	end if
+
+	if in_range(edge, 900000, 1000000)
+		insert[5].sat_amt := map_i_2i_2i_i(edge, 900000, 1000000, 500000, 900000)
+		insert[5].ifx_output := map_i_2i_2i_i(edge, 900000, 1000000, V2E.volume2(0.0), V2E.volume2(-12000.0))
+	else
+		insert[5].sat_amt := 500000
+		insert[5].ifx_output := V2E.volume2(0.0)
+	end if
+end on
+

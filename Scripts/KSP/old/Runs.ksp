@@ -1,0 +1,368 @@
+{#pragma save_compiled_source ..\..\Resources\scripts\Runs.txt}
+import "utilities/ep_shorthands.ksp"
+import "utilities/utilities.ksp"
+import "utilities/koala functions.ksp"
+
+on init
+	message("")
+	engine.ICB()
+	utilities.icb
+	tcm.init(1000)
+	SET_CONDITION(TCM_LARGE)
+	// SET_CONDITION(NO_SYS_SCRIPT_PEDAL)
+	set_snapshot_type(3)
+	set_key_pressed_support(1)
+
+	declare dev_mode[1]
+	load_array(dev_mode, 2)
+
+
+	make_perfview
+	define UI_HEIGHT := 100
+	set_ui_height_px(UI_HEIGHT + dev_mode[0]*50)
+	set_ui_color(9151515h)
+
+	// CONSTANTS
+	declare const UP_KS := 33
+	declare const DOWN_KS := 31
+	declare const DURATION_EIGHTH_AT_130BPM := 230769
+	declare const DURATION_EIGHTH_TRIPLET_AT_100BPM := 200000
+	declare const STARTING_NOTE := EVENT_PAR_0
+
+	// VARIABLES
+	declare note
+	declare offset
+	declare i
+	declare polyphonic note_id
+	declare polyphonic direction
+
+	declare time_interval
+	declare distance_past_key_bounds
+	declare increment
+	declare next_note
+	declare distance_to_highest_note
+	declare event_ids[128]
+	declare prev_cc64
+	declare cursor
+	declare e
+	declare key_i
+	declare key_active[128]
+	declare num_key_active	
+	declare note_ids[128]
+	declare buffer[128]
+	declare num_keys_down
+	declare sign[2] := (-1, 1)
+	
+	declare low_key_for_direction
+	declare high_key_for_direction
+	declare wait_time
+	declare value
+
+	// UI
+	declare pers ui_button down
+	set_bounds(down, 50, 30, 50)
+
+	declare pers ui_button up
+	set_bounds(up, 50, 10, 50)
+
+	declare pers ui_button velocity_controlled_direction
+	set_bounds(velocity_controlled_direction, 100, 20, 90)
+	velocity_controlled_direction -> text := "Velocity Control"
+
+
+	// DEVELOPER OPTIONS
+	declare pers ui_menu scale_type
+	set_bounds(scale_type, 300, UI_HEIGHT)
+	define CHROMATIC := 0
+	define OCTATONIC := 1
+	add_menu_item(scale_type, "Chromatic", CHROMATIC)
+	add_menu_item(scale_type, "Octatonic", OCTATONIC)
+
+	declare pers ui_value_edit low_key(0, 127, VALUE_EDIT_MODE_NOTE_NAMES)
+	set_bounds(low_key, 100, UI_HEIGHT)
+	set_value_edit_properties(low_key, "low key")
+
+	declare pers ui_value_edit high_key(0, 127, VALUE_EDIT_MODE_NOTE_NAMES)
+	set_bounds(high_key, 200, UI_HEIGHT)
+	set_value_edit_properties(high_key, "high key")
+
+	declare pers ui_value_edit rls_time(0, 960*2, 480)
+	set_bounds(rls_time, 400, UI_HEIGHT, 135)
+	rls_time -> text := "release time 8ths"
+
+end on
+
+function set_key_colors	
+	for i := 0 to 127
+		if search(black_keys, i mod 12) = -1
+			set_key_color(i, KEY_COLOR_BLACK)
+		else
+			set_key_color(i, KEY_COLOR_WHITE)
+		end if
+	end for
+	for i := 0 to 127
+		if in_range(i, low_key, high_key)
+			set_key_color(i, KEY_COLOR_BLUE)
+		else if i = UP_KS or i = DOWN_KS
+			if velocity_controlled_direction = 0
+				set_key_color(i, KEY_COLOR_RED)
+			end if
+		end if
+	end for
+end function
+
+function set_keys_pressed
+	if velocity_controlled_direction = 0
+		if up = 1
+			message("hey")
+			set_key_pressed(UP_KS, 1)
+			set_key_pressed(DOWN_KS, 0)
+		end if
+		if down = 1
+			set_key_pressed(DOWN_KS, 1)
+			set_key_pressed(UP_KS, 0)
+		end if
+	else
+		set_key_pressed(UP_KS, 0)
+		set_key_pressed(DOWN_KS, 0)
+	end if
+end function
+
+function release(note)
+	key_active[note] := 0
+	get_event_ids(event_ids)
+	for e := 0 to num_elements(event_ids) - 1
+		if get_event_par(event_ids[e], STARTING_NOTE) = note
+			fade_out(event_ids[e], ticks_to_ms(rls_time), STOP_VOICE_AFTER_FADE_OUT)
+		end if
+	end for
+end function
+
+
+function get_note_and_offset(cur_note)
+	note := cur_note
+	offset := 0
+	if scale_type = OCTATONIC
+		if direction = 0 // down
+			if note < 48
+				note := 48
+				select note mod 12
+					case 11 to 10
+						offset := DURATION_EIGHTH_AT_130BPM * 1
+					case 9
+						offset := DURATION_EIGHTH_AT_130BPM * 2
+					case 8
+						offset := DURATION_EIGHTH_AT_130BPM * 3
+					case 7 to 6
+						offset := DURATION_EIGHTH_AT_130BPM * 4
+					case 5 to 4
+						offset := DURATION_EIGHTH_AT_130BPM * 5
+					case 3
+						offset := DURATION_EIGHTH_AT_130BPM * 6
+					case 2 to 1
+						offset := DURATION_EIGHTH_AT_130BPM * 7
+					case 0
+						offset := DURATION_EIGHTH_AT_130BPM * 8
+				end select
+			end if
+		else if direction = 1 // up
+			if note > 72
+				note := 72
+				select note mod 12
+					case 1 to 2
+						offset := DURATION_EIGHTH_AT_130BPM * 1
+					case 3 to 4
+						offset := DURATION_EIGHTH_AT_130BPM * 2
+					case 5
+						offset := DURATION_EIGHTH_AT_130BPM * 3
+					case 6 to 7
+						offset := DURATION_EIGHTH_AT_130BPM * 4
+					case 8
+						offset := DURATION_EIGHTH_AT_130BPM * 5
+					case 9 to 10
+						offset := DURATION_EIGHTH_AT_130BPM * 6
+					case 11
+						offset := DURATION_EIGHTH_AT_130BPM * 7
+				end select
+			end if
+		end if
+	else
+		if direction = 0
+			if note < 48
+				note := 48
+				offset := (48 - note) * DURATION_EIGHTH_TRIPLET_AT_100BPM
+			end if
+		else if direction = 1
+			if note > 72
+				note := 72
+				offset := (note - 72) * DURATION_EIGHTH_TRIPLET_AT_100BPM
+			end if
+		end if
+	end if
+end function
+
+
+on persistence_changed
+	call set_key_colors
+	call set_keys_pressed
+end on
+
+function note_callback()
+	set_key_pressed(EVENT_NOTE, 1)
+	ignore_event(EVENT_ID)
+
+	if velocity_controlled_direction = 0
+		select EVENT_NOTE
+			case DOWN_KS
+				down := 1 
+				up := 0
+			case UP_KS
+				up := 1
+				down := 0
+		end select
+	else
+		if in_range(EVENT_NOTE, low_key, high_key)
+			if EVENT_VELOCITY < 64
+				up := 1
+				down := 0
+			else
+				up := 0
+				down := 1
+			end if
+		end if
+	end if
+
+	// if in_range(EVENT_NOTE, low_key, high_key)
+	// 	get_note_and_offset()
+	// 	note_id := play_note(note, EVENT_VELOCITY, offset, 0)
+	// 	set_event_par_arr(note_id, EVENT_PAR_ALLOW_GROUP, 0, ALL_GROUPS)
+	// 	set_event_par_arr(note_id, EVENT_PAR_ALLOW_GROUP, 1, direction)
+	// end if
+
+
+	if in_range(EVENT_NOTE, low_key, high_key)
+		key_active[EVENT_NOTE] := 1
+		direction := up
+		declare polyphonic cur_note := EVENT_NOTE
+		note_ids[EVENT_NOTE] := EVENT_ID
+		declare polyphonic interval_hop
+		declare polyphonic note_spacing
+		declare polyphonic note_length
+		declare polyphonic lfo_driver
+		declare polyphonic note_start := ENGINE_UPTIME
+		declare swell_length := 960*8
+
+
+		interval_hop := 12
+		note_spacing := 960*4
+		note_length := DURATION_EIGHTH * 9
+			
+		while key_active[EVENT_NOTE] = 1 and note_ids[EVENT_NOTE] = EVENT_ID
+			// fade_out(note_id, DURATION_QUARTER, STOP_VOICE_AFTER_FADE_OUT)
+			get_note_and_offset(cur_note)
+			msg(cur_note)
+			note_id := play_note(note, EVENT_VELOCITY, offset, note_length)
+			set_event_par_arr(note_id, EVENT_PAR_ALLOW_GROUP, 0, ALL_GROUPS)
+			set_event_par_arr(note_id, EVENT_PAR_ALLOW_GROUP, 1, direction)
+			set_event_par(note_id, STARTING_NOTE, EVENT_NOTE)
+
+			cur_note := cur_note + interval_hop * sign[direction]
+			// if cur_note >= high_key
+			// 	distance_past_key_bounds := abs(cur_note - high_key)
+			// 	cur_note := high_key - distance_past_key_bounds
+			// 	direction := 0
+			// end if
+
+			// if cur_note <= low_key
+			// 	distance_past_key_bounds := abs(cur_note - low_key)
+			// 	cur_note := low_key + distance_past_key_bounds
+			// 	direction := 1
+			// end if
+
+			declare polyphonic wait_counter
+			wait_counter := 0
+			while wait_counter < note_spacing and key_active[EVENT_NOTE] = 1 and note_ids[EVENT_NOTE] = EVENT_ID
+				declare note_play_pos := ms_to_ticks((ENGINE_UPTIME - note_start) * 1000) mod swell_length
+
+				if in_range(note_play_pos, 0, swell_length / 2)
+					value := map_i_2i_2i_i(note_play_pos, 0, swell_length / 2, 1000000, 0)
+				else
+					value := map_i_2i_2i_i(note_play_pos, swell_length / 2, swell_length, 0, 1000000)
+				end if
+				set_event_par_arr(note_id, EVENT_PAR_MOD_VALUE_ID, value, 0)
+				wait_ticks(10)
+				wait_counter := wait_counter + 10
+			end while
+			// wait_ticks(note_spacing)
+		end while
+	end if
+end function
+
+on note
+	note_callback()
+end on
+
+function release_callback()
+	if EVENT_ID -> source = -1
+		set_key_pressed(EVENT_NOTE, 0)
+		call set_keys_pressed
+		if in_range(EVENT_NOTE, low_key, high_key)
+			// release(EVENT_NOTE)
+			key_active[EVENT_NOTE] := 0
+			if scale_type = CHROMATIC
+				declare polyphonic cur_beat := (note_id -> play_pos / DURATION_EIGHTH_TRIPLET_AT_100BPM)
+				declare time_til_next_beat := ((cur_beat + 1) * DURATION_EIGHTH_TRIPLET_AT_100BPM) - note_id -> play_pos
+				if time_til_next_beat > 0
+					wait(time_til_next_beat)
+				end if
+				declare group := direction
+				if direction = 0
+					declare cur_note := note_id -> note - cur_beat
+					declare rls_note := cur_note + 12 - 1
+					if rls_note > high_key
+						group := 1
+						rls_note := cur_note - 12 - 1
+					end if
+				else if direction = 1
+					declare cur_note := note_id -> note + cur_beat
+					declare rls_note := cur_note - 12 + 1
+					if rls_note < low_key
+						group := 0
+						rls_note := cur_note + 12 + 1
+					end if
+				end if
+				fade_out(note_id, DURATION_SIXTEENTH / 4, STOP_VOICE_AFTER_FADE_OUT)
+				declare rls_note_id := play_note(rls_note, EVENT_VELOCITY, DURATION_EIGHTH_TRIPLET_AT_100BPM * 12, 0)
+				fade_in(rls_note_id, DURATION_SIXTEENTH / 4)
+				set_event_par_arr(rls_note_id, EVENT_PAR_ALLOW_GROUP, 0, ALL_GROUPS)
+				set_event_par_arr(rls_note_id, EVENT_PAR_ALLOW_GROUP, 1, group)
+			end if
+			// if CC[64] > 10
+			// 	exit
+			// end if
+			// release(EVENT_NOTE)
+		end if
+	end if
+end function
+
+on release
+	release_callback()
+end on
+
+
+on ui_control (up)
+	up := 1
+	down := 0
+	call set_keys_pressed
+end on
+
+on ui_control (down)
+	down := 1
+	up := 0
+	call set_keys_pressed
+end on
+
+on ui_control (velocity_controlled_direction)
+	call set_key_colors
+	call set_keys_pressed
+end on

@@ -1,0 +1,169 @@
+{#pragma save_compiled_source ..\..\Resources\scripts\Sustains.txt}
+import "utilities/ep_shorthands.ksp"
+import "utilities/utilities.ksp"
+import "utilities/koala functions.ksp"
+
+on init
+	engine.ICB()
+	utilities.icb
+	tcm.init(1000)
+	SET_CONDITION(TCM_LARGE)
+
+	SET_CONDITION(NO_SYS_SCRIPT_PEDAL)
+	pgs_create_key(LEGATO_KEY, 20)
+
+	declare dev_mode[1]
+	load_array(dev_mode, 2)
+
+	make_perfview
+	define UI_HEIGHT := 100
+	set_ui_height_px(UI_HEIGHT + dev_mode[0]*50)
+	set_ui_color(9151515h)
+
+	set_listener(NI_SIGNAL_TIMER_MS, 100000)
+	message("")
+
+	// PLACEHOLDER VARIABLES
+	declare prev_pedal
+	declare offset
+	declare i
+	declare g
+	declare key_i
+	declare art_i
+	declare pitch_i
+	declare value
+	declare event_ids[128]
+	declare num_key_active
+	declare first_note
+	declare play_pos
+	declare recent_id
+	declare riser_length
+	declare @group_str
+
+	// VARIABLES
+	declare note_ids[128]
+	declare key_active[128]
+
+
+	// CONSTANTS
+
+	// UI
+	declare pers ui_button legato
+	set_bounds(legato, 50, 10, 60)
+
+	declare pers ui_button loop
+	set_bounds(loop, 50, 30, 60)
+
+	declare pers ui_slider reverb(0, 1000000)
+	set_bounds(reverb, 350, 10)
+	reverb -> default := 500000
+	declare ui_label reverb_lbl(2,2)
+	set_bounds(reverb_lbl, reverb -> pos_x, reverb -> pos_y + 20, 88)
+	set_label_properties(reverb_lbl, "Reverb")
+
+	declare pers ui_slider edge(0, 1000000)
+	set_bounds(edge, 450, 10)
+	edge -> default := 500000
+	declare ui_label edge_lbl(2,2)
+	set_bounds(edge_lbl, edge -> pos_x, edge -> pos_y + 20, 88)
+	set_label_properties(edge_lbl, "Edge")
+
+	// DEVELOPER OPTIONS
+	declare pers ui_menu sustain_type
+	const SUSTAIN
+		GROWL
+		WHISPER
+		WOOZY
+	end const
+
+	set_bounds(sustain_type, 0, UI_HEIGHT)
+	add_menu_item(sustain_type, "Growl", SUSTAIN.GROWL)
+	add_menu_item(sustain_type, "Whisper", SUSTAIN.WHISPER)
+	add_menu_item(sustain_type, "Woozy", SUSTAIN.WOOZY)
+
+	declare key_colors[SUSTAIN.SIZE]
+	key_colors[SUSTAIN.GROWL] := KEY_COLOR_GREEN
+	key_colors[SUSTAIN.WHISPER] := KEY_COLOR_TURQUOISE
+	key_colors[SUSTAIN.WOOZY] := KEY_COLOR_YELLOW
+
+	declare pers ui_value_edit low_key(0, 127, VALUE_EDIT_MODE_NOTE_NAMES)
+	set_bounds(low_key, 100, UI_HEIGHT)
+	set_value_edit_properties(low_key, "low key")
+
+	declare pers ui_value_edit high_key(0, 127, VALUE_EDIT_MODE_NOTE_NAMES)
+	set_bounds(high_key, 200, UI_HEIGHT)
+	set_value_edit_properties(high_key, "high key")
+
+end on
+
+function set_key_colors
+	for i := 0 to 127
+		if in_range(i, low_key, high_key)
+			set_key_color(i, key_colors[sustain_type])
+		else
+			if search(black_keys, i mod 12) = -1
+				set_key_color(i, KEY_COLOR_BLACK)
+			else
+				set_key_color(i, KEY_COLOR_WHITE)
+			end if
+		end if
+	end for
+end function
+
+
+on persistence_changed
+	call set_key_colors
+end on
+
+
+on note
+	select sustain_type
+	case SUSTAIN.GROWL
+		set_event_par_arr(EVENT_ID, EVENT_PAR_ALLOW_GROUP, 0, ALL_GROUPS)
+		group_str := "not "
+		if loop = 1
+			group_str := ""
+		end if
+		set_event_par_arr(EVENT_ID, EVENT_PAR_ALLOW_GROUP, 1, find_group(group_str & "looped"))
+		set_event_par_arr(EVENT_ID, EVENT_PAR_ALLOW_GROUP, 1, find_group(group_str & "looped crackle"))
+
+	case SUSTAIN.WHISPER
+
+	case SUSTAIN.WOOZY
+		set_event_par_arr(EVENT_ID, EVENT_PAR_ALLOW_GROUP, 0, ALL_GROUPS)
+		set_event_par_arr(EVENT_ID, EVENT_PAR_ALLOW_GROUP, 1, find_group("Low"))
+
+	end select
+end on
+
+
+on ui_control (legato)
+	pgs_set_key_val(LEGATO_KEY, LEGATO_BYPASS, legato)	
+end on
+
+
+on ui_control (reverb)
+	if reverb < 500000
+		insert[7].send_0 := map_i_2i_2i_i(reverb, 0, 1000000, V2E.volume(-25000.0), V2E.volume(0.0))
+	else
+		insert[7].send_0 := map_i_2i_2i_i(reverb, 0, 1000000, V2E.volume(0.0), V2E.volume(12000.0))
+	end if
+end on
+
+on ui_control (edge)
+	set_controller(103, map_i_2i_2i_i(edge, 0, 1000000, 0, 127))
+	if in_range(edge, 500000, 1000000)
+		insert[6].seq_hf_gain := map_i_2i_2i_i(edge, 500000, 1000000, V2E.SGEQGAIN_BASE(0.0), V2E.SGEQGAIN_BASE(100.0))
+	else
+		insert[6].seq_hf_gain := map_i_2i_2i_i(edge, 0, 500000, V2E.SGEQGAIN_BASE(-60.0), V2E.SGEQGAIN_BASE(0.0))
+	end if
+
+	if in_range(edge, 900000, 1000000)
+		// insert[5].sat_amt := map_i_2i_2i_i(edge, 900000, 1000000, 500000, 900000)
+		// insert[5].ifx_output := map_i_2i_2i_i(edge, 900000, 1000000, V2E.volume2(0.0), V2E.volume2(-12000.0))
+	else
+		// insert[5].sat_amt := 500000
+		// insert[5].ifx_output := V2E.volume2(0.0)
+	end if
+end on
+

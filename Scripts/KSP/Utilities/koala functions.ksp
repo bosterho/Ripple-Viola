@@ -1,0 +1,93 @@
+// Math
+function k6_log2(value) -> return
+	return := log_b(2, value)
+end function
+
+
+// Filters
+// Fundamental equation: ep = 10^6/log2(Fmax/Fmin)*log2(F/Fmin)
+// E2V output and V2E input: f_min to f_max Hz
+define E2V.FILT_FREQ_BASE(in, f_min, f_max) := ((pow(2.0, int_to_real(in) * (log_b(2, f_max/f_min)/pow(10.0, 6.0)))) * f_min)
+define V2E.FILT_FREQ_BASE(in, f_min, f_max) := real_to_int(((pow(10.0, 6.0) / log_b(2, f_max/f_min)) * log_b(2, in / f_min)))
+
+// SV and Ladder filter frequency
+// function E2V.SVFreq(in) -> return
+// 	return := E2V.FILT_FREQ_BASE(in, 26.0, 19900.0)
+// end function
+function V2E.SVFreq(in) -> return
+	return := V2E.FILT_FREQ_BASE(in, 26.0, 19900.0)	
+end function
+
+// 1,2,3 bands EQ frequency
+function E2V.EqFreq(in) -> return
+	return := E2V.FILT_FREQ_BASE(in, 20.0, 20000.0)
+end function
+function V2E.EqFreq(in) -> return
+	return := V2E.FILT_FREQ_BASE(in, 20.0, 20000.0)
+end function
+
+// 1-2-3 Band EQ Gain
+// Fundamental equation: ep = 500000*G/180 + 500000
+// E2V output and V2E input: -180 to +180 (dB scaled by 10)
+define E2V.EQGAIN_BASE(in) := (int_to_real(in) - 500000.0) / 500000.0 * 180.0
+define V2E.EQGAIN_BASE(in) := real_to_int(500000.0 * in / 180.0 + 500000.0)
+
+function E2V.EqGain(in) -> return
+	return := E2V.EQGAIN_BASE(in)
+end function
+function V2E.EqGain(in) -> return
+	return := V2E.EQGAIN_BASE(in)
+end function
+
+// Solid G-EQ Gain
+	// Fundamental equation: ep = 500000*G/200 + 500000
+	// E2V output and V2E input: -200 to +200 (dB scaled by 10)
+	define E2V.SGEQGAIN_BASE(in) := (int_to_real(in) - 500000.0) / 500000.0 * 200.0
+	define V2E.SGEQGAIN_BASE(in) := real_to_int(500000.0 * in / 200.0 + 500000.0)
+
+	function E2V.SGEqGain(in) -> return
+		return := E2V.SGEQGAIN_BASE(in)
+	end function
+	function V2E.SGEqGain(in) -> return
+		return := V2E.SGEQGAIN_BASE(in)
+	end function
+
+
+// Volume 
+// Fundamental equation: vol = 18000*Lg(ep) - 346768
+// E2V output and V2E input: -inf to 12000 millidB
+define E2V.VOL_BASE(ep) := (18000.0 * k6_log2(int_to_real(ep)) - 346768.2342478351)
+define V2E.VOL_BASE(ep) := real_to_int(pow(2.0, (ep + 346768.2342478351) / 18000.0))
+
+// function E2V.volume(in) -> return
+// 	return := E2V.VOL_BASE(in)
+// end function
+function V2E.volume(in) -> return
+	return := V2E.VOL_BASE(in)
+end function
+define V2E.volume2(in) := V2E.volume(in - 12000.0)
+
+//----------------- ENVELOPE --------------
+// Fundamental equation: 	ep = K*[log2(T/100 + 2) - 1]
+//    						where K = 1000000/[(log2(Tmax/100 + 2) - 1]
+define _ENV_BASE_K := (1000000.0/(k6_log2((t_max)/100.0 + 2.0) - 1.0))
+define E2V.ENV_BASE(in, t_max) := ((pow(2.0, int_to_real(in) / _ENV_BASE_K + 1.0) - 2.0) * 100.0)
+define V2E.ENV_BASE(in, t_max) := real_to_int((_ENV_BASE_K * (k6_log2(in / 100.0 + 2.0) - 1.0)))
+
+// Attack time
+// E2V output and V2E input: 0 to 15000.00 milliseconds (scaled by 100)
+function E2V.AtkTime(in) -> return
+	return := E2V.ENV_BASE(in, 1500000.0)
+end function
+function V2E.AtkTime(in) -> return
+	return := V2E.ENV_BASE(in, 1500000.0)
+end function
+
+// Decay and Release time 
+// E2V output and V2E input: 0 to 25000.00 milliseconds (scaled by 100)
+function E2V.DRTime(in) -> return
+	return := E2V.ENV_BASE(in, 2500000.0)
+end function
+function V2E.DRTime(in) -> return
+	return := V2E.ENV_BASE(in, 2500000.0)
+end function

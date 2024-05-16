@@ -1,0 +1,239 @@
+
+define V2E_speed(#in#) := 1000000 - (((#in#) - 1) * 90909)
+
+function update_speed
+	for g := 0 to NUM_GROUPS - 1
+		if switch_halfSpeed = 1
+			group[g].speed_unit := NI_SYNC_UNIT_QUARTER
+		end if
+		if switch_slowTripletSpeed = 1
+			group[g].speed_unit := NI_SYNC_UNIT_QUARTER_TRIPLET
+		end if
+		if switch_fullSpeed = 1
+			group[g].speed_unit := NI_SYNC_UNIT_8TH
+		end if
+		if switch_fastTripletSpeed = 1
+			group[g].speed_unit := NI_SYNC_UNIT_8TH_TRIPLET
+		end if
+		if switch_doubleSpeed = 1
+			group[g].speed_unit := NI_SYNC_UNIT_16TH
+		end if
+	end for
+end function
+
+function find_first_active_event() -> return
+	declare e
+	declare event_ids[MAX_NUM_NOTES]
+	declare found := 0
+	return := 0
+	get_event_ids(event_ids)
+	for e := 0 to num_elements(event_ids) - 1
+		if event_ids[e] -> source # OUTSIDE_SOURCE ...
+		and event_ids[e] -> play_pos > 0
+			if found = 0
+				return := event_ids[e]
+				found := 1
+			end if
+		end if
+	end for
+end function
+
+
+function search_for_note_in_channel_history(channel, note) -> return
+	declare hist_i
+	declare note_found := 0
+	for hist_i := 0 to key_history.SIZE_D2 - 1
+		if note_found = 0
+			if key_history[channel, hist_i] = note
+				note_found := 1
+				return := hist_i
+			end if
+		end if
+	end for
+	if note_found = 0
+		return := -1
+	end if
+end function
+
+function search_for_event_id_in_channel_history(channel, event_id) -> return
+	declare hist_i
+	declare event_id_found := 0
+	for hist_i := 0 to MAX_RIPPLE_HISTORY - 1
+		if event_id_found = 0
+			if ripple_history_by_channel[channel, hist_i] = event_id
+				event_id_found := 1
+				return := hist_i
+			end if
+		end if
+	end for
+	if event_id_found = 0
+		return := -1
+	end if
+end function
+
+
+function redraw_all_ripples_in_history()
+	declare key_i
+	declare r
+	declare row_i
+
+	// Clear grid array
+	for key_i := LOWEST_KEY to HIGHEST_KEY
+		for row_i := 0 to NUM_GRID_ROWS - 1
+			grid[key_i, row_i] := 0
+			grid_for_half_steps[key_i, row_i] := 0
+		end for
+	end for
+
+	// Fill grid array, finding collisions
+	highest_row := 0
+	for r := MAX_RIPPLE_HISTORY - 1 downto 0
+		if ripple_history[r] # 0
+			declare low_note  := get_event_par_arr(ripple_history[r], EVENT_PAR_CUSTOM, EVENT.LOW_NOTE)
+			declare high_note := get_event_par_arr(ripple_history[r], EVENT_PAR_CUSTOM, EVENT.HIGH_NOTE)
+			declare interval  := high_note - low_note
+
+			// Find collision using the grid, to figure out which row to put this ripple on
+			row := 0
+			declare found_free_row := 0
+			for row_i := 0 to NUM_GRID_ROWS - 1
+				if found_free_row = 0
+					declare collision_found := 0
+					for key_i := low_note+1 to high_note-1
+						if grid[key_i, row_i] = 1
+							collision_found := 1
+						end if
+					end for
+					if abs(interval) = 1
+						if grid[low_note, row_i] = 1 ...
+						and grid[high_note, row_i] = 1
+							collision_found := 1
+						end if
+						if grid_for_half_steps[low_note, row_i] = 1 ...
+						and grid_for_half_steps[high_note, row_i] = 1
+							collision_found := 1
+						end if
+					end if
+					if collision_found = 0
+						found_free_row := 1
+						row := row_i
+					end if
+				end if
+			end for
+
+			if found_free_row = 1
+				if row > highest_row
+					highest_row := row
+				end if
+				set_event_par_arr(ripple_history[r], EVENT_PAR_CUSTOM, row, EVENT.ROW)
+				for key_i := low_note to high_note
+					grid[key_i, row] := 1
+					if abs(interval) = 1
+						grid_for_half_steps[key_i, row] := 1
+					end if
+				end for
+			end if
+		end if
+	end for
+
+	// Get grid row height
+	if highest_row >= 3
+		grid_row_height := 134 / (highest_row+1)
+	else
+		grid_row_height := 134 / 4
+	end if
+
+	// Draw Ripples onto grid
+	for r := MAX_RIPPLE_HISTORY - 1 downto 0
+		if event_status(ripple_history[r]) = EVENT_STATUS_INACTIVE
+			ripple[r] -> hide  := HIDE_WHOLE_CONTROL
+			dot[r] -> hide := HIDE_WHOLE_CONTROL
+		else
+			low_note  := get_event_par_arr(ripple_history[r], EVENT_PAR_CUSTOM, EVENT.LOW_NOTE)
+			high_note := get_event_par_arr(ripple_history[r], EVENT_PAR_CUSTOM, EVENT.HIGH_NOTE)
+			row       := get_event_par_arr(ripple_history[r], EVENT_PAR_CUSTOM, EVENT.ROW)
+			channel   := get_event_par_arr(ripple_history[r], EVENT_PAR_CUSTOM, EVENT.CHANNEL)
+			declare start := panel_keyboard -> pos_x + key_base_ids[low_note]  -> pos_x + key_base_ids[low_note]  -> width / 2
+			declare stop  := panel_keyboard -> pos_x + key_base_ids[high_note] -> pos_x + key_base_ids[high_note] -> width / 2
+			ripple[r] -> pos_x   := start
+			ripple[r] -> pos_y   := panel_keyboard -> pos_y - grid_row_height * (row+1)
+			ripple[r] -> width   := stop - start
+			ripple[r] -> height  := grid_row_height * (row+1)
+			ripple[r] -> picture := "ripple " & channel
+			ripple[r] -> hide := HIDE_PART_NOTHING
+			if get_event_par_arr(ripple_history[r], EVENT_PAR_CUSTOM, EVENT.FADING_OUT) = 0
+				dot[r] -> hide := HIDE_PART_NOTHING
+			else
+				dot[r] -> hide := HIDE_WHOLE_CONTROL
+				dot[r] -> pos_y := UI_HEIGHT + 200
+			end if
+		end if
+	end for
+end function
+
+
+function set_key_colors
+	for key_i := 0 to 127
+		set_key_color(key_i, KEY_COLOR_INACTIVE)
+
+		if search(articulation_keyswitches, key_i) # -1
+			set_key_color(key_i, KEY_COLOR_RED)
+		end if
+		if in_range(key_i, LOWEST_KEY, HIGHEST_KEY)
+			set_key_color(key_i, KEY_COLOR_DEFAULT)
+		end if
+		if search(speed_keyswitches, key_i) # -1
+			set_key_color(key_i, KEY_COLOR_GREEN)
+		end if
+		if search(direction_keyswitches, key_i) # -1
+			set_key_color(key_i, KEY_COLOR_YELLOW)
+		end if
+		if search(legato_keyswitches, key_i) # -1
+			set_key_color(key_i, KEY_COLOR_PURPLE)
+		end if
+	end for
+end function
+
+function set_keys_pressed
+	for i := 0 to NUM_ARTICULATIONS - 1
+		if i = cur_artic
+			set_key_pressed(articulation_keyswitches[i], 1)
+		else
+			set_key_pressed(articulation_keyswitches[i], 0)
+		end if
+	end for
+
+	for i := 0 to NUM_SPEEDS - 1
+		if i = slider_speed
+			set_key_pressed(speed_keyswitches[i], 1)
+		else
+			set_key_pressed(speed_keyswitches[i], 0)
+		end if
+	end for
+
+	for i := 0 to DIRECTION_MODE.SIZE - 1
+		if i = slider_direction
+			set_key_pressed(direction_keyswitches[i], 1)
+		else
+			set_key_pressed(direction_keyswitches[i], 0)
+		end if
+	end for
+
+	for i := 0 to LEGATO_MODE.SIZE - 1
+		if i = slider_legato
+			set_key_pressed(legato_keyswitches[i], 1)
+		else
+			set_key_pressed(legato_keyswitches[i], 0)
+		end if
+	end for
+end function
+
+
+function count_keys_pressed(channel)
+	num_keys_pressed[channel] := 0
+	for key_i := LOWEST_KEY to HIGHEST_KEY
+		if key_active[channel, key_i] = 1
+			inc(num_keys_pressed[channel])
+		end if
+	end for
+end function

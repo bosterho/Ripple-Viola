@@ -1,0 +1,1167 @@
+{***********************************************
+Arpeggiator
+Author: Native Instruments
+Written by: Josef Natterer, Nicki Marinic
+Modified: August 19, 2021
+Last modified by: Mario Kruselj a.k.a. EvilDragon
+*************************************************}
+
+on init
+	message("")
+
+	set_script_title("Arpeggiator")
+	set_ui_height(5)
+
+	declare const $REC_TIME := 30
+	declare const $LATCH_TIME := 300
+	declare const $LATCH_TIME_TRANS := 1000
+
+	declare $count
+	declare $latch_mode := 1
+	make_persistent($latch_mode)
+	read_persistent_var($latch_mode)
+
+	declare !note_class[12]
+	!note_class[ 0] := "C"
+	!note_class[ 1] := "C#"
+	!note_class[ 2] := "D"
+	!note_class[ 3] := "D#"
+	!note_class[ 4] := "E"
+	!note_class[ 5] := "F"
+	!note_class[ 6] := "F#"
+	!note_class[ 7] := "G"
+	!note_class[ 8] := "G#"
+	!note_class[ 9] := "A"
+	!note_class[10] := "A#"
+	!note_class[11] := "B"
+
+	declare !note_names[128]
+
+	$count := 0
+	while ($count < 128)
+		!note_names[$count] := !note_class[$count mod 12] & (($count / 12) - 2)
+
+		inc ($count)
+	end while
+
+	declare ui_knob $Latch_knob (0, 3, 1)
+	$Latch_knob := 1
+	make_persistent($Latch_knob)
+	set_text($Latch_knob, "Mode")
+
+	select ($latch_mode)
+		case 0
+			set_knob_label($Latch_knob, "Off")
+		case 1
+			set_knob_label($Latch_knob, "On")
+		case 2
+			set_knob_label($Latch_knob, "Hold")
+		case 3
+			set_knob_label($Latch_knob, "Hold +-")
+	end select
+
+	declare ui_knob $Dur (1, 200, 1)
+	$Dur := 100
+	set_text($Dur, "Duration")
+	set_knob_unit($Dur, $KNOB_UNIT_PERCENT)
+	set_knob_defval($Dur, 100)
+	make_persistent($Dur)
+
+	declare ui_knob $Strike (1, 5, 1)
+	$Strike := 1
+	make_persistent($Strike)
+
+	declare ui_value_edit $Steps (2, 32, 1)
+	$Steps := 16
+	make_persistent($Steps)
+	read_persistent_var($Steps)
+
+	declare ui_table %Rhythm[32] (2, 2, 100)
+	make_persistent(%Rhythm)
+
+	$count := 0
+	while ($count < 32)
+		%Rhythm[$count] := 100
+
+		inc($count)
+	end while
+
+	declare ui_knob $Swing (-50, 50, 1)
+	$Swing := 0
+	make_persistent($Swing)
+	set_knob_unit($Swing, $KNOB_UNIT_PERCENT)
+	set_knob_defval($Swing, 0)
+
+	declare ui_knob $Octave (-6,6,1)
+	$Octave := 0
+	make_persistent($Octave)
+	set_knob_defval($Octave, 0)
+
+	declare ui_menu $Note_order
+	add_menu_item($Note_order, "Note Order", 99)
+	add_menu_item($Note_order, "--------------------", -1)
+	add_menu_item($Note_order, "As Played", 1)
+	add_menu_item($Note_order, "--------------------", -2)
+	add_menu_item($Note_order, "Up", 2)
+	add_menu_item($Note_order, "Down", 3)
+	add_menu_item($Note_order, "Up-Down", 4)
+	add_menu_item($Note_order, "Down-Up", 5)
+	add_menu_item($Note_order, "--------------------", -6)
+	add_menu_item($Note_order, "Zig-Zag Up", 6)
+	add_menu_item($Note_order, "Zig-Zag Down", 7)
+	add_menu_item($Note_order, "Zig-Zag Up-Dn", 8)
+	add_menu_item($Note_order, "Zig-Zag Dn-Up", 9)
+	add_menu_item($Note_order, "--------------------", -10)
+	add_menu_item($Note_order, "Move In", 10)
+	add_menu_item($Note_order, "Move Out", 11)
+	add_menu_item($Note_order, "Move In-Out", 12)
+	add_menu_item($Note_order, "Move Out-In", 13)
+	add_menu_item($Note_order, "--------------------", -14)
+	add_menu_item($Note_order, "Random", 14)
+	add_menu_item($Note_order, "Random (Urn)", 15)
+	add_menu_item($Note_order, "--------------------", -16)
+	add_menu_item($Note_order, "All (Chord)", 16)
+
+	$Note_order := 2
+	make_persistent($Note_order)
+	read_persistent_var($Note_order)
+
+	declare $last_note_order := 2
+	make_persistent($last_note_order)
+
+	declare ui_menu $Repeat
+	add_menu_item($Repeat, "Edge Note Repeat", 99)
+	add_menu_item($Repeat, "--------------------", -1)
+	add_menu_item($Repeat, "No Repeat", 0)
+	add_menu_item($Repeat, "Repeat Top", 1)
+	add_menu_item($Repeat, "Repeat Bottom", 2)
+	add_menu_item($Repeat, "Repeat Edges", 3)
+
+	$Repeat := 0
+
+	make_persistent($Repeat)
+
+	declare ui_switch $Fixed_vel
+	set_text($Fixed_vel, "Fixed Velocity")
+	set_control_par(get_ui_id($Fixed_vel), $CONTROL_PAR_TEXT_ALIGNMENT, 1)
+	make_persistent($Fixed_vel)
+
+	declare ui_switch $MIDI_thru
+	set_text($MIDI_thru, "MIDI Thru")
+	set_control_par(get_ui_id($MIDI_thru), $CONTROL_PAR_TEXT_ALIGNMENT, 1)
+	make_persistent($MIDI_thru)
+
+	declare !tempo_names[18]
+	!tempo_names[0] := "1/128"
+	!tempo_names[1] := "1/64"
+	!tempo_names[2] := "1/32"
+	!tempo_names[3] := "1/16 T"
+	!tempo_names[4] := "1/32 D"
+	!tempo_names[5] := "1/16"
+	!tempo_names[6] := "1/8 T"
+	!tempo_names[7] := "1/16 D"
+	!tempo_names[8] := "1/8"
+	!tempo_names[9] := "1/4 T"
+	!tempo_names[10] := "1/8 D"
+	!tempo_names[11] := "1/4"
+	!tempo_names[12] := "1/2 T"
+	!tempo_names[13] := "1/4 D"
+	!tempo_names[14] := "1/2"
+	!tempo_names[15] := "1/2 D"
+	!tempo_names[16] := "1/1"
+	!tempo_names[17] := "Bar"
+
+	declare ui_knob $Rate_knob (0, 1000000, 1)
+	set_text($Rate_knob, "Rate")
+	make_persistent($Rate_knob)
+
+	declare ui_knob $Sync_knob (0, 17, 1)
+	$Sync_knob := 5
+	set_text($Sync_knob, "Rate")
+	set_knob_defval($Sync_knob, 5)
+	make_persistent($Sync_knob)
+	read_persistent_var($Sync_knob)
+	set_knob_label($Sync_knob, !tempo_names[$Sync_knob])
+
+	declare $fill_buffer := 11
+	make_persistent($fill_buffer)
+
+	declare %pressed_id[128]
+	declare %note_buffer[512]
+	declare %ordered[128]
+	declare %velo[128]
+	declare $cursor
+	declare $old_latch_time
+	declare $a
+	declare $aa
+	declare $sema
+	declare $rand
+	declare $bb
+	declare $b
+	declare $loop_cursor
+	declare %loop_buffer[512]
+	declare %groups[512]
+	declare $id
+	declare $check_id
+	declare $min
+	declare $min_note
+	declare $max_note
+	declare $helper
+	declare %help_buffer[512]
+	declare $step_length
+	declare $strike_count
+	declare $duration
+	declare $note
+	declare $velo
+	declare $act_step
+	declare $last_order
+	declare $oct_cursor
+	declare $swing_cursor
+
+	set_table_steps_shown(%Rhythm, $Steps)
+
+	$Rate_knob := ($sync_knob * 1000001) / 17
+	set_knob_defval($Rate_knob, (5 * 1000001) / 17)
+	set_knob_label($Rate_knob, !tempo_names[$sync_knob])
+	set_knob_unit($Rate_knob, $KNOB_UNIT_NONE)
+
+	declare ui_label $Global_label (3, 1)
+	set_text($Global_label, "Global Settings")
+	set_control_par(get_ui_id($Global_label), $CONTROL_PAR_TEXT_ALIGNMENT, 1)
+
+	declare ui_label $Pitch_label (3, 1)
+	set_text($Pitch_label, "Pitch")
+	set_control_par(get_ui_id($Pitch_label), $CONTROL_PAR_TEXT_ALIGNMENT, 1)
+
+	declare ui_label $Timing_label (3, 1)
+	set_text($Timing_label, "Timing")
+	set_control_par(get_ui_id($Timing_label), $CONTROL_PAR_TEXT_ALIGNMENT, 1)
+
+	declare ui_label $Rhythm_label (3, 1)
+	set_text($Rhythm_label, "Rhythm")
+	set_control_par(get_ui_id($Rhythm_label), $CONTROL_PAR_TEXT_ALIGNMENT, 1)
+
+	move_control($Global_label, 1, 2)
+	move_control($Pitch_label, 4, 2)
+	move_control($Timing_label, 1, 7)
+	move_control($Rhythm_label, 4, 7)
+
+	move_control(%Rhythm, 5, 8)
+	move_control($swing, 3, 8)
+	move_control($Steps, 4, 8)
+
+	move_control($Dur, 2, 8)
+	move_control($Note_order, 4, 3)
+	move_control($strike, 6, 3)
+
+	move_control($Octave, 5, 3)
+	move_control($Latch_knob, 1, 3)
+
+	move_control($Fixed_vel, 4, 9)
+
+	move_control($MIDI_thru, 3, 3)
+	move_control($Rate_knob, 1, 8)
+	move_control($Sync_knob, 0, 0)
+
+	if (in_range($Note_order, 4, 5) or in_range($Note_order, 8, 9) or in_range($Note_order, 12, 13))
+		move_control($Repeat, 4, 4)
+	else
+		move_control($Repeat, 0, 0)
+	end if
+
+	set_control_help($Latch_knob, "Arpeggiator Mode: Choose among three arpeggiator modes. <On> enables the normal arpeggiator mode. <Hold> will latch all played keys. <Hold+-> will latch all played keys and subsequently played keys will be added or taken away from the note buffer. <Off> turns the arpeggiator off.")
+	set_control_help($Dur, "Duration: Sets the duration of the arpeggiated MIDI notes in percent. This will only hange the length o the MIDI notes, not the volume envelope.")
+	set_control_help($Strike, "Strike: Sets the number of strikes of each note of the note buffer. When <Strike> is set to any other value other than 1, each note of the note buffer will be repeated by the amount specified with <Strike>.")
+	set_control_help(%Rhythm, "Rhythm Grid: Sets the rhythmic pattern of the arpeggiated notes. The columns set the velocity of each note. If a column is set to 0 (e.g. by Cmd/Ctrl cliking on a table column), the step will not be played. The actual velocity depends on the <Fix Velocity> button, the length of the pattern can be set with <Steps>.")
+	set_control_help($Swing, "Swing: Offsets every other step by the specified amount in percent in order to create a swing feel. Positive values delay every other step, negative values push every other step forward.")
+	set_control_help($Steps, "Steps: Sets the number of steps of the rhythmic pattern.")
+	set_control_help($Octave, "Octave: Sets the octave displacement, i.e. the distribution of the arpeggio pattern in various octaves. The arpeggio pattern cycles from the played octave to the octave set upwards.")
+	set_control_help($Note_order, "Note Order: Defines the pattern for the order in which notes are arpeggiated.")
+	set_control_help($Repeat, "Edge Note Repeat: Defines if any top or bottom (edge) notes should be repeated when flipping the ascending/descending order of arpeggiation in certain note order modes.")
+	set_control_help($Fixed_vel, "Fix Velocity: When enabled, played velocities are ignored and taken from the columns in the rhythmic grid. When deactivated, played velocities will be scaled by the columns of the rhythmic grid.")
+	set_control_help($Global_label, "Global Settings: Adjust the arpeggiator's global settings.")
+	set_control_help($Pitch_label, "Pitch Settings: Adjust the arpeggiator's pitch settings, which determine the octaves and note repititions played.")
+	set_control_help($Timing_label, "Timing Settings: Adjust the arpeggiator's timing settings, which determine the rate and duration of the notes and the amount of swing.")
+	set_control_help($Rhythm_label, "Rhythm Settings: Adjust the arpeggiator's rhythm settings, which determine the velocities of the notes and the number of velocity steps played.")
+	set_control_help($Sync_knob, "Rate (Sync): Adjust the tempo in rhythmical values, synced to the master clock. T stands for triplet, D stands for dotted.")
+	set_control_help($MIDI_thru, "MIDI Thru: When activated, played notes will be merged with the arpeggiated notes.")
+	set_control_help($Rate_Knob, "Rate: Sets the rate of the arpeggiator.")
+end on
+
+on note
+	if ($latch_mode = 0)
+		exit
+	end if
+
+	%velo[$EVENT_NOTE] := $EVENT_VELOCITY
+
+	{ only one event per note }
+	set_event_par($EVENT_ID, 0, 2)
+
+	if ($MIDI_thru = 0)
+		ignore_event($EVENT_ID)
+	end if
+
+	if (%pressed_id[$EVENT_NOTE] > 0)
+		exit
+	else
+		%pressed_id[$EVENT_NOTE] := $EVENT_ID
+	end if
+
+	{ which notes should be in the buffer }
+	select ($latch_mode)
+		case 1
+			%note_buffer[$cursor] := $EVENT_NOTE
+			inc($cursor)
+		case 2
+			if ($ENGINE_UPTIME - $old_latch_time > $LATCH_TIME)
+				$a := 0
+				while ($a < $cursor)
+					%note_buffer[$a] := 0
+
+					inc($a)
+				end while
+
+				$cursor := 0
+			end if
+
+			%note_buffer[$cursor] := $EVENT_NOTE
+			$old_latch_time := $ENGINE_UPTIME
+
+			inc($cursor)
+		case 3
+			$a := 0
+			$b := $cursor
+			$cursor := 0
+			while ($a < $b)
+				if ($EVENT_NOTE # %note_buffer[$a])
+					%note_buffer[$cursor] := %note_buffer[$a]
+
+					inc($cursor)
+				end if
+
+				inc($a)
+			end while
+
+			if ($b = $cursor)
+				%note_buffer[$cursor] := $EVENT_NOTE
+				inc($cursor)
+			end if
+	end select
+
+	if ($cursor < 2 and $check_id = 0)
+		$check_id := $EVENT_ID
+		$aa := 0
+		$act_step := 0
+		$oct_cursor := 0
+		$last_order := -1
+		$swing_cursor := 0
+
+		wait($REC_TIME * 1000)
+
+		while ($cursor > 0)
+			$a := 0
+			while ($a < 128)
+				if ($a < $cursor)
+					%ordered[$a] := %note_buffer[$a]
+				else
+					%ordered[$a] := 0
+					%note_buffer[$a] := 0
+				end if
+
+				inc($a)
+			end while
+
+			$min_note := %ordered[$cursor-1]
+			$max_note := %ordered[0]
+
+			sort(%ordered, 1)
+
+			select ($Note_order)
+				case 1  { as played }
+					$loop_cursor := $cursor
+
+					$a := 0
+					while ($a < $cursor)
+						%loop_buffer[$a] := %note_buffer[$a]
+
+						inc($a)
+					end while
+				case 2  { up }
+					$loop_cursor := $cursor
+
+					$a := 0
+					while ($a < $cursor)
+						%loop_buffer[$a] := %ordered[$cursor - 1 - $a]
+
+						inc($a)
+					end while
+
+				case 3  { down }
+					$loop_cursor := $cursor
+
+					$a := 0
+					while ($a < $cursor)
+						%loop_buffer[$a] := %ordered[$a]
+
+						inc($a)
+					end while
+				case 4  { up-down }
+					$loop_cursor := $cursor
+
+					$a := 0
+					while ($a < $cursor)
+						%loop_buffer[$a] := %ordered[$cursor - 1 - $a]
+						groups[a] := 1
+						// message("groups[" & a & "] := 1")
+
+						inc($a)
+					end while
+
+					if ($cursor > 2)
+						select ($Repeat)
+							case 0
+								$loop_cursor := ($cursor * 2) - 2
+
+								$a := 0
+								while ($a < $cursor - 2)
+									%loop_buffer[$a + $cursor] := %ordered[$a + 1]
+									groups[$a + $cursor] := 0
+									message("groups[" & a + cursor & "] := 1")
+
+									inc($a)
+								end while
+							case 1
+								$loop_cursor := ($cursor * 2) - 1
+
+								$a := 0
+								while ($a < $cursor - 1)
+									%loop_buffer[$a + $cursor] := %ordered[$a]
+
+									inc($a)
+								end while
+							case 2
+								$loop_cursor := ($cursor * 2) - 1
+
+								$a := 0
+								while ($a < $cursor - 1)
+									%loop_buffer[$a + $cursor] := %ordered[$a + 1]
+
+									inc($a)
+								end while
+							case 3
+								$loop_cursor := ($cursor * 2)
+
+								$a := 0
+								while ($a < $cursor)
+									%loop_buffer[$a + $cursor] := %ordered[$a]
+
+									inc($a)
+								end while
+						end select
+					end if
+				case 5  { down-up }
+					$loop_cursor := $cursor
+
+					$a := 0
+					while ($a < $cursor)
+						%loop_buffer[$a] := %ordered[$a]
+
+						inc($a)
+					end while
+
+					if ($cursor > 2)
+						select ($Repeat)
+							case 0
+								$loop_cursor := ($cursor * 2) - 2
+
+								$a := 0
+								while ($a < $cursor - 2)
+									%loop_buffer[$a + $cursor] := %ordered[$cursor - 2 - $a]
+
+									inc($a)
+								end while
+							case 1
+								$loop_cursor := ($cursor * 2) - 1
+
+								$a := 0
+								while ($a < $cursor - 1)
+									%loop_buffer[$a + $cursor] := %ordered[$cursor - 2 - $a]
+
+									inc($a)
+								end while
+							case 2
+								$loop_cursor := ($cursor * 2) - 1
+
+								$a := 0
+								while ($a < $cursor - 1)
+									%loop_buffer[$a + $cursor] := %ordered[$cursor - 1 - $a]
+
+									inc($a)
+								end while
+							case 3
+								$loop_cursor := ($cursor * 2)
+
+								$a := 0
+								while ($a < $cursor)
+									%loop_buffer[$a + $cursor] := %ordered[$cursor - 1 - $a]
+
+									inc($a)
+								end while
+						end select
+					end if
+				case 6  { zig-zag up }
+					if ($cursor = 1)
+						%loop_buffer[0] := $min_note
+						$loop_cursor := 1
+					end if
+
+					if ($cursor = 2)
+						%loop_buffer[0] := $min_note
+						%loop_buffer[1] := $max_note
+						$loop_cursor := 2
+					end if
+
+					if ($cursor = 3)
+						%loop_buffer[0] := %ordered[2]
+						%loop_buffer[1] := %ordered[0]
+						%loop_buffer[2] := %ordered[1]
+						$loop_cursor := 3
+					end if
+
+					if ($cursor > 3)
+						$a := 0
+						while ($a < $cursor - 2)
+							%loop_buffer[$a * 2] := %ordered[$cursor - $a - 1]
+							%loop_buffer[($a * 2) + 1] := %ordered[$cursor - $a - 3]
+
+							inc($a)
+						end while
+
+						$loop_cursor := (2 * $cursor) - 4
+					end if
+				case 7  { zig-zag down }
+					if ($cursor = 1)
+						%loop_buffer[0] := $min_note
+						$loop_cursor := 1
+					end if
+
+					if ($cursor = 2)
+						%loop_buffer[0] := $max_note
+						%loop_buffer[1] := $min_note
+						$loop_cursor := 2
+					end if
+
+					if ($cursor = 3)
+						%loop_buffer[0] := %ordered[0]
+						%loop_buffer[1] := %ordered[2]
+						%loop_buffer[2] := %ordered[1]
+						$loop_cursor := 3
+					end if
+
+					if ($cursor > 3)
+						$a := 0
+						while ($a < $cursor - 2)
+							%loop_buffer[$a * 2] := %ordered[$a]
+							%loop_buffer[($a * 2) + 1] := %ordered[$a + 2]
+
+							inc($a)
+						end while
+
+						$loop_cursor := (2 * $cursor) - 4
+					end if
+				case 8  { zig-zag up-down }
+					if ($cursor = 1)
+						%loop_buffer[0] := $min_note
+						$loop_cursor := 1
+					end if
+
+					if ($cursor = 2)
+						%loop_buffer[0] := $min_note
+						%loop_buffer[1] := $max_note
+						$loop_cursor := 2
+					end if
+
+					if ($cursor = 3)
+						select ($Repeat)
+							case 0
+								%loop_buffer[0] := %ordered[2]
+								%loop_buffer[1] := %ordered[0]
+								%loop_buffer[2] := %ordered[1]
+								%loop_buffer[3] := %ordered[0]
+								$loop_cursor := 4
+							case 1
+								%loop_buffer[0] := %ordered[2]
+								%loop_buffer[1] := %ordered[0]
+								%loop_buffer[2] := %ordered[1]
+								%loop_buffer[3] := %ordered[0]
+								%loop_buffer[4] := %ordered[2]
+								$loop_cursor := 5
+							case 2
+								%loop_buffer[0] := %ordered[2]
+								%loop_buffer[1] := %ordered[0]
+								%loop_buffer[2] := %ordered[1]
+								%loop_buffer[3] := %ordered[1]
+								%loop_buffer[4] := %ordered[0]
+								$loop_cursor := 5
+							case 3
+								%loop_buffer[0] := %ordered[2]
+								%loop_buffer[1] := %ordered[0]
+								%loop_buffer[2] := %ordered[1]
+								%loop_buffer[3] := %ordered[1]
+								%loop_buffer[4] := %ordered[0]
+								%loop_buffer[5] := %ordered[2]
+								$loop_cursor := 6
+						end select
+					end if
+
+					if ($cursor > 3)
+						select ($Repeat)
+							case 0
+								$a := 0
+								while ($a < $cursor - 2)
+									%loop_buffer[$a * 2] := %ordered[$cursor - $a - 1]
+									%loop_buffer[($a * 2) + 1] := %ordered[$cursor - $a - 3]
+
+									inc($a)
+								end while
+
+								$a := 0
+								while ($a < $cursor - 3)
+									%loop_buffer[($a * 2) + (($cursor - 2) * 2)] := %ordered[$a + 2]
+									%loop_buffer[($a * 2) + (($cursor - 2) * 2) + 1] := %ordered[$a + 1]
+
+									inc($a)
+								end while
+
+								$loop_cursor := (4 * $cursor) - 10
+							case 1
+								$a := 0
+								while ($a < $cursor - 2)
+									%loop_buffer[$a * 2] := %ordered[$cursor - $a - 1]
+									%loop_buffer[($a * 2) + 1] := %ordered[$cursor - $a - 3]
+
+									inc($a)
+								end while
+
+								%loop_buffer[($cursor - 2) * 2] := %ordered[0]
+
+								$a := 0
+								while ($a < $cursor - 3)
+									%loop_buffer[($a * 2) + (($cursor - 2) * 2) + 1] := %ordered[$a + 2]
+									%loop_buffer[($a * 2) + (($cursor - 2) * 2) + 2] := %ordered[$a + 1]
+
+									inc($a)
+								end while
+
+								$loop_cursor := (4 * $cursor) - 9
+							case 2
+								$a := 0
+								while ($a < $cursor - 2)
+									%loop_buffer[$a * 2] := %ordered[$cursor - $a - 1]
+									%loop_buffer[($a * 2) + 1] := %ordered[$cursor - $a - 3]
+
+									inc($a)
+								end while
+
+								$a := 0
+								while ($a < $cursor - 3)
+									%loop_buffer[($a * 2) + (($cursor - 2) * 2)] := %ordered[$a + 2]
+									%loop_buffer[($a * 2) + (($cursor - 2) * 2) + 1] := %ordered[$a + 1]
+
+									inc($a)
+								end while
+
+								%loop_buffer[(4 * $cursor) - 9 - 1] := %ordered[$cursor - 1]
+								$loop_cursor := (4 * $cursor) - 9
+							case 3
+								$a := 0
+								while ($a < $cursor - 2)
+									%loop_buffer[$a * 2] := %ordered[$cursor - $a - 1]
+									%loop_buffer[($a * 2) + 1] := %ordered[$cursor - $a - 3]
+
+									inc($a)
+								end while
+
+								%loop_buffer[($cursor - 2) * 2] := %ordered[0]
+
+								$a := 0
+								while ($a < $cursor - 3)
+									%loop_buffer[($a * 2) + (($cursor - 2) * 2) + 1] := %ordered[$a + 2]
+									%loop_buffer[($a * 2) + (($cursor - 2) * 2) + 2] := %ordered[$a + 1]
+
+									inc($a)
+								end while
+
+								%loop_buffer[(4 * $cursor) - 8 - 1] := %ordered[$cursor - 1]
+								$loop_cursor := (4 * $cursor) - 8
+						end select
+					end if
+				case 9  { zig-zag down-up }
+					if ($cursor = 1)
+						%loop_buffer[0] := $min_note
+						$loop_cursor := 1
+					end if
+
+					if ($cursor = 2)
+						%loop_buffer[0] := $max_note
+						%loop_buffer[1] := $min_note
+						$loop_cursor := 2
+					end if
+
+					if ($cursor = 3)
+						select ($Repeat)
+							case 0
+								%loop_buffer[0] := %ordered[0]
+								%loop_buffer[1] := %ordered[2]
+								%loop_buffer[2] := %ordered[1]
+								%loop_buffer[3] := %ordered[2]
+								$loop_cursor := 4
+							case 1
+								%loop_buffer[0] := %ordered[0]
+								%loop_buffer[1] := %ordered[2]
+								%loop_buffer[2] := %ordered[1]
+								%loop_buffer[3] := %ordered[2]
+								%loop_buffer[4] := %ordered[0]
+								$loop_cursor := 5
+							case 2
+								%loop_buffer[0] := %ordered[0]
+								%loop_buffer[1] := %ordered[2]
+								%loop_buffer[2] := %ordered[1]
+								%loop_buffer[3] := %ordered[1]
+								%loop_buffer[4] := %ordered[2]
+								$loop_cursor := 5
+							case 3
+								%loop_buffer[0] := %ordered[0]
+								%loop_buffer[1] := %ordered[2]
+								%loop_buffer[2] := %ordered[1]
+								%loop_buffer[3] := %ordered[1]
+								%loop_buffer[4] := %ordered[2]
+								%loop_buffer[5] := %ordered[0]
+								$loop_cursor := 6
+						end select
+					end if
+
+					if ($cursor > 3)
+						select ($Repeat)
+							case 0
+								$a := 0
+								while ($a < $cursor - 2)
+									%loop_buffer[$a * 2] := %ordered[$a]
+									%loop_buffer[($a * 2) + 1] := %ordered[$a + 2]
+
+									inc($a)
+								end while
+
+								$a := 0
+								while ($a < $cursor - 3)
+									%loop_buffer[($a * 2) + (($cursor - 2) * 2)] := %ordered[$cursor - $a - 3]
+									%loop_buffer[($a * 2) + (($cursor - 2) * 2) + 1] := %ordered[$cursor - $a - 2]
+
+									inc($a)
+								end while
+
+								$loop_cursor := (4 * $cursor) - 10
+							case 1
+								$a := 0
+								while ($a < $cursor - 2)
+									%loop_buffer[$a * 2] := %ordered[$a]
+									%loop_buffer[($a * 2) + 1] := %ordered[$a + 2]
+
+									inc($a)
+								end while
+
+								$a := 0
+								while ($a < $cursor - 3)
+									%loop_buffer[($a * 2) + (($cursor - 2) * 2)] := %ordered[$cursor - $a - 3]
+									%loop_buffer[($a * 2) + (($cursor - 2) * 2) + 1] := %ordered[$cursor - $a - 2]
+
+									inc($a)
+								end while
+
+								%loop_buffer[(4 * $cursor) - 9 - 1] := %ordered[0]
+								$loop_cursor := (4 * $cursor) - 9
+							case 2
+								$a := 0
+								while ($a < $cursor - 2)
+									%loop_buffer[$a * 2] := %ordered[$a]
+									%loop_buffer[($a * 2) + 1] := %ordered[$a + 2]
+
+									inc($a)
+								end while
+
+								%loop_buffer[($cursor - 2) * 2] := %ordered[$cursor - 1]
+
+								$a := 0
+								while ($a < $cursor - 3)
+									%loop_buffer[($a * 2) + (($cursor - 2) * 2) + 1] := %ordered[$cursor - $a - 3]
+									%loop_buffer[($a * 2) + (($cursor - 2) * 2) + 2] := %ordered[$cursor - $a - 2]
+
+									inc($a)
+								end while
+
+								$loop_cursor := (4 * $cursor) - 9
+							case 3
+								$a := 0
+								while ($a < $cursor - 2)
+									%loop_buffer[$a * 2] := %ordered[$a]
+									%loop_buffer[($a * 2) + 1] := %ordered[$a + 2]
+
+									inc($a)
+								end while
+
+								%loop_buffer[($cursor - 2) * 2] := %ordered[$cursor - 1]
+
+								$a := 0
+								while ($a < $cursor - 3)
+									%loop_buffer[($a * 2) + (($cursor - 2) * 2) + 1] := %ordered[$cursor - $a - 3]
+									%loop_buffer[($a * 2) + (($cursor - 2) * 2) + 2] := %ordered[$cursor - $a - 2]
+
+									inc($a)
+								end while
+
+								%loop_buffer[(4 * $cursor) - 8 - 1] := %ordered[0]
+								$loop_cursor := (4 * $cursor) - 8
+						end select
+					end if
+				case 10 to 13 { move in/out modes }
+					$loop_cursor := $cursor
+
+					$a := 0
+					while ($a * 2 < $cursor)
+						%loop_buffer[$a * 2] := %ordered[$cursor - 1 - $a]
+						%loop_buffer[($a * 2) + 1] := %ordered[$a]
+
+						inc($a)
+					end while
+
+					$loop_cursor := $cursor
+
+					if ($Note_order = 11 or $Note_order = 13)
+						$a := 0
+						while ($a < $loop_cursor)
+							%help_buffer[$loop_cursor - $a - 1] := %loop_buffer[$a]
+
+							inc($a)
+						end while
+
+						$a := 0
+						while ($a < $loop_cursor)
+							%loop_buffer[$a] := %help_buffer[$a]
+
+							inc($a)
+						end while
+					end if
+
+					if (($Note_order = 12 or $Note_order = 13) and $cursor > 2)
+						select ($Repeat)
+							case 0
+								$a := 0
+								while ($a < $cursor - 2)
+									%loop_buffer[$a + $cursor] := %loop_buffer[$cursor - 2 - $a]
+
+									inc($a)
+								end while
+
+								$loop_cursor := $cursor * 2 - 2
+							case 1
+								if ($Note_order = 12)
+									$a := 0
+									while ($a < $cursor - 1)
+										%loop_buffer[$a + $cursor] := %loop_buffer[$cursor - 1 - $a]
+
+										inc($a)
+									end while
+
+									$loop_cursor := $cursor * 2 - 1
+								else
+									$a := 0
+									while ($a < $cursor - 1)
+										%loop_buffer[$a + $cursor] := %loop_buffer[$cursor - 2 - $a]
+
+										inc($a)
+									end while
+
+									$loop_cursor := $cursor * 2 - 1
+								end if
+							case 2
+								if ($Note_order = 13)
+									$a := 0
+									while ($a < $cursor - 1)
+										%loop_buffer[$a + $cursor] := %loop_buffer[$cursor - 1 - $a]
+
+										inc($a)
+									end while
+
+									$loop_cursor := $cursor * 2 - 1
+								else
+									$a := 0
+									while ($a < $cursor - 1)
+										%loop_buffer[$a + $cursor] := %loop_buffer[$cursor - 2 - $a]
+
+										inc($a)
+									end while
+
+									$loop_cursor := $cursor * 2 - 1
+								end if
+							case 3
+								$a := 0
+								while ($a < $cursor)
+									%loop_buffer[$a + $cursor] := %loop_buffer[$cursor - 1 - $a]
+
+									inc($a)
+								end while
+
+								$loop_cursor := $cursor * 2
+						end select
+					end if
+				case 14  { random }
+					$loop_cursor := 1
+					%loop_buffer[$aa + 1] := %ordered[random(0, $cursor - 1)]
+					%loop_buffer[0] := %ordered[random(0, $cursor - 1)]
+				case 15  { random (urn) }
+					if ($aa < 2 or $last_order # $Note_order)
+						$loop_cursor := $cursor
+
+						$a := 0
+						while ($a < $cursor)
+							%help_buffer[$a] := %ordered[$a]
+
+							inc($a)
+						end while
+
+						$helper := $cursor
+
+						$a := 0
+						while ($a < $cursor)
+							%loop_buffer[$a] := %help_buffer[random(0, $helper - 1)]
+
+							$bb := 0
+							while ($bb < $helper)
+								if (%help_buffer[$bb] = %loop_buffer[$a])
+									while ($bb < $helper)
+										%help_buffer[$bb] := %help_buffer[$bb + 1]
+
+										inc($bb)
+									end while
+
+									$bb := $helper + 1
+
+									dec($helper)
+								end if
+
+								inc($bb)
+							end while
+
+							inc($a)
+						end while
+					end if
+				case 16  { chord }
+					$loop_cursor := $cursor
+
+					$a := 0
+					while ($a < $cursor)
+						%loop_buffer[$a] := %note_buffer[$a]
+
+						inc($a)
+					end while
+			end select
+
+			$last_order := $Note_order
+
+			$step_length := $DURATION_QUARTER * 2
+
+			$duration := ($step_length / 100) * $dur
+
+			if ($duration < 10000)
+				$duration := 10000
+			end if
+
+			if ($step_length < 5000)
+				$step_length := 5000
+			end if
+
+			$velo := 100
+
+			if ($loop_cursor # 0)
+
+				$note := %loop_buffer[$aa] + $oct_cursor * 12
+				$velo := %velo[%loop_buffer[$aa]]
+
+				if ($strike_count > 0)
+					$velo := ($velo * 100) / 100
+				end if
+
+				if ($Fixed_vel = 1)
+					$velo := 127
+				end if
+
+				$velo := ($velo * %Rhythm[$act_step]) / 100
+
+				if ($velo > 127)
+					$velo := 127
+				end if
+
+				if ($velo < 1)
+					$velo := 1
+				end if
+
+				disallow_group(ALL_GROUPS)
+				allow_group(groups[$aa])
+				if (in_range($note, 0, 127))
+					play_note($note, $velo, 0, $duration)
+				end if
+			end if
+
+			if ($strike_count < $strike - 1)
+				dec($aa)
+				dec($act_step)
+				inc($strike_count)
+			else
+				$strike_count := 0
+			end if
+			
+
+			inc($aa)
+
+			if ($aa >= $loop_cursor)
+				$aa := 0
+
+				if ($octave > 0)
+					inc($oct_cursor)
+
+					if ($oct_cursor > $Octave)
+						$oct_cursor := 0
+					end if
+				end if
+
+				if ($octave < 0)
+					dec($oct_cursor)
+
+					if ($oct_cursor < $Octave)
+						$oct_cursor := 0
+					end if
+				end if
+			end if
+
+			inc($act_step)
+
+			if ($act_step >= $Steps)
+				$act_step := 0
+			end if
+
+			wait($step_length)
+		end while
+
+		$check_id := 0
+	end if
+end on
+
+on release
+	{ only one event per note }
+	if (%EVENT_PAR[0] = 2)
+		if (%pressed_id[$EVENT_NOTE] = 0)
+			exit
+		else
+			%pressed_id[$EVENT_NOTE] := 0
+		end if
+	else
+		exit
+	end if
+
+	if ($latch_mode = 0)
+		exit
+	end if
+
+	{ which notes should be in the buffer }
+	select ($latch_mode)
+		case 1
+			$a := 0
+			$b := $cursor
+			$cursor := 0
+			while ($a < $b)
+				if ($EVENT_NOTE # %note_buffer[$a])
+					%note_buffer[$cursor] := %note_buffer[$a]
+					inc($cursor)
+				end if
+
+				inc($a)
+			end while
+		case 2 to 3
+			exit
+	end select
+end on
+
+on ui_control ($Latch_knob)
+	$latch_mode := $Latch_knob
+
+	select ($latch_mode)
+		case 0
+			set_knob_label($Latch_knob, "Off")
+
+			$a := 0
+			while ($a < $cursor)
+				%note_buffer[$a] := 0
+
+				inc($a)
+			end while
+
+			$cursor := 0
+		case 1
+			set_knob_label($Latch_knob, "On")
+
+			$b := $cursor
+			$cursor := 0
+			$a := 0
+			while ($a < $b)
+				if (%pressed_id[%note_buffer[$a]] > 0)
+					%note_buffer[$cursor] := %note_buffer[$a]
+
+					inc($cursor)
+				end if
+
+				inc($a)
+			end while
+		case 2
+			set_knob_label($Latch_knob, "Hold")
+		case 3
+			set_knob_label($Latch_knob, "Hold +-")
+	end select
+end on
+
+on ui_control ($Sync_knob)
+	set_knob_label($Sync_knob, !tempo_names[$Sync_knob])
+end on
+
+on ui_control ($Steps)
+	set_table_steps_shown(%Rhythm, $Steps)
+end on
+
+on ui_control ($Note_order)
+	if ($Note_order < 0)
+		$Note_order := abs($Note_order)
+	end if
+
+	if ($Note_order # 99)
+		$last_note_order := $Note_order
+	else
+		$Note_order := $last_note_order
+	end if
+
+	if (in_range($Note_order, 4, 5) or in_range($Note_order, 8, 9) or in_range($Note_order, 12, 13))
+		move_control($Repeat, 4, 4)
+	else
+		move_control($Repeat, 0, 0)
+	end if
+end on
+
+on ui_control ($Repeat)
+	if ($Repeat < 0)
+		$Repeat := 0
+	end if
+end on
+
+on ui_control ($rate_knob)
+	$sync_knob := ($Rate_knob * 18) / 1000001
+	set_knob_label($Rate_knob, !tempo_names[$sync_knob])
+end on

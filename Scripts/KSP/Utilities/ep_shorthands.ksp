@@ -1,0 +1,715 @@
+{
+    This instantiates the syntactic sugar for accessing Kontakt's engine and modulation
+    parameters with substantially less text.
+
+    For example, instead of:
+    set_engine_par(ENGINE_PAR_VOLUME, VolumeSlider, 0, -1, -1)
+
+    We do:
+    group[0].slot[-1].volume := VolumeSlider
+}
+macro engine.ICB()
+ //    { Instrument, Source, Amp }
+    add_engine_par(volume,                ENGINE_PAR_VOLUME)
+    add_engine_par(pan,                   ENGINE_PAR_PAN)
+    add_engine_par(tune,                  ENGINE_PAR_TUNE)
+    add_engine_par(speed,                 ENGINE_PAR_SPEED)
+    add_engine_par(speed_unit,            ENGINE_PAR_SPEED_UNIT)
+ //    add_engine_par(time_smooth,           ENGINE_PAR_SMOOTH)
+ //    add_engine_par(time_formant,          ENGINE_PAR_FORMANT)
+ //    add_engine_par(time_grain,            ENGINE_PAR_GRAIN_LENGTH)
+ //    add_engine_par(tm2_trans,             ENGINE_PAR_TRANSIENT_SIZE)
+ //    add_engine_par(tmp_envorder,          ENGINE_PAR_ENVELOPE_ORDER)
+ //    add_engine_par(tmp_formant,           ENGINE_PAR_FORMANT_SHIFT)
+ //    add_engine_par(bm_slice_atk,          ENGINE_PAR_SLICE_ATTACK
+  //    add_engine_par(bm_slice_rel,          ENGINE_PAR_SLICE_RELEASE)
+    add_engine_par(tm_legato,          ENGINE_PAR_TM_LEGATO)
+    add_engine_par(out_chan,              ENGINE_PAR_OUTPUT_CHANNEL)
+ //    add_engine_par(output,                ENGINE_PAR_OUTPUT_CHANNEL)
+ //    add_engine_par(phase_invert,          ENGINE_PAR_PHASE_INVERT)
+ //    add_engine_par(lr_swap,               ENGINE_PAR_LR_SWAP)
+ //    add_engine_par(post_amp_slot,         ENGINE_PAR_POST_FX_SLOT)
+ //    { wavetable }
+ //    add_engine_par(wt_pos,                ENGINE_PAR_WT_POSITION)
+ //    add_engine_par(wt_inharm,             ENGINE_PAR_WT_INHARMONIC)
+ //    add_engine_par(wt_inharm_mode,        ENGINE_PAR_WT_INHARMONIC_MODE)
+ //    add_engine_par(wt_form,               ENGINE_PAR_WT_FORM)
+ //    add_engine_par(wt_form_mode,          ENGINE_PAR_WT_FORM_MODE)
+ //    add_engine_par(wt_phase,              ENGINE_PAR_WT_PHASE)
+ //    add_engine_par(wt_phase_rnd,          ENGINE_PAR_WT_PHASE_RAND)
+ //    { GET only! }
+ //    add_engine_par(rel_trig,              ENGINE_PAR_RELEASE_TRIGGER)
+
+ //    { Insert FX }
+    add_engine_par(ifx_bypass,            ENGINE_PAR_EFFECT_BYPASS)
+    // add_engine_par(ifx_outgain,           ENGINE_PAR_INSERT_EFFECT_OUTPUT_GAIN)
+    add_engine_par(ifx_output,            ENGINE_PAR_INSERT_EFFECT_OUTPUT_GAIN)
+
+ //    { Send FX }
+    add_engine_par(sfx_bypass,            ENGINE_PAR_SEND_EFFECT_BYPASS)
+    add_engine_par(sfx_dry,               ENGINE_PAR_SEND_EFFECT_DRY_LEVEL)
+ //    add_engine_par(sfx_outgain,           ENGINE_PAR_SEND_EFFECT_OUTPUT_GAIN)
+    add_engine_par(sfx_return,            ENGINE_PAR_SEND_EFFECT_OUTPUT_GAIN)
+    add_engine_par(sfx_wet,               ENGINE_PAR_SEND_EFFECT_OUTPUT_GAIN)
+
+ //    { FX types }
+ //    add_engine_par(ifx_type,              ENGINE_PAR_EFFECT_TYPE)
+ //    add_engine_par(sfx_type,              ENGINE_PAR_SEND_EFFECT_TYPE)
+ //    add_engine_par(filt_type,             ENGINE_PAR_EFFECT_SUBTYPE)
+
+ //    { Filters }
+    add_engine_par(filt_lp_cut,           ENGINE_PAR_LP_CUTOFF)
+    add_engine_par(filt_hp_cut,           ENGINE_PAR_HP_CUTOFF)
+    add_engine_par(filt_cutoff,           ENGINE_PAR_CUTOFF)
+ //    add_engine_par(filt_shift2,           ENGINE_PAR_FILTER_SHIFTB)
+ //    add_engine_par(filt_shift3,           ENGINE_PAR_FILTER_SHIFTC)
+ //    add_engine_par(filt_res,              ENGINE_PAR_RESONANCE)
+ //    add_engine_par(filt_res2,             ENGINE_PAR_FILTER_RESB)
+ //    add_engine_par(filt_res3,             ENGINE_PAR_FILTER_RESC)
+ //    add_engine_par(filt_type1,            ENGINE_PAR_FILTER_TYPEA)
+ //    add_engine_par(filt_type2,            ENGINE_PAR_FILTER_TYPEB)
+ //    add_engine_par(filt_type3,            ENGINE_PAR_FILTER_TYPEC)
+    add_engine_par(filt_amt1,             ENGINE_PAR_FILTER_BYPA)
+ //    add_engine_par(filt_amt2,             ENGINE_PAR_FILTER_BYPB)
+ //    add_engine_par(filt_amt3,             ENGINE_PAR_FILTER_BYPC)
+ //    add_engine_par(filt_gain3x2,          ENGINE_PAR_FILTER_GAIN)
+ //    add_engine_par(filt_bw,               ENGINE_PAR_BANDWIDTH)
+ //    add_engine_par(filt_gain,             ENGINE_PAR_GAIN)
+ //    add_engine_par(filt_sharp,            ENGINE_PAR_FORMANT_SHARP)
+ //    add_engine_par(filt_size,             ENGINE_PAR_FORMANT_SIZE)
+ //    add_engine_par(filt_talk,             ENGINE_PAR_FORMANT_TALK)
+ //    { Solid G-EQ }
+    add_engine_par(seq_hp_freq,                ENGINE_PAR_SEQ_HP_FREQ)
+ //    add_engine_par(seq_hf_bell,           ENGINE_PAR_SEQ_HF_BELL)
+ //    add_engine_par(seq_hf_freq,           ENGINE_PAR_SEQ_HF_FREQ)
+    add_engine_par(seq_hf_gain,           ENGINE_PAR_SEQ_HF_GAIN)
+ //    add_engine_par(seq_hmf_freq,          ENGINE_PAR_SEQ_HMF_FREQ)
+ //    add_engine_par(seq_hmf_gain,          ENGINE_PAR_SEQ_HMF_GAIN)
+ //    add_engine_par(seq_hmf_q,             ENGINE_PAR_SEQ_HMF_Q)
+ //    add_engine_par(seq_lf_bell,           ENGINE_PAR_SEQ_LF_BELL)
+    // add_engine_par(seq_lf_freq,           ENGINE_PAR_SEQ_LF_FREQ)
+    add_engine_par(seq_lf_gain,           ENGINE_PAR_SEQ_LF_GAIN)
+ //    add_engine_par(seq_lmf_freq,          ENGINE_PAR_SEQ_LMF_FREQ)
+ //    add_engine_par(seq_lmf_gain,          ENGINE_PAR_SEQ_LMF_GAIN)
+ //    add_engine_par(seq_lmf_q,             ENGINE_PAR_SEQ_LMF_Q)
+    add_engine_par(seq_lp_freq,                ENGINE_PAR_SEQ_LP_FREQ)
+ //    { Equalizers }
+    add_engine_par(eq_freq1,              ENGINE_PAR_FREQ1)
+    add_engine_par(eq_freq2,              ENGINE_PAR_FREQ2)
+    add_engine_par(eq_freq3,              ENGINE_PAR_FREQ3)
+    add_engine_par(eq_bw1,                ENGINE_PAR_BW1)
+ //    add_engine_par(eq_bw2,                ENGINE_PAR_BW2)
+ //    add_engine_par(eq_bw3,                ENGINE_PAR_BW3)
+    add_engine_par(eq_gain1,              ENGINE_PAR_GAIN1)
+    add_engine_par(eq_gain2,              ENGINE_PAR_GAIN2)
+    add_engine_par(eq_gain3,              ENGINE_PAR_GAIN3)
+
+ //    { AET Filter }
+ //    add_engine_par(aet_morph,             ENGINE_PAR_EXP_FILTER_MORPH)
+ //    add_engine_par(aet_amount,            ENGINE_PAR_EXP_FILTER_AMOUNT)
+ //    { Transient Master }
+ //    add_engine_par(tm_smooth,             ENGINE_PAR_TR_SMOOTH)
+ //    add_engine_par(tm_input,              ENGINE_PAR_TR_INPUT)
+ //    add_engine_par(tm_atk,                ENGINE_PAR_TR_ATTACK)
+ //    add_engine_par(tm_sus,                ENGINE_PAR_TR_SUSTAIN)
+ //    add_engine_par(tr_smooth,             ENGINE_PAR_TR_SMOOTH)
+ //    add_engine_par(tr_input,              ENGINE_PAR_TR_INPUT)
+ //    add_engine_par(tr_atk,                ENGINE_PAR_TR_ATTACK)
+ //    add_engine_par(tr_sus,                ENGINE_PAR_TR_SUSTAIN)
+ //    { Compressor }
+ //    add_engine_par(comp_type,             ENGINE_PAR_COMP_TYPE)
+ //    add_engine_par(comp_link,             ENGINE_PAR_COMP_LINK)
+ //    add_engine_par(comp_thres,            ENGINE_PAR_THRESHOLD)
+ //    add_engine_par(comp_ratio,            ENGINE_PAR_RATIO)
+ //    add_engine_par(comp_atk,              ENGINE_PAR_COMP_ATTACK)
+ //    add_engine_par(comp_dec,              ENGINE_PAR_COMP_DECAY)
+ //    add_engine_par(comp_rel,              ENGINE_PAR_COMP_DECAY)
+ //    { Solid Bus Comp }
+ //    add_engine_par(scomp_link,            ENGINE_PAR_SCOMP_LINK)
+ //    add_engine_par(scomp_thres,           ENGINE_PAR_SCOMP_THRESHOLD)
+ //    add_engine_par(scomp_ratio,           ENGINE_PAR_SCOMP_RATIO)
+ //    add_engine_par(scomp_atk,             ENGINE_PAR_SCOMP_ATTACK)
+ //    add_engine_par(scomp_rel,             ENGINE_PAR_SCOMP_RELEASE)
+ //    add_engine_par(scomp_makeup,          ENGINE_PAR_SCOMP_MAKEUP)
+ //    add_engine_par(scomp_mix,             ENGINE_PAR_SCOMP_MIX)
+ //    { Feedback Comp }
+ //    add_engine_par(fcomp_hq,              ENGINE_PAR_FCOMP_HQ_MODE)
+ //    add_engine_par(fcomp_hq_mode,         ENGINE_PAR_FCOMP_HQ_MODE)
+ //    add_engine_par(fcomp_link,            ENGINE_PAR_FCOMP_LINK)
+ //    add_engine_par(fcomp_input,           ENGINE_PAR_FCOMP_INPUT)
+ //    add_engine_par(fcomp_ratio,           ENGINE_PAR_FCOMP_RATIO)
+ //    add_engine_par(fcomp_atk,             ENGINE_PAR_FCOMP_ATTACK)
+ //    add_engine_par(fcomp_rel,             ENGINE_PAR_FCOMP_RELEASE)
+ //    add_engine_par(fcomp_makeup,          ENGINE_PAR_FCOMP_MAKEUP)
+ //    add_engine_par(fcomp_mix,             ENGINE_PAR_FCOMP_MIX)
+ //    { Supercharger GT }
+ //    add_engine_par(sgt_hpf_mode,          ENGINE_PAR_SUPERGT_HPF_MODE)
+ //    add_engine_par(sgt_sat_mode,          ENGINE_PAR_SUPERGT_SAT_MODE)
+ //    add_engine_par(sgt_char_mode,         ENGINE_PAR_SUPERGT_CHAR_MODE)
+ //    add_engine_par(sgt_link_mode,         ENGINE_PAR_SUPERGT_CHANNEL_LINK_MODE)
+ //    add_engine_par(sgt_trim,              ENGINE_PAR_SUPERGT_TRIM)
+ //    add_engine_par(sgt_input,             ENGINE_PAR_SUPERGT_TRIM)
+    add_engine_par(sgt_sat,               ENGINE_PAR_SUPERGT_SATURATION)
+    add_engine_par(sgt_compress,          ENGINE_PAR_SUPERGT_COMPRESS)
+    add_engine_par(sgt_char,              ENGINE_PAR_SUPERGT_CHARACTER)
+ //    add_engine_par(sgt_atk,               ENGINE_PAR_SUPERGT_ATTACK)
+ //    add_engine_par(sgt_rel,               ENGINE_PAR_SUPERGT_RELEASE)
+ //    add_engine_par(sgt_mix,               ENGINE_PAR_SUPERGT_MIX)
+ //    { Limiter }
+ //    add_engine_par(lim_input,             ENGINE_PAR_LIM_IN_GAIN)
+ //    add_engine_par(lim_rel,               ENGINE_PAR_LIM_RELEASE)
+ //    { Transparent Limiter }
+ //    add_engine_par(tlim_thres,            ENGINE_PAR_TRANSLIM_THRESHOLD)
+ //    add_engine_par(tlim_rel,              ENGINE_PAR_TRANSLIM_RELEASE)
+ //    add_engine_par(tlim_ceiling,          ENGINE_PAR_TRANSLIM_CEILING)
+ //    { Tape Saturation }
+ //    add_engine_par(tape_quality,          ENGINE_PAR_TP_QUALITY)
+    add_engine_par(tape_gain,             ENGINE_PAR_TP_GAIN)
+    add_engine_par(tape_warmth,           ENGINE_PAR_TP_WARMTH)
+ //    add_engine_par(tape_rolloff,          ENGINE_PAR_TP_HF_ROLLOFF)
+    add_engine_par(tape_hf_rolloff,       ENGINE_PAR_TP_HF_ROLLOFF)
+ //    { Distortion }
+ //    add_engine_par(dist_type,             ENGINE_PAR_DISTORTION_TYPE)
+    add_engine_par(dist_drive,            ENGINE_PAR_DRIVE)
+ //    add_engine_par(dist_damp,             ENGINE_PAR_DAMPING)
+ //    add_engine_par(dist_damping,          ENGINE_PAR_DAMPING)
+ //    add_engine_par(dist_tone,             ENGINE_PAR_DAMPING)
+ //    { Lo-Fi }
+    add_engine_par(lofi_bits,             ENGINE_PAR_BITS)
+    add_engine_par(lofi_freq,             ENGINE_PAR_FREQUENCY)
+ //    add_engine_par(lofi_noise,            ENGINE_PAR_NOISELEVEL)
+ //    add_engine_par(lofi_color,            ENGINE_PAR_NOISECOLOR)
+ //    { Saturation }
+ //    add_engine_par(sat_type,              ENGINE_PAR_SHAPE_TYPE)
+ //    add_engine_par(saturation,            ENGINE_PAR_SHAPE)
+    add_engine_par(sat_amt,               ENGINE_PAR_SHAPE)
+ //    { Cabinet }
+ //    add_engine_par(cab_type,              ENGINE_PAR_CABINET_TYPE)
+ //    add_engine_par(cab_size,              ENGINE_PAR_CB_SIZE)
+ //    add_engine_par(cab_air,               ENGINE_PAR_CB_AIR)
+ //    add_engine_par(cab_bass,              ENGINE_PAR_CB_BASS)
+ //    add_engine_par(cab_treble,            ENGINE_PAR_CB_TREBLE)
+ //    { Cat }
+ //    add_engine_par(cat_mono,              ENGINE_PAR_CT_MONO)
+ //    add_engine_par(cat_volume,            ENGINE_PAR_CT_VOLUME)
+ //    add_engine_par(cat_dist,              ENGINE_PAR_CT_DISTORTION)
+ //    add_engine_par(cat_distortion,        ENGINE_PAR_CT_DISTORTION)
+ //    add_engine_par(cat_filt,              ENGINE_PAR_CT_FILTER)
+ //    add_engine_par(cat_filter,            ENGINE_PAR_CT_FILTER)
+ //    add_engine_par(cat_tone,              ENGINE_PAR_CT_TONE)
+ //    add_engine_par(cat_bass,              ENGINE_PAR_CT_BASS)
+ //    add_engine_par(cat_treble,            ENGINE_PAR_CT_TREBLE)
+ //    add_engine_par(cat_balls,             ENGINE_PAR_CT_BALLS)
+ //    { DStortion }
+ //    add_engine_par(ds_mono,               ENGINE_PAR_DS_MONO)
+ //    add_engine_par(ds_volume,             ENGINE_PAR_DS_VOLUME)
+ //    add_engine_par(ds_drive,              ENGINE_PAR_DS_DRIVE)
+ //    add_engine_par(ds_tone,               ENGINE_PAR_DS_TONE)
+ //    add_engine_par(ds_bass,               ENGINE_PAR_DS_BASS)
+ //    add_engine_par(ds_mid,                ENGINE_PAR_DS_MID)
+ //    add_engine_par(ds_treble,             ENGINE_PAR_DS_TREBLE)
+ //    { Skreamer }
+ //    add_engine_par(sk_tone,               ENGINE_PAR_SK_TONE)
+ //    add_engine_par(sk_drive,              ENGINE_PAR_SK_DRIVE)
+ //    add_engine_par(sk_bass,               ENGINE_PAR_SK_BASS)
+ //    add_engine_par(sk_bright,             ENGINE_PAR_SK_BRIGHT)
+ //    add_engine_par(sk_treble,             ENGINE_PAR_SK_BRIGHT)
+ //    add_engine_par(sk_clean,              ENGINE_PAR_SK_MIX)
+ //    { AC Box }
+ //    add_engine_par(ac_mono,               ENGINE_PAR_AC_MONO)
+ //    add_engine_par(ac_normal,             ENGINE_PAR_AC_NORMALVOLUME)
+ //    add_engine_par(ac_brill,              ENGINE_PAR_AC_BRILLIANTVOLUME)
+ //    add_engine_par(ac_bass,               ENGINE_PAR_AC_BASS)
+ //    add_engine_par(ac_treble,             ENGINE_PAR_AC_TREBLE)
+ //    add_engine_par(ac_tone,               ENGINE_PAR_AC_TONECUT)
+ //    add_engine_par(ac_trem_speed,         ENGINE_PAR_AC_TREMOLOSPEED)
+ //    add_engine_par(ac_trem_depth,         ENGINE_PAR_AC_TREMOLODEPTH)
+ //    { Bass Invader }
+ //    add_engine_par(binv_lo_cut,           ENGINE_PAR_BASSINVADER_LO_CUT)
+ //    add_engine_par(binv_hi_boost,         ENGINE_PAR_BASSINVADER_HI_BOOST)
+ //    add_engine_par(binv_mid_contour,      ENGINE_PAR_BASSINVADER_MID_CONTOUR)
+ //    add_engine_par(binv_volume,           ENGINE_PAR_BASSINVADER_VOLUME)
+ //    add_engine_par(binv_gain,             ENGINE_PAR_BASSINVADER_VOLUME)
+ //    add_engine_par(binv_boost,            ENGINE_PAR_BASSINVADER_BOOST)
+ //    add_engine_par(binv_bass,             ENGINE_PAR_BASSINVADER_BASS)
+ //    add_engine_par(binv_lo_mid,           ENGINE_PAR_BASSINVADER_LO_MID)
+ //    add_engine_par(binv_hi_mid,           ENGINE_PAR_BASSINVADER_HI_MID)
+ //    add_engine_par(binv_treble,           ENGINE_PAR_BASSINVADER_TREBLE)
+ //    add_engine_par(binv_master,           ENGINE_PAR_BASSINVADER_MASTER)
+ //    { Bass Pro }
+	// add_engine_par(bpro_mono,             ENGINE_PAR_BASSPRO_MONO)
+	// add_engine_par(bpro_bright,           ENGINE_PAR_BASSPRO_BRIGHT)
+	// add_engine_par(bpro_ultra_hi,         ENGINE_PAR_BASSPRO_ULTRAHI)
+	// add_engine_par(bpro_ultra_lo,         ENGINE_PAR_BASSPRO_ULTRALO)
+	// add_engine_par(bpro_geq,              ENGINE_PAR_BASSPRO_GEQ)
+	// add_engine_par(bpro_gain,             ENGINE_PAR_BASSPRO_GAIN)
+	// add_engine_par(bpro_drive,            ENGINE_PAR_BASSPRO_DRIVE)
+	// add_engine_par(bpro_bass,             ENGINE_PAR_BASSPRO_BASS)
+	// add_engine_par(bpro_mid,              ENGINE_PAR_BASSPRO_MID)
+	// add_engine_par(bpro_mid_freq,         ENGINE_PAR_BASSPRO_MIDFREQ)
+	// add_engine_par(bpro_treble,           ENGINE_PAR_BASSPRO_TREBLE)
+	// add_engine_par(bpro_master,           ENGINE_PAR_BASSPRO_MASTER)
+	// add_engine_par(bpro_geq_40,           ENGINE_PAR_BASSPRO_GEQ_40)
+	// add_engine_par(bpro_geq_90,           ENGINE_PAR_BASSPRO_GEQ_90)
+	// add_engine_par(bpro_geq_180,          ENGINE_PAR_BASSPRO_GEQ_180)
+	// add_engine_par(bpro_geq_300,          ENGINE_PAR_BASSPRO_GEQ_300)
+	// add_engine_par(bpro_geq_500,          ENGINE_PAR_BASSPRO_GEQ_500)
+	// add_engine_par(bpro_geq_1k,           ENGINE_PAR_BASSPRO_GEQ_1K)
+	// add_engine_par(bpro_geq_2k,           ENGINE_PAR_BASSPRO_GEQ_2K)
+	// add_engine_par(bpro_geq_4k,           ENGINE_PAR_BASSPRO_GEQ_4K)
+	// add_engine_par(bpro_geq_10k,          ENGINE_PAR_BASSPRO_GEQ_10K)
+	// add_engine_par(bpro_geq_volume,       ENGINE_PAR_BASSPRO_GEQ_VOLUME)
+ //    { HotSolo }
+ //    add_engine_par(hs_mono,               ENGINE_PAR_HS_MONO)
+ //    add_engine_par(hs_overdrive,          ENGINE_PAR_HS_OVERDRIVE)
+ //    add_engine_par(hs_pre_normal,         ENGINE_PAR_HS_PRENORMAL)
+ //    add_engine_par(hs_pre_od,             ENGINE_PAR_HS_PREOVERDRIVE)
+ //    add_engine_par(hs_bass,               ENGINE_PAR_HS_BASS)
+ //    add_engine_par(hs_mid,                ENGINE_PAR_HS_MID)
+ //    add_engine_par(hs_treble,             ENGINE_PAR_HS_TREBLE)
+ //    add_engine_par(hs_presence,           ENGINE_PAR_HS_PRESENCE)
+ //    add_engine_par(hs_depth,              ENGINE_PAR_HS_DEPTH)
+ //    add_engine_par(hs_master,             ENGINE_PAR_HS_MASTER)
+ //    { Twang }
+ //    add_engine_par(tw_mono,               ENGINE_PAR_TW_MONO)
+ //    add_engine_par(tw_bright,             ENGINE_PAR_TW_BRIGHT)
+ //    add_engine_par(tw_gain,               ENGINE_PAR_TW_VOLUME)
+ //    add_engine_par(tw_volume,             ENGINE_PAR_TW_VOLUME)
+ //    add_engine_par(tw_treble,             ENGINE_PAR_TW_TREBLE)
+ //    add_engine_par(tw_mid,                ENGINE_PAR_TW_MID)
+ //    add_engine_par(tw_bass,               ENGINE_PAR_TW_BASS)
+ //    { Jump }
+ //    add_engine_par(jp_mono,               ENGINE_PAR_JMP_MONO)
+ //    add_engine_par(jp_higain,             ENGINE_PAR_JMP_HIGAIN)
+ //    add_engine_par(jp_preamp,             ENGINE_PAR_JMP_PREAMP)
+ //    add_engine_par(jp_bass,               ENGINE_PAR_JMP_BASS)
+ //    add_engine_par(jp_mid,                ENGINE_PAR_JMP_MID)
+ //    add_engine_par(jp_treble,             ENGINE_PAR_JMP_TREBLE)
+ //    add_engine_par(jp_presence,           ENGINE_PAR_JMP_PRESENCE)
+ //    add_engine_par(jp_master,             ENGINE_PAR_JMP_MASTER)
+ //    { Van51 }
+ //    add_engine_par(v5_mono,               ENGINE_PAR_V5_MONO)
+ //    add_engine_par(v5_higain,             ENGINE_PAR_V5_HIGAIN)
+ //    add_engine_par(v5_bright,             ENGINE_PAR_V5_BRIGHT)
+ //    add_engine_par(v5_crunch,             ENGINE_PAR_V5_CRUNCH)
+ //    add_engine_par(v5_lead_ch,            ENGINE_PAR_V5_LEADCHANNEL)
+ //    add_engine_par(v5_pre_rhythm,         ENGINE_PAR_V5_PREGAINRHYTHM)
+ //    add_engine_par(v5_pre_lead,           ENGINE_PAR_V5_PREGAINLEAD)
+ //    add_engine_par(v5_postgain,           ENGINE_PAR_V5_POSTGAIN)
+ //    add_engine_par(v5_bass,               ENGINE_PAR_V5_BASS)
+ //    add_engine_par(v5_mid,                ENGINE_PAR_V5_MID)
+ //    add_engine_par(v5_treble,             ENGINE_PAR_V5_TREBLE)
+ //    add_engine_par(v5_presence,           ENGINE_PAR_V5_PRESENCE)
+ //    add_engine_par(v5_res,                ENGINE_PAR_V5_RESONANCE)
+ //    { Rotator }
+ //    add_engine_par(rot_speed,             ENGINE_PAR_RT_SPEED)
+ //    add_engine_par(rot_accel_hi,          ENGINE_PAR_RT_ACCEL_HI)
+ //    add_engine_par(rot_accel_lo,          ENGINE_PAR_RT_ACCEL_LO)
+ //    add_engine_par(rot_balance,           ENGINE_PAR_RT_BALANCE)
+ //    add_engine_par(rot_distance,          ENGINE_PAR_RT_DISTANCE)
+ //    add_engine_par(rot_mix,               ENGINE_PAR_RT_MIX)
+ //    { Surround Panner }
+ //    add_engine_par(sp_diverge,            ENGINE_PAR_SP_DIVERGENCE)
+ //    add_engine_par(sp_divergence,         ENGINE_PAR_SP_DIVERGENCE)
+ //    add_engine_par(sp_size,               ENGINE_PAR_SP_SIZE)
+ //    add_engine_par(sp_lfe,                ENGINE_PAR_SP_LFE_VOLUME)
+ //    add_engine_par(sp_xshift,             ENGINE_PAR_SP_OFFSET_X)
+ //    add_engine_par(sp_yshift,             ENGINE_PAR_SP_OFFSET_Y)
+ //    add_engine_par(sp_angle,              ENGINE_PAR_SP_OFFSET_AZIMUTH)
+ //    add_engine_par(sp_distance,           ENGINE_PAR_SP_OFFSET_DISTANCE)
+ //    { Stereo Modeller }
+    add_engine_par(stereo_spread,         ENGINE_PAR_STEREO)
+ //    add_engine_par(stereo_width,          ENGINE_PAR_STEREO)
+ //    add_engine_par(stereo_pan,            ENGINE_PAR_STEREO_PAN)
+ //    add_engine_par(stereo_pseudo,         ENGINE_PAR_STEREO_PSEUDO)
+ //    { Replika Delay }
+ //    add_engine_par(rdl_type,              ENGINE_PAR_RDL_TYPE)
+    add_engine_par(rdl_time,              ENGINE_PAR_RDL_TIME)
+    add_engine_par(rdl_time_unit,         ENGINE_PAR_RDL_TIME_UNIT)
+    // add_engine_par(rdl_feed,              ENGINE_PAR_RDL_FEEDBACK)
+    add_engine_par(rdl_feedback,          ENGINE_PAR_RDL_FEEDBACK)
+    add_engine_par(rdl_low_cut,           ENGINE_PAR_RDL_LOWCUT)
+    add_engine_par(rdl_high_cut,          ENGINE_PAR_RDL_HIGHCUT)
+ //    add_engine_par(rdl_rate,              ENGINE_PAR_RDL_RATE)
+ //    add_engine_par(rdl_depth,             ENGINE_PAR_RDL_DEPTH)
+ //    add_engine_par(rdl_bbd_type,          ENGINE_PAR_RDL_BBDTYPE)
+ //    add_engine_par(rdl_flutter,           ENGINE_PAR_RDL_FLUTTER)
+ //    add_engine_par(rdl_tape_age,          ENGINE_PAR_RDL_TAPEAGE)
+ //    add_engine_par(rdl_saturation,        ENGINE_PAR_RDL_SATURATION)
+ //    add_engine_par(rdl_quality,           ENGINE_PAR_RDL_QUALITY)
+ //    add_engine_par(rdl_size,              ENGINE_PAR_RDL_SIZE)
+ //    add_engine_par(rdl_amount,            ENGINE_PAR_RDL_AMOUNT)
+ //    add_engine_par(rdl_modulation,        ENGINE_PAR_RDL_MODULATION)
+    add_engine_par(rdl_ping_pong,         ENGINE_PAR_RDL_PINGPONG)
+ //    add_engine_par(rdl_stereo,            ENGINE_PAR_RDL_STEREO)
+ //    add_engine_par(rdl_dense,             ENGINE_PAR_RDL_DENSE)
+ //    add_engine_par(rdl_noise,             ENGINE_PAR_RDL_NOISE)
+ //    { Psyche Delay }
+      add_engine_par(psyche_time,            ENGINE_PAR_PSYDL_TIME)
+      add_engine_par(psyche_feedback,        ENGINE_PAR_PSYDL_FEEDBACK)
+ //    { Legacy Delay }
+ //    add_engine_par(dl_time,               ENGINE_PAR_DL_TIME)
+ //    add_engine_par(dl_time_unit,          ENGINE_PAR_DL_TIME_UNIT)
+ //    add_engine_par(dl_damp,               ENGINE_PAR_DL_DAMPING)
+ //    add_engine_par(dl_damping,            ENGINE_PAR_DL_DAMPING)
+ //    add_engine_par(dl_pan,                ENGINE_PAR_DL_PAN)
+ //    add_engine_par(dl_stereo,             ENGINE_PAR_DL_PAN)
+ //    add_engine_par(dl_width,              ENGINE_PAR_DL_PAN)
+ //    add_engine_par(dl_feed,               ENGINE_PAR_DL_FEEDBACK)
+ //    add_engine_par(dl_feedback,           ENGINE_PAR_DL_FEEDBACK)
+ //    { Chorus }
+ //    add_engine_par(ch_depth,              ENGINE_PAR_CH_DEPTH)
+ //    add_engine_par(ch_speed,              ENGINE_PAR_CH_SPEED)
+ //    add_engine_par(ch_speed_unit,         ENGINE_PAR_CH_SPEED_UNIT)
+ //    add_engine_par(ch_phase,              ENGINE_PAR_CH_PHASE)
+ //    { Choral }
+ //    add_engine_par(chr_mode,              ENGINE_PAR_CHORAL_MODE)
+ //    add_engine_par(chr_voices,            ENGINE_PAR_CHORAL_VOICES)
+ //    add_engine_par(chr_rate,              ENGINE_PAR_CHORAL_RATE)
+ //    add_engine_par(chr_amt,               ENGINE_PAR_CHORAL_AMOUNT)
+ //    add_engine_par(chr_delay,             ENGINE_PAR_CHORAL_DELAY)
+ //    add_engine_par(chr_feed,              ENGINE_PAR_CHORAL_FEEDBACK)
+ //    add_engine_par(chr_feedback,          ENGINE_PAR_CHORAL_FEEDBACK)
+ //    add_engine_par(chr_scatter,           ENGINE_PAR_CHORAL_SCATTER)
+ //    add_engine_par(chr_inv_phase,         ENGINE_PAR_CHORAL_INVERT_PHASE)
+ //    add_engine_par(chr_width,             ENGINE_PAR_CHORAL_WIDTH)
+ //    add_engine_par(chr_mix,               ENGINE_PAR_CHORAL_MIX)
+ //    { Flanger }
+ //    add_engine_par(fl_depth,              ENGINE_PAR_FL_DEPTH)
+ //    add_engine_par(fl_speed,              ENGINE_PAR_FL_SPEED)
+ //    add_engine_par(fl_speed_unit,         ENGINE_PAR_FL_SPEED_UNIT)
+ //    add_engine_par(fl_phase,              ENGINE_PAR_FL_PHASE)
+ //    add_engine_par(fl_color,              ENGINE_PAR_FL_COLOR)
+ //    add_engine_par(fl_feed,               ENGINE_PAR_FL_FEEDBACK)
+ //    add_engine_par(fl_feedback,           ENGINE_PAR_FL_FEEDBACK)
+ //    { Flair }
+ //    add_engine_par(flr_mode,              ENGINE_PAR_FLAIR_MODE)
+ //    add_engine_par(flr_scan_mode,         ENGINE_PAR_FLAIR_SCANMODE)
+ //    add_engine_par(flr_voices,            ENGINE_PAR_FLAIR_VOICES)
+ //    add_engine_par(flr_detune,            ENGINE_PAR_FLAIR_DETUNE)
+ //    add_engine_par(flr_rate,              ENGINE_PAR_FLAIR_RATE)
+ //    add_engine_par(flr_rate_unit,         ENGINE_PAR_FLAIR_RATE_UNIT)
+ //    add_engine_par(flr_amt,               ENGINE_PAR_FLAIR_AMOUNT)
+ //    add_engine_par(flr_chord,             ENGINE_PAR_FLAIR_CHORD)
+ //    add_engine_par(flr_pitch,             ENGINE_PAR_FLAIR_PITCH)
+ //    add_engine_par(flr_feed,              ENGINE_PAR_FLAIR_FEEDBACK)
+ //    add_engine_par(flr_feedback,          ENGINE_PAR_FLAIR_FEEDBACK)
+ //    add_engine_par(flr_damping,           ENGINE_PAR_FLAIR_DAMPING)
+ //    add_engine_par(flr_inv_phase,         ENGINE_PAR_FLAIR_INVERT_PHASE)
+ //    add_engine_par(flr_offset,            ENGINE_PAR_FLAIR_OFFSET)
+ //    add_engine_par(flr_width,             ENGINE_PAR_FLAIR_WIDTH)
+    add_engine_par(flr_mix,               ENGINE_PAR_FLAIR_MIX)
+ //    { Phaser }
+ //    add_engine_par(ph_depth,              ENGINE_PAR_PH_DEPTH)
+ //    add_engine_par(ph_speed,              ENGINE_PAR_PH_SPEED)
+ //    add_engine_par(ph_speed_unit,         ENGINE_PAR_PH_SPEED_UNIT)
+ //    add_engine_par(ph_phase,              ENGINE_PAR_PH_PHASE)
+ //    add_engine_par(ph_feed,               ENGINE_PAR_PH_FEEDBACK)
+ //    add_engine_par(ph_feedback,           ENGINE_PAR_PH_FEEDBACK)
+ //    { Phasis }
+ //    add_engine_par(phs_rate,              ENGINE_PAR_PHASIS_RATE)
+ //    add_engine_par(phs_rate_unit,         ENGINE_PAR_PHASIS_RATE_UNIT)
+ //    add_engine_par(phs_ultra,             ENGINE_PAR_PHASIS_ULTRA)
+ //    add_engine_par(phs_center,            ENGINE_PAR_PHASIS_CENTER)
+ //    add_engine_par(phs_spread,            ENGINE_PAR_PHASIS_SPREAD)
+ //    add_engine_par(phs_feed,              ENGINE_PAR_PHASIS_FEEDBACK)
+ //    add_engine_par(phs_feedback,          ENGINE_PAR_PHASIS_FEEDBACK)
+ //    add_engine_par(phs_stereo,            ENGINE_PAR_PHASIS_STEREO)
+ //    add_engine_par(phs_notches,           ENGINE_PAR_PHASIS_NOTCHES)
+ //    add_engine_par(phs_amount,            ENGINE_PAR_PHASIS_AMOUNT)
+ //    add_engine_par(phs_mod_mix,           ENGINE_PAR_PHASIS_MOD_MIX)
+ //    add_engine_par(phs_inv_phase,         ENGINE_PAR_PHASIS_INVERT_PHASE)
+ //    add_engine_par(phs_inv_mod_mix,       ENGINE_PAR_PHASIS_INVERT_MOD_MIX)
+ //    add_engine_par(phs_mix,               ENGINE_PAR_PHASIS_MIX)
+ //    { Convolution }
+ //    add_engine_par(ir_reverse,            ENGINE_PAR_IRC_REVERSE)
+ //    add_engine_par(ir_er_lr_bound,        ENGINE_PAR_IRC_ER_LR_BOUNDARY)
+ //    add_engine_par(ir_predelay,           ENGINE_PAR_IRC_PREDELAY)
+ //    add_engine_par(ir_size_er,            ENGINE_PAR_IRC_LENGTH_RATIO_ER)
+ //    add_engine_par(ir_hp_er,              ENGINE_PAR_IRC_FREQ_HIGHPASS_ER)
+ //    add_engine_par(ir_lp_er,              ENGINE_PAR_IRC_FREQ_LOWPASS_ER)
+ //    add_engine_par(ir_size_lr,            ENGINE_PAR_IRC_LENGTH_RATIO_LR)
+ //    add_engine_par(ir_hp_lr,              ENGINE_PAR_IRC_FREQ_HIGHPASS_LR)
+ //    add_engine_par(ir_lp_lr,              ENGINE_PAR_IRC_FREQ_LOWPASS_LR)
+ //    { Reverb }
+ //    add_engine_par(rv2_type,              ENGINE_PAR_RV2_TYPE)
+ //    add_engine_par(rv2_predelay,          ENGINE_PAR_RV2_PREDELAY)
+ //    add_engine_par(rv2_size,              ENGINE_PAR_RV2_SIZE)
+ //    add_engine_par(rv2_time,              ENGINE_PAR_RV2_TIME)
+ //    add_engine_par(rv2_damp,              ENGINE_PAR_RV2_DAMPING)
+ //    add_engine_par(rv2_damping,           ENGINE_PAR_RV2_DAMPING)
+ //    add_engine_par(rv2_diff,              ENGINE_PAR_RV2_DIFF)
+ //    add_engine_par(rv2_mod,               ENGINE_PAR_RV2_MOD)
+ //    add_engine_par(rv2_stereo,            ENGINE_PAR_RV2_STEREO)
+ //    add_engine_par(rv2_low_shelf,         ENGINE_PAR_RV2_LOWSHELF)
+ //    add_engine_par(rv2_high_cut,          ENGINE_PAR_RV2_HIGHCUT)
+ //    { Plate Reverb }
+ //    add_engine_par(prv_predelay,          ENGINE_PAR_PR_PREDELAY)
+ //    add_engine_par(prv_decay,             ENGINE_PAR_PR_DECAY)
+ //    add_engine_par(prv_stereo,            ENGINE_PAR_PR_STEREO)
+ //    add_engine_par(prv_low_shelf,         ENGINE_PAR_PR_LOWSHELF)
+ //    add_engine_par(prv_high_cut,          ENGINE_PAR_PR_HIDAMP)
+ //    { Legacy Reverb }
+ //    add_engine_par(rev_predelay,          ENGINE_PAR_RV_PREDELAY)
+ //    add_engine_par(rev_size,              ENGINE_PAR_RV_SIZE)
+ //    add_engine_par(rev_color,             ENGINE_PAR_RV_COLOUR)
+ //    add_engine_par(rev_damp,              ENGINE_PAR_RV_DAMPING)
+ //    add_engine_par(rev_damping,           ENGINE_PAR_RV_DAMPING)
+ //    add_engine_par(rev_stereo,            ENGINE_PAR_RV_STEREO)
+ //    add_engine_par(rev_width,             ENGINE_PAR_RV_STEREO)
+ //    add_engine_par(rv_predelay,           ENGINE_PAR_RV_PREDELAY)
+ //    add_engine_par(rv_size,               ENGINE_PAR_RV_SIZE)
+ //    add_engine_par(rv_color,              ENGINE_PAR_RV_COLOUR)
+ //    add_engine_par(rv_damp,               ENGINE_PAR_RV_DAMPING)
+ //    add_engine_par(rv_damping,            ENGINE_PAR_RV_DAMPING)
+ //    add_engine_par(rv_stereo,             ENGINE_PAR_RV_STEREO)
+ //    add_engine_par(rv_width,              ENGINE_PAR_RV_STEREO)
+      { Raum }
+      add_engine_par(raum_type,             ENGINE_PAR_RAUM_TYPE)
+      add_engine_par(raum_decay,             ENGINE_PAR_RAUM_DECAY)
+      add_engine_par(raum_size,              ENGINE_PAR_RAUM_SIZE)
+      add_engine_par(raum_diffusion,         ENGINE_PAR_RAUM_DIFFUSION)
+      add_engine_par(raum_mod,               ENGINE_PAR_RAUM_MOD)
+      add_engine_par(raum_damping,           ENGINE_PAR_RAUM_DAMPING)
+      add_engine_par(raum_lowcut,            ENGINE_PAR_RAUM_LOWSHELF)
+      add_engine_par(raum_highcut,           ENGINE_PAR_RAUM_HIGHCUT)
+      add_engine_par(raum_reverb,           ENGINE_PAR_RAUM_REVERB)
+ //    { Gainer }
+    add_engine_par(gainer,                ENGINE_PAR_GN_GAIN)
+ //    { Send Levels }
+    add_engine_par(send_0,                ENGINE_PAR_SENDLEVEL_0)
+    add_engine_par(send_1,                ENGINE_PAR_SENDLEVEL_1)
+    add_engine_par(send_2,                ENGINE_PAR_SENDLEVEL_2)
+    add_engine_par(send_3,                ENGINE_PAR_SENDLEVEL_3)
+    add_engine_par(send_4,                ENGINE_PAR_SENDLEVEL_4)
+    add_engine_par(send_5,                ENGINE_PAR_SENDLEVEL_5)
+    add_engine_par(send_6,                ENGINE_PAR_SENDLEVEL_6)
+    add_engine_par(send_7,                ENGINE_PAR_SENDLEVEL_7)
+ //    add_engine_par(send_smooth_0,         ENGINE_PAR_SENDLEVEL_SMOOTHED_0)
+ //    add_engine_par(send_smooth_1,         ENGINE_PAR_SENDLEVEL_SMOOTHED_1)
+ //    add_engine_par(send_smooth_2,         ENGINE_PAR_SENDLEVEL_SMOOTHED_2)
+ //    add_engine_par(send_smooth_3,         ENGINE_PAR_SENDLEVEL_SMOOTHED_3)
+ //    add_engine_par(send_smooth_4,         ENGINE_PAR_SENDLEVEL_SMOOTHED_4)
+ //    add_engine_par(send_smooth_5,         ENGINE_PAR_SENDLEVEL_SMOOTHED_5)
+ //    add_engine_par(send_smooth_6,         ENGINE_PAR_SENDLEVEL_SMOOTHED_6)
+ //    add_engine_par(send_smooth_7,         ENGINE_PAR_SENDLEVEL_SMOOTHED_7)
+
+ //    { Modulation }
+ //    add_mod_par(mod_bypass,               ENGINE_PAR_INTMOD_BYPASS)
+    add_mod_par(mod_freq,                 ENGINE_PAR_INTMOD_FREQUENCY)
+    add_mod_par(mod_freq_unit,            ENGINE_PAR_INTMOD_FREQUENCY_UNIT)
+    add_mod_par(mod_amt,                  ENGINE_PAR_INTMOD_INTENSITY)
+    add_mod_par(mod_retrig,               ENGINE_PAR_INTMOD_RETRIGGER)
+    add_mod_par(mod_amt_uni,              ENGINE_PAR_MOD_TARGET_INTENSITY)
+ //    add_mod_par(mod_invert,               MOD_TARGET_INVERT_SOURCE)
+ //    add_mod_par(mod_type,                 ENGINE_PAR_INTMOD_TYPE)
+ //    add_mod_par(mod_subtype,              ENGINE_PAR_INTMOD_SUBTYPE)
+ //    { Envelopes }
+ //    add_mod_par(env_ahd_mode,             ENGINE_PAR_ENV_AHD)
+ //    add_mod_par(env_curve,                ENGINE_PAR_ATK_CURVE)
+    add_mod_par(env_atk,                  ENGINE_PAR_ATTACK)
+    add_mod_par(env_atk_unit,             ENGINE_PAR_ATTACK_UNIT)
+ //    add_mod_par(env_hold,                 ENGINE_PAR_HOLD)
+ //    add_mod_par(env_hold_unit,            ENGINE_PAR_HOLD_UNIT)
+    add_mod_par(env_dec,                  ENGINE_PAR_DECAY)
+    add_mod_par(env_dec_unit,             ENGINE_PAR_DECAY_UNIT)
+    add_mod_par(env_sus,                  ENGINE_PAR_SUSTAIN)
+    add_mod_par(env_rel,                  ENGINE_PAR_RELEASE)
+ //    add_mod_par(env_rel_unit,             ENGINE_PAR_RELEASE_UNIT)
+ //    add_mod_par(env_decay1,               ENGINE_PAR_DECAY1)
+ //    add_mod_par(env_decay1_unit,          ENGINE_PAR_DECAY1_UNIT)
+ //    add_mod_par(env_break,                ENGINE_PAR_BREAK)
+ //    add_mod_par(env_decay2,               ENGINE_PAR_DECAY2)
+ //    add_mod_par(env_decay2_unit,          ENGINE_PAR_DECAY2_UNIT)
+ //    add_mod_par(env_dbd_easy,             ENGINE_PAR_ENV_DBD_EASY)
+ //    { Envelope Follower }
+ //    add_mod_par(envf_atk,                 ENGINE_PAR_ENVF_ATTACK)
+ //    add_mod_par(envf_dec,                 ENGINE_PAR_ENVF_RELEASE)
+ //    add_mod_par(envf_rel,                 ENGINE_PAR_ENVF_RELEASE)
+ //    add_mod_par(envf_adapt,               ENGINE_PAR_ENVF_ADAPTION)
+ //    add_mod_par(envf_gain,                ENGINE_PAR_ENVF_GAIN_BOOST)
+ //    { LFOs }
+ //    add_mod_par(lfo_delay,                ENGINE_PAR_LFO_DELAY)
+ //    add_mod_par(lfo_delay_unit,           ENGINE_PAR_LFO_DELAY_UNIT)
+ //    add_mod_par(lfo_fade,                 ENGINE_PAR_LFO_DELAY)
+ //    add_mod_par(lfo_fade_unit,            ENGINE_PAR_LFO_DELAY_UNIT)
+ //    add_mod_par(lfo_sine,                 ENGINE_PAR_LFO_SINE)
+ //    add_mod_par(lfo_tri,                  ENGINE_PAR_LFO_TRI)
+ //    add_mod_par(lfo_pulse,                ENGINE_PAR_LFO_RECT)
+ //    add_mod_par(lfo_rect,                 ENGINE_PAR_LFO_RECT)
+ //    add_mod_par(lfo_pw,                   ENGINE_PAR_INTMOD_PULSEWIDTH)
+ //    add_mod_par(lfo_saw,                  ENGINE_PAR_LFO_SAW)
+ //    add_mod_par(lfo_rand,                 ENGINE_PAR_LFO_RAND)
+ //    add_mod_par(lfo_random,               ENGINE_PAR_LFO_RAND)
+ //    add_mod_par(lfo_normalize,            ENGINE_PAR_LFO_NORMALIZE)
+ //    { Glide }
+ //    add_mod_par(glide_speed,              ENGINE_PAR_GLIDE_COEF)
+end macro
+
+macro add_mod_par(#prop#, engine_par)
+    property group.mods.#prop#
+        function get(group, mods) -> result
+            result := get_engine_par(engine_par, group, get_mod_idx(group, mods), -1)
+        end function
+
+        function set(group, mods, value)
+            set_engine_par(engine_par, value, group, get_mod_idx(group, mods), -1)
+        end function
+    end property
+
+    property group.mods.#prop#.disp
+        function get(group, mods) -> result
+            result := get_engine_par_disp(engine_par, group, get_mod_idx(group, mods), -1)
+        end function
+
+        function set(group, mods, value)
+            set_engine_par(engine_par, value, group, get_mod_idx(group, mods), -1)
+        end function
+    end property
+
+    property group.mods.target.#prop#
+        function get(group, mods, target) -> result
+            result := get_engine_par(engine_par, group, get_mod_idx(group, mods), get_target_idx(group, get_mod_idx(group, mods), target))
+        end function
+
+        function set(group, mods, target, value)
+            set_engine_par(engine_par, value, group, get_mod_idx(group, mods), get_target_idx(group, get_mod_idx(group, mods), target))
+        end function
+    end property
+
+    property group.mods.target.#prop#.disp
+        function get(group, mods, target) -> result
+            result := get_engine_par_disp(engine_par, group, get_mod_idx(group, mods), get_target_idx(group, get_mod_idx(group, mods), target))
+        end function
+    end property
+end macro
+
+macro add_engine_par(#prop#, engine_par)
+    property insert.#prop#
+        function get(slot) -> result
+            result := get_engine_par(engine_par, -1, slot, 1)
+        end function
+
+        function set(slot, value)
+            set_engine_par(engine_par, value, -1, slot, 1)
+        end function
+    end property
+
+    property insert.#prop#.disp
+        function get(slot) -> result
+            result := get_engine_par_disp(engine_par, -1, slot, 1)
+        end function
+    end property
+
+    property send.#prop#
+        function get(slot) -> result
+            result := get_engine_par(engine_par, -1, slot, 0)
+        end function
+
+        function set(slot, value)
+            set_engine_par(engine_par, value, -1, slot, 0)
+        end function
+    end property
+
+    property send.#prop#.disp
+        function get(slot) -> result
+            result := get_engine_par_disp(engine_par, -1, slot, 0)
+        end function
+    end property
+
+    property group.#prop#
+        function get(group) -> result
+            result := get_engine_par(engine_par, group, -1, -1)
+        end function
+
+        function set(group, value)
+            set_engine_par(engine_par, value, group, -1, -1)
+        end function
+    end property
+
+    property group.#prop#.disp
+        function get(group) -> result
+            result := get_engine_par_disp(engine_par, group, -1, -1)
+        end function
+    end property
+
+    property group.slot.#prop#
+        function get(group, slot) -> result
+            result := get_engine_par(engine_par, group, slot, -1)
+        end function
+
+        function set(group, slot, value)
+            set_engine_par(engine_par, value, group, slot, -1)
+        end function
+    end property
+
+    property group.slot.#prop#.disp
+        function get(group, slot) -> result
+            result := get_engine_par_disp(engine_par, group, slot, -1)
+        end function
+    end property
+
+    property group.slot.generic.#prop#
+        function get(group, slot, generic) -> result
+            result := get_engine_par(engine_par, group, slot, generic)
+        end function
+
+        function set(group, slot, generic, value)
+            set_engine_par(engine_par, value, group, slot, generic)
+        end function
+    end property
+
+    property group.slot.generic.#prop#.disp
+        function get(group, slot, generic) -> result
+            result := get_engine_par_disp(engine_par, group, slot, generic)
+        end function
+    end property
+
+    property bus.slot.#prop#
+        function get(bus, slot) -> result
+            result := get_engine_par(engine_par, -1, slot, NI_BUS_OFFSET + bus)
+        end function
+
+        function set(bus, slot, value)
+            set_engine_par(engine_par, value, -1, slot, NI_BUS_OFFSET + bus)
+        end function
+    end property
+
+    property bus.slot.#prop#.disp
+        function get(bus, slot) -> result
+            result := get_engine_par_disp(engine_par, -1, slot, NI_BUS_OFFSET + bus)
+        end function
+    end property
+
+    property main.#prop#
+        function get(slot) -> result
+            result := get_engine_par(engine_par, -1, slot, NI_MAIN_BUS)
+        end function
+
+        function set(slot, value)
+            set_engine_par(engine_par, value, -1, slot, NI_MAIN_BUS)
+        end function
+    end property
+
+    property main.#prop#.disp
+        function get(slot) -> result
+            result := get_engine_par_disp(engine_par, -1, slot, NI_MAIN_BUS)
+        end function
+    end property
+
+    property master.#prop#
+        function get() -> result
+            result := get_engine_par(engine_par, -1, -1, -1)
+        end function
+
+        function set(value)
+            set_engine_par(engine_par, value, -1, -1, -1)
+        end function
+    end property
+
+    property master.#prop#.disp
+        function get() -> result
+            result := get_engine_par_disp(engine_par, -1, -1, -1)
+        end function
+    end property
+end macro

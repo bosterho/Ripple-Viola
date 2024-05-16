@@ -1,0 +1,192 @@
+{#pragma save_compiled_source ..\..\Resources\scripts\Input Quantization.txt}
+
+{***********************************************
+Input Quantize
+Author: Native Instruments
+Written by: Josef Natterer, Nicki Marinic
+Modified: August 19, 2021
+Last modified by: Mario Kruselj a.k.a. EvilDragon
+*************************************************}
+
+on init
+	make_perfview
+	set_script_title("Input Quantize")
+	set_ui_height(2)
+	message("")
+
+	declare $time_length
+	declare $rest_bar_time
+	declare $rest_click_time
+	declare $last_synctype
+	declare $dur_bar
+	declare $helper
+
+	declare !tempo_names[9]
+	!tempo_names[0] := "1/32"
+	!tempo_names[1] := "1/16 T"
+	!tempo_names[2] := "1/16"
+	!tempo_names[3] := "1/8 T"
+	!tempo_names[4] := "1/8"
+	!tempo_names[5] := "1/4 T"
+	!tempo_names[6] := "1/4"
+	!tempo_names[7] := "1/2"
+	!tempo_names[8] := "Bar"
+
+	declare ui_knob $synctype (0,8,1)
+	set_text ($synctype,"Rate")
+	$synctype := 6
+	set_knob_defval ($synctype,6)
+	set_knob_label ($synctype,!tempo_names[$synctype])
+	make_persistent ($synctype)
+
+	declare polyphonic $art_id
+
+	declare const $Amount := 100
+
+	{----- GUI -----}
+
+	declare ui_label $label2 (1,1)
+	set_text ($label2, "to the next")
+
+	declare ui_label $label1 (1,1)
+	set_text ($label1, "Quantize all")
+
+	declare ui_switch $Note_off
+	set_control_par_str(get_ui_id($Note_off),$CONTROL_PAR_TEXT,"Note Off")
+	declare ui_switch $Note_on
+	set_control_par_str(get_ui_id($Note_on),$CONTROL_PAR_TEXT,"Note On")
+	declare ui_switch $Sustain_NoteOff
+	set_control_par_str(get_ui_id($Sustain_NoteOff),$CONTROL_PAR_TEXT,"Hold")
+
+	{----- Init -----}
+
+	$Note_on := 1
+	$last_synctype := 6
+
+	{----- Recall -----}
+
+	make_persistent ($last_synctype)
+	make_persistent ($Note_off)
+	make_persistent ($Note_on)
+	make_persistent ($Sustain_NoteOff)
+
+	_read_persistent_var($Note_on)
+	_read_persistent_var($Note_off)
+
+	{----- Layout -----}
+
+	move_control ($synctype,5,2)
+	move_control ($Note_off,3,3)
+	move_control ($label2,4,2)
+	move_control ($label1,2,2)
+	move_control ($Note_on,3,2)
+	if ($note_off = 1 and $note_on = 1)
+		move_control ($Sustain_NoteOff,4,3)
+	else
+		move_control ($Sustain_NoteOff,0,0)
+	end if
+end on
+
+on note
+	if ($Note_on = 1)
+		ignore_event($EVENT_ID)
+
+		select ($synctype)
+			case 0
+				$time_length := $DURATION_SIXTEENTH/2
+			case 1
+				$time_length := $DURATION_QUARTER/6
+			case 2
+				$time_length := $DURATION_SIXTEENTH
+			case 3
+				$time_length := $DURATION_QUARTER/3
+			case 4
+				$time_length := $DURATION_EIGHTH
+			case 5
+				$time_length := ($DURATION_QUARTER*2)/3
+			case 6
+				$time_length := $DURATION_QUARTER
+			case 7
+				$time_length := $DURATION_QUARTER*2
+			case 8
+				$time_length := $DURATION_BAR
+		end select
+
+		$rest_bar_time := $DURATION_BAR - $DISTANCE_BAR_START
+		$rest_click_time := ($rest_bar_time+(10*$DURATION_BAR)) mod $time_length
+
+		if ($rest_bar_time mod ($time_length*2) < $time_length)
+			$helper := ($rest_click_time*$Amount)/100
+			if ($helper > 0)
+				wait($helper)
+			end if
+		else
+			$helper := ((($rest_bar_time mod ($time_length*2)) - $time_length)*$Amount)/100
+			if ($helper > 0)
+				wait($helper)
+			end if
+		end if
+
+		if ($Note_off = 1 and $Sustain_NoteOff = 0 and $NOTE_HELD = 1)
+			$art_id := play_note($EVENT_NOTE,$EVENT_VELOCITY,0,0)
+		end if
+		if ($Note_off = 1 and $Sustain_NoteOff = 1 and $NOTE_HELD = 0)
+			$helper := play_note($EVENT_NOTE,$EVENT_VELOCITY,0,$time_length)
+			set_event_par($helper,0,1)
+		end if
+		if ($Note_off = 1 and $Sustain_NoteOff = 1 and $NOTE_HELD = 1)
+			$art_id := play_note($EVENT_NOTE,$EVENT_VELOCITY,0,0)
+		end if
+		if ($Note_off = 0 and $NOTE_HELD = 1)
+			$art_id := play_note($EVENT_NOTE,$EVENT_VELOCITY,0,-1)
+		end if
+	else
+		if ($Note_off = 1)
+			ignore_event ($EVENT_ID)
+			$art_id := play_note($EVENT_NOTE,$EVENT_VELOCITY,0,-1)
+		end if
+	end if
+end on
+
+on release
+	if (%EVENT_PAR[0] = 1)
+		exit
+	end if
+	if ($Note_off = 1)
+		ignore_event($EVENT_ID)
+		$helper := (($DURATION_BAR - $DISTANCE_BAR_START)+($DURATION_BAR*10)) mod $time_length
+		if ($helper > 0)
+			wait($helper)
+		end if
+		note_off($art_id)
+	end if
+end on
+
+function synctype_callback
+	set_knob_label ($synctype,!tempo_names[$synctype])
+end function
+on ui_control ($synctype)
+	call synctype_callback
+end on
+
+on ui_control($note_off)
+	if ($note_off = 1 and $note_on = 1)
+		move_control ($Sustain_NoteOff,4,3)
+	else
+		move_control ($Sustain_NoteOff, 0,0)
+	end if
+end on
+
+on ui_control($note_on)
+	if ($note_off = 1 and $note_on = 1)
+		move_control ($Sustain_NoteOff,4,3)
+	else
+		move_control ($Sustain_NoteOff, 0,0)
+	end if
+end on
+
+on pgs_changed
+	synctype := pgs_get_key_val(QUANTIZATION, 0)
+	Note_on := pgs_get_key_val(QUANTIZATION, 1)
+	call synctype_callback
+end on

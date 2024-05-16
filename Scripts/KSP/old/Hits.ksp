@@ -1,0 +1,54 @@
+{#pragma save_compiled_source ..\..\Resources\scripts\Short Hits.txt}
+import "utilities/ep_shorthands.ksp"
+import "utilities/utilities.ksp"
+import "utilities/koala functions.ksp"
+
+on init
+	engine.ICB()
+	utilities.icb
+	tcm.init(1000)
+	SET_CONDITION(TCM_LARGE)
+
+	SET_CONDITION(NO_SYS_SCRIPT_PEDAL)
+
+	declare dev_mode[1]
+	load_array(dev_mode, 2)
+
+	make_perfview
+	define UI_HEIGHT := 100
+	set_ui_height_px(UI_HEIGHT + dev_mode[0]*50)
+	set_ui_color(9151515h)
+
+	set_listener(NI_SIGNAL_TIMER_MS, 100000)
+	message("")
+
+	
+	declare i
+
+end on
+
+function set_key_colors
+	for i := 0 to 127
+		if in_range(i, 36, 59)
+			set_key_color(i, KEY_COLOR_GREEN)
+		else if in_range(i, 60, 65)
+			set_key_color(i, KEY_COLOR_YELLOW)
+		else if in_range(i, 72, 81)
+			set_key_color(i, KEY_COLOR_RED)
+		else
+			declare black_keys[5] := (1, 3, 6, 8, 10)
+			for i := 0 to 127
+				if search(black_keys, i mod 12) = -1
+					set_key_color(i, KEY_COLOR_BLACK)
+				else
+					set_key_color(i, KEY_COLOR_WHITE)
+				end if
+			end for
+		end if
+	end for
+end function
+
+
+on persistence_changed
+	call set_key_colors
+end on
