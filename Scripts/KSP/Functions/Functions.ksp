@@ -21,6 +21,18 @@ function update_speed
 	end for
 end function
 
+function update_midi_visibility()
+	switch_closeMidi -> hide := hide_states[switch_showMidi]
+	// label_midiCover -> hide := hide_states[switch_showMidi]
+	panel_midiPg0 -> hide := hide_states[switch_showMidi]
+	label_midiInstructions -> hide := hide_states[switch_showMidi]
+	label_instructions -> hide := hide_states[1-switch_showMidi]
+	instructions_opacity := real(1-switch_showMidi)
+	midiInstructions_opacity := real(switch_showMidi)
+	midiCover_opacity := real(switch_showMidi)
+end function
+
+
 function find_first_active_event() -> return
 	declare e
 	declare event_ids[MAX_NUM_NOTES]
@@ -73,7 +85,10 @@ end function
 
 function set_key_colors
 	for key_i := 0 to 127
-		set_key_color(key_i, KEY_COLOR_INACTIVE)
+		set_key_color(key_i, KEY_COLOR_BLACK)
+		if search(black_keys, key_i mod 12) # -1
+			set_key_color(key_i, KEY_COLOR_WHITE)
+		end if
 
 		if search(articulation_keyswitches, key_i) # -1
 			set_key_color(key_i, KEY_COLOR_RED)
