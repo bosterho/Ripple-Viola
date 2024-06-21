@@ -1,3 +1,0 @@
-# Ripple Cello
-
-change

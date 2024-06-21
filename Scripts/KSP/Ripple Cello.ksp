@@ -33,7 +33,10 @@ on init
 	declare const MAX_NUM_CHORD_IDS := 1000
 	define MAX_NUM_NOTES := 64
 	define MAX_RIPPLE_HISTORY := 100
+	define NUM_MIDI_PAGES := 2
+	define NUM_MIDI_CLIPS := (12 * NUM_MIDI_PAGES)
 
+	{{ Event pars }}
 	macro declare_event_par(#par#)
 		declare custom_event_#par#[1000000]
 		property event.#par#
@@ -60,7 +63,6 @@ on init
 	row                               , ...
 	direction                         , ...
 	artic                             , ...
-	channel                           , ...
 	voice                             , ...
 	note_off_timestamp                , ...
 	release_length                    , ...
@@ -78,8 +80,6 @@ on init
 	literate_macro(declare_event_par) on CUSTOM_EVENT_PARS
 
 	define RELEASE_SAMPLE := 1
-	define GRID_ROW_HEIGHT_CONST := 20
-	define NUM_GRID_ROWS := 20
 	declare !direction_strings[2] := ("triangle left", "triangle right")
 	declare const RECORDED_DURATION_QUARTER := 545455
 	declare const RECORDED_DURATION_EIGHTH := 272727
@@ -87,65 +87,9 @@ on init
 	declare const MIN_BRIGHTNESS := 24
 	define CLIP_MARGIN := 4
 
-	// Options constants
+	{{ Options constants }}
+	// Speed
 	declare !speed_texts[] := ("Half", "Triplet", "Original", "Triplet", "Double")
-
-	const ARTIC
-		QUARTERS
-		EIGHTHS
-		SIXTEENTHS
-	end const
-	declare !articulation_texts[] := ("Quarters", "Eighths", "Sixteenths")
-
-	const DIRECTION_MODE
-		DOWN
-		ASPLAYED
-		UP
-	end const
-	declare !direction_mode_texts[] := ("Down", "As Played", "Up")
-
-	const LEGATO_MODE
-		OFF
-		SYNC_TO_PITCH
-		SYNC_TO_RIPPLE
-		SYNC_TO_SWELL
-	end const
-	declare !legato_mode_texts[] := ("Off", "Sync to Pitch", "Sync to Ripple", "Sync to Swell")
-
-	const RELEASE_SAMPLES
-		OFF
-		SOFT
-		LOUD
-	end const
-	declare !releaseMode_texts[] := ("Off", "Soft", "Loud")
-
-
-	// Length constants
-	declare rec_time_sample_lengths[ARTIC.SIZE]
-	rec_time_sample_lengths[ARTIC.QUARTERS]   := RECORDED_DURATION_QUARTER * 16
-	rec_time_sample_lengths[ARTIC.EIGHTHS]    := RECORDED_DURATION_QUARTER * 8
-	rec_time_sample_lengths[ARTIC.SIXTEENTHS] := RECORDED_DURATION_QUARTER * 8
-
-	declare rec_time_ripple_lengths[ARTIC.SIZE]
-	rec_time_ripple_lengths[ARTIC.QUARTERS]   := RECORDED_DURATION_QUARTER * 2
-	rec_time_ripple_lengths[ARTIC.EIGHTHS]    := RECORDED_DURATION_QUARTER
-	rec_time_ripple_lengths[ARTIC.SIXTEENTHS] := RECORDED_DURATION_QUARTER
-
-	declare ripple_length_ticks[ARTIC.SIZE]
-	ripple_length_ticks[ARTIC.QUARTERS]   := 960*2
-	ripple_length_ticks[ARTIC.EIGHTHS]    := 960
-	ripple_length_ticks[ARTIC.SIXTEENTHS] := 960
-
-	declare sample_length_ticks[ARTIC.SIZE]
-	sample_length_ticks[ARTIC.QUARTERS]   := 960 * 16
-	sample_length_ticks[ARTIC.EIGHTHS]    := 960 * 8
-	sample_length_ticks[ARTIC.SIXTEENTHS] := 960 * 8
-
-	declare pitch_fractions[ARTIC.SIZE]
-	pitch_fractions[ARTIC.QUARTERS]   := 2
-	pitch_fractions[ARTIC.EIGHTHS]    := 2
-	pitch_fractions[ARTIC.SIXTEENTHS] := 4
-
 	declare ?speeds[5]
 	speeds[0] := 2.0
 	speeds[1] := 1.5
@@ -160,12 +104,45 @@ on init
 	speed_multiplier[3] := 0.66
 	speed_multiplier[4] := 0.25
 
+	// Articulation
+	const ARTIC
+		QUARTERS
+		EIGHTHS
+		SIXTEENTHS
+	end const
+	declare !articulation_texts[] := ("Quarters", "Eighths", "Sixteenths")
+
+	// Direction
+	const DIRECTION_MODE
+		DOWN
+		ASPLAYED
+		UP
+	end const
+	declare !direction_mode_texts[] := ("Down", "As Played", "Up")
+
+	// Legato
+	const LEGATO_MODE
+		OFF
+		SYNC_TO_PITCH
+		SYNC_TO_RIPPLE
+		SYNC_TO_SWELL
+	end const
+	declare !legato_mode_texts[] := ("Off", "Sync to Pitch", "Sync to Ripple", "Sync to Swell")
+
+	// Release samples
+	const RELEASE_SAMPLES
+		OFF
+		SOFT
+		LOUD
+	end const
+	declare !releaseMode_texts[] := ("Off", "Soft", "Loud")
+
 	declare release_group[ARTIC.SIZE]
 	release_group[ARTIC.QUARTERS]   := get_group_idx("quarters releases")
 	release_group[ARTIC.EIGHTHS]    := get_group_idx("eighths releases")
 	release_group[ARTIC.SIXTEENTHS] := get_group_idx("eighths releases")
 
-	// Keyswitches
+	{{ Keyswitch constants }}
 	declare const LOWEST_KEY  := 36
 	declare const HIGHEST_KEY := 72
 	declare articulation_keyswitches[NUM_ARTICULATIONS]      := (29, 31, 33)
@@ -204,50 +181,51 @@ on init
 		all_keyswitches[total_num_keyswitches] := release_sample_keyswitches[i]
 		inc(total_num_keyswitches)
 	end for
-	
+
+	{{ Length Constants }}
+	declare rec_time_sample_lengths[ARTIC.SIZE]
+	rec_time_sample_lengths[ARTIC.QUARTERS]   := RECORDED_DURATION_QUARTER * 16
+	rec_time_sample_lengths[ARTIC.EIGHTHS]    := RECORDED_DURATION_QUARTER * 8
+	rec_time_sample_lengths[ARTIC.SIXTEENTHS] := RECORDED_DURATION_QUARTER * 8
+
+	declare rec_time_ripple_lengths[ARTIC.SIZE]
+	rec_time_ripple_lengths[ARTIC.QUARTERS]   := RECORDED_DURATION_QUARTER * 2
+	rec_time_ripple_lengths[ARTIC.EIGHTHS]    := RECORDED_DURATION_QUARTER
+	rec_time_ripple_lengths[ARTIC.SIXTEENTHS] := RECORDED_DURATION_QUARTER
+
+	declare ripple_length_ticks[ARTIC.SIZE]
+	ripple_length_ticks[ARTIC.QUARTERS]   := 960*2
+	ripple_length_ticks[ARTIC.EIGHTHS]    := 960
+	ripple_length_ticks[ARTIC.SIXTEENTHS] := 960
+
+	declare sample_length_ticks[ARTIC.SIZE]
+	sample_length_ticks[ARTIC.QUARTERS]   := 960 * 16
+	sample_length_ticks[ARTIC.EIGHTHS]    := 960 * 8
+	sample_length_ticks[ARTIC.SIXTEENTHS] := 960 * 8
+
+	declare pitch_fractions[ARTIC.SIZE]
+	pitch_fractions[ARTIC.QUARTERS]   := 2
+	pitch_fractions[ARTIC.EIGHTHS]    := 2
+	pitch_fractions[ARTIC.SIXTEENTHS] := 4
 
 	{{ Variables }}
 	declare num_active_ripples
-	declare num_keys_pressed[16]
-	declare prev_num_keys_pressed[16]
-	declare key_active[16, 128]
+	declare num_keys_pressed
+	declare key_active[128]
 	declare key_down[128]
+	declare velo[128]
 	declare num_ripple_voices[128]
 	declare note_used_by_ripple[128]
-	declare key_timestamp[16, 128]
-	declare note_ids[16, 128, NUM_GRID_ROWS]
-	declare velo[16, 128]
-	declare key_history[16, 100]
+	declare key_timestamp[128]
+	declare key_history[100]
 	declare ripple_id_history[MAX_RIPPLE_HISTORY]
 	declare direction
 	declare row
-	declare channel
-	declare pedal
 	declare first_ripple_timestamp
 	declare cur_midi_page
-
-	{{ Iterators }}
-	declare hist_i
-	declare voice_i
-	declare par_i
-	declare key_i
-	declare ripple_i
-	declare b
-	declare v
-	declare r
-	declare k
-	declare g
-	declare n
-	declare event_i
-	declare other_event_i
-	declare row_i
-	declare vel_i
-	declare clip_i
-	declare @str := ""
-
-	declare read grid_row_height := 20
 	declare read cur_artic
 
+	// Fading graphics
 	declare ~instructions_opacity := 0.0
 	declare ~midiInstructions_opacity := 0.0
 	declare ~midiCover_opacity := 0.0
@@ -255,12 +233,9 @@ on init
 	declare ~smoothed_instructions_opacity
 	declare ~smoothed_midiCover_opacity
 
-	define NUM_MIDI_PAGES := 2
-	define NUM_MIDI_CLIPS := (12 * NUM_MIDI_PAGES)
-
+	// Midi
 	declare midi_event_id[NUM_MIDI_CLIPS, MF_BUFFER_SIZE]
 	declare midi_command [NUM_MIDI_CLIPS, MF_BUFFER_SIZE]
-	declare midi_channel [NUM_MIDI_CLIPS, MF_BUFFER_SIZE]
 	declare midi_pos     [NUM_MIDI_CLIPS, MF_BUFFER_SIZE]
 	declare midi_byte_1  [NUM_MIDI_CLIPS, MF_BUFFER_SIZE]
 	declare midi_byte_2  [NUM_MIDI_CLIPS, MF_BUFFER_SIZE]
@@ -271,7 +246,6 @@ on init
 	declare num_midi_notes[NUM_MIDI_CLIPS]
 	declare num_midi_ccs[NUM_MIDI_CLIPS]
 	declare time_started[NUM_MIDI_CLIPS]
-
 	declare cur_event[NUM_MIDI_CLIPS]
     define clip_poly := NI_UI_ID -> custom_id
     define cur_event_poly := cur_event[NI_UI_ID -> custom_id]
@@ -280,6 +254,24 @@ on init
     declare midi_file_pos_ticks[NUM_MIDI_CLIPS]
 	define midi_file_pos_ticks_poly := midi_file_pos_ticks[NI_UI_ID -> custom_id]
 	declare cb_id[NUM_MIDI_CLIPS]
+
+	{{ Iterators }}
+	declare hist_i
+	declare voice_i
+	declare par_i
+	declare key_i
+	declare ripple_i
+	declare b
+	declare g
+	declare v
+	declare r
+	declare k
+	declare n
+	declare event_i
+	declare other_event_i
+	declare row_i
+	declare vel_i
+	declare clip_i
 
 	{{ MIDI }}
 	mf_reset()
@@ -297,7 +289,6 @@ on init
 			if mf_get_command() = MIDI_COMMAND_NOTE_ON
 				midi_event_id[clip_i, num_midi_events[clip_i]] := mf_get_id()
 				midi_command [clip_i, num_midi_events[clip_i]] := mf_get_command()
-				midi_channel [clip_i, num_midi_events[clip_i]] := mf_get_channel()
 				midi_pos     [clip_i, num_midi_events[clip_i]] := mf_get_pos()
 				midi_byte_1  [clip_i, num_midi_events[clip_i]] := mf_get_byte_one()
 				midi_byte_2  [clip_i, num_midi_events[clip_i]] := mf_get_byte_two()
@@ -355,7 +346,6 @@ on init
 							for other_event_i := MF_BUFFER_SIZE - 1 downto insert_index + 1
 								midi_event_id[clip_i, other_event_i] := midi_event_id[clip_i, other_event_i - 1]
 								midi_command [clip_i, other_event_i] := midi_command [clip_i, other_event_i - 1]
-								midi_channel [clip_i, other_event_i] := midi_channel [clip_i, other_event_i - 1]
 								midi_pos     [clip_i, other_event_i] := midi_pos     [clip_i, other_event_i - 1]
 								midi_byte_1  [clip_i, other_event_i] := midi_byte_1  [clip_i, other_event_i - 1]
 								midi_byte_2  [clip_i, other_event_i] := midi_byte_2  [clip_i, other_event_i - 1]
@@ -365,7 +355,6 @@ on init
 							// Add CC
 							midi_event_id[clip_i, insert_index] := mf_get_id()
 							midi_command [clip_i, insert_index] := mf_get_command()
-							midi_channel [clip_i, insert_index] := mf_get_channel()
 							midi_pos     [clip_i, insert_index] := mf_get_pos()
 							midi_byte_1  [clip_i, insert_index] := mf_get_byte_one()
 							midi_byte_2  [clip_i, insert_index] := mf_get_byte_two()
@@ -528,11 +517,6 @@ on init
 		speed_ids[i] -> text := speed_texts[i]
 		speed_ids[i] -> width := speed_ids[i] -> width + 14
 	end for
-	// switch_halfSpeed        -> pos_x := switch_halfSpeed        -> pos_x - 4
-	// switch_slowTripletSpeed -> pos_x := switch_slowTripletSpeed -> pos_x - 6
-	// switch_fullSpeed        -> pos_x := switch_fullSpeed        -> pos_x - 4
-	// switch_fastTripletSpeed -> pos_x := switch_fastTripletSpeed -> pos_x - 3
-	// switch_doubleSpeed      -> pos_x := switch_doubleSpeed      -> pos_x - 6
 
 	// Direction
 	switch_up       -> text := "Up"
@@ -574,10 +558,6 @@ on init
 		legato_ids[i] -> font_type_on_hover    := get_font_id("Khula Bold Size 11 on hover")
 		// direction_mode_ids[i] -> text := speed_texts[i]
 	end for
-	// switch_noLegato     -> width := switch_noLegato     -> width + 4
-	// switch_syncToPitch  -> width := switch_syncToPitch  -> width + 12
-	// switch_syncToRipple -> width := switch_syncToRipple -> width + 12
-	// switch_syncToSwell  -> width := switch_syncToSwell  -> width + 16
 
 	// Release Mode
 	declare releaseMode_ids[RELEASE_SAMPLES.SIZE]
@@ -644,8 +624,6 @@ on init
 	slider_reverb -> automation_name := "Reverb"
 
 	// DEV
-	declare multichannel_midi_enabled := 0
-
 	group[ARTIC.QUARTERS].speed   := V2E_speed(18*2)
 	group[ARTIC.EIGHTHS].speed    := V2E_speed(18)
 	group[ARTIC.SIXTEENTHS].speed := V2E_speed(18)
@@ -671,10 +649,6 @@ end on
 function note_callback(note, velocity, event_id)
 	set_key_pressed(note, 1)
 	key_down[note] := 1
-	declare channel := event_id -> midi_channel
-	if multichannel_midi_enabled = 0
-		channel := 0
-	end if
 
 	// Keyswitches
 	declare ks_index := search(articulation_keyswitches, note)
@@ -715,21 +689,21 @@ function note_callback(note, velocity, event_id)
 	// Playable range
 	if in_range(note, LOWEST_KEY, HIGHEST_KEY)
 		// Key arrays
-		key_active   [channel, note] := 1
-		key_timestamp[channel, note] := ENGINE_UPTIME
-		velo         [channel, note] := velocity
+		key_active   [note] := 1
+		key_timestamp[note] := ENGINE_UPTIME
+		velo         [note] := velocity
 
 		// UI keyboard
 		key_ids[note] -> picture_state := 1
 
 		// Keys history
-		for key_i := key_history.SIZE_D2 - 2 downto 0
-			key_history[channel, key_i + 1]   := key_history[channel, key_i]
+		for key_i := num_elements(key_history) - 2 downto 0
+			key_history[key_i + 1] := key_history[key_i]
 		end for
-		key_history[channel, 0] := note
+		key_history[0] := note
 
-		count_keys_pressed(channel)
-		if num_keys_pressed[channel] > 1
+		call count_keys_pressed
+		if num_keys_pressed > 1
 			declare notes[MAX_NUM_NOTES]
 			declare intervals[MAX_NUM_NOTES]
 			declare played_notes[MAX_NUM_NOTES]
@@ -774,8 +748,8 @@ function note_callback(note, velocity, event_id)
 			end for
 
 			if lower_neighbor[0] # 0 and upper_neighbor[0] # 0
-				declare lower_neighbor_time_held := ENGINE_UPTIME - key_timestamp[channel, lower_neighbor[0]]
-				declare upper_neighbor_time_held := ENGINE_UPTIME - key_timestamp[channel, upper_neighbor[0]]
+				declare lower_neighbor_time_held := ENGINE_UPTIME - key_timestamp[lower_neighbor[0]]
+				declare upper_neighbor_time_held := ENGINE_UPTIME - key_timestamp[upper_neighbor[0]]
 				declare make_ripples_to_both_adjacent_neighbors
 				if abs(upper_neighbor_time_held - lower_neighbor_time_held) < 50
 					make_ripples_to_both_adjacent_neighbors := 1
@@ -793,12 +767,7 @@ function note_callback(note, velocity, event_id)
 					intervals[1] := note - upper_neighbor[0]
 					num_ripples := 2
 				else if make_ripples_to_both_adjacent_neighbors = 0
-					declare channel_history[key_history.SIZE_D2]
-					declare hist_i
-					for hist_i := 0 to key_history.SIZE_D2 - 1
-						channel_history[hist_i] := key_history[channel, hist_i]
-					end for
-					if search(channel_history, lower_neighbor[0]) < search(channel_history, upper_neighbor[0])
+					if search(key_history, lower_neighbor[0]) < search(key_history, upper_neighbor[0])
 						// lower neighbor happened more recently
 						notes[0] := lower_neighbor[0]
 						intervals[0] := note - lower_neighbor[0]
@@ -811,8 +780,8 @@ function note_callback(note, velocity, event_id)
 				end if
 			else
 				// Find ripple to play from history
-				notes[0]     := key_history[channel, 1]
-				intervals[0] := key_history[channel, 0] - key_history[channel, 1]
+				notes[0]     := key_history[1]
+				intervals[0] := key_history[0] - key_history[1]
 				num_ripples := 1
 
 				if abs(intervals[0]) > MAX_INTERVAL
@@ -924,9 +893,6 @@ function note_callback(note, velocity, event_id)
 					else
 						event[note_id].voice := num_ripple_voices[event[note_id].second_note] - 1
 					end if
-					if multichannel_midi_enabled = 1
-						event[note_id].channel := channel
-					end if
 					event[note_id].direction := direction
 					event[note_id].source := OUTSIDE_SOURCE
 					event[note_id].triggered_by_mf := event[event_id].triggered_by_mf
@@ -965,63 +931,57 @@ function release_callback(note, event_id)
 	end if
 
 	if in_range(note, LOWEST_KEY, HIGHEST_KEY) and event[event_id].source = OUTSIDE_SOURCE
-		declare channel := event_id -> midi_channel
-		if multichannel_midi_enabled = 0
-			channel := 0
-		end if
 		key_ids[note] -> picture_state := 0
 
 		// move all history
-		declare history_index := search_for_note_in_channel_history(channel, note)
+		declare history_index := search_for_note_in_key_history(note)
 		if history_index > -1
-			for key_i := history_index to key_history.SIZE_D2 - 2
-				key_history[channel, key_i] := key_history[channel, key_i + 1]
+			for key_i := history_index to num_elements(key_history) - 2
+				key_history[key_i] := key_history[key_i + 1]
 			end for
 		end if
 			
 		if CC[64] < 10
-			key_active[channel, note] := 0
-			release(channel, note, num_ripple_voices[note] - 1)
+			key_active[note] := 0
+			release(note, num_ripple_voices[note] - 1)
 			num_ripple_voices[note] := 0
 		end if
 	end if
 end function
 
-function release(channel, note, voice)
+function release(note, voice)
 	declare r
 	for r := 0 to MAX_RIPPLE_HISTORY - 1
 		if ripple_id_history[r] # 0
-			if channel = event[ripple_id_history[r]].channel
-				if voice = event[ripple_id_history[r]].voice
-					declare artic := event[ripple_id_history[r]].artic
-					declare rec_time_pos_in_ripple := ripple_id_history[r] -> play_pos mod rec_time_ripple_lengths[artic]
-					
-					declare real_time_pos_in_pulse := map_i_2i_2i_i(rec_time_pos_in_ripple, 0, rec_time_ripple_lengths[artic], 0, ticks_to_ms(ripple_length_ticks[artic]))
-					real_time_pos_in_pulse := int(real(real_time_pos_in_pulse) * speeds[slider_speed])
-					declare real_time_ripple_length := ticks_to_ms(int(real(ripple_length_ticks[artic]) * speeds[slider_speed]))
-					declare time_til_end_of_ripple := (real_time_ripple_length - real_time_pos_in_pulse) / 1000
+			if voice = event[ripple_id_history[r]].voice
+				declare artic := event[ripple_id_history[r]].artic
+				declare rec_time_pos_in_ripple := ripple_id_history[r] -> play_pos mod rec_time_ripple_lengths[artic]
+				
+				declare real_time_pos_in_pulse := map_i_2i_2i_i(rec_time_pos_in_ripple, 0, rec_time_ripple_lengths[artic], 0, ticks_to_ms(ripple_length_ticks[artic]))
+				real_time_pos_in_pulse := int(real(real_time_pos_in_pulse) * speeds[slider_speed])
+				declare real_time_ripple_length := ticks_to_ms(int(real(ripple_length_ticks[artic]) * speeds[slider_speed]))
+				declare time_til_end_of_ripple := (real_time_ripple_length - real_time_pos_in_pulse) / 1000
 
-					if note = event[ripple_id_history[r]].second_note
-						event[ripple_id_history[r]].note_off_timestamp := ENGINE_UPTIME
+				if note = event[ripple_id_history[r]].second_note
+					event[ripple_id_history[r]].note_off_timestamp := ENGINE_UPTIME
 
-						if slider_releaseSamples = 0
-							event[ripple_id_history[r]].releasing := 1
-							declare fade_out_time := time_til_end_of_ripple //+ ticks_to_ms(ripple_length_ticks[artic])
-							event[ripple_id_history[r]].release_length := fade_out_time
-							if fade_out_time < DURATION_SIXTEENTH / 8 / 1000
-								fade_out_time := ticks_to_ms(ripple_length_ticks[artic] / pitch_fractions[artic]) / 1000
-							end if
-							fade_out(ripple_id_history[r], fade_out_time * 1000, STOP_VOICE_AFTER_FADE_OUT)
-						else
-							event[ripple_id_history[r]].time_til_note_off := time_til_end_of_ripple
-							event[ripple_id_history[r]].waiting_to_trigger_release_sample := 1
+					if slider_releaseSamples = 0
+						event[ripple_id_history[r]].releasing := 1
+						declare fade_out_time := time_til_end_of_ripple //+ ticks_to_ms(ripple_length_ticks[artic])
+						event[ripple_id_history[r]].release_length := fade_out_time
+						if fade_out_time < DURATION_SIXTEENTH / 8 / 1000
+							fade_out_time := ticks_to_ms(ripple_length_ticks[artic] / pitch_fractions[artic]) / 1000
 						end if
+						fade_out(ripple_id_history[r], fade_out_time * 1000, STOP_VOICE_AFTER_FADE_OUT)
+					else
+						event[ripple_id_history[r]].time_til_note_off := time_til_end_of_ripple
+						event[ripple_id_history[r]].waiting_to_trigger_release_sample := 1
 					end if
-
-					// Old:
-					// dynamic_release(note)
-					// immediate_release(note)
 				end if
+
+				// Old:
+				// dynamic_release(note)
+				// immediate_release(note)
 			end if
 		end if
 	end for
@@ -1037,23 +997,20 @@ function controller_callback(cc_num)
 		declare prev_cc64
 		if CC[64] < 10 and prev_cc64 >= 10
 			declare key_i
-			declare c
-			for c := 0 to 0 // this was 15 originally
-				for key_i := LOWEST_KEY to HIGHEST_KEY
-					// Release most recent voice if the key is up
-					if key_down[key_i] = 0 and key_active[c, key_i] = 1
-						key_active[c, key_i] := 0
-						release(c, key_i, num_ripple_voices[key_i] - 1)
-					end if
+			for key_i := LOWEST_KEY to HIGHEST_KEY
+				// Release most recent voice if the key is up
+				if key_down[key_i] = 0 and key_active[key_i] = 1
+					key_active[key_i] := 0
+					release(key_i, num_ripple_voices[key_i] - 1)
+				end if
 
-					// Release all other previous voices, no matter what
-					for voice_i := 0 to num_ripple_voices[key_i] - 2
-						release(c, key_i, voice_i)
-					end for
-
-					// set num_ripple_voices
-					// num_ripple_voices[key_i] := key_down[key_i]
+				// Release all other previous voices, no matter what
+				for voice_i := 0 to num_ripple_voices[key_i] - 2
+					release(key_i, voice_i)
 				end for
+
+				// set num_ripple_voices
+				// num_ripple_voices[key_i] := key_down[key_i]
 			end for
 		end if
 		prev_cc64 := CC[64]
@@ -1251,9 +1208,6 @@ function ui_controls_callback()
 							declare velocity := midi_byte_2[clip_poly, cur_event_poly]
 							declare length   := ticks_to_ms(midi_length[clip_poly, cur_event_poly])
 							declare note_id  := play_note(note, velocity, 0, length)
-							if multichannel_midi_enabled = 1
-								event[note_id].channel := midi_channel[clip_poly, cur_event_poly]
-							end if
 							event[note_id].triggered_by_mf := clip_poly + 1
 							event[note_id].source := OUTSIDE_SOURCE
 							set_event_par_arr(note_id, EVENT_PAR_ALLOW_GROUP, 0, ALL_GROUPS)

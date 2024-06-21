@@ -1,4 +1,4 @@
-{ Compiled on Thu Jun 20 22:42:11 2024 }
+{ Compiled on Thu Jun 20 23:33:29 2024 }
 on init
   declare $sksp_dummy
   declare $concat_it
@@ -201,7 +201,6 @@ on init
   declare %custom_event_row[1000000]
   declare %custom_event_direction[1000000]
   declare %custom_event_artic[1000000]
-  declare %custom_event_channel[1000000]
   declare %custom_event_voice[1000000]
   declare %custom_event_note_off_timestamp[1000000]
   declare %custom_event_release_length[1000000]
@@ -229,6 +228,18 @@ on init
   !speed_texts[3] := "Triplet"
   !speed_texts[4] := "Double"
   declare const $speed_texts__SIZE := 5
+  declare ?speeds[5]
+  ?speeds[0] := 2.0
+  ?speeds[1] := 1.5
+  ?speeds[2] := 1.0
+  ?speeds[3] := 0.75
+  ?speeds[4] := 0.5
+  declare ?speed_multiplier[5]
+  ?speed_multiplier[0] := 4.0
+  ?speed_multiplier[1] := 1.66
+  ?speed_multiplier[2] := 1.0
+  ?speed_multiplier[3] := 0.66
+  ?speed_multiplier[4] := 0.25
   declare %ARTIC[3] := (0, 1, 2)
   declare const $ARTIC__SIZE := 3
   declare const $ARTIC__QUARTERS := 0
@@ -271,38 +282,6 @@ on init
   !releaseMode_texts[1] := "Soft"
   !releaseMode_texts[2] := "Loud"
   declare const $releaseMode_texts__SIZE := 3
-  declare %rec_time_sample_lengths[$ARTIC__SIZE]
-  %rec_time_sample_lengths[$ARTIC__QUARTERS] := $RECORDED_DURATION_QUARTER*16
-  %rec_time_sample_lengths[$ARTIC__EIGHTHS] := $RECORDED_DURATION_QUARTER*8
-  %rec_time_sample_lengths[$ARTIC__SIXTEENTHS] := $RECORDED_DURATION_QUARTER*8
-  declare %rec_time_ripple_lengths[$ARTIC__SIZE]
-  %rec_time_ripple_lengths[$ARTIC__QUARTERS] := $RECORDED_DURATION_QUARTER*2
-  %rec_time_ripple_lengths[$ARTIC__EIGHTHS] := $RECORDED_DURATION_QUARTER
-  %rec_time_ripple_lengths[$ARTIC__SIXTEENTHS] := $RECORDED_DURATION_QUARTER
-  declare %ripple_length_ticks[$ARTIC__SIZE]
-  %ripple_length_ticks[$ARTIC__QUARTERS] := 960*2
-  %ripple_length_ticks[$ARTIC__EIGHTHS] := 960
-  %ripple_length_ticks[$ARTIC__SIXTEENTHS] := 960
-  declare %sample_length_ticks[$ARTIC__SIZE]
-  %sample_length_ticks[$ARTIC__QUARTERS] := 960*16
-  %sample_length_ticks[$ARTIC__EIGHTHS] := 960*8
-  %sample_length_ticks[$ARTIC__SIXTEENTHS] := 960*8
-  declare %pitch_fractions[$ARTIC__SIZE]
-  %pitch_fractions[$ARTIC__QUARTERS] := 2
-  %pitch_fractions[$ARTIC__EIGHTHS] := 2
-  %pitch_fractions[$ARTIC__SIXTEENTHS] := 4
-  declare ?speeds[5]
-  ?speeds[0] := 2.0
-  ?speeds[1] := 1.5
-  ?speeds[2] := 1.0
-  ?speeds[3] := 0.75
-  ?speeds[4] := 0.5
-  declare ?speed_multiplier[5]
-  ?speed_multiplier[0] := 4.0
-  ?speed_multiplier[1] := 1.66
-  ?speed_multiplier[2] := 1.0
-  ?speed_multiplier[3] := 0.66
-  ?speed_multiplier[4] := 0.25
   declare %release_group[$ARTIC__SIZE]
   %release_group[$ARTIC__QUARTERS] := get_group_idx("quarters releases")
   %release_group[$ARTIC__EIGHTHS] := get_group_idx("eighths releases")
@@ -346,56 +325,40 @@ on init
     inc($total_num_keyswitches)
     inc($i)
   end while
+  declare %rec_time_sample_lengths[$ARTIC__SIZE]
+  %rec_time_sample_lengths[$ARTIC__QUARTERS] := $RECORDED_DURATION_QUARTER*16
+  %rec_time_sample_lengths[$ARTIC__EIGHTHS] := $RECORDED_DURATION_QUARTER*8
+  %rec_time_sample_lengths[$ARTIC__SIXTEENTHS] := $RECORDED_DURATION_QUARTER*8
+  declare %rec_time_ripple_lengths[$ARTIC__SIZE]
+  %rec_time_ripple_lengths[$ARTIC__QUARTERS] := $RECORDED_DURATION_QUARTER*2
+  %rec_time_ripple_lengths[$ARTIC__EIGHTHS] := $RECORDED_DURATION_QUARTER
+  %rec_time_ripple_lengths[$ARTIC__SIXTEENTHS] := $RECORDED_DURATION_QUARTER
+  declare %ripple_length_ticks[$ARTIC__SIZE]
+  %ripple_length_ticks[$ARTIC__QUARTERS] := 960*2
+  %ripple_length_ticks[$ARTIC__EIGHTHS] := 960
+  %ripple_length_ticks[$ARTIC__SIXTEENTHS] := 960
+  declare %sample_length_ticks[$ARTIC__SIZE]
+  %sample_length_ticks[$ARTIC__QUARTERS] := 960*16
+  %sample_length_ticks[$ARTIC__EIGHTHS] := 960*8
+  %sample_length_ticks[$ARTIC__SIXTEENTHS] := 960*8
+  declare %pitch_fractions[$ARTIC__SIZE]
+  %pitch_fractions[$ARTIC__QUARTERS] := 2
+  %pitch_fractions[$ARTIC__EIGHTHS] := 2
+  %pitch_fractions[$ARTIC__SIXTEENTHS] := 4
   declare $num_active_ripples
-  declare %num_keys_pressed[16]
-  declare %prev_num_keys_pressed[16]
-  declare %_key_active[16*128]
-  declare const $key_active__SIZE_D1 := 16
-  declare const $key_active__SIZE_D2 := 128
+  declare $num_keys_pressed
+  declare %key_active[128]
   declare %key_down[128]
+  declare %velo[128]
   declare %num_ripple_voices[128]
   declare %note_used_by_ripple[128]
-  declare %_key_timestamp[16*128]
-  declare const $key_timestamp__SIZE_D1 := 16
-  declare const $key_timestamp__SIZE_D2 := 128
-  declare %_note_ids[16*128*20]
-  declare const $note_ids__SIZE_D1 := 16
-  declare const $note_ids__SIZE_D2 := 128
-  declare const $note_ids__SIZE_D3 := 20
-  declare %_velo[16*128]
-  declare const $velo__SIZE_D1 := 16
-  declare const $velo__SIZE_D2 := 128
-  declare %_key_history[16*100]
-  declare const $key_history__SIZE_D1 := 16
-  declare const $key_history__SIZE_D2 := 100
+  declare %key_timestamp[128]
+  declare %key_history[100]
   declare %ripple_id_history[100]
   declare $direction
   declare $row
-  declare $channel
-  declare $pedal
   declare $first_ripple_timestamp
   declare $cur_midi_page
-  declare $hist_i
-  declare $voice_i
-  declare $par_i
-  declare $key_i
-  declare $ripple_i
-  declare $b
-  declare $v
-  declare $r
-  declare $k
-  declare $g
-  declare $n
-  declare $event_i
-  declare $other_event_i
-  declare $row_i
-  declare $vel_i
-  declare $clip_i
-  declare @str
-  @str := ""
-  declare $grid_row_height := 20
-  make_persistent($grid_row_height)
-  read_persistent_var($grid_row_height)
   declare $cur_artic
   make_persistent($cur_artic)
   read_persistent_var($cur_artic)
@@ -411,9 +374,6 @@ on init
   declare %_midi_command[24*1000]
   declare const $midi_command__SIZE_D1 := 24
   declare const $midi_command__SIZE_D2 := 1000
-  declare %_midi_channel[24*1000]
-  declare const $midi_channel__SIZE_D1 := 24
-  declare const $midi_channel__SIZE_D2 := 1000
   declare %_midi_pos[24*1000]
   declare const $midi_pos__SIZE_D1 := 24
   declare const $midi_pos__SIZE_D2 := 1000
@@ -437,6 +397,22 @@ on init
   declare %looping[24]
   declare %midi_file_pos_ticks[24]
   declare %cb_id[24]
+  declare $hist_i
+  declare $voice_i
+  declare $par_i
+  declare $key_i
+  declare $ripple_i
+  declare $b
+  declare $g
+  declare $v
+  declare $r
+  declare $k
+  declare $n
+  declare $event_i
+  declare $other_event_i
+  declare $row_i
+  declare $vel_i
+  declare $clip_i
   mf_reset()
   mf_set_buffer_size(1000)
   mf_set_num_export_areas(24+1)
@@ -448,7 +424,6 @@ on init
       if (mf_get_command()=$MIDI_COMMAND_NOTE_ON)
         %_midi_event_id[1000*$clip_i+%num_midi_events[$clip_i]] := mf_get_id()
         %_midi_command[1000*$clip_i+%num_midi_events[$clip_i]] := mf_get_command()
-        %_midi_channel[1000*$clip_i+%num_midi_events[$clip_i]] := mf_get_channel()
         %_midi_pos[1000*$clip_i+%num_midi_events[$clip_i]] := mf_get_pos()
         %_midi_byte_1[1000*$clip_i+%num_midi_events[$clip_i]] := mf_get_byte_one()
         %_midi_byte_2[1000*$clip_i+%num_midi_events[$clip_i]] := mf_get_byte_two()
@@ -492,7 +467,6 @@ on init
               while ($other_event_i>=($insert_index+1))
                 %_midi_event_id[1000*$clip_i+$other_event_i] := %_midi_event_id[1000*$clip_i+($other_event_i-1)]
                 %_midi_command[1000*$clip_i+$other_event_i] := %_midi_command[1000*$clip_i+($other_event_i-1)]
-                %_midi_channel[1000*$clip_i+$other_event_i] := %_midi_channel[1000*$clip_i+($other_event_i-1)]
                 %_midi_pos[1000*$clip_i+$other_event_i] := %_midi_pos[1000*$clip_i+($other_event_i-1)]
                 %_midi_byte_1[1000*$clip_i+$other_event_i] := %_midi_byte_1[1000*$clip_i+($other_event_i-1)]
                 %_midi_byte_2[1000*$clip_i+$other_event_i] := %_midi_byte_2[1000*$clip_i+($other_event_i-1)]
@@ -501,7 +475,6 @@ on init
               end while
               %_midi_event_id[1000*$clip_i+$insert_index] := mf_get_id()
               %_midi_command[1000*$clip_i+$insert_index] := mf_get_command()
-              %_midi_channel[1000*$clip_i+$insert_index] := mf_get_channel()
               %_midi_pos[1000*$clip_i+$insert_index] := mf_get_pos()
               %_midi_byte_1[1000*$clip_i+$insert_index] := mf_get_byte_one()
               %_midi_byte_2[1000*$clip_i+$insert_index] := mf_get_byte_two()
@@ -2478,13 +2451,12 @@ on init
   set_control_par_str(get_ui_id($slider_vol),$CONTROL_PAR_AUTOMATION_NAME,"Expression")
   set_control_par(get_ui_id($slider_reverb),$CONTROL_PAR_AUTOMATION_ID,1)
   set_control_par_str(get_ui_id($slider_reverb),$CONTROL_PAR_AUTOMATION_NAME,"Reverb")
-  declare $multichannel_midi_enabled := 0
   set_engine_par($ENGINE_PAR_SPEED,1000000-((18*2-1)*90909),$ARTIC__QUARTERS,-1,-1)
   set_engine_par($ENGINE_PAR_SPEED,1000000-((18-1)*90909),$ARTIC__EIGHTHS,-1,-1)
   set_engine_par($ENGINE_PAR_SPEED,1000000-((18-1)*90909),$ARTIC__SIXTEENTHS,-1,-1)
   set_engine_par($ENGINE_PAR_SPEED,1000000-((12-1)*90909),get_group_idx("quarters releases"),-1,-1)
   set_engine_par($ENGINE_PAR_SPEED,1000000-((12-1)*90909),get_group_idx("eighths releases"),-1,-1)
-  declare $_index
+  declare $_index2
   declare %_event_ids[128]
   declare $_e
   declare $_other_clip_i
@@ -2498,7 +2470,6 @@ on init
   declare ~_db
   declare $_prev_cc64
   declare $_key_i
-  declare $_c
   declare $_r3
   declare $_artic4
   declare $_rec_time_pos_in_ripple
@@ -2506,9 +2477,7 @@ on init
   declare $_real_time_ripple_length
   declare $_time_til_end_of_ripple
   declare $_fade_out_time2
-  declare $_channel3
   declare $_history_index
-  declare $_channel2
   declare $_ks_index
   declare %_notes[64]
   declare %_intervals[64]
@@ -2531,8 +2500,6 @@ on init
   declare $_lower_neighbor_time_held
   declare $_upper_neighbor_time_held
   declare $_make_ripples_to_both_adjacent_neighbors
-  declare %_channel_history[$key_history__SIZE_D2]
-  declare $_hist_i3
   declare $_ripple_i
   declare $_low_note2
   declare $_high_note2
@@ -2562,7 +2529,6 @@ on init
   declare $_high_note
   declare $_direction
   declare $_interval
-  declare $_channel
   declare $_artic
   declare ~_speed_curve
   declare ~_brightness_curve
@@ -2575,6 +2541,7 @@ on init
   declare $_found2 := 0
   declare $_r2
   declare $_time_since_note_off
+  declare $_index
   declare $_hist_i
   declare $_note_found := 0
   declare $_r
@@ -2592,33 +2559,38 @@ function set_key_colors_and_types_and_names
     end if
     set_key_type($key_i,$NI_KEY_TYPE_NONE)
     set_key_name($key_i,"")
-    if (search(%articulation_keyswitches,$key_i) # -1)
+    $_index := search(%articulation_keyswitches,$key_i)
+    if ($_index # -1)
       set_key_color($key_i,$KEY_COLOR_RED)
-      set_key_name($key_i,!articulation_texts[$key_i])
+      set_key_name($key_i,!articulation_texts[$_index])
       set_key_type($key_i,$NI_KEY_TYPE_CONTROL)
     end if
     if (in_range($key_i,$LOWEST_KEY,$HIGHEST_KEY))
       set_key_color($key_i,$KEY_COLOR_DEFAULT)
       set_key_type($key_i,$NI_KEY_TYPE_DEFAULT)
     end if
-    if (search(%speed_keyswitches,$key_i) # -1)
+    $_index := search(%speed_keyswitches,$key_i)
+    if ($_index # -1)
       set_key_color($key_i,$KEY_COLOR_GREEN)
-      set_key_name($key_i,!speed_texts[$key_i])
+      set_key_name($key_i,!speed_texts[$_index])
       set_key_type($key_i,$NI_KEY_TYPE_CONTROL)
     end if
-    if (search(%direction_keyswitches,$key_i) # -1)
+    $_index := search(%direction_keyswitches,$key_i)
+    if ($_index # -1)
       set_key_color($key_i,$KEY_COLOR_YELLOW)
-      set_key_name($key_i,!direction_mode_texts[$key_i])
+      set_key_name($key_i,!direction_mode_texts[$_index])
       set_key_type($key_i,$NI_KEY_TYPE_CONTROL)
     end if
-    if (search(%legato_keyswitches,$key_i) # -1)
+    $_index := search(%legato_keyswitches,$key_i)
+    if ($_index # -1)
       set_key_color($key_i,$KEY_COLOR_PURPLE)
-      set_key_name($key_i,!legato_mode_texts[$key_i])
+      set_key_name($key_i,!legato_mode_texts[$_index])
       set_key_type($key_i,$NI_KEY_TYPE_CONTROL)
     end if
-    if (search(%release_sample_keyswitches,$key_i) # -1)
+    $_index := search(%release_sample_keyswitches,$key_i)
+    if ($_index # -1)
       set_key_color($key_i,$KEY_COLOR_ORANGE)
-      set_key_name($key_i,!releaseMode_texts[$key_i])
+      set_key_name($key_i,!releaseMode_texts[$_index])
       set_key_type($key_i,$NI_KEY_TYPE_CONTROL)
     end if
     inc($key_i)
@@ -2718,10 +2690,6 @@ function ripple_animations
         $_high_note := %custom_event_high_note[%ripple_id_history[$r] mod 1000000]
         $_direction := %custom_event_direction[%ripple_id_history[$r] mod 1000000]
         $_interval := ($_high_note-$_low_note)*($_direction*2-1)
-        $_channel := %custom_event_channel[%ripple_id_history[$r] mod 1000000]
-        if ($multichannel_midi_enabled=0)
-          $_channel := 0
-        end if
         $_artic := %custom_event_artic[%ripple_id_history[$r] mod 1000000]
         if ($_artic=$ARTIC__QUARTERS)
           ~_speed_curve := 1.0
@@ -2744,13 +2712,13 @@ function ripple_animations
         else
           set_control_par(%ripple[$r],$CONTROL_PAR_POS_Y,get_control_par(get_ui_id($panel_keyboard),$CONTROL_PAR_POS_Y)+get_control_par(%key_ids[$LOWEST_KEY],$CONTROL_PAR_HEIGHT)-((22*abs($_interval)+1)/2))
         end if
-        set_control_par_str(%ripple[$r],$CONTROL_PAR_PICTURE,"ripple " & $_interval & " ch " & ($_channel+1))
+        set_control_par_str(%ripple[$r],$CONTROL_PAR_PICTURE,"ripple " & $_interval)
         $_play_pos_in_beat := get_event_par(%ripple_id_history[$r],$EVENT_PAR_PLAY_POS) mod %rec_time_ripple_lengths[$_artic]
         set_control_par(%ripple[$r],$CONTROL_PAR_VALUE,int(real(0)+((real($_play_pos_in_beat)-real(0))/(real(%rec_time_ripple_lengths[$_artic])-real(0))*(real(127)-real(0)))))
         set_control_par(%ripple[$r],$CONTROL_PAR_HIDE,$HIDE_PART_NOTHING)
         set_control_par(%ripple_swell[$r],$CONTROL_PAR_POS_X,get_control_par(%ripple[$r],$CONTROL_PAR_POS_X))
         set_control_par(%ripple_swell[$r],$CONTROL_PAR_POS_Y,get_control_par(%ripple[$r],$CONTROL_PAR_POS_Y))
-        set_control_par_str(%ripple_swell[$r],$CONTROL_PAR_PICTURE,"ripple swell " & $_interval & " ch " & ($_channel+1))
+        set_control_par_str(%ripple_swell[$r],$CONTROL_PAR_PICTURE,"ripple swell " & $_interval)
         $_pos_in_swell := get_event_par(%ripple_id_history[$r],$EVENT_PAR_PLAY_POS) mod %rec_time_sample_lengths[$_artic]
         if (in_range($_pos_in_swell,0,%rec_time_sample_lengths[$_artic]/2))
           set_control_par(%ripple_swell[$r],$CONTROL_PAR_VALUE,int(real(0)+((real($_pos_in_swell)-real(0))/(real(%rec_time_sample_lengths[$_artic]/2)-real(0))*(real(64)-real(0)))))
@@ -2864,7 +2832,6 @@ function play_release_samples_when_its_time
             %custom_event_row[$_note_id mod 1000000] := %custom_event_row[%ripple_id_history[$r] mod 1000000]
             %custom_event_direction[$_note_id mod 1000000] := %custom_event_direction[%ripple_id_history[$r] mod 1000000]
             %custom_event_artic[$_note_id mod 1000000] := %custom_event_artic[%ripple_id_history[$r] mod 1000000]
-            %custom_event_channel[$_note_id mod 1000000] := %custom_event_channel[%ripple_id_history[$r] mod 1000000]
             %custom_event_voice[$_note_id mod 1000000] := %custom_event_voice[%ripple_id_history[$r] mod 1000000]
             %custom_event_note_off_timestamp[$_note_id mod 1000000] := %custom_event_note_off_timestamp[%ripple_id_history[$r] mod 1000000]
             %custom_event_release_length[$_note_id mod 1000000] := %custom_event_release_length[%ripple_id_history[$r] mod 1000000]
@@ -2921,7 +2888,6 @@ function crossfaded_looping
         %custom_event_row[$_note_id2 mod 1000000] := %custom_event_row[%ripple_id_history[$r] mod 1000000]
         %custom_event_direction[$_note_id2 mod 1000000] := %custom_event_direction[%ripple_id_history[$r] mod 1000000]
         %custom_event_artic[$_note_id2 mod 1000000] := %custom_event_artic[%ripple_id_history[$r] mod 1000000]
-        %custom_event_channel[$_note_id2 mod 1000000] := %custom_event_channel[%ripple_id_history[$r] mod 1000000]
         %custom_event_voice[$_note_id2 mod 1000000] := %custom_event_voice[%ripple_id_history[$r] mod 1000000]
         %custom_event_note_off_timestamp[$_note_id2 mod 1000000] := %custom_event_note_off_timestamp[%ripple_id_history[$r] mod 1000000]
         %custom_event_release_length[$_note_id2 mod 1000000] := %custom_event_release_length[%ripple_id_history[$r] mod 1000000]
@@ -2968,13 +2934,24 @@ function update_midi_visibility
   set_control_par(get_ui_id($switch_openInfoOptions),$CONTROL_PAR_HIDE,%hide_states[1-$switch_showMidi])
 end function
 
+function count_keys_pressed
+  $num_keys_pressed := 0
+  $key_i := $LOWEST_KEY
+  while ($key_i<=$HIGHEST_KEY)
+    if (%key_active[$key_i]=1)
+      inc($num_keys_pressed)
+    end if
+    inc($key_i)
+  end while
+end function
+
 function count_active_ripples
   $_found2 := 0
   $num_active_ripples := 0
   $_r2 := 1
   while ($_r2<100)
     if (%ripple_id_history[$_r2]=0 and ($_found2=0))
-      if (%_key_active[128*0+%custom_event_second_note[%ripple_id_history[$_r2-1] mod 1000000]]=0)
+      if (%key_active[%custom_event_second_note[%ripple_id_history[$_r2-1] mod 1000000]]=0)
         if (%custom_event_note_off_timestamp[%ripple_id_history[$_r2-1] mod 1000000] # 0)
           $_time_since_note_off := $ENGINE_UPTIME-%custom_event_note_off_timestamp[%ripple_id_history[$_r2-1] mod 1000000]
           if ($_time_since_note_off<($DURATION_EIGHTH/1000+100))
@@ -3084,10 +3061,6 @@ on note
   set_event_par_arr($EVENT_ID,$EVENT_PAR_ALLOW_GROUP,0,$ALL_GROUPS)
   set_key_pressed($EVENT_NOTE,1)
   %key_down[$EVENT_NOTE] := 1
-  $_channel2 := get_event_par($EVENT_ID,$EVENT_PAR_MIDI_CHANNEL)
-  if ($multichannel_midi_enabled=0)
-    $_channel2 := 0
-  end if
   $_ks_index := search(%articulation_keyswitches,$EVENT_NOTE)
   if ($_ks_index # -1)
     $cur_artic := $_ks_index
@@ -3118,25 +3091,18 @@ on note
     call set_keys_pressed
   end if
   if (in_range($EVENT_NOTE,$LOWEST_KEY,$HIGHEST_KEY))
-    %_key_active[128*$_channel2+$EVENT_NOTE] := 1
-    %_key_timestamp[128*$_channel2+$EVENT_NOTE] := $ENGINE_UPTIME
-    %_velo[128*$_channel2+$EVENT_NOTE] := $EVENT_VELOCITY
+    %key_active[$EVENT_NOTE] := 1
+    %key_timestamp[$EVENT_NOTE] := $ENGINE_UPTIME
+    %velo[$EVENT_NOTE] := $EVENT_VELOCITY
     set_control_par(%key_ids[$EVENT_NOTE],$CONTROL_PAR_PICTURE_STATE,1)
-    $key_i := $key_history__SIZE_D2-2
+    $key_i := num_elements(%key_history)-2
     while ($key_i>=0)
-      %_key_history[100*$_channel2+$key_i+1] := %_key_history[100*$_channel2+$key_i]
+      %key_history[$key_i+1] := %key_history[$key_i]
       dec($key_i)
     end while
-    %_key_history[100*$_channel2+0] := $EVENT_NOTE
-    %num_keys_pressed[$_channel2] := 0
-    $key_i := $LOWEST_KEY
-    while ($key_i<=$HIGHEST_KEY)
-      if (%_key_active[128*$_channel2+$key_i]=1)
-        inc(%num_keys_pressed[$_channel2])
-      end if
-      inc($key_i)
-    end while
-    if (%num_keys_pressed[$_channel2]>1)
+    %key_history[0] := $EVENT_NOTE
+    call count_keys_pressed
+    if ($num_keys_pressed>1)
       $_num_ripples := 0
       $_closest_neighbor := -1
       $_closest_neighbor_interval := 12
@@ -3181,8 +3147,8 @@ on note
         inc($i)
       end while
       if (%_lower_neighbor[0] # 0 and (%_upper_neighbor[0] # 0))
-        $_lower_neighbor_time_held := $ENGINE_UPTIME-%_key_timestamp[128*$_channel2+%_lower_neighbor[0]]
-        $_upper_neighbor_time_held := $ENGINE_UPTIME-%_key_timestamp[128*$_channel2+%_upper_neighbor[0]]
+        $_lower_neighbor_time_held := $ENGINE_UPTIME-%key_timestamp[%_lower_neighbor[0]]
+        $_upper_neighbor_time_held := $ENGINE_UPTIME-%key_timestamp[%_upper_neighbor[0]]
         if (abs($_upper_neighbor_time_held-$_lower_neighbor_time_held)<50)
           $_make_ripples_to_both_adjacent_neighbors := 1
         else
@@ -3199,12 +3165,7 @@ on note
           $_num_ripples := 2
         else
           if ($_make_ripples_to_both_adjacent_neighbors=0)
-            $_hist_i3 := 0
-            while ($_hist_i3<$key_history__SIZE_D2)
-              %_channel_history[$_hist_i3] := %_key_history[100*$_channel2+$_hist_i3]
-              inc($_hist_i3)
-            end while
-            if (search(%_channel_history,%_lower_neighbor[0])<search(%_channel_history,%_upper_neighbor[0]))
+            if (search(%key_history,%_lower_neighbor[0])<search(%key_history,%_upper_neighbor[0]))
               %__notes[0] := %_lower_neighbor[0]
               %__intervals[0] := $EVENT_NOTE-%_lower_neighbor[0]
             else
@@ -3215,8 +3176,8 @@ on note
           end if
         end if
       else
-        %__notes[0] := %_key_history[100*$_channel2+1]
-        %__intervals[0] := %_key_history[100*$_channel2+0]-%_key_history[100*$_channel2+1]
+        %__notes[0] := %key_history[1]
+        %__intervals[0] := %key_history[0]-%key_history[1]
         $_num_ripples := 1
         if (abs(%__intervals[0])>$MAX_INTERVAL)
           if ($_num_neighbors>0)
@@ -3351,9 +3312,6 @@ on note
           else
             %custom_event_voice[$_note_id3 mod 1000000] := %num_ripple_voices[%custom_event_second_note[$_note_id3 mod 1000000]]-1
           end if
-          if ($multichannel_midi_enabled=1)
-            %custom_event_channel[$_note_id3 mod 1000000] := $_channel2
-          end if
           %custom_event_direction[$_note_id3 mod 1000000] := $direction
           %custom_event_source[$_note_id3 mod 1000000] := -1
           %custom_event_triggered_by_mf[$_note_id3 mod 1000000] := %custom_event_triggered_by_mf[$EVENT_ID mod 1000000]
@@ -3385,16 +3343,12 @@ on release
     set_key_pressed($EVENT_NOTE,0)
   end if
   if (in_range($EVENT_NOTE,$LOWEST_KEY,$HIGHEST_KEY) and (%custom_event_source[$EVENT_ID mod 1000000]=-1))
-    $_channel3 := get_event_par($EVENT_ID,$EVENT_PAR_MIDI_CHANNEL)
-    if ($multichannel_midi_enabled=0)
-      $_channel3 := 0
-    end if
     set_control_par(%key_ids[$EVENT_NOTE],$CONTROL_PAR_PICTURE_STATE,0)
     $_note_found := 0
     $_hist_i := 0
-    while ($_hist_i<$key_history__SIZE_D2)
+    while ($_hist_i<num_elements(%key_history))
       if ($_note_found=0)
-        if (%_key_history[100*$_channel3+$_hist_i]=$EVENT_NOTE)
+        if (%key_history[$_hist_i]=$EVENT_NOTE)
           $_note_found := 1
           $_history_index := $_hist_i
         end if
@@ -3406,38 +3360,36 @@ on release
     end if
     if ($_history_index>-1)
       $key_i := $_history_index
-      while ($key_i<=($key_history__SIZE_D2-2))
-        %_key_history[100*$_channel3+$key_i] := %_key_history[100*$_channel3+$key_i+1]
+      while ($key_i<=(num_elements(%key_history)-2))
+        %key_history[$key_i] := %key_history[$key_i+1]
         inc($key_i)
       end while
     end if
     if (%CC[64]<10)
-      %_key_active[128*$_channel3+$EVENT_NOTE] := 0
+      %key_active[$EVENT_NOTE] := 0
       $_r3 := 0
       while ($_r3<100)
         if (%ripple_id_history[$_r3] # 0)
-          if ($_channel3=%custom_event_channel[%ripple_id_history[$_r3] mod 1000000])
-            if (%num_ripple_voices[$EVENT_NOTE]-1=%custom_event_voice[%ripple_id_history[$_r3] mod 1000000])
-              $_artic4 := %custom_event_artic[%ripple_id_history[$_r3] mod 1000000]
-              $_rec_time_pos_in_ripple := get_event_par(%ripple_id_history[$_r3],$EVENT_PAR_PLAY_POS) mod %rec_time_ripple_lengths[$_artic4]
-              $_real_time_pos_in_pulse := int(real(0)+((real($_rec_time_pos_in_ripple)-real(0))/(real(%rec_time_ripple_lengths[$_artic4])-real(0))*(real(ticks_to_ms(%ripple_length_ticks[$_artic4]))-real(0))))
-              $_real_time_pos_in_pulse := int(real($_real_time_pos_in_pulse)*?speeds[$slider_speed])
-              $_real_time_ripple_length := ticks_to_ms(int(real(%ripple_length_ticks[$_artic4])*?speeds[$slider_speed]))
-              $_time_til_end_of_ripple := ($_real_time_ripple_length-$_real_time_pos_in_pulse)/1000
-              if ($EVENT_NOTE=%custom_event_second_note[%ripple_id_history[$_r3] mod 1000000])
-                %custom_event_note_off_timestamp[%ripple_id_history[$_r3] mod 1000000] := $ENGINE_UPTIME
-                if ($slider_releaseSamples=0)
-                  %custom_event_releasing[%ripple_id_history[$_r3] mod 1000000] := 1
-                  $_fade_out_time2 := $_time_til_end_of_ripple
-                  %custom_event_release_length[%ripple_id_history[$_r3] mod 1000000] := $_fade_out_time2
-                  if ($_fade_out_time2<($DURATION_SIXTEENTH/8/1000))
-                    $_fade_out_time2 := ticks_to_ms(%ripple_length_ticks[$_artic4]/%pitch_fractions[$_artic4])/1000
-                  end if
-                  fade_out(%ripple_id_history[$_r3],$_fade_out_time2*1000,1)
-                else
-                  %custom_event_time_til_note_off[%ripple_id_history[$_r3] mod 1000000] := $_time_til_end_of_ripple
-                  %custom_event_waiting_to_trigger_release_sample[%ripple_id_history[$_r3] mod 1000000] := 1
+          if (%num_ripple_voices[$EVENT_NOTE]-1=%custom_event_voice[%ripple_id_history[$_r3] mod 1000000])
+            $_artic4 := %custom_event_artic[%ripple_id_history[$_r3] mod 1000000]
+            $_rec_time_pos_in_ripple := get_event_par(%ripple_id_history[$_r3],$EVENT_PAR_PLAY_POS) mod %rec_time_ripple_lengths[$_artic4]
+            $_real_time_pos_in_pulse := int(real(0)+((real($_rec_time_pos_in_ripple)-real(0))/(real(%rec_time_ripple_lengths[$_artic4])-real(0))*(real(ticks_to_ms(%ripple_length_ticks[$_artic4]))-real(0))))
+            $_real_time_pos_in_pulse := int(real($_real_time_pos_in_pulse)*?speeds[$slider_speed])
+            $_real_time_ripple_length := ticks_to_ms(int(real(%ripple_length_ticks[$_artic4])*?speeds[$slider_speed]))
+            $_time_til_end_of_ripple := ($_real_time_ripple_length-$_real_time_pos_in_pulse)/1000
+            if ($EVENT_NOTE=%custom_event_second_note[%ripple_id_history[$_r3] mod 1000000])
+              %custom_event_note_off_timestamp[%ripple_id_history[$_r3] mod 1000000] := $ENGINE_UPTIME
+              if ($slider_releaseSamples=0)
+                %custom_event_releasing[%ripple_id_history[$_r3] mod 1000000] := 1
+                $_fade_out_time2 := $_time_til_end_of_ripple
+                %custom_event_release_length[%ripple_id_history[$_r3] mod 1000000] := $_fade_out_time2
+                if ($_fade_out_time2<($DURATION_SIXTEENTH/8/1000))
+                  $_fade_out_time2 := ticks_to_ms(%ripple_length_ticks[$_artic4]/%pitch_fractions[$_artic4])/1000
                 end if
+                fade_out(%ripple_id_history[$_r3],$_fade_out_time2*1000,1)
+              else
+                %custom_event_time_til_note_off[%ripple_id_history[$_r3] mod 1000000] := $_time_til_end_of_ripple
+                %custom_event_waiting_to_trigger_release_sample[%ripple_id_history[$_r3] mod 1000000] := 1
               end if
             end if
           end if
@@ -3452,82 +3404,74 @@ end on
 on controller
   if ($CC_NUM=64)
     if (%CC[64]<10 and ($_prev_cc64>=10))
-      $_c := 0
-      while ($_c<=0)
-        $_key_i := $LOWEST_KEY
-        while ($_key_i<=$HIGHEST_KEY)
-          if (%key_down[$_key_i]=0 and (%_key_active[128*$_c+$_key_i]=1))
-            %_key_active[128*$_c+$_key_i] := 0
-            $_r3 := 0
-            while ($_r3<100)
-              if (%ripple_id_history[$_r3] # 0)
-                if ($_c=%custom_event_channel[%ripple_id_history[$_r3] mod 1000000])
-                  if (%num_ripple_voices[$_key_i]-1=%custom_event_voice[%ripple_id_history[$_r3] mod 1000000])
-                    $_artic4 := %custom_event_artic[%ripple_id_history[$_r3] mod 1000000]
-                    $_rec_time_pos_in_ripple := get_event_par(%ripple_id_history[$_r3],$EVENT_PAR_PLAY_POS) mod %rec_time_ripple_lengths[$_artic4]
-                    $_real_time_pos_in_pulse := int(real(0)+((real($_rec_time_pos_in_ripple)-real(0))/(real(%rec_time_ripple_lengths[$_artic4])-real(0))*(real(ticks_to_ms(%ripple_length_ticks[$_artic4]))-real(0))))
-                    $_real_time_pos_in_pulse := int(real($_real_time_pos_in_pulse)*?speeds[$slider_speed])
-                    $_real_time_ripple_length := ticks_to_ms(int(real(%ripple_length_ticks[$_artic4])*?speeds[$slider_speed]))
-                    $_time_til_end_of_ripple := ($_real_time_ripple_length-$_real_time_pos_in_pulse)/1000
-                    if ($_key_i=%custom_event_second_note[%ripple_id_history[$_r3] mod 1000000])
-                      %custom_event_note_off_timestamp[%ripple_id_history[$_r3] mod 1000000] := $ENGINE_UPTIME
-                      if ($slider_releaseSamples=0)
-                        %custom_event_releasing[%ripple_id_history[$_r3] mod 1000000] := 1
-                        $_fade_out_time2 := $_time_til_end_of_ripple
-                        %custom_event_release_length[%ripple_id_history[$_r3] mod 1000000] := $_fade_out_time2
-                        if ($_fade_out_time2<($DURATION_SIXTEENTH/8/1000))
-                          $_fade_out_time2 := ticks_to_ms(%ripple_length_ticks[$_artic4]/%pitch_fractions[$_artic4])/1000
-                        end if
-                        fade_out(%ripple_id_history[$_r3],$_fade_out_time2*1000,1)
-                      else
-                        %custom_event_time_til_note_off[%ripple_id_history[$_r3] mod 1000000] := $_time_til_end_of_ripple
-                        %custom_event_waiting_to_trigger_release_sample[%ripple_id_history[$_r3] mod 1000000] := 1
-                      end if
+      $_key_i := $LOWEST_KEY
+      while ($_key_i<=$HIGHEST_KEY)
+        if (%key_down[$_key_i]=0 and (%key_active[$_key_i]=1))
+          %key_active[$_key_i] := 0
+          $_r3 := 0
+          while ($_r3<100)
+            if (%ripple_id_history[$_r3] # 0)
+              if (%num_ripple_voices[$_key_i]-1=%custom_event_voice[%ripple_id_history[$_r3] mod 1000000])
+                $_artic4 := %custom_event_artic[%ripple_id_history[$_r3] mod 1000000]
+                $_rec_time_pos_in_ripple := get_event_par(%ripple_id_history[$_r3],$EVENT_PAR_PLAY_POS) mod %rec_time_ripple_lengths[$_artic4]
+                $_real_time_pos_in_pulse := int(real(0)+((real($_rec_time_pos_in_ripple)-real(0))/(real(%rec_time_ripple_lengths[$_artic4])-real(0))*(real(ticks_to_ms(%ripple_length_ticks[$_artic4]))-real(0))))
+                $_real_time_pos_in_pulse := int(real($_real_time_pos_in_pulse)*?speeds[$slider_speed])
+                $_real_time_ripple_length := ticks_to_ms(int(real(%ripple_length_ticks[$_artic4])*?speeds[$slider_speed]))
+                $_time_til_end_of_ripple := ($_real_time_ripple_length-$_real_time_pos_in_pulse)/1000
+                if ($_key_i=%custom_event_second_note[%ripple_id_history[$_r3] mod 1000000])
+                  %custom_event_note_off_timestamp[%ripple_id_history[$_r3] mod 1000000] := $ENGINE_UPTIME
+                  if ($slider_releaseSamples=0)
+                    %custom_event_releasing[%ripple_id_history[$_r3] mod 1000000] := 1
+                    $_fade_out_time2 := $_time_til_end_of_ripple
+                    %custom_event_release_length[%ripple_id_history[$_r3] mod 1000000] := $_fade_out_time2
+                    if ($_fade_out_time2<($DURATION_SIXTEENTH/8/1000))
+                      $_fade_out_time2 := ticks_to_ms(%ripple_length_ticks[$_artic4]/%pitch_fractions[$_artic4])/1000
                     end if
+                    fade_out(%ripple_id_history[$_r3],$_fade_out_time2*1000,1)
+                  else
+                    %custom_event_time_til_note_off[%ripple_id_history[$_r3] mod 1000000] := $_time_til_end_of_ripple
+                    %custom_event_waiting_to_trigger_release_sample[%ripple_id_history[$_r3] mod 1000000] := 1
                   end if
                 end if
               end if
-              inc($_r3)
-            end while
-          end if
-          $voice_i := 0
-          while ($voice_i<=(%num_ripple_voices[$_key_i]-2))
-            $_r3 := 0
-            while ($_r3<100)
-              if (%ripple_id_history[$_r3] # 0)
-                if ($_c=%custom_event_channel[%ripple_id_history[$_r3] mod 1000000])
-                  if ($voice_i=%custom_event_voice[%ripple_id_history[$_r3] mod 1000000])
-                    $_artic4 := %custom_event_artic[%ripple_id_history[$_r3] mod 1000000]
-                    $_rec_time_pos_in_ripple := get_event_par(%ripple_id_history[$_r3],$EVENT_PAR_PLAY_POS) mod %rec_time_ripple_lengths[$_artic4]
-                    $_real_time_pos_in_pulse := int(real(0)+((real($_rec_time_pos_in_ripple)-real(0))/(real(%rec_time_ripple_lengths[$_artic4])-real(0))*(real(ticks_to_ms(%ripple_length_ticks[$_artic4]))-real(0))))
-                    $_real_time_pos_in_pulse := int(real($_real_time_pos_in_pulse)*?speeds[$slider_speed])
-                    $_real_time_ripple_length := ticks_to_ms(int(real(%ripple_length_ticks[$_artic4])*?speeds[$slider_speed]))
-                    $_time_til_end_of_ripple := ($_real_time_ripple_length-$_real_time_pos_in_pulse)/1000
-                    if ($_key_i=%custom_event_second_note[%ripple_id_history[$_r3] mod 1000000])
-                      %custom_event_note_off_timestamp[%ripple_id_history[$_r3] mod 1000000] := $ENGINE_UPTIME
-                      if ($slider_releaseSamples=0)
-                        %custom_event_releasing[%ripple_id_history[$_r3] mod 1000000] := 1
-                        $_fade_out_time2 := $_time_til_end_of_ripple
-                        %custom_event_release_length[%ripple_id_history[$_r3] mod 1000000] := $_fade_out_time2
-                        if ($_fade_out_time2<($DURATION_SIXTEENTH/8/1000))
-                          $_fade_out_time2 := ticks_to_ms(%ripple_length_ticks[$_artic4]/%pitch_fractions[$_artic4])/1000
-                        end if
-                        fade_out(%ripple_id_history[$_r3],$_fade_out_time2*1000,1)
-                      else
-                        %custom_event_time_til_note_off[%ripple_id_history[$_r3] mod 1000000] := $_time_til_end_of_ripple
-                        %custom_event_waiting_to_trigger_release_sample[%ripple_id_history[$_r3] mod 1000000] := 1
-                      end if
-                    end if
-                  end if
-                end if
-              end if
-              inc($_r3)
-            end while
-            inc($voice_i)
+            end if
+            inc($_r3)
           end while
-          inc($_key_i)
+        end if
+        $voice_i := 0
+        while ($voice_i<=(%num_ripple_voices[$_key_i]-2))
+          $_r3 := 0
+          while ($_r3<100)
+            if (%ripple_id_history[$_r3] # 0)
+              if ($voice_i=%custom_event_voice[%ripple_id_history[$_r3] mod 1000000])
+                $_artic4 := %custom_event_artic[%ripple_id_history[$_r3] mod 1000000]
+                $_rec_time_pos_in_ripple := get_event_par(%ripple_id_history[$_r3],$EVENT_PAR_PLAY_POS) mod %rec_time_ripple_lengths[$_artic4]
+                $_real_time_pos_in_pulse := int(real(0)+((real($_rec_time_pos_in_ripple)-real(0))/(real(%rec_time_ripple_lengths[$_artic4])-real(0))*(real(ticks_to_ms(%ripple_length_ticks[$_artic4]))-real(0))))
+                $_real_time_pos_in_pulse := int(real($_real_time_pos_in_pulse)*?speeds[$slider_speed])
+                $_real_time_ripple_length := ticks_to_ms(int(real(%ripple_length_ticks[$_artic4])*?speeds[$slider_speed]))
+                $_time_til_end_of_ripple := ($_real_time_ripple_length-$_real_time_pos_in_pulse)/1000
+                if ($_key_i=%custom_event_second_note[%ripple_id_history[$_r3] mod 1000000])
+                  %custom_event_note_off_timestamp[%ripple_id_history[$_r3] mod 1000000] := $ENGINE_UPTIME
+                  if ($slider_releaseSamples=0)
+                    %custom_event_releasing[%ripple_id_history[$_r3] mod 1000000] := 1
+                    $_fade_out_time2 := $_time_til_end_of_ripple
+                    %custom_event_release_length[%ripple_id_history[$_r3] mod 1000000] := $_fade_out_time2
+                    if ($_fade_out_time2<($DURATION_SIXTEENTH/8/1000))
+                      $_fade_out_time2 := ticks_to_ms(%ripple_length_ticks[$_artic4]/%pitch_fractions[$_artic4])/1000
+                    end if
+                    fade_out(%ripple_id_history[$_r3],$_fade_out_time2*1000,1)
+                  else
+                    %custom_event_time_til_note_off[%ripple_id_history[$_r3] mod 1000000] := $_time_til_end_of_ripple
+                    %custom_event_waiting_to_trigger_release_sample[%ripple_id_history[$_r3] mod 1000000] := 1
+                  end if
+                end if
+              end if
+            end if
+            inc($_r3)
+          end while
+          inc($voice_i)
         end while
-        inc($_c)
+        inc($_key_i)
       end while
     end if
     $_prev_cc64 := %CC[64]
@@ -3599,9 +3543,9 @@ on ui_controls
     end while
     call update_midi_visibility
   end if
-  $_index := search(%switch_midiPgChooser,$NI_UI_ID)
-  if ($_index # -1)
-    $cur_midi_page := $_index
+  $_index2 := search(%switch_midiPgChooser,$NI_UI_ID)
+  if ($_index2 # -1)
+    $cur_midi_page := $_index2
     call update_midi_visibility
     $i := 0
     while ($i<2)
@@ -3637,8 +3581,8 @@ on ui_controls
   if ($NI_UI_ID=get_ui_id($switch_InfoOptions))
     set_control_par(get_ui_id($switch_InfoOptions),$CONTROL_PAR_HIDE,$HIDE_WHOLE_CONTROL)
   end if
-  $_index := search(%midi_clip_preview_id,$NI_UI_ID)
-  if ($_index # -1)
+  $_index2 := search(%midi_clip_preview_id,$NI_UI_ID)
+  if ($_index2 # -1)
     set_controller(64,0)
     wait(1)
     if (get_control_par($NI_UI_ID,$CONTROL_PAR_VALUE)=0)
@@ -3660,7 +3604,7 @@ on ui_controls
       %cb_id[get_control_par($NI_UI_ID,$CONTROL_PAR_CUSTOM_ID)] := $NI_CALLBACK_ID
       $_other_clip_i := 0
       while ($_other_clip_i<num_elements(%midi_clip_preview_id))
-        if ($_index # $_other_clip_i)
+        if ($_index2 # $_other_clip_i)
           set_control_par(%midi_clip_preview_id[$_other_clip_i],$CONTROL_PAR_VALUE,0)
           if (%playing[$_other_clip_i]=1)
             get_event_ids(%_event_ids)
@@ -3715,18 +3659,11 @@ on ui_controls
               $_velocity := %_midi_byte_2[1000*get_control_par($NI_UI_ID,$CONTROL_PAR_CUSTOM_ID)+%cur_event[get_control_par($NI_UI_ID,$CONTROL_PAR_CUSTOM_ID)]]
               $_length := ticks_to_ms(%_midi_length[1000*get_control_par($NI_UI_ID,$CONTROL_PAR_CUSTOM_ID)+%cur_event[get_control_par($NI_UI_ID,$CONTROL_PAR_CUSTOM_ID)]])
               $_note_id4 := play_note($_note,$_velocity,0,$_length)
-              if ($multichannel_midi_enabled=1)
-                %custom_event_channel[$_note_id4 mod 1000000] := %_midi_channel[1000*get_control_par($NI_UI_ID,$CONTROL_PAR_CUSTOM_ID)+%cur_event[get_control_par($NI_UI_ID,$CONTROL_PAR_CUSTOM_ID)]]
-              end if
               %custom_event_triggered_by_mf[$_note_id4 mod 1000000] := get_control_par($NI_UI_ID,$CONTROL_PAR_CUSTOM_ID)+1
               %custom_event_source[$_note_id4 mod 1000000] := -1
               set_event_par_arr($_note_id4,$EVENT_PAR_ALLOW_GROUP,0,$ALL_GROUPS)
               set_key_pressed($_note,1)
               %key_down[$_note] := 1
-              $_channel2 := get_event_par($_note_id4,$EVENT_PAR_MIDI_CHANNEL)
-              if ($multichannel_midi_enabled=0)
-                $_channel2 := 0
-              end if
               $_ks_index := search(%articulation_keyswitches,$_note)
               if ($_ks_index # -1)
                 $cur_artic := $_ks_index
@@ -3757,25 +3694,18 @@ on ui_controls
                 call set_keys_pressed
               end if
               if (in_range($_note,$LOWEST_KEY,$HIGHEST_KEY))
-                %_key_active[128*$_channel2+$_note] := 1
-                %_key_timestamp[128*$_channel2+$_note] := $ENGINE_UPTIME
-                %_velo[128*$_channel2+$_note] := $_velocity
+                %key_active[$_note] := 1
+                %key_timestamp[$_note] := $ENGINE_UPTIME
+                %velo[$_note] := $_velocity
                 set_control_par(%key_ids[$_note],$CONTROL_PAR_PICTURE_STATE,1)
-                $key_i := $key_history__SIZE_D2-2
+                $key_i := num_elements(%key_history)-2
                 while ($key_i>=0)
-                  %_key_history[100*$_channel2+$key_i+1] := %_key_history[100*$_channel2+$key_i]
+                  %key_history[$key_i+1] := %key_history[$key_i]
                   dec($key_i)
                 end while
-                %_key_history[100*$_channel2+0] := $_note
-                %num_keys_pressed[$_channel2] := 0
-                $key_i := $LOWEST_KEY
-                while ($key_i<=$HIGHEST_KEY)
-                  if (%_key_active[128*$_channel2+$key_i]=1)
-                    inc(%num_keys_pressed[$_channel2])
-                  end if
-                  inc($key_i)
-                end while
-                if (%num_keys_pressed[$_channel2]>1)
+                %key_history[0] := $_note
+                call count_keys_pressed
+                if ($num_keys_pressed>1)
                   $_num_ripples := 0
                   $_closest_neighbor := -1
                   $_closest_neighbor_interval := 12
@@ -3820,8 +3750,8 @@ on ui_controls
                     inc($i)
                   end while
                   if (%_lower_neighbor[0] # 0 and (%_upper_neighbor[0] # 0))
-                    $_lower_neighbor_time_held := $ENGINE_UPTIME-%_key_timestamp[128*$_channel2+%_lower_neighbor[0]]
-                    $_upper_neighbor_time_held := $ENGINE_UPTIME-%_key_timestamp[128*$_channel2+%_upper_neighbor[0]]
+                    $_lower_neighbor_time_held := $ENGINE_UPTIME-%key_timestamp[%_lower_neighbor[0]]
+                    $_upper_neighbor_time_held := $ENGINE_UPTIME-%key_timestamp[%_upper_neighbor[0]]
                     if (abs($_upper_neighbor_time_held-$_lower_neighbor_time_held)<50)
                       $_make_ripples_to_both_adjacent_neighbors := 1
                     else
@@ -3838,12 +3768,7 @@ on ui_controls
                       $_num_ripples := 2
                     else
                       if ($_make_ripples_to_both_adjacent_neighbors=0)
-                        $_hist_i3 := 0
-                        while ($_hist_i3<$key_history__SIZE_D2)
-                          %_channel_history[$_hist_i3] := %_key_history[100*$_channel2+$_hist_i3]
-                          inc($_hist_i3)
-                        end while
-                        if (search(%_channel_history,%_lower_neighbor[0])<search(%_channel_history,%_upper_neighbor[0]))
+                        if (search(%key_history,%_lower_neighbor[0])<search(%key_history,%_upper_neighbor[0]))
                           %__notes[0] := %_lower_neighbor[0]
                           %__intervals[0] := $_note-%_lower_neighbor[0]
                         else
@@ -3854,8 +3779,8 @@ on ui_controls
                       end if
                     end if
                   else
-                    %__notes[0] := %_key_history[100*$_channel2+1]
-                    %__intervals[0] := %_key_history[100*$_channel2+0]-%_key_history[100*$_channel2+1]
+                    %__notes[0] := %key_history[1]
+                    %__intervals[0] := %key_history[0]-%key_history[1]
                     $_num_ripples := 1
                     if (abs(%__intervals[0])>$MAX_INTERVAL)
                       if ($_num_neighbors>0)
@@ -3990,9 +3915,6 @@ on ui_controls
                       else
                         %custom_event_voice[$_note_id3 mod 1000000] := %num_ripple_voices[%custom_event_second_note[$_note_id3 mod 1000000]]-1
                       end if
-                      if ($multichannel_midi_enabled=1)
-                        %custom_event_channel[$_note_id3 mod 1000000] := $_channel2
-                      end if
                       %custom_event_direction[$_note_id3 mod 1000000] := $direction
                       %custom_event_source[$_note_id3 mod 1000000] := -1
                       %custom_event_triggered_by_mf[$_note_id3 mod 1000000] := %custom_event_triggered_by_mf[$_note_id4 mod 1000000]
@@ -4023,82 +3945,74 @@ on ui_controls
               wait(1)
               if ($_cc_num=64)
                 if (%CC[64]<10 and ($_prev_cc64>=10))
-                  $_c := 0
-                  while ($_c<=0)
-                    $_key_i := $LOWEST_KEY
-                    while ($_key_i<=$HIGHEST_KEY)
-                      if (%key_down[$_key_i]=0 and (%_key_active[128*$_c+$_key_i]=1))
-                        %_key_active[128*$_c+$_key_i] := 0
-                        $_r3 := 0
-                        while ($_r3<100)
-                          if (%ripple_id_history[$_r3] # 0)
-                            if ($_c=%custom_event_channel[%ripple_id_history[$_r3] mod 1000000])
-                              if (%num_ripple_voices[$_key_i]-1=%custom_event_voice[%ripple_id_history[$_r3] mod 1000000])
-                                $_artic4 := %custom_event_artic[%ripple_id_history[$_r3] mod 1000000]
-                                $_rec_time_pos_in_ripple := get_event_par(%ripple_id_history[$_r3],$EVENT_PAR_PLAY_POS) mod %rec_time_ripple_lengths[$_artic4]
-                                $_real_time_pos_in_pulse := int(real(0)+((real($_rec_time_pos_in_ripple)-real(0))/(real(%rec_time_ripple_lengths[$_artic4])-real(0))*(real(ticks_to_ms(%ripple_length_ticks[$_artic4]))-real(0))))
-                                $_real_time_pos_in_pulse := int(real($_real_time_pos_in_pulse)*?speeds[$slider_speed])
-                                $_real_time_ripple_length := ticks_to_ms(int(real(%ripple_length_ticks[$_artic4])*?speeds[$slider_speed]))
-                                $_time_til_end_of_ripple := ($_real_time_ripple_length-$_real_time_pos_in_pulse)/1000
-                                if ($_key_i=%custom_event_second_note[%ripple_id_history[$_r3] mod 1000000])
-                                  %custom_event_note_off_timestamp[%ripple_id_history[$_r3] mod 1000000] := $ENGINE_UPTIME
-                                  if ($slider_releaseSamples=0)
-                                    %custom_event_releasing[%ripple_id_history[$_r3] mod 1000000] := 1
-                                    $_fade_out_time2 := $_time_til_end_of_ripple
-                                    %custom_event_release_length[%ripple_id_history[$_r3] mod 1000000] := $_fade_out_time2
-                                    if ($_fade_out_time2<($DURATION_SIXTEENTH/8/1000))
-                                      $_fade_out_time2 := ticks_to_ms(%ripple_length_ticks[$_artic4]/%pitch_fractions[$_artic4])/1000
-                                    end if
-                                    fade_out(%ripple_id_history[$_r3],$_fade_out_time2*1000,1)
-                                  else
-                                    %custom_event_time_til_note_off[%ripple_id_history[$_r3] mod 1000000] := $_time_til_end_of_ripple
-                                    %custom_event_waiting_to_trigger_release_sample[%ripple_id_history[$_r3] mod 1000000] := 1
-                                  end if
+                  $_key_i := $LOWEST_KEY
+                  while ($_key_i<=$HIGHEST_KEY)
+                    if (%key_down[$_key_i]=0 and (%key_active[$_key_i]=1))
+                      %key_active[$_key_i] := 0
+                      $_r3 := 0
+                      while ($_r3<100)
+                        if (%ripple_id_history[$_r3] # 0)
+                          if (%num_ripple_voices[$_key_i]-1=%custom_event_voice[%ripple_id_history[$_r3] mod 1000000])
+                            $_artic4 := %custom_event_artic[%ripple_id_history[$_r3] mod 1000000]
+                            $_rec_time_pos_in_ripple := get_event_par(%ripple_id_history[$_r3],$EVENT_PAR_PLAY_POS) mod %rec_time_ripple_lengths[$_artic4]
+                            $_real_time_pos_in_pulse := int(real(0)+((real($_rec_time_pos_in_ripple)-real(0))/(real(%rec_time_ripple_lengths[$_artic4])-real(0))*(real(ticks_to_ms(%ripple_length_ticks[$_artic4]))-real(0))))
+                            $_real_time_pos_in_pulse := int(real($_real_time_pos_in_pulse)*?speeds[$slider_speed])
+                            $_real_time_ripple_length := ticks_to_ms(int(real(%ripple_length_ticks[$_artic4])*?speeds[$slider_speed]))
+                            $_time_til_end_of_ripple := ($_real_time_ripple_length-$_real_time_pos_in_pulse)/1000
+                            if ($_key_i=%custom_event_second_note[%ripple_id_history[$_r3] mod 1000000])
+                              %custom_event_note_off_timestamp[%ripple_id_history[$_r3] mod 1000000] := $ENGINE_UPTIME
+                              if ($slider_releaseSamples=0)
+                                %custom_event_releasing[%ripple_id_history[$_r3] mod 1000000] := 1
+                                $_fade_out_time2 := $_time_til_end_of_ripple
+                                %custom_event_release_length[%ripple_id_history[$_r3] mod 1000000] := $_fade_out_time2
+                                if ($_fade_out_time2<($DURATION_SIXTEENTH/8/1000))
+                                  $_fade_out_time2 := ticks_to_ms(%ripple_length_ticks[$_artic4]/%pitch_fractions[$_artic4])/1000
                                 end if
+                                fade_out(%ripple_id_history[$_r3],$_fade_out_time2*1000,1)
+                              else
+                                %custom_event_time_til_note_off[%ripple_id_history[$_r3] mod 1000000] := $_time_til_end_of_ripple
+                                %custom_event_waiting_to_trigger_release_sample[%ripple_id_history[$_r3] mod 1000000] := 1
                               end if
                             end if
                           end if
-                          inc($_r3)
-                        end while
-                      end if
-                      $voice_i := 0
-                      while ($voice_i<=(%num_ripple_voices[$_key_i]-2))
-                        $_r3 := 0
-                        while ($_r3<100)
-                          if (%ripple_id_history[$_r3] # 0)
-                            if ($_c=%custom_event_channel[%ripple_id_history[$_r3] mod 1000000])
-                              if ($voice_i=%custom_event_voice[%ripple_id_history[$_r3] mod 1000000])
-                                $_artic4 := %custom_event_artic[%ripple_id_history[$_r3] mod 1000000]
-                                $_rec_time_pos_in_ripple := get_event_par(%ripple_id_history[$_r3],$EVENT_PAR_PLAY_POS) mod %rec_time_ripple_lengths[$_artic4]
-                                $_real_time_pos_in_pulse := int(real(0)+((real($_rec_time_pos_in_ripple)-real(0))/(real(%rec_time_ripple_lengths[$_artic4])-real(0))*(real(ticks_to_ms(%ripple_length_ticks[$_artic4]))-real(0))))
-                                $_real_time_pos_in_pulse := int(real($_real_time_pos_in_pulse)*?speeds[$slider_speed])
-                                $_real_time_ripple_length := ticks_to_ms(int(real(%ripple_length_ticks[$_artic4])*?speeds[$slider_speed]))
-                                $_time_til_end_of_ripple := ($_real_time_ripple_length-$_real_time_pos_in_pulse)/1000
-                                if ($_key_i=%custom_event_second_note[%ripple_id_history[$_r3] mod 1000000])
-                                  %custom_event_note_off_timestamp[%ripple_id_history[$_r3] mod 1000000] := $ENGINE_UPTIME
-                                  if ($slider_releaseSamples=0)
-                                    %custom_event_releasing[%ripple_id_history[$_r3] mod 1000000] := 1
-                                    $_fade_out_time2 := $_time_til_end_of_ripple
-                                    %custom_event_release_length[%ripple_id_history[$_r3] mod 1000000] := $_fade_out_time2
-                                    if ($_fade_out_time2<($DURATION_SIXTEENTH/8/1000))
-                                      $_fade_out_time2 := ticks_to_ms(%ripple_length_ticks[$_artic4]/%pitch_fractions[$_artic4])/1000
-                                    end if
-                                    fade_out(%ripple_id_history[$_r3],$_fade_out_time2*1000,1)
-                                  else
-                                    %custom_event_time_til_note_off[%ripple_id_history[$_r3] mod 1000000] := $_time_til_end_of_ripple
-                                    %custom_event_waiting_to_trigger_release_sample[%ripple_id_history[$_r3] mod 1000000] := 1
-                                  end if
-                                end if
-                              end if
-                            end if
-                          end if
-                          inc($_r3)
-                        end while
-                        inc($voice_i)
+                        end if
+                        inc($_r3)
                       end while
-                      inc($_key_i)
+                    end if
+                    $voice_i := 0
+                    while ($voice_i<=(%num_ripple_voices[$_key_i]-2))
+                      $_r3 := 0
+                      while ($_r3<100)
+                        if (%ripple_id_history[$_r3] # 0)
+                          if ($voice_i=%custom_event_voice[%ripple_id_history[$_r3] mod 1000000])
+                            $_artic4 := %custom_event_artic[%ripple_id_history[$_r3] mod 1000000]
+                            $_rec_time_pos_in_ripple := get_event_par(%ripple_id_history[$_r3],$EVENT_PAR_PLAY_POS) mod %rec_time_ripple_lengths[$_artic4]
+                            $_real_time_pos_in_pulse := int(real(0)+((real($_rec_time_pos_in_ripple)-real(0))/(real(%rec_time_ripple_lengths[$_artic4])-real(0))*(real(ticks_to_ms(%ripple_length_ticks[$_artic4]))-real(0))))
+                            $_real_time_pos_in_pulse := int(real($_real_time_pos_in_pulse)*?speeds[$slider_speed])
+                            $_real_time_ripple_length := ticks_to_ms(int(real(%ripple_length_ticks[$_artic4])*?speeds[$slider_speed]))
+                            $_time_til_end_of_ripple := ($_real_time_ripple_length-$_real_time_pos_in_pulse)/1000
+                            if ($_key_i=%custom_event_second_note[%ripple_id_history[$_r3] mod 1000000])
+                              %custom_event_note_off_timestamp[%ripple_id_history[$_r3] mod 1000000] := $ENGINE_UPTIME
+                              if ($slider_releaseSamples=0)
+                                %custom_event_releasing[%ripple_id_history[$_r3] mod 1000000] := 1
+                                $_fade_out_time2 := $_time_til_end_of_ripple
+                                %custom_event_release_length[%ripple_id_history[$_r3] mod 1000000] := $_fade_out_time2
+                                if ($_fade_out_time2<($DURATION_SIXTEENTH/8/1000))
+                                  $_fade_out_time2 := ticks_to_ms(%ripple_length_ticks[$_artic4]/%pitch_fractions[$_artic4])/1000
+                                end if
+                                fade_out(%ripple_id_history[$_r3],$_fade_out_time2*1000,1)
+                              else
+                                %custom_event_time_til_note_off[%ripple_id_history[$_r3] mod 1000000] := $_time_til_end_of_ripple
+                                %custom_event_waiting_to_trigger_release_sample[%ripple_id_history[$_r3] mod 1000000] := 1
+                              end if
+                            end if
+                          end if
+                        end if
+                        inc($_r3)
+                      end while
+                      inc($voice_i)
                     end while
-                    inc($_c)
+                    inc($_key_i)
                   end while
                 end if
                 $_prev_cc64 := %CC[64]
@@ -4119,43 +4033,43 @@ on ui_controls
       end if
     end if
   end if
-  $_index := search(%articulation_ids,$NI_UI_ID)
-  if ($_index # -1)
-    $cur_artic := $_index
+  $_index2 := search(%articulation_ids,$NI_UI_ID)
+  if ($_index2 # -1)
+    $cur_artic := $_index2
     call update_articulation_switches
   end if
   if ($NI_UI_ID=get_ui_id($slider_speed))
     call update_speed_switches
     call update_speed
   end if
-  $_index := search(%speed_ids,$NI_UI_ID)
-  if ($_index # -1)
-    $slider_speed := $_index
+  $_index2 := search(%speed_ids,$NI_UI_ID)
+  if ($_index2 # -1)
+    $slider_speed := $_index2
     call update_speed_switches
     call update_speed
   end if
   if ($NI_UI_ID=get_ui_id($slider_direction))
     call update_direction_switches
   end if
-  $_index := search(%direction_mode_ids,$NI_UI_ID)
-  if ($_index # -1)
-    $slider_direction := $_index
+  $_index2 := search(%direction_mode_ids,$NI_UI_ID)
+  if ($_index2 # -1)
+    $slider_direction := $_index2
     call update_direction_switches
   end if
   if ($NI_UI_ID=get_ui_id($slider_legato))
     call update_legato_switches
   end if
-  $_index := search(%legato_ids,$NI_UI_ID)
-  if ($_index # -1)
-    $slider_legato := $_index
+  $_index2 := search(%legato_ids,$NI_UI_ID)
+  if ($_index2 # -1)
+    $slider_legato := $_index2
     call update_legato_switches
   end if
   if ($NI_UI_ID=get_ui_id($slider_releaseSamples))
     call update_releaseMode_switches
   end if
-  $_index := search(%releaseMode_ids,$NI_UI_ID)
-  if ($_index # -1)
-    $slider_releaseSamples := $_index
+  $_index2 := search(%releaseMode_ids,$NI_UI_ID)
+  if ($_index2 # -1)
+    $slider_releaseSamples := $_index2
     call update_releaseMode_switches
   end if
   if ($NI_UI_ID=get_ui_id($slider_vol))
