@@ -23,7 +23,7 @@ macro engine.ICB()
  //    add_engine_par(tmp_formant,           ENGINE_PAR_FORMANT_SHIFT)
  //    add_engine_par(bm_slice_atk,          ENGINE_PAR_SLICE_ATTACK
   //    add_engine_par(bm_slice_rel,          ENGINE_PAR_SLICE_RELEASE)
-    add_engine_par(tm_legato,          ENGINE_PAR_TM_LEGATO)
+    add_engine_par(tm_legato,             ENGINE_PAR_TM_LEGATO)
     add_engine_par(out_chan,              ENGINE_PAR_OUTPUT_CHANNEL)
  //    add_engine_par(output,                ENGINE_PAR_OUTPUT_CHANNEL)
  //    add_engine_par(phase_invert,          ENGINE_PAR_PHASE_INVERT)

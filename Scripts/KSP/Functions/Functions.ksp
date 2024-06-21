@@ -1,4 +1,3 @@
-
 define V2E_speed(#in#) := 1000000 - (((#in#) - 1) * 90909)
 
 function update_speed
@@ -21,35 +20,84 @@ function update_speed
 	end for
 end function
 
-function update_midi_visibility()
-	switch_closeMidi -> hide := hide_states[switch_showMidi]
-	// label_midiCover -> hide := hide_states[switch_showMidi]
-	panel_midiPg0 -> hide := hide_states[switch_showMidi]
-	label_midiInstructions -> hide := hide_states[switch_showMidi]
-	label_instructions -> hide := hide_states[1-switch_showMidi]
-	instructions_opacity := real(1-switch_showMidi)
-	midiInstructions_opacity := real(switch_showMidi)
-	midiCover_opacity := real(switch_showMidi)
-end function
-
-
-function find_first_active_event() -> return
-	declare e
-	declare event_ids[MAX_NUM_NOTES]
-	declare found := 0
-	return := 0
-	get_event_ids(event_ids)
-	for e := 0 to num_elements(event_ids) - 1
-		if event_ids[e] -> source # OUTSIDE_SOURCE ...
-		and event_ids[e] -> play_pos > 0
-			if found = 0
-				return := event_ids[e]
-				found := 1
-			end if
+function set_reverb_menu_checkmark
+	declare @checkmark
+	declare i
+	for i := 0 to NUM_REVERB_PRESETS - 1
+		if i = menu_reverb
+			checkmark := " x "
+		else
+			checkmark := "    "
 		end if
+		set_menu_item_str(get_ui_id(menu_reverb), i, checkmark & reverb_preset_names[i])
 	end for
 end function
 
+function update_midi_visibility()
+	switch_closeMidi -> hide := hide_states[switch_showMidi]
+	paneL_ideas -> hide := hide_states[switch_showMidi]
+	for i := 0 to NUM_MIDI_PAGES - 1
+		panel_midiPg[i] -> hide := HIDE_WHOLE_CONTROL
+	end for
+	panel_midiPg[cur_midi_page] -> hide := hide_states[switch_showMidi]
+	label_midiInstructions      -> hide := hide_states[switch_showMidi]
+	midiInstructions_opacity := real(switch_showMidi)
+	midiCover_opacity := real(switch_showMidi)
+
+	panel_articulations    -> hide := hide_states[1 - switch_showMidi]
+	panel_fx               -> hide := hide_states[1 - switch_showMidi]
+	panel_speed            -> hide := hide_states[1 - switch_showMidi]
+	slider_speed           -> hide := hide_states[1 - switch_showMidi]
+	panel_direction        -> hide := hide_states[1 - switch_showMidi]
+	slider_direction       -> hide := hide_states[1 - switch_showMidi]
+	panel_legato           -> hide := hide_states[1 - switch_showMidi]
+	slider_legato          -> hide := hide_states[1 - switch_showMidi]
+	panel_releaseSamples   -> hide := hide_states[1 - switch_showMidi]
+	slider_releaseSamples  -> hide := hide_states[1 - switch_showMidi]
+	switch_openInfo        -> hide := hide_states[1 - switch_showMidi]
+	switch_openInfoOptions -> hide := hide_states[1 - switch_showMidi]
+end function
+
+
+function find_first_active_ripple() -> return
+	declare r
+	declare found := 0
+	for r := 0 to MAX_RIPPLE_HISTORY - 1
+		if ripple_id_history[r] # 0 ...
+		and event[ripple_id_history[r]].source = OUTSIDE_SOURCE ...
+		and event[ripple_id_history[r]].type # RELEASE_SAMPLE ...
+		and (event[ripple_id_history[r]].releasing = 0 or slider_legato = LEGATO_MODE.SYNC_TO_SWELL) ...
+		and ripple_id_history[r] -> play_pos > 0 ...
+		and found = 0
+			found := 1
+			return := ripple_id_history[r]
+		end if
+	end for
+
+	found := 0
+	for r := 0 to MAX_RIPPLE_HISTORY - 1
+		if ripple_id_history[r] = 0 and found = 0
+			found := 1
+			return := r - 1
+		end if
+	end for
+
+	// declare e
+	// declare event_ids[MAX_NUM_NOTES]
+	// declare found := 0
+	// return := 0
+	// get_event_ids(event_ids)
+	// for e := 0 to num_elements(event_ids) - 1
+	// 	if event_ids[e] -> source # OUTSIDE_SOURCE ...
+	// 	and event[event_ids[e]].type # RELEASE_SAMPLE ...
+	// 	and event_ids[e] -> play_pos > 0
+	// 		if found = 0
+	// 			return := event_ids[e]
+	// 			found := 1
+	// 		end if
+	// 	end if
+	// end for
+end function
 
 function search_for_note_in_channel_history(channel, note) -> return
 	declare hist_i
@@ -72,7 +120,7 @@ function search_for_event_id_in_channel_history(channel, event_id) -> return
 	declare event_id_found := 0
 	for hist_i := 0 to MAX_RIPPLE_HISTORY - 1
 		if event_id_found = 0
-			if ripple_history_by_channel[channel, hist_i] = event_id
+			if ripple_id_history[hist_i] = event_id and event[ripple_id_history[hist_i]].channel = channel
 				event_id_found := 1
 				return := hist_i
 			end if
@@ -83,27 +131,43 @@ function search_for_event_id_in_channel_history(channel, event_id) -> return
 	end if
 end function
 
-function set_key_colors
+function set_key_colors_and_types_and_names
 	for key_i := 0 to 127
 		set_key_color(key_i, KEY_COLOR_BLACK)
 		if search(black_keys, key_i mod 12) # -1
 			set_key_color(key_i, KEY_COLOR_WHITE)
 		end if
+		set_key_type(key_i, NI_KEY_TYPE_NONE)
+		set_key_name(key_i, "")
 
 		if search(articulation_keyswitches, key_i) # -1
 			set_key_color(key_i, KEY_COLOR_RED)
+			set_key_name(key_i, articulation_texts[key_i])
+			set_key_type(key_i, NI_KEY_TYPE_CONTROL)
 		end if
 		if in_range(key_i, LOWEST_KEY, HIGHEST_KEY)
 			set_key_color(key_i, KEY_COLOR_DEFAULT)
+			set_key_type(key_i, NI_KEY_TYPE_DEFAULT)
 		end if
 		if search(speed_keyswitches, key_i) # -1
 			set_key_color(key_i, KEY_COLOR_GREEN)
+			set_key_name(key_i, speed_texts[key_i])
+			set_key_type(key_i, NI_KEY_TYPE_CONTROL)
 		end if
 		if search(direction_keyswitches, key_i) # -1
 			set_key_color(key_i, KEY_COLOR_YELLOW)
+			set_key_name(key_i, direction_mode_texts[key_i])
+			set_key_type(key_i, NI_KEY_TYPE_CONTROL)
 		end if
 		if search(legato_keyswitches, key_i) # -1
 			set_key_color(key_i, KEY_COLOR_PURPLE)
+			set_key_name(key_i, legato_mode_texts[key_i])
+			set_key_type(key_i, NI_KEY_TYPE_CONTROL)
+		end if
+		if search(release_sample_keyswitches, key_i) # -1
+			set_key_color(key_i, KEY_COLOR_ORANGE)
+			set_key_name(key_i, releaseMode_texts[key_i])
+			set_key_type(key_i, NI_KEY_TYPE_CONTROL)
 		end if
 	end for
 end function
@@ -140,8 +204,41 @@ function set_keys_pressed
 			set_key_pressed(legato_keyswitches[i], 0)
 		end if
 	end for
+
+	for i := 0 to RELEASE_SAMPLES.SIZE - 1
+		if i = slider_releaseSamples
+			set_key_pressed(release_sample_keyswitches[i], 1)
+		else
+			set_key_pressed(release_sample_keyswitches[i], 0)
+		end if
+	end for
+
 end function
 
+
+function count_active_ripples
+	declare found := 0
+	declare r
+	num_active_ripples := 0
+	for r := 1 to MAX_RIPPLE_HISTORY - 1
+		if ripple_id_history[r] = 0 and found = 0
+			if key_active[0, event[ripple_id_history[r-1]].second_note] = 0
+				// Need to stop counting ripples as active slightly before they actually finish fading out.
+				// This is where we figure that out
+				if event[ripple_id_history[r-1]].note_off_timestamp # 0
+					declare time_since_note_off := ENGINE_UPTIME - event[ripple_id_history[r-1]].note_off_timestamp
+					if time_since_note_off < DURATION_EIGHTH / 1000 + 100
+						found := 1
+						num_active_ripples := r
+					end if
+				end if
+			else
+				found := 1
+				num_active_ripples := r
+			end if
+		end if
+	end for
+end function
 
 function count_keys_pressed(channel)
 	num_keys_pressed[channel] := 0
@@ -151,3 +248,367 @@ function count_keys_pressed(channel)
 		end if
 	end for
 end function
+
+function update_articulation_switches
+	for i := 0 to num_elements(articulation_ids) - 1
+		if i = cur_artic
+			articulation_ids[i] -> value := 1
+		else
+			articulation_ids[i] -> value := 0
+		end if
+	end for
+end function
+
+function update_speed_switches
+	for i := 0 to num_elements(speed_ids) - 1
+		if i = slider_speed
+			speed_ids[i] -> value := 1
+		else
+			speed_ids[i] -> value := 0
+		end if
+	end for
+end function
+
+function update_direction_switches
+	for i := 0 to num_elements(direction_mode_ids) - 1
+		if i = slider_direction
+			direction_mode_ids[i] -> value := 1
+		else
+			direction_mode_ids[i] -> value := 0
+		end if
+	end for
+end function
+
+function update_legato_switches
+	for i := 0 to num_elements(legato_ids) - 1
+		if i = slider_legato
+			legato_ids[i] -> value := 1
+		else
+			legato_ids[i] -> value := 0
+		end if
+	end for
+end function
+
+function update_releaseMode_switches
+	for i := 0 to num_elements(releaseMode_ids) - 1
+		if i = slider_releaseSamples
+			releaseMode_ids[i] -> value := 1
+		else
+			releaseMode_ids[i] -> value := 0
+		end if
+	end for
+end function
+
+
+
+{{ Listener }}
+function remove_ripple_ids_from_history_after_they_have_faded_out
+	for r := 0 to MAX_RIPPLE_HISTORY - 1
+		if event_status(ripple_id_history[r]) = EVENT_STATUS_INACTIVE and ripple_id_history[r] # 0
+			ripple[r] -> hide := HIDE_WHOLE_CONTROL // also hide them
+			for hist_i := r to MAX_RIPPLE_HISTORY - 2
+				ripple_id_history[hist_i] := ripple_id_history[hist_i + 1]
+			end for
+		end if
+	end for
+end function
+
+function ripple_animations
+	// Hide any ripple graphics that have been removed from history and didn't get a chance to be hidden otherwise
+	for r := 0 to MAX_RIPPLE_HISTORY - 1
+		if ripple_id_history[r] = 0 //or event_status(ripple_id_history[r]) = EVENT_STATUS_INACTIVE
+			ripple[r]       -> hide := HIDE_WHOLE_CONTROL
+			ripple_swell[r] -> hide := HIDE_WHOLE_CONTROL
+		end if
+	end for
+
+	// Draw and animate ripples
+	for r := MAX_RIPPLE_HISTORY - 1 downto 0
+		if event[ripple_id_history[r]].releasing = 0
+			if event_status(ripple_id_history[r]) = EVENT_STATUS_NOTE_QUEUE
+				// Animation Variables
+				declare low_note  := event[ripple_id_history[r]].low_note
+				declare high_note := event[ripple_id_history[r]].high_note
+				declare direction := event[ripple_id_history[r]].direction
+				declare interval  := (high_note - low_note) * (direction * 2 - 1)
+				
+				declare channel := event[ripple_id_history[r]].channel
+				if multichannel_midi_enabled = 0
+					channel := 0
+				end if
+				declare artic := event[ripple_id_history[r]].artic
+				declare ~speed_curve
+				declare ~brightness_curve
+				if artic = ARTIC.QUARTERS
+					speed_curve := 1.0
+					brightness_curve := 5.0
+				else if artic = ARTIC.EIGHTHS
+					speed_curve := 1.5
+					brightness_curve := 2.0
+				else if artic = ARTIC.SIXTEENTHS
+					speed_curve := 0.75
+					brightness_curve := 2.0
+				end if
+
+				// Ripple position
+				declare row := event[ripple_id_history[r]].row
+				ripple[r] -> pos_x := panel_keyboard -> pos_x + key_ids[low_note]  -> pos_x + (key_ids[low_note]  -> width / 2)
+				if interval < 0
+					ripple[r] -> pos_y := panel_keyboard -> pos_y - (22*abs(interval)+1) / 2 - 1
+				else
+					ripple[r] -> pos_y := panel_keyboard -> pos_y + key_ids[LOWEST_KEY] -> height - (22*abs(interval)+1) / 2
+				end if
+				// ripple[r] -> width   := stop - start
+				// ripple[r] -> height  := grid_row_height * (row+1)
+				// ripple[r] -> picture := "ripple " & channel
+				// ripple[r] -> picture := "Ripples/sized/ripple circle " & stop - start
+				ripple[r] -> picture := "ripple " & interval & " ch " & channel+1
+
+				// Play Ripple animation
+				declare play_pos_in_beat := ripple_id_history[r] -> play_pos mod rec_time_ripple_lengths[artic]
+				ripple[r] -> value := map_i_2i_2i_i(play_pos_in_beat, 0, rec_time_ripple_lengths[artic], 0, 127)
+
+				// Ripple visiblity
+				ripple[r] -> hide := HIDE_PART_NOTHING
+
+				// Ripple swell
+				ripple_swell[r] -> pos_x := ripple[r] -> pos_x
+				ripple_swell[r] -> pos_y := ripple[r] -> pos_y
+				ripple_swell[r] -> picture := "ripple swell " & interval & " ch " & channel+1
+				declare pos_in_swell := ripple_id_history[r] -> play_pos mod rec_time_sample_lengths[artic]
+				if in_range(pos_in_swell, 0, rec_time_sample_lengths[artic] / 2)
+					ripple_swell[r] -> value := map_i_2i_2i_i(pos_in_swell, 0, rec_time_sample_lengths[artic] / 2, 0, 64)
+				else
+					ripple_swell[r] -> value := map_i_2i_2i_i(pos_in_swell, rec_time_sample_lengths[artic] / 2, rec_time_sample_lengths[artic], 64, 0)
+				end if
+				ripple_swell[r] -> hide := ripple[r] -> hide
+				ripple_swell[r] -> hide := HIDE_PART_NOTHING
+				event[ripple_id_history[r]].brightness_on_release := ripple_swell[r] -> value
+			end if
+		else if event[ripple_id_history[r]].releasing = 1
+			ripple[r] -> hide := HIDE_WHOLE_CONTROL
+			if ripple_swell[r] -> value > 0
+				declare time_since_note_off := ENGINE_UPTIME - event[ripple_id_history[r]].note_off_timestamp
+				declare release_length := event[ripple_id_history[r]].release_length
+				declare brightness_on_release := event[ripple_id_history[r]].brightness_on_release
+				if release_length = 0
+					release_length := 1
+				end if
+				if brightness_on_release = 0
+					brightness_on_release := 1
+				end if
+				if event[ripple_id_history[r]].release_mode = RELEASE_SAMPLES.LOUD
+					release_length := release_length * 3
+				end if
+				if time_since_note_off > 0
+					ripple_swell[r] -> value := map_i_2i_2i_i(time_since_note_off, 0, release_length, brightness_on_release, 0)
+				end if
+			end if
+		end if
+
+	end for
+end function
+
+function midi_clip_play_cursors
+	for clip_i := 0 to NUM_MIDI_CLIPS - 1
+		if midi_clip_preview_id[clip_i] -> value = 1
+			declare time_played := ENGINE_UPTIME - time_started[clip_i]
+			declare clip_length_ms := ticks_to_ms(clip_length[clip_i]) / 1000
+			// mf_cursor[clip_i] -> pos_x := map_i_2i_2i_i(time_played, 0, clip_length_ms, CLIP_MARGIN, midi_clip_id[clip_i] -> width - CLIP_MARGIN)
+			mf_cursor[clip_i] -> value := map_i_2i_2i_i(time_played, 0, clip_length_ms, 0, 1000)
+			mf_cursor[clip_i] -> hide := HIDE_PART_NOTHING
+		else
+			mf_cursor[clip_i] -> hide := HIDE_WHOLE_CONTROL
+		end if
+	end for
+end function
+
+function info_graphics_animation
+	if PLAYED_VOICES_INST > 0 
+		instructions_opacity := 0.0
+		midiInstructions_opacity := 0.0
+	end if
+	smoothed_instructions_opacity := smoothed_instructions_opacity + (instructions_opacity - smoothed_instructions_opacity) / 30.0
+	if ~smoothed_instructions_opacity < 0.0001
+		~smoothed_instructions_opacity := 0.0
+	end if
+	label_instructions -> picture_state := map_f_2f_2i_i(smoothed_instructions_opacity, 0.0, 1.0, 0, 127)
+	smoothed_midiInstructions_opacity := smoothed_midiInstructions_opacity + (midiInstructions_opacity - smoothed_midiInstructions_opacity) / 30.0
+	if ~smoothed_midiInstructions_opacity < 0.0001
+		~smoothed_midiInstructions_opacity := 0.0
+	end if
+	label_midiInstructions -> picture_state := map_f_2f_2i_i(smoothed_midiInstructions_opacity, 0.0, 1.0, 0, 127)
+	smoothed_midiCover_opacity := smoothed_midiCover_opacity + (midiCover_opacity - smoothed_midiCover_opacity) / 4.0
+	if ~smoothed_midiCover_opacity < 0.0001
+		~smoothed_midiCover_opacity := 0.0
+	end if
+	label_midiCover -> picture_state := map_f_2f_2i_i(smoothed_midiCover_opacity, 0.0, 1.0, 0, 127)
+end function
+
+function get_cur_swell_volume(ripple_index, artic) -> return
+	declare swell_play_pos := ripple_id_history[ripple_index] -> play_pos mod rec_time_sample_lengths[artic]
+	define LOWEST_RELEASE_VOL := -6000
+	if in_range(swell_play_pos, 0, rec_time_sample_lengths[artic] / 2)
+		return := map_i_2i_2i_i(swell_play_pos, 0, rec_time_sample_lengths[artic] / 2, LOWEST_RELEASE_VOL, 0)
+	else
+		return := map_i_2i_2i_i(swell_play_pos, rec_time_sample_lengths[artic] / 2, rec_time_sample_lengths[artic], 0, LOWEST_RELEASE_VOL)
+	end if
+end function 
+
+function play_release_samples_when_its_time
+	if slider_releaseSamples > 0
+		for r := 0 to MAX_RIPPLE_HISTORY - 1
+			if event_status(ripple_id_history[r]) = EVENT_STATUS_NOTE_QUEUE
+				if event[ripple_id_history[r]].waiting_to_trigger_release_sample = 1 ...
+				and event[ripple_id_history[r]].type # RELEASE_SAMPLE
+					declare time_since_note_off := ENGINE_UPTIME - event[ripple_id_history[r]].note_off_timestamp
+					if time_since_note_off > event[ripple_id_history[r]].time_til_note_off - (DURATION_SIXTEENTH / 4 / 1000)
+						event[ripple_id_history[r]].waiting_to_trigger_release_sample := 0
+						declare artic := event[ripple_id_history[r]].artic
+
+						// Stop ripple
+						// Must grab these values from the Ripple before stopping it, though
+						declare vol := ripple_id_history[r] -> volume
+						// declare cur_swell_volume := get_cur_swell_volume(r, artic)
+						// vol := vol + cur_swell_volume
+						// Dependant on current ripple
+						declare cur_ripple := (ripple_id_history[r] -> play_pos mod rec_time_sample_lengths[artic]) / rec_time_ripple_lengths[artic]
+						if cur_ripple > 3
+							cur_ripple := 4 - (cur_ripple - 3)
+						end if
+						declare vel := (cur_ripple * 32 + 1)
+
+						// take into account release samples slider
+						// vel := (slider_releaseSamples - 1) * 32 + 1
+
+						// fade_out(ripple_id_history[r], DURATION_SIXTEENTH / 2, STOP_VOICE_AFTER_FADE_OUT)
+						declare fade_out_time := int(real(ticks_to_ms(ripple_length_ticks[artic] / pitch_fractions[artic])) * speeds[slider_speed])
+						fade_out(ripple_id_history[r], fade_out_time, STOP_VOICE_AFTER_FADE_OUT)
+
+						
+						// Play release-sample
+						event[ripple_id_history[r]].release_mode := slider_releaseSamples
+						declare offset
+						select slider_releaseSamples
+							case RELEASE_SAMPLES.SOFT
+								offset := ticks_to_ms(ripple_length_ticks[artic] / pitch_fractions[artic])
+							case RELEASE_SAMPLES.LOUD
+								offset := 0
+						end select
+						declare note_id := play_note(event[ripple_id_history[r]].origin_note, vel, offset, 0)
+						set_event_par_arr(note_id, EVENT_PAR_ALLOW_GROUP, 0, ALL_GROUPS)
+						set_event_par_arr(note_id, EVENT_PAR_ALLOW_GROUP, 1, release_group[artic])
+
+						literate_macro(copy_ripple_history_pars_to_note_id_pars) on CUSTOM_EVENT_PARS
+						ripple_id_history[r] := note_id
+
+						event[ripple_id_history[r]].note_off_timestamp := ENGINE_UPTIME
+						event[ripple_id_history[r]].release_length := DURATION_QUARTER / 1000
+
+						// Release-sample fade and vol
+						// fade_in(note_id, DURATION_SIXTEENTH / 2)
+						if slider_releaseSamples = RELEASE_SAMPLES.SOFT
+							fade_in(note_id, ticks_to_ms(ripple_length_ticks[artic] / pitch_fractions[artic]))
+						end if
+
+						event[note_id].source := OUTSIDE_SOURCE
+						event[note_id].type := RELEASE_SAMPLE
+						change_vol(note_id, vol, CHANGE_ABSOLUTE)
+
+						event[ripple_id_history[r]].releasing := 1
+					end if
+				end if
+			end if
+		end for
+	end if
+end function
+
+function crossfaded_looping
+	for r := 0 to MAX_RIPPLE_HISTORY - 1
+		if event_status(ripple_id_history[r]) = EVENT_STATUS_NOTE_QUEUE
+			declare artic := event[ripple_id_history[r]].artic
+			if event[ripple_id_history[r]].releasing = 0 ...
+			and ripple_id_history[r] -> play_pos > rec_time_sample_lengths[artic]
+				// duplicate event
+				fade_out(ripple_id_history[r], DURATION_SIXTEENTH, STOP_VOICE_AFTER_FADE_OUT)
+				declare offset := ripple_id_history[r] -> play_pos mod rec_time_sample_lengths[artic]
+				declare note_id := play_note(ripple_id_history[r] -> note, ripple_id_history[r] -> velocity, offset, 0)
+				set_event_par_arr(note_id, EVENT_PAR_ALLOW_GROUP, 0, ALL_GROUPS)
+				set_event_par_arr(note_id, EVENT_PAR_ALLOW_GROUP, 1, artic)
+				change_vol(note_id, ripple_id_history[r] -> volume, CHANGE_ABSOLUTE)
+				fade_in(note_id, DURATION_SIXTEENTH)
+				macro copy_ripple_history_pars_to_note_id_pars(#par#)
+					event[note_id].#par# := event[ripple_id_history[r]].#par#
+				end macro
+				literate_macro(copy_ripple_history_pars_to_note_id_pars) on CUSTOM_EVENT_PARS
+				ripple_id_history[r] := note_id
+			end if
+		end if
+	end for
+end function
+
+// function dynamic_release(note)
+// 	if note = event[ripple_id_history[r]].second_note ...// the 2nd note is what started the ripple
+// 	and event[ripple_id_history[r]].second_note_released = 0
+// 		event[ripple_id_history[r]].second_note_released := 1
+// 		if event[ripple_id_history[r]].first_note_released = 0
+// 			event[ripple_id_history[r]].release_note := event[ripple_id_history[r]].first_note
+// 		else
+// 			event[ripple_id_history[r]].release_note := event[ripple_id_history[r]].second_note
+// 		end if
+// 		event[ripple_id_history[r]].note_off_timestamp := ENGINE_UPTIME * 1000
+// 		event[ripple_id_history[r]].release_length := time_til_end_of_ripple
+// 		event[ripple_id_history[r]].releasing := 1
+// 	end if
+
+// 	if note = event[ripple_id_history[r]].first_note ...
+// 	and event[ripple_id_history[r]].first_note_released = 0
+// 		event[ripple_id_history[r]].first_note_released := 1
+// 		if event[ripple_id_history[r]].second_note_released = 0
+// 			event[ripple_id_history[r]].release_note := event[ripple_id_history[r]].first_note
+// 		end if
+// 	end if
+// end function
+
+// function immediate_release(note:)
+// 	if note = event[ripple_id_history[r]].second_note ...
+// 	and event[ripple_id_history[r]].releasing = 0
+// 		event[ripple_id_history[r]].releasing := 1
+
+// 		// Stop ripple
+// 		fade_out(ripple_id_history[r], time_til_end_of_ripple, STOP_VOICE_AFTER_FADE_OUT)
+
+// 		// Play release-sample
+// 		declare offset := ripple_id_history[r] -> play_pos / rec_time_ripple_lengths[artic] * rec_time_ripple_lengths[artic] + rec_time_ripple_lengths[artic]/2
+// 		declare length := ticks_to_ms(ripple_length_ticks[artic] / 2)
+// 		declare note_id := play_note(ripple_id_history[r] -> note, ripple_id_history[r] -> velocity, offset, length)
+// 		set_event_par_arr(note_id, EVENT_PAR_ALLOW_GROUP, 0, ALL_GROUPS)
+// 		set_event_par_arr(note_id, EVENT_PAR_ALLOW_GROUP, 1, get_group_idx("quarters release"))
+// 		// fade_in(note_id, time_til_end_of_ripple)
+
+// 		// if recorded_pos_in_ripple < rec_time_ripple_lengths[artic] / 2
+// 		// 	declare rls_note := event[ripple_id_history[r]].first_note
+// 		// else
+// 		// 	rls_note := event[ripple_id_history[r]].second_note
+// 		// end if
+// 		// declare offset := recorded_pos_in_ripple - (rec_time_ripple_lengths[artic] / 2)
+// 		// offset := offset + rec_time_ripple_lengths[artic]/2
+// 		// msg(offset)
+// 		// declare note_id := play_note(rls_note, event[ripple_id_history[r]].velocity, offset, 0)
+// 		// set_event_par_arr(note_id, EVENT_PAR_ALLOW_GROUP, 0, ALL_GROUPS)
+// 		// set_event_par_arr(note_id, EVENT_PAR_ALLOW_GROUP, 1, get_group_idx("releases"))
+
+// 		// // Release-sample fade and vol
+// 		// declare fade_in_time := time_til_end_of_ripple/2
+// 		// if fade_in_time < DURATION_EIGHTH
+// 		// 	fade_in_time := DURATION_EIGHTH
+// 		// end if
+// 		// msg(fade_in_time)
+// 		// fade_in(note_id, fade_in_time)
+// 		// declare cur_swell_volume := get_cur_swell_volume(r, artic)
+// 		// declare vol := cur_swell_volume + ripple_id_history[r] -> volume
+// 		// event[note_id].source := OUTSIDE_SOURCE
+// 		// event[note_id].type := RELEASE_SAMPLE
+// 		// change_vol(note_id, vol, CHANGE_ABSOLUTE)
+// 	end if
+// end function

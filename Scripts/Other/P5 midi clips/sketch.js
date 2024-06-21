@@ -1,5 +1,5 @@
 let clipWidth = 136;
-let clipHeight = 90;
+let clipHeight = 80;
 let marginVertical = 20;
 let marginHorizontal = 4;
 let clip_i = 0;
@@ -14,7 +14,7 @@ function preload() {
 
 function setup() {
   print(hex_colors[0])
-  frameRate(8)
+  frameRate(9)
 }
 
 function draw() {
@@ -57,7 +57,7 @@ function draw() {
       let x = map(event.pos, 0, clip_lengths[clip_i], marginHorizontal, clipWidth - marginHorizontal);
 
       if (event.command == "keyswitch") {
-        pg.image(ks_image, x-5, clipHeight-5)
+        // pg.image(ks_image, x-5, clipHeight-5)
 
         // pg.noFill()
         // pg.strokeWeight(1)
@@ -83,9 +83,8 @@ function draw() {
         pg.rect(x, y, w, h, radius);
       }
     }
-    
-    
-    saveCanvas(pg, clip_names[clip_i], 'png');
+
+    saveCanvas(pg, "clip" + clip_i, 'png');
   }
   clip_i++
 }
