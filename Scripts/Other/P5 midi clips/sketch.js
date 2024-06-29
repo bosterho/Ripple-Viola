@@ -32,21 +32,25 @@ function draw() {
         pedalEvents[event.pos] = event
       }
     }
+
+    let pedalStart = 0
     for (let i = 0; i < clip_lengths[clip_i]; i++) {
       if (pedalEvents[i]) {
         if (pedalEvents[i].value > 64) {
           pedalStart = i
         } else {
-          pg.noStroke()
-          pg.fill(color(255, 255, 255, 15))
-          let x = map(pedalStart, 0, clip_lengths[clip_i], marginHorizontal, clipWidth - marginHorizontal)
-          let y = clipHeight/4*3
-          let w = map(i - pedalStart, 0, clip_lengths[clip_i], marginHorizontal, clipWidth - marginHorizontal)
-          let h = clipHeight/4
-          pg.rect(x, y, w, h)
-          pg.noFill
-          pg.stroke(color(255, 255, 255, 100))
-          pg.line(x, y, x, clipHeight)
+          if (pedalStart) {
+            pg.noStroke()
+            pg.fill(color(255, 255, 255, 15))
+            let x = map(pedalStart, 0, clip_lengths[clip_i], marginHorizontal, clipWidth - marginHorizontal)
+            let y = clipHeight/4*3
+            let w = map(i - pedalStart, 0, clip_lengths[clip_i], marginHorizontal, clipWidth - marginHorizontal)
+            let h = clipHeight/4
+            pg.rect(x, y, w, h)
+            pg.noFill
+            pg.stroke(color(255, 255, 255, 100))
+            pg.line(x, y, x, clipHeight)
+          }
         }
         
       }

@@ -575,16 +575,18 @@ function crossfaded_looping
 				// duplicate event
 				fade_out(ripple_id_history[r], DURATION_SIXTEENTH, STOP_VOICE_AFTER_FADE_OUT)
 				declare offset := ripple_id_history[r] -> play_pos mod rec_time_sample_lengths[artic]
-				declare note_id := play_note(ripple_id_history[r] -> note, ripple_id_history[r] -> velocity, offset, 0)
-				set_event_par_arr(note_id, EVENT_PAR_ALLOW_GROUP, 0, ALL_GROUPS)
-				set_event_par_arr(note_id, EVENT_PAR_ALLOW_GROUP, 1, artic)
-				change_vol(note_id, ripple_id_history[r] -> volume, CHANGE_ABSOLUTE)
-				fade_in(note_id, DURATION_SIXTEENTH)
-				macro copy_ripple_history_pars_to_note_id_pars(#par#)
-					event[note_id].#par# := event[ripple_id_history[r]].#par#
-				end macro
-				literate_macro(copy_ripple_history_pars_to_note_id_pars) on CUSTOM_EVENT_PARS
-				ripple_id_history[r] := note_id
+				if event[ripple_id_history[r]].preview_being_stopped = 0
+					declare note_id := play_note(ripple_id_history[r] -> note, ripple_id_history[r] -> velocity, offset, 0)
+					set_event_par_arr(note_id, EVENT_PAR_ALLOW_GROUP, 0, ALL_GROUPS)
+					set_event_par_arr(note_id, EVENT_PAR_ALLOW_GROUP, 1, artic)
+					change_vol(note_id, ripple_id_history[r] -> volume, CHANGE_ABSOLUTE)
+					fade_in(note_id, DURATION_SIXTEENTH)
+					macro copy_ripple_history_pars_to_note_id_pars(#par#)
+						event[note_id].#par# := event[ripple_id_history[r]].#par#
+					end macro
+					literate_macro(copy_ripple_history_pars_to_note_id_pars) on CUSTOM_EVENT_PARS
+					ripple_id_history[r] := note_id
+				end if
 			end if
 		end if
 	end for

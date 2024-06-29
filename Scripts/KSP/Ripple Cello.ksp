@@ -76,6 +76,7 @@ on init
 	dest_note_released                , ...
 	start_note_released               , ...
 	triggered_by_mf                   , ...
+	preview_being_stopped             , ...
 	type
 
 	literate_macro(declare_event_par) on CUSTOM_EVENT_PARS
@@ -1144,31 +1145,35 @@ function ui_controls_callback()
 	declare event_ids[128]
 	declare e
 
+	macro stop_ideas_panel
+		set_controller(64, 0)
+		wait(1)
+		for clip_i := 0 to num_elements(midi_clip_preview_id) - 1
+			midi_clip_preview_id[clip_i] -> value := 0
+			if playing[clip_i] = 1
+				get_event_ids(event_ids)
+				for e := 0 to num_elements(event_ids) - 1
+					if event_ids[e] # 0
+						if event[event_ids[e]].triggered_by_mf = clip_i + 1
+							event[event_ids[e]].preview_being_stopped := 1 // don't let crossfaded looping fade in a note while this event is trying to be faded out here.
+							fade_out(event_ids[e], DURATION_SIXTEENTH, STOP_VOICE_AFTER_FADE_OUT)
+							if in_range(event_ids[e] -> note, LOWEST_KEY, HIGHEST_KEY)
+								key_ids[event_ids[e] -> note] -> picture_state := 0
+								key_down[event_ids[e] -> note] := 0
+								key_active[event_ids[e] -> note] := 0
+							end if
+						end if
+					end if
+				end for
+				playing[clip_i] := 0
+				looping[clip_i] := 0
+			end if
+		end for
+	end macro
+
 	// Show midi
 	if NI_UI_ID = get_ui_id(button_showMidi)
 		if button_showMidi = 0
-			macro stop_ideas_panel
-				set_controller(64, 0)
-				wait(1)
-				for clip_i := 0 to num_elements(midi_clip_preview_id) - 1
-					midi_clip_preview_id[clip_i] -> value := 0
-					if playing[clip_i] = 1
-						get_event_ids(event_ids)
-						for e := 0 to num_elements(event_ids) - 1
-							if event[event_ids[e]].triggered_by_mf = clip_i + 1
-								fade_out(event_ids[e], DURATION_SIXTEENTH, STOP_VOICE_AFTER_FADE_OUT)
-								if in_range(event_ids[e] -> note, LOWEST_KEY, HIGHEST_KEY)
-									key_ids[event_ids[e] -> note] -> picture_state := 0
-									key_down[event_ids[e] -> note] := 0
-									key_active[event_ids[e] -> note] := 0
-								end if
-							end if
-						end for
-						playing[clip_i] := 0
-						looping[clip_i] := 0
-					end if
-				end for
-			end macro
 			stop_ideas_panel()
 		end if
 		call update_midi_visibility
@@ -1280,12 +1285,15 @@ function ui_controls_callback()
 			// Stop clicked clip
 			get_event_ids(event_ids)
 			for e := 0 to num_elements(event_ids) - 1
-				if event[event_ids[e]].triggered_by_mf = clip_poly + 1
-					fade_out(event_ids[e], DURATION_SIXTEENTH, STOP_VOICE_AFTER_FADE_OUT)
-					if in_range(event_ids[e] -> note, LOWEST_KEY, HIGHEST_KEY)
-						key_ids[event_ids[e] -> note] -> picture_state := 0
-						key_down[event_ids[e] -> note] := 0
-						key_active[event_ids[e] -> note] := 0
+				if event_ids[e] # 0
+					if event[event_ids[e]].triggered_by_mf = clip_poly + 1
+						event[event_ids[e]].preview_being_stopped := 1 // don't let crossfaded looping fade in a note while this event is trying to be faded out here.
+						fade_out(event_ids[e], DURATION_SIXTEENTH, STOP_VOICE_AFTER_FADE_OUT)
+						if in_range(event_ids[e] -> note, LOWEST_KEY, HIGHEST_KEY)
+							key_ids[event_ids[e] -> note] -> picture_state := 0
+							key_down[event_ids[e] -> note] := 0
+							key_active[event_ids[e] -> note] := 0
+						end if
 					end if
 				end if
 			end for
@@ -1302,12 +1310,15 @@ function ui_controls_callback()
 					if playing[other_clip_i] = 1
 						get_event_ids(event_ids)
 						for e := 0 to num_elements(event_ids) - 1
-							if event[event_ids[e]].triggered_by_mf = other_clip_i + 1
-								fade_out(event_ids[e], DURATION_SIXTEENTH, STOP_VOICE_AFTER_FADE_OUT)
-								if in_range(event_ids[e] -> note, LOWEST_KEY, HIGHEST_KEY)
-									key_ids[event_ids[e] -> note] -> picture_state := 0
-									key_down[event_ids[e] -> note] := 0
-									key_active[event_ids[e] -> note] := 0
+							if event_ids[e] # 0
+								if event[event_ids[e]].triggered_by_mf = other_clip_i + 1
+									event[event_ids[e]].preview_being_stopped := 1 // don't let crossfaded looping fade in a note while this event is trying to be faded out here.
+									fade_out(event_ids[e], DURATION_SIXTEENTH, STOP_VOICE_AFTER_FADE_OUT)
+									if in_range(event_ids[e] -> note, LOWEST_KEY, HIGHEST_KEY)
+										key_ids[event_ids[e] -> note] -> picture_state := 0
+										key_down[event_ids[e] -> note] := 0
+										key_active[event_ids[e] -> note] := 0
+									end if
 								end if
 							end if
 						end for
