@@ -18,6 +18,7 @@ on init
 
 	set_listener(NI_SIGNAL_TIMER_MS, 1000000/30) // 30 fps
 	set_listener(NI_SIGNAL_TRANSP_START, 1)
+	set_listener(NI_SIGNAL_TRANSP_STOP, 1)
 
 	SET_CONDITION(NO_SYS_SCRIPT_PEDAL)
 
@@ -66,12 +67,12 @@ on init
 	voice                             , ...
 	note_off_timestamp                , ...
 	release_length                    , ...
+	release_sample_length             , ...
 	time_til_note_off                 , ...
 	release_note                      , ...
 	brightness_on_release             , ...
 	waiting_to_trigger_release_sample , ...
 	releasing                         , ...
-	release_mode                      , ...
 	dest_note_released                , ...
 	start_note_released               , ...
 	triggered_by_mf                   , ...
@@ -150,6 +151,7 @@ on init
 	declare direction_keyswitches[DIRECTION_MODE.SIZE]       := (72+14, 72+16, 72+17)
 	declare legato_keyswitches[LEGATO_MODE.SIZE]             := (72+19, 72+21, 72+23, 72+24)
 	declare release_sample_keyswitches[RELEASE_SAMPLES.SIZE] := (72+26, 72+28, 72+29)
+	declare release_trigger_keyswitches[2] := (24, 108)
 		
 	// Formatted for Reascript:
 	// articulation_keyswitches   = {29, 31, 33}
@@ -181,6 +183,7 @@ on init
 		all_keyswitches[total_num_keyswitches] := release_sample_keyswitches[i]
 		inc(total_num_keyswitches)
 	end for
+	
 
 	{{ Length Constants }}
 	declare rec_time_sample_lengths[ARTIC.SIZE]
@@ -209,11 +212,16 @@ on init
 	pitch_fractions[ARTIC.SIXTEENTHS] := 4
 
 	{{ Variables }}
+	declare timestamp_version_shown
 	declare num_active_ripples
 	declare num_keys_pressed
 	declare key_active[128]
 	declare key_down[128]
-	declare velo[128]
+	declare key_released[128]
+	fill(key_released, 1)
+	declare notes_to_release[1000]
+	declare voices_to_release[1000]
+	declare num_notes_to_release
 	declare num_ripple_voices[128]
 	declare note_used_by_ripple[128]
 	declare key_timestamp[128]
@@ -224,13 +232,16 @@ on init
 	declare first_ripple_timestamp
 	declare cur_midi_page
 	declare read cur_artic
+	declare all_keys_released := 1
+	declare recent_release_trigger_key := release_trigger_keyswitches[0]
+	declare velo[128]
+	declare event_ids[128]
+	velo[recent_release_trigger_key] := 64
 
 	// Fading graphics
-	declare ~instructions_opacity := 0.0
 	declare ~midiInstructions_opacity := 0.0
 	declare ~midiCover_opacity := 0.0
 	declare ~smoothed_midiInstructions_opacity
-	declare ~smoothed_instructions_opacity
 	declare ~smoothed_midiCover_opacity
 
 	// Midi
@@ -267,6 +278,7 @@ on init
 	declare r
 	declare k
 	declare n
+	declare e
 	declare event_i
 	declare other_event_i
 	declare row_i
@@ -391,6 +403,8 @@ on init
 	import "F2K/UI Code.ksp"
 	set_control_par_str(INST_ICON_ID, CONTROL_PAR_PICTURE, "insticon")
 
+	label_version -> hide := HIDE_WHOLE_CONTROL
+
 	// Midi page
 	declare panel_midiPg[NUM_MIDI_PAGES]
 	declare switch_midiPgChooser[NUM_MIDI_PAGES]
@@ -434,21 +448,34 @@ on init
 		set_bounds(mf_cursor[i], 0, 0)
 	end for
 
-	switch_showMidi := 0
+	button_showMidi := 0
 	update_midi_visibility()
 
 
 	// Z layers
 
-	// putting panel_ideas on z_layer 1 would mess up the hover states. 
-	// So instead, I'm just hiding all z_layer=1 controls whenever I show panel_ideas
-	panel_ideas -> z_layer := 0
+	// putting panel_midi on z_layer 1 would mess up the hover states. 
+	// So instead, I'm just hiding all z_layer=1 controls whenever I show panel_midi
+	panel_midi -> z_layer := 0
 
-	switch_info         -> hide := HIDE_WHOLE_CONTROL
-	switch_infoOptions  -> hide := HIDE_WHOLE_CONTROL
-	switch_info         -> z_layer := 1
-	switch_infoOptions  -> z_layer := 1
-	panel_midiPgChooser -> z_layer := 1
+	switch_generalInfoDisp        -> hide := HIDE_WHOLE_CONTROL
+	switch_articulationsInfoDisp  -> hide := HIDE_WHOLE_CONTROL
+	switch_optionsInfoDisp        -> hide := HIDE_WHOLE_CONTROL
+	switch_speedInfoDisp          -> hide := HIDE_WHOLE_CONTROL
+	switch_directionInfoDisp      -> hide := HIDE_WHOLE_CONTROL
+	switch_legatoInfoDisp         -> hide := HIDE_WHOLE_CONTROL
+	switch_releaseSamplesInfoDisp -> hide := HIDE_WHOLE_CONTROL
+
+
+	switch_generalInfoDisp        -> z_layer := 1
+	switch_articulationsInfoDisp  -> z_layer := 1
+	switch_optionsInfoDisp        -> z_layer := 1
+	switch_speedInfoDisp          -> z_layer := 1
+	switch_directionInfoDisp      -> z_layer := 1
+	switch_legatoInfoDisp         -> z_layer := 1
+	switch_releaseSamplesInfoDisp -> z_layer := 1
+
+	panel_midiPgChooser   -> z_layer := 1
 	switch_midiPgChooser0 -> z_layer := 1
 	switch_midiPgChooser1 -> z_layer := 1
 
@@ -577,6 +604,8 @@ on init
 	switch_releaseSamples.soft -> width := switch_releaseSamples.soft -> width + 14
 	switch_releaseSamples.loud -> width := switch_releaseSamples.loud -> width + 14
 
+	switch_releaseTrigger -> allow_automation := 0
+
 
 	slider_speed       -> mouse_behaviour := 2000
 	slider_direction   -> mouse_behaviour := 2000
@@ -587,20 +616,12 @@ on init
 	slider_direction -> default := 1
 	slider_legato    -> default := 0
 
-	slider_vol -> default := V2E.volume(0.0)
+	slider_vol -> default := 500000
 	slider_reverb -> default := 500000
 
 	menu_reverb -> textpos_y := 100
 
 	// Old
-	declare ui_slider bracket[MAX_NUM_NOTES, 9](0, 1000)
-	for i := 0 to bracket.size_D1 - 1
-		for v := 0 to bracket.size_D2 - 1
-			set_bounds(bracket[i, v], 20 + i * 18, 100 + (bracket.size_D2 - v) * 18, 13, 13)
-			bracket[i, v] -> hide := HIDE_WHOLE_CONTROL
-			bracket[i, v] -> picture := "circle"
-		end for
-	end for
 
 	set_voice_limit(NI_VL_TMPRO_STANDARD, MAX_RIPPLE_HISTORY)
 	declare ui_slider ripple[MAX_RIPPLE_HISTORY](0,127)
@@ -630,6 +651,7 @@ on init
 	group[get_group_idx("quarters releases")].speed := V2E_speed(12)
 	group[get_group_idx("eighths releases")].speed := V2E_speed(12)
 
+
 end on
 
 on persistence_changed
@@ -649,6 +671,7 @@ end on
 function note_callback(note, velocity, event_id)
 	set_key_pressed(note, 1)
 	key_down[note] := 1
+	velo[note] := velocity
 
 	// Keyswitches
 	declare ks_index := search(articulation_keyswitches, note)
@@ -680,6 +703,13 @@ function note_callback(note, velocity, event_id)
 	if ks_index # -1
 		slider_releaseSamples := ks_index
 		call update_releaseMode_switches
+	end if
+
+	ks_index := search(release_trigger_keyswitches, note)
+	if ks_index # -1
+		recent_release_trigger_key := release_trigger_keyswitches[ks_index]
+		switch_releaseTrigger := 1
+		call trigger_release_samples_for_all_ripples
 	end if
 
 	if search(all_keyswitches, note) # -1
@@ -837,7 +867,8 @@ function note_callback(note, velocity, event_id)
 				declare already_playing := 0
 				for r := 0 to MAX_RIPPLE_HISTORY - 1
 					if ripple_id_history[r] # 0
-						if event[ripple_id_history[r]].low_note = low_note ...
+						if event[ripple_id_history[r]].low_note = low_note    and key_released[low_note] = 0 ...
+						and event[ripple_id_history[r]].high_note = high_note and key_released[high_note] = 0 ...
 						and event[ripple_id_history[r]].high_note = high_note ...
 						and event[ripple_id_history[r]].direction = direction ...
 						and event[ripple_id_history[r]].releasing = 0
@@ -846,19 +877,36 @@ function note_callback(note, velocity, event_id)
 					end if
 				end for
 
+				key_released[low_note] := 0
+				key_released[high_note] := 0
+
 				if already_playing = 0
 					declare offset_real_time
+					declare do_legato := 0
+
 					call count_active_ripples
-					if num_active_ripples = 0
+					if num_active_ripples > 0
+						do_legato := 1
+					end if
+
+					if all_keys_released = 1
+						do_legato := 0
+					else
+						do_legato := 1
+					end if
+					all_keys_released := 0
+
+					if do_legato = 0
 						first_ripple_timestamp := ENGINE_UPTIME
 						declare real_legato_time := 0
 						offset_real_time := 0
 					else
-						declare first_ripple := find_first_active_ripple()
+						// declare first_ripple := find_first_active_ripple()
 						real_legato_time := (ENGINE_UPTIME - first_ripple_timestamp) * 1000
 						real_legato_time := int(real(real_legato_time) / speeds[slider_speed])
 						select slider_legato
 							case LEGATO_MODE.SYNC_TO_PITCH
+								real_legato_time := real_legato_time + ticks_to_ms(1) // For when you add a ripple using grid-snapped notes.
 								offset_real_time := real_legato_time mod ticks_to_ms(ripple_length_ticks[cur_artic] / pitch_fractions[cur_artic])
 							case LEGATO_MODE.SYNC_TO_RIPPLE
 								offset_real_time := real_legato_time mod ticks_to_ms(ripple_length_ticks[cur_artic])
@@ -925,9 +973,14 @@ on release
 	release_callback(EVENT_NOTE, EVENT_ID)
 end on
 function release_callback(note, event_id)
+	key_released[note] := 1
 	key_down[note] := 0
 	if search(all_keyswitches, note) = -1
 		set_key_pressed(note, 0)
+	end if
+
+	if note = release_trigger_keyswitches[0] or note = release_trigger_keyswitches[1]
+		switch_releaseTrigger := 0
 	end if
 
 	if in_range(note, LOWEST_KEY, HIGHEST_KEY) and event[event_id].source = OUTSIDE_SOURCE
@@ -943,13 +996,28 @@ function release_callback(note, event_id)
 			
 		if CC[64] < 10
 			key_active[note] := 0
-			release(note, num_ripple_voices[note] - 1)
+			if num_ripple_voices[note] = 0
+				release(note, 0)
+			else
+				for voice_i := 0 to num_ripple_voices[note] - 1
+					release(note, voice_i)
+				end for
+			end if
 			num_ripple_voices[note] := 0
+		else
+			// fill up array of notes/voices to be released when pedal comes up
+			notes_to_release[num_notes_to_release] := note
+			voices_to_release[num_notes_to_release] := num_ripple_voices[note] - 1
+			inc(num_notes_to_release)
 		end if
 	end if
 end function
 
 function release(note, voice)
+	if voice = -1
+		msg(voice)
+	end if
+
 	declare r
 	for r := 0 to MAX_RIPPLE_HISTORY - 1
 		if ripple_id_history[r] # 0
@@ -965,13 +1033,24 @@ function release(note, voice)
 				if note = event[ripple_id_history[r]].second_note
 					event[ripple_id_history[r]].note_off_timestamp := ENGINE_UPTIME
 
+					declare play_release_sample
 					if slider_releaseSamples = 0
+						if key_down[recent_release_trigger_key] = 1
+							play_release_sample := 1
+						else
+							play_release_sample := 0
+						end if
+					else if slider_releaseSamples > 0
+						play_release_sample := 1
+					end if
+
+					if play_release_sample = 0
 						event[ripple_id_history[r]].releasing := 1
 						declare fade_out_time := time_til_end_of_ripple //+ ticks_to_ms(ripple_length_ticks[artic])
 						event[ripple_id_history[r]].release_length := fade_out_time
-						if fade_out_time < DURATION_SIXTEENTH / 8 / 1000
-							fade_out_time := ticks_to_ms(ripple_length_ticks[artic] / pitch_fractions[artic]) / 1000
-						end if
+						// if fade_out_time < DURATION_SIXTEENTH / 8 / 1000
+						// 	fade_out_time := ticks_to_ms(ripple_length_ticks[artic] / pitch_fractions[artic]) / 1000
+						// end if
 						fade_out(ripple_id_history[r], fade_out_time * 1000, STOP_VOICE_AFTER_FADE_OUT)
 					else
 						event[ripple_id_history[r]].time_til_note_off := time_til_end_of_ripple
@@ -986,6 +1065,10 @@ function release(note, voice)
 		end if
 	end for
 
+	call count_keys_pressed
+	if num_keys_pressed = 0
+		all_keys_released := 1
+	end if
 end function
 
 
@@ -996,22 +1079,32 @@ function controller_callback(cc_num)
 	if cc_num = 64
 		declare prev_cc64
 		if CC[64] < 10 and prev_cc64 >= 10
-			declare key_i
-			for key_i := LOWEST_KEY to HIGHEST_KEY
+			declare i
+			for i := 0 to num_notes_to_release - 1
+				key_active[notes_to_release[i]] := key_down[notes_to_release[i]]
+				release(notes_to_release[i], voices_to_release[i])
+			end for
+			fill(notes_to_release, 0)
+			fill(voices_to_release, 0)
+			num_notes_to_release := 0
+
+			// declare key_i
+			// for key_i := LOWEST_KEY to HIGHEST_KEY
 				// Release most recent voice if the key is up
-				if key_down[key_i] = 0 and key_active[key_i] = 1
-					key_active[key_i] := 0
-					release(key_i, num_ripple_voices[key_i] - 1)
-				end if
+				// if key_down[key_i] = 0 and key_active[key_i] = 1
+				// 	key_active[key_i] := 0
+				// 	release(key_i, num_ripple_voices[key_i] - 1)
+				// end if
 
 				// Release all other previous voices, no matter what
-				for voice_i := 0 to num_ripple_voices[key_i] - 2
-					release(key_i, voice_i)
-				end for
+				// for voice_i := 0 to num_ripple_voices[key_i] - 2
+				// 	release(key_i, voice_i)
+				// end for
+
 
 				// set num_ripple_voices
 				// num_ripple_voices[key_i] := key_down[key_i]
-			end for
+			// end for
 		end if
 		prev_cc64 := CC[64]
 	end if
@@ -1022,14 +1115,23 @@ on listener
 	listener_callback()
 end on
 function listener_callback
-	if NI_SIGNAL_TYPE = NI_SIGNAL_TIMER_MS
-		call remove_ripple_ids_from_history_after_they_have_faded_out
-		call ripple_animations
-		call midi_clip_play_cursors
-		call info_graphics_animation
-		call play_release_samples_when_its_time
-		call crossfaded_looping
-	end if
+	select NI_SIGNAL_TYPE
+		case NI_SIGNAL_TIMER_MS
+			call remove_ripple_ids_from_history_after_they_have_faded_out
+			call ripple_animations
+			// call update_recorded_midi
+			call midi_clip_play_cursors
+			call info_graphics_animation
+			call play_release_samples_when_its_time
+			call crossfaded_looping
+			call hide_version
+		case NI_SIGNAL_TRANSP_START
+			first_ripple_timestamp := ENGINE_UPTIME
+			stop_ideas_panel()
+
+		case NI_SIGNAL_TRANSP_STOP
+			stop_ideas_panel()
+	end select
 end function
 
 
@@ -1043,8 +1145,8 @@ function ui_controls_callback()
 	declare e
 
 	// Show midi
-	if NI_UI_ID = get_ui_id(switch_showMidi)
-		if switch_showMidi = 0
+	if NI_UI_ID = get_ui_id(button_showMidi)
+		if button_showMidi = 0
 			macro stop_ideas_panel
 				set_controller(64, 0)
 				wait(1)
@@ -1057,6 +1159,8 @@ function ui_controls_callback()
 								fade_out(event_ids[e], DURATION_SIXTEENTH, STOP_VOICE_AFTER_FADE_OUT)
 								if in_range(event_ids[e] -> note, LOWEST_KEY, HIGHEST_KEY)
 									key_ids[event_ids[e] -> note] -> picture_state := 0
+									key_down[event_ids[e] -> note] := 0
+									key_active[event_ids[e] -> note] := 0
 								end if
 							end if
 						end for
@@ -1070,7 +1174,7 @@ function ui_controls_callback()
 		call update_midi_visibility
 	end if
 	if NI_UI_ID = get_ui_id(switch_closeMidi)
-		switch_showMidi := 0
+		button_showMidi := 0
 		stop_ideas_panel()
 		call update_midi_visibility
 	end if
@@ -1089,33 +1193,79 @@ function ui_controls_callback()
 		end for
 	end if
 
-	// Info
-	if NI_UI_ID = get_ui_id(switch_openInfo)
-		switch_showMidi := 0
+	// General info
+	if NI_UI_ID = get_ui_id(button_generalInfo)
+		button_showMidi := 0
 		call update_midi_visibility
-		if switch_info -> hide = HIDE_WHOLE_CONTROL
-			switch_info -> hide := HIDE_PART_NOTHING
+		if switch_generalInfoDisp -> hide = HIDE_WHOLE_CONTROL
+			switch_generalInfoDisp -> hide := HIDE_PART_NOTHING
 		else
-			switch_info -> hide := HIDE_WHOLE_CONTROL
+			switch_generalInfoDisp -> hide := HIDE_WHOLE_CONTROL
 		end if
 	end if
 
-	if NI_UI_ID = get_ui_id(switch_Info)
-		switch_info -> hide := HIDE_WHOLE_CONTROL
+	if NI_UI_ID = get_ui_id(switch_generalInfoDisp)
+		switch_generalInfoDisp -> hide := HIDE_WHOLE_CONTROL
 	end if
 
-	if NI_UI_ID = get_ui_id(switch_openInfoOptions)
-		switch_showMidi := 0
+	// Articulations info
+	if NI_UI_ID = get_ui_id(button_articulationsInfo)
+		switch_articulationsInfoDisp -> hide := HIDE_PART_NOTHING
+	end if
+
+	if NI_UI_ID = get_ui_id(switch_articulationsInfoDisp)
+		switch_articulationsInfoDisp -> hide := HIDE_WHOLE_CONTROL
+	end if
+
+	// Options info
+	if NI_UI_ID = get_ui_id(button_optionsInfo)
+		button_showMidi := 0
 		call update_midi_visibility
-		if switch_infoOptions -> hide = HIDE_WHOLE_CONTROL
-			switch_infoOptions -> hide := HIDE_PART_NOTHING
+		if switch_optionsInfoDisp -> hide = HIDE_WHOLE_CONTROL
+			switch_optionsInfoDisp -> hide := HIDE_PART_NOTHING
 		else
-			switch_infoOptions -> hide := HIDE_WHOLE_CONTROL
+			switch_optionsInfoDisp -> hide := HIDE_WHOLE_CONTROL
 		end if
 	end if
 
-	if NI_UI_ID = get_ui_id(switch_InfoOptions)
-		switch_InfoOptions -> hide := HIDE_WHOLE_CONTROL
+	if NI_UI_ID = get_ui_id(switch_optionsInfoDisp)
+		switch_optionsInfoDisp -> hide := HIDE_WHOLE_CONTROL
+	end if
+
+	// Speed info
+	if NI_UI_ID = get_ui_id(button_speedInfo)
+		switch_speedInfoDisp -> hide := HIDE_PART_NOTHING
+	end if
+
+	if NI_UI_ID = get_ui_id(switch_speedInfoDisp)
+		switch_speedInfoDisp -> hide := HIDE_WHOLE_CONTROL
+	end if
+
+	// Direction info
+	if NI_UI_ID = get_ui_id(button_directionInfo)
+		switch_directionInfoDisp -> hide := HIDE_PART_NOTHING
+	end if
+
+	if NI_UI_ID = get_ui_id(switch_directionInfoDisp)
+		switch_directionInfoDisp -> hide := HIDE_WHOLE_CONTROL
+	end if
+
+	// Legato info
+	if NI_UI_ID = get_ui_id(button_legatoInfo)
+		switch_legatoInfoDisp -> hide := HIDE_PART_NOTHING
+	end if
+
+	if NI_UI_ID = get_ui_id(switch_legatoInfoDisp)
+		switch_legatoInfoDisp -> hide := HIDE_WHOLE_CONTROL
+	end if
+
+	// Release samples info
+	if NI_UI_ID = get_ui_id(button_releaseSamplesInfo)
+		switch_releaseSamplesInfoDisp -> hide := HIDE_PART_NOTHING
+	end if
+
+	if NI_UI_ID = get_ui_id(switch_releaseSamplesInfoDisp)
+		switch_releaseSamplesInfoDisp -> hide := HIDE_WHOLE_CONTROL
 	end if
 
 
@@ -1134,6 +1284,8 @@ function ui_controls_callback()
 					fade_out(event_ids[e], DURATION_SIXTEENTH, STOP_VOICE_AFTER_FADE_OUT)
 					if in_range(event_ids[e] -> note, LOWEST_KEY, HIGHEST_KEY)
 						key_ids[event_ids[e] -> note] -> picture_state := 0
+						key_down[event_ids[e] -> note] := 0
+						key_active[event_ids[e] -> note] := 0
 					end if
 				end if
 			end for
@@ -1154,6 +1306,8 @@ function ui_controls_callback()
 								fade_out(event_ids[e], DURATION_SIXTEENTH, STOP_VOICE_AFTER_FADE_OUT)
 								if in_range(event_ids[e] -> note, LOWEST_KEY, HIGHEST_KEY)
 									key_ids[event_ids[e] -> note] -> picture_state := 0
+									key_down[event_ids[e] -> note] := 0
+									key_active[event_ids[e] -> note] := 0
 								end if
 							end if
 						end for
@@ -1169,7 +1323,7 @@ function ui_controls_callback()
 				if clip_loop_enabled[clip_poly] = 0
 					looping[clip_poly] := 0
 				end if
-				if switch_showMidi = 0
+				if button_showMidi = 0
 					looping[clip_poly] := 0
 				end if
 
@@ -1195,7 +1349,7 @@ function ui_controls_callback()
 						if cur_event_poly > num_midi_events[clip_poly]
 							playing[clip_poly] := 0
 						end if
-						if switch_showMidi = 0
+						if button_showMidi = 0
 							playing[clip_poly] := 0
 						end if
 					end macro
@@ -1287,10 +1441,25 @@ function ui_controls_callback()
 		call update_releaseMode_switches
 	end if
 
+	if NI_UI_ID = get_ui_id(switch_releaseTrigger)
+		switch_releaseTrigger := 0
+		key_down[recent_release_trigger_key] := 1
+		call trigger_release_samples_for_all_ripples
+		set_key_pressed(release_trigger_keyswitches[0], 1)
+		set_key_pressed(release_trigger_keyswitches[1], 1)
+		wait(100000)
+		set_key_pressed(release_trigger_keyswitches[0], 0)
+		set_key_pressed(release_trigger_keyswitches[1], 0)
+	end if
+
 
 	// Expression
 	if NI_UI_ID = get_ui_id(slider_vol)
-		insert[0].sfx_wet := map_i_2i_2i_i(slider_vol, 0, 1000000, V2E.volume2(-16000.0), V2E.volume2(6000.0))
+		if in_range(slider_vol, 0, 500000)
+			insert[0].sfx_wet := map_i_2i_2i_i(slider_vol, 0, 500000, V2E.volume2(-16000.0), V2E.volume2(0.0))
+		else if in_range(slider_vol, 500000, 1000000)
+			insert[0].sfx_wet := map_i_2i_2i_i(slider_vol, 500000, 1000000, V2E.volume2(0.0), V2E.volume2(9000.0))
+		end if
 		slider_vol -> label := insert[0].sfx_wet.disp & " dB"
 	end if
 
@@ -1343,6 +1512,8 @@ function ui_controls_callback()
 	end if
 
 	if NI_UI_ID = get_ui_id(switch_logoAnimTrigger)
+		label_version -> hide := HIDE_PART_NOTHING
+		timestamp_version_shown := ENGINE_UPTIME
 		if slider_logoAnim = 0
 			slider_logoAnim := 0
 			while slider_logoAnim < 127

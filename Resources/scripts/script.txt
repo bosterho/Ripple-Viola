@@ -1,4 +1,4 @@
-{ Compiled on Thu Jun 20 23:33:29 2024 }
+{ Compiled on Sat Jun 29 08:25:12 2024 }
 on init
   declare $sksp_dummy
   declare $concat_it
@@ -182,6 +182,7 @@ on init
   load_array(%dev_mode,2)
   set_listener($NI_SIGNAL_TIMER_MS,1000000/30)
   set_listener($NI_SIGNAL_TRANSP_START,1)
+  set_listener($NI_SIGNAL_TRANSP_STOP,1)
   SET_CONDITION(NO_SYS_SCRIPT_PEDAL)
   declare $i
   declare const $NUM_ARTICULATIONS := 3
@@ -204,12 +205,12 @@ on init
   declare %custom_event_voice[1000000]
   declare %custom_event_note_off_timestamp[1000000]
   declare %custom_event_release_length[1000000]
+  declare %custom_event_release_sample_length[1000000]
   declare %custom_event_time_til_note_off[1000000]
   declare %custom_event_release_note[1000000]
   declare %custom_event_brightness_on_release[1000000]
   declare %custom_event_waiting_to_trigger_release_sample[1000000]
   declare %custom_event_releasing[1000000]
-  declare %custom_event_release_mode[1000000]
   declare %custom_event_dest_note_released[1000000]
   declare %custom_event_start_note_released[1000000]
   declare %custom_event_triggered_by_mf[1000000]
@@ -293,6 +294,7 @@ on init
   declare %direction_keyswitches[$DIRECTION_MODE__SIZE] := (72+14, 72+16, 72+17)
   declare %legato_keyswitches[$LEGATO_MODE__SIZE] := (72+19, 72+21, 72+23, 72+24)
   declare %release_sample_keyswitches[$RELEASE_SAMPLES__SIZE] := (72+26, 72+28, 72+29)
+  declare %release_trigger_keyswitches[2] := (24, 108)
   declare %all_keyswitches[64]
   declare $total_num_keyswitches
   $i := 0
@@ -345,11 +347,20 @@ on init
   %pitch_fractions[$ARTIC__QUARTERS] := 2
   %pitch_fractions[$ARTIC__EIGHTHS] := 2
   %pitch_fractions[$ARTIC__SIXTEENTHS] := 4
+  declare $timestamp_version_shown
   declare $num_active_ripples
   declare $num_keys_pressed
   declare %key_active[128]
   declare %key_down[128]
-  declare %velo[128]
+  declare %key_released[128]
+  $array_i := 0
+  while ($array_i<num_elements(%key_released))
+    %key_released[$array_i] := 1
+    inc($array_i)
+  end while
+  declare %notes_to_release[1000]
+  declare %voices_to_release[1000]
+  declare $num_notes_to_release
   declare %num_ripple_voices[128]
   declare %note_used_by_ripple[128]
   declare %key_timestamp[128]
@@ -362,11 +373,15 @@ on init
   declare $cur_artic
   make_persistent($cur_artic)
   read_persistent_var($cur_artic)
-  declare ~instructions_opacity := 0.0
+  declare $all_keys_released := 1
+  declare $recent_release_trigger_key
+  $recent_release_trigger_key := %release_trigger_keyswitches[0]
+  declare %velo[128]
+  declare %event_ids[128]
+  %velo[$recent_release_trigger_key] := 64
   declare ~midiInstructions_opacity := 0.0
   declare ~midiCover_opacity := 0.0
   declare ~smoothed_midiInstructions_opacity
-  declare ~smoothed_instructions_opacity
   declare ~smoothed_midiCover_opacity
   declare %_midi_event_id[24*1000]
   declare const $midi_event_id__SIZE_D1 := 24
@@ -408,6 +423,7 @@ on init
   declare $r
   declare $k
   declare $n
+  declare $e
   declare $event_i
   declare $other_event_i
   declare $row_i
@@ -514,146 +530,159 @@ on init
   set_control_par_str($INST_WALLPAPER_ID,$CONTROL_PAR_PICTURE,"ui_background")
   declare $figma_counter
   declare $figma_counter_multi_line_labels
-  declare %UI_x[212] := (0, 660, 115, -5, 214, 26, 735, 551, 369, 128, 0, 2, 422, 11, 740, 592, 444, 296, 148, 0, 740, 592, 444, 296, 148, 0, 11, 740, 592, 444, 296, 148, 0, 740, 592, 444, 296, 148, 0, 0, 3, ...
-  236, 194, 829, 806, 760, 714, 668, 645, 599, 553, 783, 737, 691, 622, 576, 530, 484, 438, 392, 369, 323, 277, 507, 461, 415, 346, 300, 254, 208, 162, 116, 93, 47, 1, 231, 185, 139, 70, 24, 0, ...
+  declare %UI_x[223] := (0, 725, 540, 361, 122, 660, 115, -5, 214, 26, 0, 2, 422, 11, 740, 592, 444, 296, 148, 0, 740, 592, 444, 296, 148, 0, 11, 740, 592, 444, 296, 148, 0, 740, 592, 444, 296, 148, 0, 95, 51, ...
+  9, 140, 128, 84, 45, 10, 129, 56, 7, 183, 137, 86, 41, 5, 0, 0, 0, 0, 0, 0, 0, 255, 127, -1, 716, -1, 31, 117, 117, 117, 117, 117, 117, 117, 117, 117, 117, 117, 117, 117, ...
+  117, 117, 117, 117, 117, 117, 117, 117, 117, 117, 117, -1, 0, 0, 0, 0, 0, 5, 704, 4, 20, 48, 88, 29, 6, 6, 18, 0, 3, 236, 829, 806, 760, 714, 668, 645, 599, 553, 783, 737, ...
+  691, 622, 576, 530, 484, 438, 392, 369, 323, 277, 507, 461, 415, 346, 300, 254, 208, 162, 116, 93, 47, 1, 231, 185, 139, 70, 24, 865, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, ...
   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, ...
-  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0, 5, 725, 540, 361, 122, 704, ...
-  255, 127, -1, 85, 41, -1, 117, 73, 34, -1, 121, 48, -1, 177, 131, 80, 35, -1, -1, 6, 6, 18, -1, 31, 117, 117, 117, 117, 117, 117, 117, 117, 117, 117, 117, 117, 117, 117, 117, 117, ...
-  117, 117, 117, 117, 117, 117, 117, 117, 0, 0, 716)
-  declare %UI_y[212] := (0, 242, 0, 0, 260, 131, 394, 394, 394, 394, 0, 1, 201, 242, 92, 92, 92, 92, 92, 92, 0, 0, 0, 0, 0, 0, 242, 92, 92, 92, 92, 92, 92, 0, 0, 0, 0, 0, 0, 70, 70, ...
-  75, 76, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, ...
+  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3)
+  declare %UI_y[223] := (0, 344, 344, 344, 344, 242, 0, 0, 260, 131, 0, 1, 201, 242, 92, 92, 92, 92, 92, 92, 0, 0, 0, 0, 0, 0, 242, 92, 92, 92, 92, 92, 92, 0, 0, 0, 0, 0, 0, 49, 49, ...
+  49, 2, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, -1, -1, -1, -1, -1, -1, -1, 0, 0, 0, 6, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, ...
+  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, -1, 17, 17, 17, 17, 0, 0, 2, -1, -1, -1, -1, 352, 258, 72, 15, 70, 70, 75, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, ...
+  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 49, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, ...
   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, ...
-  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 70, 0, 0, 361, 361, 361, 361, 2, ...
-  0, 0, 0, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 334, 72, 15, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, ...
-  1, 1, 1, 1, 1, 1, 1, 1, -1, -1, 6)
-  declare %UI_width[212] := (900, 183, 74, 83, 346, 852, 125, 160, 147, 225, 898, 896, 54, 876, 136, 136, 136, 136, 136, 136, 136, 136, 136, 136, 136, 136, 876, 136, 136, 136, 136, 136, 136, 136, 136, 136, 136, 136, 136, 68, 77, ...
-  430, 512, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 896, ...
-  136, 109, 136, 136, 109, 136, 136, 109, 136, 136, 109, 136, 136, 109, 136, 136, 109, 136, 136, 109, 136, 136, 109, 136, 136, 109, 136, 136, 109, 136, 136, 109, 136, 136, 109, 136, 136, 109, 136, 136, ...
-  109, 136, 136, 109, 136, 136, 109, 136, 136, 109, 136, 136, 109, 136, 136, 109, 136, 136, 109, 136, 136, 109, 136, 136, 109, 136, 136, 109, 136, 136, 109, 136, 68, 74, 74, 136, 171, 165, 225, 193, ...
-  91, 91, 91, 40, 35, 34, 43, 50, 42, 35, 26, 61, 43, 48, 45, 52, 45, 35, 901, 30, 30, 33, 23, 23, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18, ...
-  18, 18, 18, 18, 18, 18, 18, 18, 899, 899, 170)
-  declare %UI_height[212] := (427, 85, 85, 88, 43, 38, 14, 14, 14, 14, 427, 424, 24, 182, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 182, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 14, 18, ...
-  49, 151, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 424, ...
+  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 70)
+  declare %UI_width[223] := (900, 158, 171, 165, 231, 183, 74, 83, 346, 852, 898, 896, 54, 876, 136, 136, 136, 136, 136, 136, 136, 136, 136, 136, 136, 136, 876, 136, 136, 136, 136, 136, 136, 136, 136, 136, 136, 136, 136, 40, 35, ...
+  34, 18, 43, 50, 42, 35, 26, 61, 43, 48, 45, 52, 45, 35, 899, 899, 899, 899, 899, 899, 899, 91, 91, 91, 170, 23, 23, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18, ...
+  18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 901, 136, 171, 165, 225, 74, 74, 193, 133, 131, 73, 48, 74, 174, 30, 33, 68, 77, 430, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, ...
+  22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 38, 896, 136, 109, 136, 136, 109, 136, 136, 109, 136, 136, 109, ...
+  136, 136, 109, 136, 136, 109, 136, 136, 109, 136, 136, 109, 136, 136, 109, 136, 136, 109, 136, 136, 109, 136, 136, 109, 136, 136, 109, 136, 136, 109, 136, 136, 109, 136, 136, 109, 136, 136, 109, 136, ...
+  136, 109, 136, 136, 109, 136, 136, 109, 136, 136, 109, 136, 136, 109, 136, 136, 109, 136, 136, 109, 136, 68)
+  declare %UI_height[223] := (427, 64, 64, 64, 64, 85, 85, 88, 43, 38, 427, 424, 24, 182, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 182, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 15, 15, ...
+  15, 16, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 423, 423, 423, 423, 423, 423, 423, 43, 43, 43, 50, 23, 23, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, ...
+  16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 147, 33, 33, 33, 33, 74, 74, 70, 21, 21, 21, 21, 45, 45, 30, 35, 14, 18, 49, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, ...
+  36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 18, 424, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, ...
   80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, ...
-  80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 13, 74, 74, 33, 33, 33, 33, 70, ...
-  43, 43, 43, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 147, 30, 30, 35, 23, 23, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, ...
-  16, 16, 16, 16, 16, 16, 16, 16, 423, 423, 50)
-  declare %UI_skin[212] := (-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0, 0, ...
-  1, 2, 3, 3, 3, 3, 3, 3, 3, 3, 4, 4, 4, 4, 4, 3, 3, 3, 3, 3, 3, 3, 4, 4, 4, 4, 4, 3, 3, 3, 3, 3, 3, 3, 4, 4, 4, 4, 4, 5, ...
-  6, 7, 8, 6, 7, 9, 6, 7, 10, 6, 7, 11, 6, 7, 12, 6, 7, 13, 6, 7, 14, 6, 7, 15, 6, 7, 16, 6, 7, 17, 6, 7, 18, 6, 7, 19, 6, 7, 20, 6, ...
-  7, 21, 6, 7, 22, 6, 7, 23, 6, 7, 24, 6, 7, 25, 6, 7, 26, 6, 7, 27, 6, 7, 28, 6, 7, 29, 6, 7, 30, 6, 7, 31, 32, 33, 33, 34, 35, 36, 37, 38, ...
-  39, 40, 41, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 42, 42, 43, 44, 44, 45, 45, 45, 45, 45, 45, 45, 45, 45, 45, 45, 45, 45, 45, 45, 45, ...
-  45, 45, 45, 45, 45, 45, 45, 45, 46, 47, 7)
-  declare %UI_font[212] := (-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, ...
-  0, 0, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, ...
+  80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 13)
+  declare %UI_skin[223] := (-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0, 0, ...
+  0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 13, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, ...
+  14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 0, 15, 16, 17, 18, 19, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 0, 0, 29, 30, 30, 30, 30, 30, 30, 30, 30, 31, 31, ...
+  31, 31, 31, 30, 30, 30, 30, 30, 30, 30, 31, 31, 31, 31, 31, 30, 30, 30, 30, 30, 30, 30, 31, 31, 31, 31, 31, 0, 32, 33, 12, 34, 33, 12, 35, 33, 12, 36, 33, 12, ...
+  37, 33, 12, 38, 33, 12, 39, 33, 12, 40, 33, 12, 41, 33, 12, 42, 33, 12, 43, 33, 12, 44, 33, 12, 45, 33, 12, 46, 33, 12, 47, 33, 12, 48, 33, 12, 49, 33, 12, 50, ...
+  33, 12, 51, 33, 12, 52, 33, 12, 53, 33, 12, 54, 33, 12, 55, 33, 12, 56, 33, 12, 57, 58)
+  declare %UI_font[223] := (-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, ...
   -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, ...
+  -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, ...
+  -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, ...
   -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, ...
+  -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1)
+  declare %UI_label_text[223] := (-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, ...
   -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, ...
-  -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1)
-  declare %UI_label_text[212] := (-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0, 1, ...
+  -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0, 1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, ...
+  -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 2, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, ...
   -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, ...
-  -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, ...
-  -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, ...
-  -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, ...
-  -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1)
-  declare %UI_default_value[212] := (-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, ...
-  -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, ...
-  -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, ...
-  -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, ...
-  -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, ...
-  -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1)
-  declare %UI_mouse_behaviour[212] := (-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, ...
-  -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, ...
-  -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, ...
-  -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -800, -800, -1, -1, -1, -1, -1, ...
-  -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, ...
-  -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1)
-  declare %UI_mouse_behaviour_x[212] := (-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, ...
+  -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1)
+  declare %UI_default_value[223] := (-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, ...
   -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, ...
   -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, ...
   -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, ...
   -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, ...
-  -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1)
-  declare %UI_mouse_behaviour_y[212] := (-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, ...
+  -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1)
+  declare %UI_mouse_behaviour[223] := (-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, ...
+  -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, ...
+  -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -800, -800, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, ...
+  -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, ...
+  -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, ...
+  -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1)
+  declare %UI_mouse_behaviour_x[223] := (-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, ...
   -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, ...
   -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, ...
   -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, ...
   -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, ...
-  -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1)
-  declare %UI_z_layer[212] := (-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, ...
-  -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 1, 1, 1, 1, 1, -1, -1, -1, -1, -1, -1, -1, 1, 1, 1, 1, 1, -1, -1, -1, -1, -1, -1, -1, 1, 1, 1, 1, 1, -1, ...
+  -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1)
+  declare %UI_mouse_behaviour_y[223] := (-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, ...
   -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, ...
   -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, ...
-  -1, 0, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, ...
-  -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1)
-  declare !skin_picture[48]
+  -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, ...
+  -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, ...
+  -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1)
+  declare %UI_z_layer[223] := (-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, ...
+  -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, ...
+  -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 1, 1, ...
+  1, 1, 1, -1, -1, -1, -1, -1, -1, -1, 1, 1, 1, 1, 1, -1, -1, -1, -1, -1, -1, -1, 1, 1, 1, 1, 1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, ...
+  -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, ...
+  -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1)
+  declare !skin_picture[59]
   !skin_picture[0] := "label_transparent"
-  !skin_picture[1] := "label_midiInstructions"
-  !skin_picture[2] := "label_instructions"
-  !skin_picture[3] := "white key"
-  !skin_picture[4] := "black key"
-  !skin_picture[5] := "label_midiCover"
-  !skin_picture[6] := "label_clipOutline"
-  !skin_picture[7] := "blank"
-  !skin_picture[8] := "clip23"
-  !skin_picture[9] := "clip22"
-  !skin_picture[10] := "clip21"
-  !skin_picture[11] := "clip20"
-  !skin_picture[12] := "clip19"
-  !skin_picture[13] := "clip18"
-  !skin_picture[14] := "clip17"
-  !skin_picture[15] := "clip16"
-  !skin_picture[16] := "clip15"
-  !skin_picture[17] := "clip14"
-  !skin_picture[18] := "clip13"
-  !skin_picture[19] := "clip12"
-  !skin_picture[20] := "clip11"
-  !skin_picture[21] := "clip10"
-  !skin_picture[22] := "clip9"
-  !skin_picture[23] := "clip8"
-  !skin_picture[24] := "clip7"
-  !skin_picture[25] := "clip6"
-  !skin_picture[26] := "clip5"
-  !skin_picture[27] := "clip4"
-  !skin_picture[28] := "clip3"
-  !skin_picture[29] := "clip2"
-  !skin_picture[30] := "clip1"
-  !skin_picture[31] := "clip0"
-  !skin_picture[32] := "reverb menu"
-  !skin_picture[33] := "knob"
-  !skin_picture[34] := "3 step slider small"
-  !skin_picture[35] := "4 step slider"
-  !skin_picture[36] := "3 step slider"
-  !skin_picture[37] := "5 step slider"
-  !skin_picture[38] := "Logo animation"
-  !skin_picture[39] := "sixteenths"
-  !skin_picture[40] := "eighths"
-  !skin_picture[41] := "quarters"
-  !skin_picture[42] := "open info"
-  !skin_picture[43] := "lightbulb"
-  !skin_picture[44] := "dot"
-  !skin_picture[45] := "preview"
-  !skin_picture[46] := "switch_infoOptions"
-  !skin_picture[47] := "switch_info"
-  declare !_labels_text[2*10]
-  declare const $labels_text__SIZE_D1 := 2
+  !skin_picture[1] := "release trigger"
+  !skin_picture[2] := "switch_releaseSamplesInfoDisp"
+  !skin_picture[3] := "switch_legatoInfoDisp"
+  !skin_picture[4] := "switch_directionInfoDisp"
+  !skin_picture[5] := "switch_speedInfoDisp"
+  !skin_picture[6] := "switch_optionsInfoDisp"
+  !skin_picture[7] := "switch_articulationsInfoDisp"
+  !skin_picture[8] := "switch_generalInfoDisp"
+  !skin_picture[9] := "sixteenths"
+  !skin_picture[10] := "eighths"
+  !skin_picture[11] := "quarters"
+  !skin_picture[12] := "blank"
+  !skin_picture[13] := "dot"
+  !skin_picture[14] := "preview"
+  !skin_picture[15] := "3 step slider small"
+  !skin_picture[16] := "4 step slider"
+  !skin_picture[17] := "3 step slider"
+  !skin_picture[18] := "5 step slider"
+  !skin_picture[19] := "knob"
+  !skin_picture[20] := "Logo animation"
+  !skin_picture[21] := "release samples info"
+  !skin_picture[22] := "legato info"
+  !skin_picture[23] := "direction info"
+  !skin_picture[24] := "speed info"
+  !skin_picture[25] := "options info"
+  !skin_picture[26] := "articulations info"
+  !skin_picture[27] := "general info"
+  !skin_picture[28] := "lightbulb"
+  !skin_picture[29] := "label_midiInstructions"
+  !skin_picture[30] := "white key"
+  !skin_picture[31] := "black key"
+  !skin_picture[32] := "label_midiCover"
+  !skin_picture[33] := "label_clipOutline"
+  !skin_picture[34] := "clip23"
+  !skin_picture[35] := "clip22"
+  !skin_picture[36] := "clip21"
+  !skin_picture[37] := "clip20"
+  !skin_picture[38] := "clip19"
+  !skin_picture[39] := "clip18"
+  !skin_picture[40] := "clip17"
+  !skin_picture[41] := "clip16"
+  !skin_picture[42] := "clip15"
+  !skin_picture[43] := "clip14"
+  !skin_picture[44] := "clip13"
+  !skin_picture[45] := "clip12"
+  !skin_picture[46] := "clip11"
+  !skin_picture[47] := "clip10"
+  !skin_picture[48] := "clip9"
+  !skin_picture[49] := "clip8"
+  !skin_picture[50] := "clip7"
+  !skin_picture[51] := "clip6"
+  !skin_picture[52] := "clip5"
+  !skin_picture[53] := "clip4"
+  !skin_picture[54] := "clip3"
+  !skin_picture[55] := "clip2"
+  !skin_picture[56] := "clip1"
+  !skin_picture[57] := "clip0"
+  !skin_picture[58] := "reverb menu"
+  declare !_labels_text[3*10]
+  declare const $labels_text__SIZE_D1 := 3
   declare const $labels_text__SIZE_D2 := 10
   !_labels_text[10*0+0] := "REVERB"
   !_labels_text[10*1+0] := "EXPRESSION"
-  declare %MULTI_LINE_DATA[2] := (1, 1)
-  declare %font_file_ids[1]
+  !_labels_text[10*2+0] := "v1.0"
+  declare %MULTI_LINE_DATA[3] := (1, 1, 1)
+  declare %font_file_ids[2]
   %font_file_ids[0] := get_font_id("Khula Regular Size 15")
+  %font_file_ids[1] := get_font_id("Khula Bold Size 11 on")
   declare ui_panel $panel_UI
+  declare ui_panel $panel_releaseSamples
+  declare ui_panel $panel_legato
+  declare ui_panel $panel_direction
+  declare ui_panel $panel_speed
   declare ui_panel $panel_fx
   declare ui_panel $panel_reverb
   declare ui_panel $panel_vol
   declare ui_panel $panel_articulations
   declare ui_panel $panel_keyboard
-  declare ui_panel $panel_releaseSamples
-  declare ui_panel $panel_legato
-  declare ui_panel $panel_direction
-  declare ui_panel $panel_speed
-  declare ui_panel $panel_ideas
+  declare ui_panel $panel_midi
   declare ui_panel $panel_midiCover
   declare ui_panel $panel_midiPgChooser
   declare ui_panel $panel_midiPg1
@@ -682,6 +711,213 @@ on init
   declare ui_panel $panel_clip2
   declare ui_panel $panel_clip1
   declare ui_panel $panel_clip0
+  declare ui_switch $switch_releaseSamples__loud
+  make_persistent($switch_releaseSamples__loud)
+  read_persistent_var($switch_releaseSamples__loud)
+  declare ui_switch $switch_releaseSamples__soft
+  make_persistent($switch_releaseSamples__soft)
+  read_persistent_var($switch_releaseSamples__soft)
+  declare ui_switch $switch_releaseSamples__off
+  make_persistent($switch_releaseSamples__off)
+  read_persistent_var($switch_releaseSamples__off)
+  declare ui_switch $switch_releaseTrigger
+  make_persistent($switch_releaseTrigger)
+  read_persistent_var($switch_releaseTrigger)
+  declare ui_switch $switch_syncToSwell
+  make_persistent($switch_syncToSwell)
+  read_persistent_var($switch_syncToSwell)
+  declare ui_switch $switch_syncToRipple
+  make_persistent($switch_syncToRipple)
+  read_persistent_var($switch_syncToRipple)
+  declare ui_switch $switch_syncToPitch
+  make_persistent($switch_syncToPitch)
+  read_persistent_var($switch_syncToPitch)
+  declare ui_switch $switch_noLegato
+  make_persistent($switch_noLegato)
+  read_persistent_var($switch_noLegato)
+  declare ui_switch $switch_up
+  make_persistent($switch_up)
+  read_persistent_var($switch_up)
+  declare ui_switch $switch_asPlayed
+  make_persistent($switch_asPlayed)
+  read_persistent_var($switch_asPlayed)
+  declare ui_switch $switch_down
+  make_persistent($switch_down)
+  read_persistent_var($switch_down)
+  declare ui_switch $switch_doubleSpeed
+  make_persistent($switch_doubleSpeed)
+  read_persistent_var($switch_doubleSpeed)
+  declare ui_switch $switch_fastTripletSpeed
+  make_persistent($switch_fastTripletSpeed)
+  read_persistent_var($switch_fastTripletSpeed)
+  declare ui_switch $switch_fullSpeed
+  make_persistent($switch_fullSpeed)
+  read_persistent_var($switch_fullSpeed)
+  declare ui_switch $switch_slowTripletSpeed
+  make_persistent($switch_slowTripletSpeed)
+  read_persistent_var($switch_slowTripletSpeed)
+  declare ui_switch $switch_halfSpeed
+  make_persistent($switch_halfSpeed)
+  read_persistent_var($switch_halfSpeed)
+  declare ui_switch $switch_releaseSamplesInfoDisp
+  make_persistent($switch_releaseSamplesInfoDisp)
+  read_persistent_var($switch_releaseSamplesInfoDisp)
+  declare ui_switch $switch_legatoInfoDisp
+  make_persistent($switch_legatoInfoDisp)
+  read_persistent_var($switch_legatoInfoDisp)
+  declare ui_switch $switch_directionInfoDisp
+  make_persistent($switch_directionInfoDisp)
+  read_persistent_var($switch_directionInfoDisp)
+  declare ui_switch $switch_speedInfoDisp
+  make_persistent($switch_speedInfoDisp)
+  read_persistent_var($switch_speedInfoDisp)
+  declare ui_switch $switch_optionsInfoDisp
+  make_persistent($switch_optionsInfoDisp)
+  read_persistent_var($switch_optionsInfoDisp)
+  declare ui_switch $switch_articulationsInfoDisp
+  make_persistent($switch_articulationsInfoDisp)
+  read_persistent_var($switch_articulationsInfoDisp)
+  declare ui_switch $switch_generalInfoDisp
+  make_persistent($switch_generalInfoDisp)
+  read_persistent_var($switch_generalInfoDisp)
+  declare ui_switch $switch_sixteenths
+  make_persistent($switch_sixteenths)
+  read_persistent_var($switch_sixteenths)
+  declare ui_switch $switch_eighths
+  make_persistent($switch_eighths)
+  read_persistent_var($switch_eighths)
+  declare ui_switch $switch_quarters
+  make_persistent($switch_quarters)
+  read_persistent_var($switch_quarters)
+  declare ui_switch $switch_logoAnimTrigger
+  make_persistent($switch_logoAnimTrigger)
+  read_persistent_var($switch_logoAnimTrigger)
+  declare ui_switch $switch_midiPgChooser0
+  make_persistent($switch_midiPgChooser0)
+  read_persistent_var($switch_midiPgChooser0)
+  declare ui_switch $switch_midiPgChooser1
+  make_persistent($switch_midiPgChooser1)
+  read_persistent_var($switch_midiPgChooser1)
+  declare ui_switch $switch_preview23
+  make_persistent($switch_preview23)
+  read_persistent_var($switch_preview23)
+  declare ui_switch $switch_preview22
+  make_persistent($switch_preview22)
+  read_persistent_var($switch_preview22)
+  declare ui_switch $switch_preview21
+  make_persistent($switch_preview21)
+  read_persistent_var($switch_preview21)
+  declare ui_switch $switch_preview20
+  make_persistent($switch_preview20)
+  read_persistent_var($switch_preview20)
+  declare ui_switch $switch_preview19
+  make_persistent($switch_preview19)
+  read_persistent_var($switch_preview19)
+  declare ui_switch $switch_preview18
+  make_persistent($switch_preview18)
+  read_persistent_var($switch_preview18)
+  declare ui_switch $switch_preview17
+  make_persistent($switch_preview17)
+  read_persistent_var($switch_preview17)
+  declare ui_switch $switch_preview16
+  make_persistent($switch_preview16)
+  read_persistent_var($switch_preview16)
+  declare ui_switch $switch_preview15
+  make_persistent($switch_preview15)
+  read_persistent_var($switch_preview15)
+  declare ui_switch $switch_preview14
+  make_persistent($switch_preview14)
+  read_persistent_var($switch_preview14)
+  declare ui_switch $switch_preview13
+  make_persistent($switch_preview13)
+  read_persistent_var($switch_preview13)
+  declare ui_switch $switch_preview12
+  make_persistent($switch_preview12)
+  read_persistent_var($switch_preview12)
+  declare ui_switch $switch_preview11
+  make_persistent($switch_preview11)
+  read_persistent_var($switch_preview11)
+  declare ui_switch $switch_preview10
+  make_persistent($switch_preview10)
+  read_persistent_var($switch_preview10)
+  declare ui_switch $switch_preview9
+  make_persistent($switch_preview9)
+  read_persistent_var($switch_preview9)
+  declare ui_switch $switch_preview8
+  make_persistent($switch_preview8)
+  read_persistent_var($switch_preview8)
+  declare ui_switch $switch_preview7
+  make_persistent($switch_preview7)
+  read_persistent_var($switch_preview7)
+  declare ui_switch $switch_preview6
+  make_persistent($switch_preview6)
+  read_persistent_var($switch_preview6)
+  declare ui_switch $switch_preview5
+  make_persistent($switch_preview5)
+  read_persistent_var($switch_preview5)
+  declare ui_switch $switch_preview4
+  make_persistent($switch_preview4)
+  read_persistent_var($switch_preview4)
+  declare ui_switch $switch_preview3
+  make_persistent($switch_preview3)
+  read_persistent_var($switch_preview3)
+  declare ui_switch $switch_preview2
+  make_persistent($switch_preview2)
+  read_persistent_var($switch_preview2)
+  declare ui_switch $switch_preview1
+  make_persistent($switch_preview1)
+  read_persistent_var($switch_preview1)
+  declare ui_switch $switch_preview0
+  make_persistent($switch_preview0)
+  read_persistent_var($switch_preview0)
+  declare ui_switch $switch_closeMidi
+  make_persistent($switch_closeMidi)
+  read_persistent_var($switch_closeMidi)
+  declare ui_slider $slider_releaseSamples(0,2)
+  make_persistent($slider_releaseSamples)
+  read_persistent_var($slider_releaseSamples)
+  declare ui_slider $slider_legato(0,3)
+  make_persistent($slider_legato)
+  read_persistent_var($slider_legato)
+  declare ui_slider $slider_direction(0,2)
+  make_persistent($slider_direction)
+  read_persistent_var($slider_direction)
+  declare ui_slider $slider_speed(0,4)
+  make_persistent($slider_speed)
+  read_persistent_var($slider_speed)
+  declare ui_slider $slider_reverb(0,1000000)
+  make_persistent($slider_reverb)
+  read_persistent_var($slider_reverb)
+  declare ui_slider $slider_vol(0,1000000)
+  make_persistent($slider_vol)
+  read_persistent_var($slider_vol)
+  declare ui_slider $slider_logoAnim(0,127)
+  make_persistent($slider_logoAnim)
+  read_persistent_var($slider_logoAnim)
+  declare ui_button $button_releaseSamplesInfo
+  make_persistent($button_releaseSamplesInfo)
+  read_persistent_var($button_releaseSamplesInfo)
+  declare ui_button $button_legatoInfo
+  make_persistent($button_legatoInfo)
+  read_persistent_var($button_legatoInfo)
+  declare ui_button $button_directionInfo
+  make_persistent($button_directionInfo)
+  read_persistent_var($button_directionInfo)
+  declare ui_button $button_speedInfo
+  make_persistent($button_speedInfo)
+  read_persistent_var($button_speedInfo)
+  declare ui_button $button_optionsInfo
+  make_persistent($button_optionsInfo)
+  read_persistent_var($button_optionsInfo)
+  declare ui_button $button_articulationsInfo
+  make_persistent($button_articulationsInfo)
+  read_persistent_var($button_articulationsInfo)
+  declare ui_button $button_generalInfo
+  make_persistent($button_generalInfo)
+  read_persistent_var($button_generalInfo)
+  declare ui_button $button_showMidi
+  make_persistent($button_showMidi)
+  read_persistent_var($button_showMidi)
   declare ui_label $label_reverb(1,1)
   make_persistent($label_reverb)
   read_persistent_var($label_reverb)
@@ -691,9 +927,6 @@ on init
   declare ui_label $label_midiInstructions(1,1)
   make_persistent($label_midiInstructions)
   read_persistent_var($label_midiInstructions)
-  declare ui_label $label_instructions(1,1)
-  make_persistent($label_instructions)
-  read_persistent_var($label_instructions)
   declare ui_label $label_oct2__note12(1,1)
   make_persistent($label_oct2__note12)
   read_persistent_var($label_oct2__note12)
@@ -805,6 +1038,9 @@ on init
   declare ui_label $label_oct0__note1(1,1)
   make_persistent($label_oct0__note1)
   read_persistent_var($label_oct0__note1)
+  declare ui_label $label_version(1,1)
+  make_persistent($label_version)
+  read_persistent_var($label_version)
   declare ui_label $label_midiCover(1,1)
   make_persistent($label_midiCover)
   read_persistent_var($label_midiCover)
@@ -1027,199 +1263,25 @@ on init
   declare ui_menu $menu_reverb
   make_persistent($menu_reverb)
   read_persistent_var($menu_reverb)
-  declare ui_slider $slider_reverb(0,1000000)
-  make_persistent($slider_reverb)
-  read_persistent_var($slider_reverb)
-  declare ui_slider $slider_vol(0,1000000)
-  make_persistent($slider_vol)
-  read_persistent_var($slider_vol)
-  declare ui_slider $slider_releaseSamples(0,2)
-  make_persistent($slider_releaseSamples)
-  read_persistent_var($slider_releaseSamples)
-  declare ui_slider $slider_legato(0,3)
-  make_persistent($slider_legato)
-  read_persistent_var($slider_legato)
-  declare ui_slider $slider_direction(0,2)
-  make_persistent($slider_direction)
-  read_persistent_var($slider_direction)
-  declare ui_slider $slider_speed(0,4)
-  make_persistent($slider_speed)
-  read_persistent_var($slider_speed)
-  declare ui_slider $slider_logoAnim(0,127)
-  make_persistent($slider_logoAnim)
-  read_persistent_var($slider_logoAnim)
-  declare ui_switch $switch_sixteenths
-  make_persistent($switch_sixteenths)
-  read_persistent_var($switch_sixteenths)
-  declare ui_switch $switch_eighths
-  make_persistent($switch_eighths)
-  read_persistent_var($switch_eighths)
-  declare ui_switch $switch_quarters
-  make_persistent($switch_quarters)
-  read_persistent_var($switch_quarters)
-  declare ui_switch $switch_releaseSamples__loud
-  make_persistent($switch_releaseSamples__loud)
-  read_persistent_var($switch_releaseSamples__loud)
-  declare ui_switch $switch_releaseSamples__soft
-  make_persistent($switch_releaseSamples__soft)
-  read_persistent_var($switch_releaseSamples__soft)
-  declare ui_switch $switch_releaseSamples__off
-  make_persistent($switch_releaseSamples__off)
-  read_persistent_var($switch_releaseSamples__off)
-  declare ui_switch $switch_syncToSwell
-  make_persistent($switch_syncToSwell)
-  read_persistent_var($switch_syncToSwell)
-  declare ui_switch $switch_syncToRipple
-  make_persistent($switch_syncToRipple)
-  read_persistent_var($switch_syncToRipple)
-  declare ui_switch $switch_syncToPitch
-  make_persistent($switch_syncToPitch)
-  read_persistent_var($switch_syncToPitch)
-  declare ui_switch $switch_noLegato
-  make_persistent($switch_noLegato)
-  read_persistent_var($switch_noLegato)
-  declare ui_switch $switch_up
-  make_persistent($switch_up)
-  read_persistent_var($switch_up)
-  declare ui_switch $switch_asPlayed
-  make_persistent($switch_asPlayed)
-  read_persistent_var($switch_asPlayed)
-  declare ui_switch $switch_down
-  make_persistent($switch_down)
-  read_persistent_var($switch_down)
-  declare ui_switch $switch_doubleSpeed
-  make_persistent($switch_doubleSpeed)
-  read_persistent_var($switch_doubleSpeed)
-  declare ui_switch $switch_fastTripletSpeed
-  make_persistent($switch_fastTripletSpeed)
-  read_persistent_var($switch_fastTripletSpeed)
-  declare ui_switch $switch_fullSpeed
-  make_persistent($switch_fullSpeed)
-  read_persistent_var($switch_fullSpeed)
-  declare ui_switch $switch_slowTripletSpeed
-  make_persistent($switch_slowTripletSpeed)
-  read_persistent_var($switch_slowTripletSpeed)
-  declare ui_switch $switch_halfSpeed
-  make_persistent($switch_halfSpeed)
-  read_persistent_var($switch_halfSpeed)
-  declare ui_switch $switch_closeMidi
-  make_persistent($switch_closeMidi)
-  read_persistent_var($switch_closeMidi)
-  declare ui_switch $switch_openInfoOptions
-  make_persistent($switch_openInfoOptions)
-  read_persistent_var($switch_openInfoOptions)
-  declare ui_switch $switch_openInfo
-  make_persistent($switch_openInfo)
-  read_persistent_var($switch_openInfo)
-  declare ui_switch $switch_showMidi
-  make_persistent($switch_showMidi)
-  read_persistent_var($switch_showMidi)
-  declare ui_switch $switch_midiPgChooser0
-  make_persistent($switch_midiPgChooser0)
-  read_persistent_var($switch_midiPgChooser0)
-  declare ui_switch $switch_midiPgChooser1
-  make_persistent($switch_midiPgChooser1)
-  read_persistent_var($switch_midiPgChooser1)
-  declare ui_switch $switch_preview23
-  make_persistent($switch_preview23)
-  read_persistent_var($switch_preview23)
-  declare ui_switch $switch_preview22
-  make_persistent($switch_preview22)
-  read_persistent_var($switch_preview22)
-  declare ui_switch $switch_preview21
-  make_persistent($switch_preview21)
-  read_persistent_var($switch_preview21)
-  declare ui_switch $switch_preview20
-  make_persistent($switch_preview20)
-  read_persistent_var($switch_preview20)
-  declare ui_switch $switch_preview19
-  make_persistent($switch_preview19)
-  read_persistent_var($switch_preview19)
-  declare ui_switch $switch_preview18
-  make_persistent($switch_preview18)
-  read_persistent_var($switch_preview18)
-  declare ui_switch $switch_preview17
-  make_persistent($switch_preview17)
-  read_persistent_var($switch_preview17)
-  declare ui_switch $switch_preview16
-  make_persistent($switch_preview16)
-  read_persistent_var($switch_preview16)
-  declare ui_switch $switch_preview15
-  make_persistent($switch_preview15)
-  read_persistent_var($switch_preview15)
-  declare ui_switch $switch_preview14
-  make_persistent($switch_preview14)
-  read_persistent_var($switch_preview14)
-  declare ui_switch $switch_preview13
-  make_persistent($switch_preview13)
-  read_persistent_var($switch_preview13)
-  declare ui_switch $switch_preview12
-  make_persistent($switch_preview12)
-  read_persistent_var($switch_preview12)
-  declare ui_switch $switch_preview11
-  make_persistent($switch_preview11)
-  read_persistent_var($switch_preview11)
-  declare ui_switch $switch_preview10
-  make_persistent($switch_preview10)
-  read_persistent_var($switch_preview10)
-  declare ui_switch $switch_preview9
-  make_persistent($switch_preview9)
-  read_persistent_var($switch_preview9)
-  declare ui_switch $switch_preview8
-  make_persistent($switch_preview8)
-  read_persistent_var($switch_preview8)
-  declare ui_switch $switch_preview7
-  make_persistent($switch_preview7)
-  read_persistent_var($switch_preview7)
-  declare ui_switch $switch_preview6
-  make_persistent($switch_preview6)
-  read_persistent_var($switch_preview6)
-  declare ui_switch $switch_preview5
-  make_persistent($switch_preview5)
-  read_persistent_var($switch_preview5)
-  declare ui_switch $switch_preview4
-  make_persistent($switch_preview4)
-  read_persistent_var($switch_preview4)
-  declare ui_switch $switch_preview3
-  make_persistent($switch_preview3)
-  read_persistent_var($switch_preview3)
-  declare ui_switch $switch_preview2
-  make_persistent($switch_preview2)
-  read_persistent_var($switch_preview2)
-  declare ui_switch $switch_preview1
-  make_persistent($switch_preview1)
-  read_persistent_var($switch_preview1)
-  declare ui_switch $switch_preview0
-  make_persistent($switch_preview0)
-  read_persistent_var($switch_preview0)
-  declare ui_switch $switch_infoOptions
-  make_persistent($switch_infoOptions)
-  read_persistent_var($switch_infoOptions)
-  declare ui_switch $switch_info
-  make_persistent($switch_info)
-  read_persistent_var($switch_info)
-  declare ui_switch $switch_logoAnimTrigger
-  make_persistent($switch_logoAnimTrigger)
-  read_persistent_var($switch_logoAnimTrigger)
   declare %UI_ID[10000] := (0)
   %UI_ID[0] := get_ui_id($panel_UI)
   $figma_counter := 1
-  while ($figma_counter<212)
+  while ($figma_counter<223)
     %UI_ID[$figma_counter] := %UI_ID[0]+$figma_counter
     inc($figma_counter)
   end while
-  declare %panel_idx[212] := (0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 10, 10, 10, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 10, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 2, 3, 0, ...
-  0, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 11, 14, ...
-  14, 14, 15, 15, 15, 16, 16, 16, 17, 17, 17, 18, 18, 18, 19, 19, 19, 20, 20, 20, 21, 21, 21, 22, 22, 22, 23, 23, 23, 24, 24, 24, 25, 25, 25, 27, 27, 27, 28, 28, ...
-  28, 29, 29, 29, 30, 30, 30, 31, 31, 31, 32, 32, 32, 33, 33, 33, 34, 34, 34, 35, 35, 35, 36, 36, 36, 37, 37, 37, 38, 38, 38, 2, 2, 3, 0, 0, 0, 0, 0, 4, ...
-  4, 4, 6, 6, 6, 7, 7, 7, 7, 8, 8, 8, 9, 9, 9, 9, 9, 0, 0, 0, 0, 12, 12, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 27, 28, 29, 30, 31, ...
-  32, 33, 34, 35, 36, 37, 38, 0, 0, 0)
-  declare %element_idx[212] := (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, ...
+  declare %panel_idx[223] := (0, 0, 0, 0, 0, 5, 5, 0, 0, 0, 10, 10, 10, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 10, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 1, 1, 1, ...
+  1, 2, 2, 2, 2, 3, 3, 3, 4, 4, 4, 4, 4, 0, 0, 0, 0, 0, 0, 0, 8, 8, 8, 0, 12, 12, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 27, 28, ...
+  29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 0, 1, 2, 3, 4, 6, 7, 0, 1, 2, 3, 4, 0, 0, 0, 0, 6, 7, 0, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, ...
+  9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 0, 11, 14, 14, 14, 15, 15, 15, 16, 16, 16, 17, 17, 17, ...
+  18, 18, 18, 19, 19, 19, 20, 20, 20, 21, 21, 21, 22, 22, 22, 23, 23, 23, 24, 24, 24, 25, 25, 25, 27, 27, 27, 28, 28, 28, 29, 29, 29, 30, 30, 30, 31, 31, 31, 32, ...
+  32, 32, 33, 33, 33, 34, 34, 34, 35, 35, 35, 36, 36, 36, 37, 37, 37, 38, 38, 38, 6)
+  declare %element_idx[223] := (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, ...
   42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, ...
   82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119, 120, 121, ...
   122, 123, 124, 125, 126, 127, 128, 129, 130, 131, 132, 133, 134, 135, 136, 137, 138, 139, 140, 141, 142, 143, 144, 145, 146, 147, 148, 149, 150, 151, 152, 153, 154, 155, 156, 157, 158, 159, 160, 161, ...
   162, 163, 164, 165, 166, 167, 168, 169, 170, 171, 172, 173, 174, 175, 176, 177, 178, 179, 180, 181, 182, 183, 184, 185, 186, 187, 188, 189, 190, 191, 192, 193, 194, 195, 196, 197, 198, 199, 200, 201, ...
-  202, 203, 204, 205, 206, 207, 208, 209, 210, 211)
+  202, 203, 204, 205, 206, 207, 208, 209, 210, 211, 212, 213, 214, 215, 216, 217, 218, 219, 220, 221, 222)
   $figma_counter := 1
   while ($figma_counter<num_elements(%panel_idx))
     if (%panel_idx[$figma_counter] # -1)
@@ -1228,7 +1290,7 @@ on init
     inc($figma_counter)
   end while
   $figma_counter := 0
-  while ($figma_counter<212)
+  while ($figma_counter<223)
     set_control_par_str(%UI_ID[$figma_counter],$CONTROL_PAR_TEXT,"")
     set_control_par(%UI_ID[$figma_counter],$CONTROL_PAR_WIDTH,%UI_width[$figma_counter])
     set_control_par(%UI_ID[$figma_counter],$CONTROL_PAR_HEIGHT,%UI_height[$figma_counter])
@@ -1266,6 +1328,7 @@ on init
     inc($figma_counter)
   end while
   set_control_par_str($INST_ICON_ID,$CONTROL_PAR_PICTURE,"insticon")
+  set_control_par(get_ui_id($label_version),$CONTROL_PAR_HIDE,$HIDE_WHOLE_CONTROL)
   declare %panel_midiPg[2]
   declare %switch_midiPgChooser[2]
   %panel_midiPg[0] := get_ui_id($panel_midiPg0)
@@ -1424,35 +1487,45 @@ on init
     set_control_par(%mf_cursor[$i],$CONTROL_PAR_POS_Y,0)
     inc($i)
   end while
-  $switch_showMidi := 0
-  set_control_par(get_ui_id($switch_closeMidi),$CONTROL_PAR_HIDE,%hide_states[$switch_showMidi])
-  set_control_par(get_ui_id($paneL_ideas),$CONTROL_PAR_HIDE,%hide_states[$switch_showMidi])
+  $button_showMidi := 0
+  set_control_par(get_ui_id($switch_closeMidi),$CONTROL_PAR_HIDE,%hide_states[$button_showMidi])
+  set_control_par(get_ui_id($paneL_midi),$CONTROL_PAR_HIDE,%hide_states[$button_showMidi])
   $i := 0
   while ($i<2)
     set_control_par(%panel_midiPg[$i],$CONTROL_PAR_HIDE,$HIDE_WHOLE_CONTROL)
     inc($i)
   end while
-  set_control_par(%panel_midiPg[$cur_midi_page],$CONTROL_PAR_HIDE,%hide_states[$switch_showMidi])
-  set_control_par(get_ui_id($label_midiInstructions),$CONTROL_PAR_HIDE,%hide_states[$switch_showMidi])
-  ~midiInstructions_opacity := real($switch_showMidi)
-  ~midiCover_opacity := real($switch_showMidi)
-  set_control_par(get_ui_id($panel_articulations),$CONTROL_PAR_HIDE,%hide_states[1-$switch_showMidi])
-  set_control_par(get_ui_id($panel_fx),$CONTROL_PAR_HIDE,%hide_states[1-$switch_showMidi])
-  set_control_par(get_ui_id($panel_speed),$CONTROL_PAR_HIDE,%hide_states[1-$switch_showMidi])
-  set_control_par(get_ui_id($slider_speed),$CONTROL_PAR_HIDE,%hide_states[1-$switch_showMidi])
-  set_control_par(get_ui_id($panel_direction),$CONTROL_PAR_HIDE,%hide_states[1-$switch_showMidi])
-  set_control_par(get_ui_id($slider_direction),$CONTROL_PAR_HIDE,%hide_states[1-$switch_showMidi])
-  set_control_par(get_ui_id($panel_legato),$CONTROL_PAR_HIDE,%hide_states[1-$switch_showMidi])
-  set_control_par(get_ui_id($slider_legato),$CONTROL_PAR_HIDE,%hide_states[1-$switch_showMidi])
-  set_control_par(get_ui_id($panel_releaseSamples),$CONTROL_PAR_HIDE,%hide_states[1-$switch_showMidi])
-  set_control_par(get_ui_id($slider_releaseSamples),$CONTROL_PAR_HIDE,%hide_states[1-$switch_showMidi])
-  set_control_par(get_ui_id($switch_openInfo),$CONTROL_PAR_HIDE,%hide_states[1-$switch_showMidi])
-  set_control_par(get_ui_id($switch_openInfoOptions),$CONTROL_PAR_HIDE,%hide_states[1-$switch_showMidi])
-  set_control_par(get_ui_id($panel_ideas),$CONTROL_PAR_Z_LAYER,0)
-  set_control_par(get_ui_id($switch_info),$CONTROL_PAR_HIDE,$HIDE_WHOLE_CONTROL)
-  set_control_par(get_ui_id($switch_infoOptions),$CONTROL_PAR_HIDE,$HIDE_WHOLE_CONTROL)
-  set_control_par(get_ui_id($switch_info),$CONTROL_PAR_Z_LAYER,1)
-  set_control_par(get_ui_id($switch_infoOptions),$CONTROL_PAR_Z_LAYER,1)
+  set_control_par(%panel_midiPg[$cur_midi_page],$CONTROL_PAR_HIDE,%hide_states[$button_showMidi])
+  set_control_par(get_ui_id($label_midiInstructions),$CONTROL_PAR_HIDE,%hide_states[$button_showMidi])
+  ~midiInstructions_opacity := real($button_showMidi)
+  ~midiCover_opacity := real($button_showMidi)
+  set_control_par(get_ui_id($panel_articulations),$CONTROL_PAR_HIDE,%hide_states[1-$button_showMidi])
+  set_control_par(get_ui_id($panel_fx),$CONTROL_PAR_HIDE,%hide_states[1-$button_showMidi])
+  set_control_par(get_ui_id($panel_speed),$CONTROL_PAR_HIDE,%hide_states[1-$button_showMidi])
+  set_control_par(get_ui_id($slider_speed),$CONTROL_PAR_HIDE,%hide_states[1-$button_showMidi])
+  set_control_par(get_ui_id($panel_direction),$CONTROL_PAR_HIDE,%hide_states[1-$button_showMidi])
+  set_control_par(get_ui_id($slider_direction),$CONTROL_PAR_HIDE,%hide_states[1-$button_showMidi])
+  set_control_par(get_ui_id($panel_legato),$CONTROL_PAR_HIDE,%hide_states[1-$button_showMidi])
+  set_control_par(get_ui_id($slider_legato),$CONTROL_PAR_HIDE,%hide_states[1-$button_showMidi])
+  set_control_par(get_ui_id($panel_releaseSamples),$CONTROL_PAR_HIDE,%hide_states[1-$button_showMidi])
+  set_control_par(get_ui_id($slider_releaseSamples),$CONTROL_PAR_HIDE,%hide_states[1-$button_showMidi])
+  set_control_par(get_ui_id($button_generalInfo),$CONTROL_PAR_HIDE,%hide_states[1-$button_showMidi])
+  set_control_par(get_ui_id($button_optionsInfo),$CONTROL_PAR_HIDE,%hide_states[1-$button_showMidi])
+  set_control_par(get_ui_id($panel_midi),$CONTROL_PAR_Z_LAYER,0)
+  set_control_par(get_ui_id($switch_generalInfoDisp),$CONTROL_PAR_HIDE,$HIDE_WHOLE_CONTROL)
+  set_control_par(get_ui_id($switch_articulationsInfoDisp),$CONTROL_PAR_HIDE,$HIDE_WHOLE_CONTROL)
+  set_control_par(get_ui_id($switch_optionsInfoDisp),$CONTROL_PAR_HIDE,$HIDE_WHOLE_CONTROL)
+  set_control_par(get_ui_id($switch_speedInfoDisp),$CONTROL_PAR_HIDE,$HIDE_WHOLE_CONTROL)
+  set_control_par(get_ui_id($switch_directionInfoDisp),$CONTROL_PAR_HIDE,$HIDE_WHOLE_CONTROL)
+  set_control_par(get_ui_id($switch_legatoInfoDisp),$CONTROL_PAR_HIDE,$HIDE_WHOLE_CONTROL)
+  set_control_par(get_ui_id($switch_releaseSamplesInfoDisp),$CONTROL_PAR_HIDE,$HIDE_WHOLE_CONTROL)
+  set_control_par(get_ui_id($switch_generalInfoDisp),$CONTROL_PAR_Z_LAYER,1)
+  set_control_par(get_ui_id($switch_articulationsInfoDisp),$CONTROL_PAR_Z_LAYER,1)
+  set_control_par(get_ui_id($switch_optionsInfoDisp),$CONTROL_PAR_Z_LAYER,1)
+  set_control_par(get_ui_id($switch_speedInfoDisp),$CONTROL_PAR_Z_LAYER,1)
+  set_control_par(get_ui_id($switch_directionInfoDisp),$CONTROL_PAR_Z_LAYER,1)
+  set_control_par(get_ui_id($switch_legatoInfoDisp),$CONTROL_PAR_Z_LAYER,1)
+  set_control_par(get_ui_id($switch_releaseSamplesInfoDisp),$CONTROL_PAR_Z_LAYER,1)
   set_control_par(get_ui_id($panel_midiPgChooser),$CONTROL_PAR_Z_LAYER,1)
   set_control_par(get_ui_id($switch_midiPgChooser0),$CONTROL_PAR_Z_LAYER,1)
   set_control_par(get_ui_id($switch_midiPgChooser1),$CONTROL_PAR_Z_LAYER,1)
@@ -1614,6 +1687,7 @@ on init
   set_control_par(get_ui_id($switch_releaseSamples__off),$CONTROL_PAR_WIDTH,get_control_par(get_ui_id($switch_releaseSamples__off),$CONTROL_PAR_WIDTH)+14)
   set_control_par(get_ui_id($switch_releaseSamples__soft),$CONTROL_PAR_WIDTH,get_control_par(get_ui_id($switch_releaseSamples__soft),$CONTROL_PAR_WIDTH)+14)
   set_control_par(get_ui_id($switch_releaseSamples__loud),$CONTROL_PAR_WIDTH,get_control_par(get_ui_id($switch_releaseSamples__loud),$CONTROL_PAR_WIDTH)+14)
+  set_control_par(get_ui_id($switch_releaseTrigger),$CONTROL_PAR_ALLOW_AUTOMATION,0)
   set_control_par(get_ui_id($slider_speed),$CONTROL_PAR_MOUSE_BEHAVIOUR,2000)
   set_control_par(get_ui_id($slider_direction),$CONTROL_PAR_MOUSE_BEHAVIOUR,2000)
   set_control_par(get_ui_id($slider_legato),$CONTROL_PAR_MOUSE_BEHAVIOUR,2000)
@@ -1621,607 +1695,9 @@ on init
   set_control_par(get_ui_id($slider_speed),$CONTROL_PAR_DEFAULT_VALUE,2)
   set_control_par(get_ui_id($slider_direction),$CONTROL_PAR_DEFAULT_VALUE,1)
   set_control_par(get_ui_id($slider_legato),$CONTROL_PAR_DEFAULT_VALUE,0)
-  set_control_par(get_ui_id($slider_vol),$CONTROL_PAR_DEFAULT_VALUE,real_to_int(pow(2.0,(0.0+346768.2342478351)/18000.0)))
+  set_control_par(get_ui_id($slider_vol),$CONTROL_PAR_DEFAULT_VALUE,500000)
   set_control_par(get_ui_id($slider_reverb),$CONTROL_PAR_DEFAULT_VALUE,500000)
   set_control_par(get_ui_id($menu_reverb),$CONTROL_PAR_TEXTPOS_Y,100)
-  declare %_bracket[64*9]
-  declare const $bracket__SIZE_D1 := 64
-  declare const $bracket__SIZE_D2 := 9
-  declare ui_slider $_bracket0(0,1000)
-  declare ui_slider $_bracket1(0,1000)
-  declare ui_slider $_bracket2(0,1000)
-  declare ui_slider $_bracket3(0,1000)
-  declare ui_slider $_bracket4(0,1000)
-  declare ui_slider $_bracket5(0,1000)
-  declare ui_slider $_bracket6(0,1000)
-  declare ui_slider $_bracket7(0,1000)
-  declare ui_slider $_bracket8(0,1000)
-  declare ui_slider $_bracket9(0,1000)
-  declare ui_slider $_bracket10(0,1000)
-  declare ui_slider $_bracket11(0,1000)
-  declare ui_slider $_bracket12(0,1000)
-  declare ui_slider $_bracket13(0,1000)
-  declare ui_slider $_bracket14(0,1000)
-  declare ui_slider $_bracket15(0,1000)
-  declare ui_slider $_bracket16(0,1000)
-  declare ui_slider $_bracket17(0,1000)
-  declare ui_slider $_bracket18(0,1000)
-  declare ui_slider $_bracket19(0,1000)
-  declare ui_slider $_bracket20(0,1000)
-  declare ui_slider $_bracket21(0,1000)
-  declare ui_slider $_bracket22(0,1000)
-  declare ui_slider $_bracket23(0,1000)
-  declare ui_slider $_bracket24(0,1000)
-  declare ui_slider $_bracket25(0,1000)
-  declare ui_slider $_bracket26(0,1000)
-  declare ui_slider $_bracket27(0,1000)
-  declare ui_slider $_bracket28(0,1000)
-  declare ui_slider $_bracket29(0,1000)
-  declare ui_slider $_bracket30(0,1000)
-  declare ui_slider $_bracket31(0,1000)
-  declare ui_slider $_bracket32(0,1000)
-  declare ui_slider $_bracket33(0,1000)
-  declare ui_slider $_bracket34(0,1000)
-  declare ui_slider $_bracket35(0,1000)
-  declare ui_slider $_bracket36(0,1000)
-  declare ui_slider $_bracket37(0,1000)
-  declare ui_slider $_bracket38(0,1000)
-  declare ui_slider $_bracket39(0,1000)
-  declare ui_slider $_bracket40(0,1000)
-  declare ui_slider $_bracket41(0,1000)
-  declare ui_slider $_bracket42(0,1000)
-  declare ui_slider $_bracket43(0,1000)
-  declare ui_slider $_bracket44(0,1000)
-  declare ui_slider $_bracket45(0,1000)
-  declare ui_slider $_bracket46(0,1000)
-  declare ui_slider $_bracket47(0,1000)
-  declare ui_slider $_bracket48(0,1000)
-  declare ui_slider $_bracket49(0,1000)
-  declare ui_slider $_bracket50(0,1000)
-  declare ui_slider $_bracket51(0,1000)
-  declare ui_slider $_bracket52(0,1000)
-  declare ui_slider $_bracket53(0,1000)
-  declare ui_slider $_bracket54(0,1000)
-  declare ui_slider $_bracket55(0,1000)
-  declare ui_slider $_bracket56(0,1000)
-  declare ui_slider $_bracket57(0,1000)
-  declare ui_slider $_bracket58(0,1000)
-  declare ui_slider $_bracket59(0,1000)
-  declare ui_slider $_bracket60(0,1000)
-  declare ui_slider $_bracket61(0,1000)
-  declare ui_slider $_bracket62(0,1000)
-  declare ui_slider $_bracket63(0,1000)
-  declare ui_slider $_bracket64(0,1000)
-  declare ui_slider $_bracket65(0,1000)
-  declare ui_slider $_bracket66(0,1000)
-  declare ui_slider $_bracket67(0,1000)
-  declare ui_slider $_bracket68(0,1000)
-  declare ui_slider $_bracket69(0,1000)
-  declare ui_slider $_bracket70(0,1000)
-  declare ui_slider $_bracket71(0,1000)
-  declare ui_slider $_bracket72(0,1000)
-  declare ui_slider $_bracket73(0,1000)
-  declare ui_slider $_bracket74(0,1000)
-  declare ui_slider $_bracket75(0,1000)
-  declare ui_slider $_bracket76(0,1000)
-  declare ui_slider $_bracket77(0,1000)
-  declare ui_slider $_bracket78(0,1000)
-  declare ui_slider $_bracket79(0,1000)
-  declare ui_slider $_bracket80(0,1000)
-  declare ui_slider $_bracket81(0,1000)
-  declare ui_slider $_bracket82(0,1000)
-  declare ui_slider $_bracket83(0,1000)
-  declare ui_slider $_bracket84(0,1000)
-  declare ui_slider $_bracket85(0,1000)
-  declare ui_slider $_bracket86(0,1000)
-  declare ui_slider $_bracket87(0,1000)
-  declare ui_slider $_bracket88(0,1000)
-  declare ui_slider $_bracket89(0,1000)
-  declare ui_slider $_bracket90(0,1000)
-  declare ui_slider $_bracket91(0,1000)
-  declare ui_slider $_bracket92(0,1000)
-  declare ui_slider $_bracket93(0,1000)
-  declare ui_slider $_bracket94(0,1000)
-  declare ui_slider $_bracket95(0,1000)
-  declare ui_slider $_bracket96(0,1000)
-  declare ui_slider $_bracket97(0,1000)
-  declare ui_slider $_bracket98(0,1000)
-  declare ui_slider $_bracket99(0,1000)
-  declare ui_slider $_bracket100(0,1000)
-  declare ui_slider $_bracket101(0,1000)
-  declare ui_slider $_bracket102(0,1000)
-  declare ui_slider $_bracket103(0,1000)
-  declare ui_slider $_bracket104(0,1000)
-  declare ui_slider $_bracket105(0,1000)
-  declare ui_slider $_bracket106(0,1000)
-  declare ui_slider $_bracket107(0,1000)
-  declare ui_slider $_bracket108(0,1000)
-  declare ui_slider $_bracket109(0,1000)
-  declare ui_slider $_bracket110(0,1000)
-  declare ui_slider $_bracket111(0,1000)
-  declare ui_slider $_bracket112(0,1000)
-  declare ui_slider $_bracket113(0,1000)
-  declare ui_slider $_bracket114(0,1000)
-  declare ui_slider $_bracket115(0,1000)
-  declare ui_slider $_bracket116(0,1000)
-  declare ui_slider $_bracket117(0,1000)
-  declare ui_slider $_bracket118(0,1000)
-  declare ui_slider $_bracket119(0,1000)
-  declare ui_slider $_bracket120(0,1000)
-  declare ui_slider $_bracket121(0,1000)
-  declare ui_slider $_bracket122(0,1000)
-  declare ui_slider $_bracket123(0,1000)
-  declare ui_slider $_bracket124(0,1000)
-  declare ui_slider $_bracket125(0,1000)
-  declare ui_slider $_bracket126(0,1000)
-  declare ui_slider $_bracket127(0,1000)
-  declare ui_slider $_bracket128(0,1000)
-  declare ui_slider $_bracket129(0,1000)
-  declare ui_slider $_bracket130(0,1000)
-  declare ui_slider $_bracket131(0,1000)
-  declare ui_slider $_bracket132(0,1000)
-  declare ui_slider $_bracket133(0,1000)
-  declare ui_slider $_bracket134(0,1000)
-  declare ui_slider $_bracket135(0,1000)
-  declare ui_slider $_bracket136(0,1000)
-  declare ui_slider $_bracket137(0,1000)
-  declare ui_slider $_bracket138(0,1000)
-  declare ui_slider $_bracket139(0,1000)
-  declare ui_slider $_bracket140(0,1000)
-  declare ui_slider $_bracket141(0,1000)
-  declare ui_slider $_bracket142(0,1000)
-  declare ui_slider $_bracket143(0,1000)
-  declare ui_slider $_bracket144(0,1000)
-  declare ui_slider $_bracket145(0,1000)
-  declare ui_slider $_bracket146(0,1000)
-  declare ui_slider $_bracket147(0,1000)
-  declare ui_slider $_bracket148(0,1000)
-  declare ui_slider $_bracket149(0,1000)
-  declare ui_slider $_bracket150(0,1000)
-  declare ui_slider $_bracket151(0,1000)
-  declare ui_slider $_bracket152(0,1000)
-  declare ui_slider $_bracket153(0,1000)
-  declare ui_slider $_bracket154(0,1000)
-  declare ui_slider $_bracket155(0,1000)
-  declare ui_slider $_bracket156(0,1000)
-  declare ui_slider $_bracket157(0,1000)
-  declare ui_slider $_bracket158(0,1000)
-  declare ui_slider $_bracket159(0,1000)
-  declare ui_slider $_bracket160(0,1000)
-  declare ui_slider $_bracket161(0,1000)
-  declare ui_slider $_bracket162(0,1000)
-  declare ui_slider $_bracket163(0,1000)
-  declare ui_slider $_bracket164(0,1000)
-  declare ui_slider $_bracket165(0,1000)
-  declare ui_slider $_bracket166(0,1000)
-  declare ui_slider $_bracket167(0,1000)
-  declare ui_slider $_bracket168(0,1000)
-  declare ui_slider $_bracket169(0,1000)
-  declare ui_slider $_bracket170(0,1000)
-  declare ui_slider $_bracket171(0,1000)
-  declare ui_slider $_bracket172(0,1000)
-  declare ui_slider $_bracket173(0,1000)
-  declare ui_slider $_bracket174(0,1000)
-  declare ui_slider $_bracket175(0,1000)
-  declare ui_slider $_bracket176(0,1000)
-  declare ui_slider $_bracket177(0,1000)
-  declare ui_slider $_bracket178(0,1000)
-  declare ui_slider $_bracket179(0,1000)
-  declare ui_slider $_bracket180(0,1000)
-  declare ui_slider $_bracket181(0,1000)
-  declare ui_slider $_bracket182(0,1000)
-  declare ui_slider $_bracket183(0,1000)
-  declare ui_slider $_bracket184(0,1000)
-  declare ui_slider $_bracket185(0,1000)
-  declare ui_slider $_bracket186(0,1000)
-  declare ui_slider $_bracket187(0,1000)
-  declare ui_slider $_bracket188(0,1000)
-  declare ui_slider $_bracket189(0,1000)
-  declare ui_slider $_bracket190(0,1000)
-  declare ui_slider $_bracket191(0,1000)
-  declare ui_slider $_bracket192(0,1000)
-  declare ui_slider $_bracket193(0,1000)
-  declare ui_slider $_bracket194(0,1000)
-  declare ui_slider $_bracket195(0,1000)
-  declare ui_slider $_bracket196(0,1000)
-  declare ui_slider $_bracket197(0,1000)
-  declare ui_slider $_bracket198(0,1000)
-  declare ui_slider $_bracket199(0,1000)
-  declare ui_slider $_bracket200(0,1000)
-  declare ui_slider $_bracket201(0,1000)
-  declare ui_slider $_bracket202(0,1000)
-  declare ui_slider $_bracket203(0,1000)
-  declare ui_slider $_bracket204(0,1000)
-  declare ui_slider $_bracket205(0,1000)
-  declare ui_slider $_bracket206(0,1000)
-  declare ui_slider $_bracket207(0,1000)
-  declare ui_slider $_bracket208(0,1000)
-  declare ui_slider $_bracket209(0,1000)
-  declare ui_slider $_bracket210(0,1000)
-  declare ui_slider $_bracket211(0,1000)
-  declare ui_slider $_bracket212(0,1000)
-  declare ui_slider $_bracket213(0,1000)
-  declare ui_slider $_bracket214(0,1000)
-  declare ui_slider $_bracket215(0,1000)
-  declare ui_slider $_bracket216(0,1000)
-  declare ui_slider $_bracket217(0,1000)
-  declare ui_slider $_bracket218(0,1000)
-  declare ui_slider $_bracket219(0,1000)
-  declare ui_slider $_bracket220(0,1000)
-  declare ui_slider $_bracket221(0,1000)
-  declare ui_slider $_bracket222(0,1000)
-  declare ui_slider $_bracket223(0,1000)
-  declare ui_slider $_bracket224(0,1000)
-  declare ui_slider $_bracket225(0,1000)
-  declare ui_slider $_bracket226(0,1000)
-  declare ui_slider $_bracket227(0,1000)
-  declare ui_slider $_bracket228(0,1000)
-  declare ui_slider $_bracket229(0,1000)
-  declare ui_slider $_bracket230(0,1000)
-  declare ui_slider $_bracket231(0,1000)
-  declare ui_slider $_bracket232(0,1000)
-  declare ui_slider $_bracket233(0,1000)
-  declare ui_slider $_bracket234(0,1000)
-  declare ui_slider $_bracket235(0,1000)
-  declare ui_slider $_bracket236(0,1000)
-  declare ui_slider $_bracket237(0,1000)
-  declare ui_slider $_bracket238(0,1000)
-  declare ui_slider $_bracket239(0,1000)
-  declare ui_slider $_bracket240(0,1000)
-  declare ui_slider $_bracket241(0,1000)
-  declare ui_slider $_bracket242(0,1000)
-  declare ui_slider $_bracket243(0,1000)
-  declare ui_slider $_bracket244(0,1000)
-  declare ui_slider $_bracket245(0,1000)
-  declare ui_slider $_bracket246(0,1000)
-  declare ui_slider $_bracket247(0,1000)
-  declare ui_slider $_bracket248(0,1000)
-  declare ui_slider $_bracket249(0,1000)
-  declare ui_slider $_bracket250(0,1000)
-  declare ui_slider $_bracket251(0,1000)
-  declare ui_slider $_bracket252(0,1000)
-  declare ui_slider $_bracket253(0,1000)
-  declare ui_slider $_bracket254(0,1000)
-  declare ui_slider $_bracket255(0,1000)
-  declare ui_slider $_bracket256(0,1000)
-  declare ui_slider $_bracket257(0,1000)
-  declare ui_slider $_bracket258(0,1000)
-  declare ui_slider $_bracket259(0,1000)
-  declare ui_slider $_bracket260(0,1000)
-  declare ui_slider $_bracket261(0,1000)
-  declare ui_slider $_bracket262(0,1000)
-  declare ui_slider $_bracket263(0,1000)
-  declare ui_slider $_bracket264(0,1000)
-  declare ui_slider $_bracket265(0,1000)
-  declare ui_slider $_bracket266(0,1000)
-  declare ui_slider $_bracket267(0,1000)
-  declare ui_slider $_bracket268(0,1000)
-  declare ui_slider $_bracket269(0,1000)
-  declare ui_slider $_bracket270(0,1000)
-  declare ui_slider $_bracket271(0,1000)
-  declare ui_slider $_bracket272(0,1000)
-  declare ui_slider $_bracket273(0,1000)
-  declare ui_slider $_bracket274(0,1000)
-  declare ui_slider $_bracket275(0,1000)
-  declare ui_slider $_bracket276(0,1000)
-  declare ui_slider $_bracket277(0,1000)
-  declare ui_slider $_bracket278(0,1000)
-  declare ui_slider $_bracket279(0,1000)
-  declare ui_slider $_bracket280(0,1000)
-  declare ui_slider $_bracket281(0,1000)
-  declare ui_slider $_bracket282(0,1000)
-  declare ui_slider $_bracket283(0,1000)
-  declare ui_slider $_bracket284(0,1000)
-  declare ui_slider $_bracket285(0,1000)
-  declare ui_slider $_bracket286(0,1000)
-  declare ui_slider $_bracket287(0,1000)
-  declare ui_slider $_bracket288(0,1000)
-  declare ui_slider $_bracket289(0,1000)
-  declare ui_slider $_bracket290(0,1000)
-  declare ui_slider $_bracket291(0,1000)
-  declare ui_slider $_bracket292(0,1000)
-  declare ui_slider $_bracket293(0,1000)
-  declare ui_slider $_bracket294(0,1000)
-  declare ui_slider $_bracket295(0,1000)
-  declare ui_slider $_bracket296(0,1000)
-  declare ui_slider $_bracket297(0,1000)
-  declare ui_slider $_bracket298(0,1000)
-  declare ui_slider $_bracket299(0,1000)
-  declare ui_slider $_bracket300(0,1000)
-  declare ui_slider $_bracket301(0,1000)
-  declare ui_slider $_bracket302(0,1000)
-  declare ui_slider $_bracket303(0,1000)
-  declare ui_slider $_bracket304(0,1000)
-  declare ui_slider $_bracket305(0,1000)
-  declare ui_slider $_bracket306(0,1000)
-  declare ui_slider $_bracket307(0,1000)
-  declare ui_slider $_bracket308(0,1000)
-  declare ui_slider $_bracket309(0,1000)
-  declare ui_slider $_bracket310(0,1000)
-  declare ui_slider $_bracket311(0,1000)
-  declare ui_slider $_bracket312(0,1000)
-  declare ui_slider $_bracket313(0,1000)
-  declare ui_slider $_bracket314(0,1000)
-  declare ui_slider $_bracket315(0,1000)
-  declare ui_slider $_bracket316(0,1000)
-  declare ui_slider $_bracket317(0,1000)
-  declare ui_slider $_bracket318(0,1000)
-  declare ui_slider $_bracket319(0,1000)
-  declare ui_slider $_bracket320(0,1000)
-  declare ui_slider $_bracket321(0,1000)
-  declare ui_slider $_bracket322(0,1000)
-  declare ui_slider $_bracket323(0,1000)
-  declare ui_slider $_bracket324(0,1000)
-  declare ui_slider $_bracket325(0,1000)
-  declare ui_slider $_bracket326(0,1000)
-  declare ui_slider $_bracket327(0,1000)
-  declare ui_slider $_bracket328(0,1000)
-  declare ui_slider $_bracket329(0,1000)
-  declare ui_slider $_bracket330(0,1000)
-  declare ui_slider $_bracket331(0,1000)
-  declare ui_slider $_bracket332(0,1000)
-  declare ui_slider $_bracket333(0,1000)
-  declare ui_slider $_bracket334(0,1000)
-  declare ui_slider $_bracket335(0,1000)
-  declare ui_slider $_bracket336(0,1000)
-  declare ui_slider $_bracket337(0,1000)
-  declare ui_slider $_bracket338(0,1000)
-  declare ui_slider $_bracket339(0,1000)
-  declare ui_slider $_bracket340(0,1000)
-  declare ui_slider $_bracket341(0,1000)
-  declare ui_slider $_bracket342(0,1000)
-  declare ui_slider $_bracket343(0,1000)
-  declare ui_slider $_bracket344(0,1000)
-  declare ui_slider $_bracket345(0,1000)
-  declare ui_slider $_bracket346(0,1000)
-  declare ui_slider $_bracket347(0,1000)
-  declare ui_slider $_bracket348(0,1000)
-  declare ui_slider $_bracket349(0,1000)
-  declare ui_slider $_bracket350(0,1000)
-  declare ui_slider $_bracket351(0,1000)
-  declare ui_slider $_bracket352(0,1000)
-  declare ui_slider $_bracket353(0,1000)
-  declare ui_slider $_bracket354(0,1000)
-  declare ui_slider $_bracket355(0,1000)
-  declare ui_slider $_bracket356(0,1000)
-  declare ui_slider $_bracket357(0,1000)
-  declare ui_slider $_bracket358(0,1000)
-  declare ui_slider $_bracket359(0,1000)
-  declare ui_slider $_bracket360(0,1000)
-  declare ui_slider $_bracket361(0,1000)
-  declare ui_slider $_bracket362(0,1000)
-  declare ui_slider $_bracket363(0,1000)
-  declare ui_slider $_bracket364(0,1000)
-  declare ui_slider $_bracket365(0,1000)
-  declare ui_slider $_bracket366(0,1000)
-  declare ui_slider $_bracket367(0,1000)
-  declare ui_slider $_bracket368(0,1000)
-  declare ui_slider $_bracket369(0,1000)
-  declare ui_slider $_bracket370(0,1000)
-  declare ui_slider $_bracket371(0,1000)
-  declare ui_slider $_bracket372(0,1000)
-  declare ui_slider $_bracket373(0,1000)
-  declare ui_slider $_bracket374(0,1000)
-  declare ui_slider $_bracket375(0,1000)
-  declare ui_slider $_bracket376(0,1000)
-  declare ui_slider $_bracket377(0,1000)
-  declare ui_slider $_bracket378(0,1000)
-  declare ui_slider $_bracket379(0,1000)
-  declare ui_slider $_bracket380(0,1000)
-  declare ui_slider $_bracket381(0,1000)
-  declare ui_slider $_bracket382(0,1000)
-  declare ui_slider $_bracket383(0,1000)
-  declare ui_slider $_bracket384(0,1000)
-  declare ui_slider $_bracket385(0,1000)
-  declare ui_slider $_bracket386(0,1000)
-  declare ui_slider $_bracket387(0,1000)
-  declare ui_slider $_bracket388(0,1000)
-  declare ui_slider $_bracket389(0,1000)
-  declare ui_slider $_bracket390(0,1000)
-  declare ui_slider $_bracket391(0,1000)
-  declare ui_slider $_bracket392(0,1000)
-  declare ui_slider $_bracket393(0,1000)
-  declare ui_slider $_bracket394(0,1000)
-  declare ui_slider $_bracket395(0,1000)
-  declare ui_slider $_bracket396(0,1000)
-  declare ui_slider $_bracket397(0,1000)
-  declare ui_slider $_bracket398(0,1000)
-  declare ui_slider $_bracket399(0,1000)
-  declare ui_slider $_bracket400(0,1000)
-  declare ui_slider $_bracket401(0,1000)
-  declare ui_slider $_bracket402(0,1000)
-  declare ui_slider $_bracket403(0,1000)
-  declare ui_slider $_bracket404(0,1000)
-  declare ui_slider $_bracket405(0,1000)
-  declare ui_slider $_bracket406(0,1000)
-  declare ui_slider $_bracket407(0,1000)
-  declare ui_slider $_bracket408(0,1000)
-  declare ui_slider $_bracket409(0,1000)
-  declare ui_slider $_bracket410(0,1000)
-  declare ui_slider $_bracket411(0,1000)
-  declare ui_slider $_bracket412(0,1000)
-  declare ui_slider $_bracket413(0,1000)
-  declare ui_slider $_bracket414(0,1000)
-  declare ui_slider $_bracket415(0,1000)
-  declare ui_slider $_bracket416(0,1000)
-  declare ui_slider $_bracket417(0,1000)
-  declare ui_slider $_bracket418(0,1000)
-  declare ui_slider $_bracket419(0,1000)
-  declare ui_slider $_bracket420(0,1000)
-  declare ui_slider $_bracket421(0,1000)
-  declare ui_slider $_bracket422(0,1000)
-  declare ui_slider $_bracket423(0,1000)
-  declare ui_slider $_bracket424(0,1000)
-  declare ui_slider $_bracket425(0,1000)
-  declare ui_slider $_bracket426(0,1000)
-  declare ui_slider $_bracket427(0,1000)
-  declare ui_slider $_bracket428(0,1000)
-  declare ui_slider $_bracket429(0,1000)
-  declare ui_slider $_bracket430(0,1000)
-  declare ui_slider $_bracket431(0,1000)
-  declare ui_slider $_bracket432(0,1000)
-  declare ui_slider $_bracket433(0,1000)
-  declare ui_slider $_bracket434(0,1000)
-  declare ui_slider $_bracket435(0,1000)
-  declare ui_slider $_bracket436(0,1000)
-  declare ui_slider $_bracket437(0,1000)
-  declare ui_slider $_bracket438(0,1000)
-  declare ui_slider $_bracket439(0,1000)
-  declare ui_slider $_bracket440(0,1000)
-  declare ui_slider $_bracket441(0,1000)
-  declare ui_slider $_bracket442(0,1000)
-  declare ui_slider $_bracket443(0,1000)
-  declare ui_slider $_bracket444(0,1000)
-  declare ui_slider $_bracket445(0,1000)
-  declare ui_slider $_bracket446(0,1000)
-  declare ui_slider $_bracket447(0,1000)
-  declare ui_slider $_bracket448(0,1000)
-  declare ui_slider $_bracket449(0,1000)
-  declare ui_slider $_bracket450(0,1000)
-  declare ui_slider $_bracket451(0,1000)
-  declare ui_slider $_bracket452(0,1000)
-  declare ui_slider $_bracket453(0,1000)
-  declare ui_slider $_bracket454(0,1000)
-  declare ui_slider $_bracket455(0,1000)
-  declare ui_slider $_bracket456(0,1000)
-  declare ui_slider $_bracket457(0,1000)
-  declare ui_slider $_bracket458(0,1000)
-  declare ui_slider $_bracket459(0,1000)
-  declare ui_slider $_bracket460(0,1000)
-  declare ui_slider $_bracket461(0,1000)
-  declare ui_slider $_bracket462(0,1000)
-  declare ui_slider $_bracket463(0,1000)
-  declare ui_slider $_bracket464(0,1000)
-  declare ui_slider $_bracket465(0,1000)
-  declare ui_slider $_bracket466(0,1000)
-  declare ui_slider $_bracket467(0,1000)
-  declare ui_slider $_bracket468(0,1000)
-  declare ui_slider $_bracket469(0,1000)
-  declare ui_slider $_bracket470(0,1000)
-  declare ui_slider $_bracket471(0,1000)
-  declare ui_slider $_bracket472(0,1000)
-  declare ui_slider $_bracket473(0,1000)
-  declare ui_slider $_bracket474(0,1000)
-  declare ui_slider $_bracket475(0,1000)
-  declare ui_slider $_bracket476(0,1000)
-  declare ui_slider $_bracket477(0,1000)
-  declare ui_slider $_bracket478(0,1000)
-  declare ui_slider $_bracket479(0,1000)
-  declare ui_slider $_bracket480(0,1000)
-  declare ui_slider $_bracket481(0,1000)
-  declare ui_slider $_bracket482(0,1000)
-  declare ui_slider $_bracket483(0,1000)
-  declare ui_slider $_bracket484(0,1000)
-  declare ui_slider $_bracket485(0,1000)
-  declare ui_slider $_bracket486(0,1000)
-  declare ui_slider $_bracket487(0,1000)
-  declare ui_slider $_bracket488(0,1000)
-  declare ui_slider $_bracket489(0,1000)
-  declare ui_slider $_bracket490(0,1000)
-  declare ui_slider $_bracket491(0,1000)
-  declare ui_slider $_bracket492(0,1000)
-  declare ui_slider $_bracket493(0,1000)
-  declare ui_slider $_bracket494(0,1000)
-  declare ui_slider $_bracket495(0,1000)
-  declare ui_slider $_bracket496(0,1000)
-  declare ui_slider $_bracket497(0,1000)
-  declare ui_slider $_bracket498(0,1000)
-  declare ui_slider $_bracket499(0,1000)
-  declare ui_slider $_bracket500(0,1000)
-  declare ui_slider $_bracket501(0,1000)
-  declare ui_slider $_bracket502(0,1000)
-  declare ui_slider $_bracket503(0,1000)
-  declare ui_slider $_bracket504(0,1000)
-  declare ui_slider $_bracket505(0,1000)
-  declare ui_slider $_bracket506(0,1000)
-  declare ui_slider $_bracket507(0,1000)
-  declare ui_slider $_bracket508(0,1000)
-  declare ui_slider $_bracket509(0,1000)
-  declare ui_slider $_bracket510(0,1000)
-  declare ui_slider $_bracket511(0,1000)
-  declare ui_slider $_bracket512(0,1000)
-  declare ui_slider $_bracket513(0,1000)
-  declare ui_slider $_bracket514(0,1000)
-  declare ui_slider $_bracket515(0,1000)
-  declare ui_slider $_bracket516(0,1000)
-  declare ui_slider $_bracket517(0,1000)
-  declare ui_slider $_bracket518(0,1000)
-  declare ui_slider $_bracket519(0,1000)
-  declare ui_slider $_bracket520(0,1000)
-  declare ui_slider $_bracket521(0,1000)
-  declare ui_slider $_bracket522(0,1000)
-  declare ui_slider $_bracket523(0,1000)
-  declare ui_slider $_bracket524(0,1000)
-  declare ui_slider $_bracket525(0,1000)
-  declare ui_slider $_bracket526(0,1000)
-  declare ui_slider $_bracket527(0,1000)
-  declare ui_slider $_bracket528(0,1000)
-  declare ui_slider $_bracket529(0,1000)
-  declare ui_slider $_bracket530(0,1000)
-  declare ui_slider $_bracket531(0,1000)
-  declare ui_slider $_bracket532(0,1000)
-  declare ui_slider $_bracket533(0,1000)
-  declare ui_slider $_bracket534(0,1000)
-  declare ui_slider $_bracket535(0,1000)
-  declare ui_slider $_bracket536(0,1000)
-  declare ui_slider $_bracket537(0,1000)
-  declare ui_slider $_bracket538(0,1000)
-  declare ui_slider $_bracket539(0,1000)
-  declare ui_slider $_bracket540(0,1000)
-  declare ui_slider $_bracket541(0,1000)
-  declare ui_slider $_bracket542(0,1000)
-  declare ui_slider $_bracket543(0,1000)
-  declare ui_slider $_bracket544(0,1000)
-  declare ui_slider $_bracket545(0,1000)
-  declare ui_slider $_bracket546(0,1000)
-  declare ui_slider $_bracket547(0,1000)
-  declare ui_slider $_bracket548(0,1000)
-  declare ui_slider $_bracket549(0,1000)
-  declare ui_slider $_bracket550(0,1000)
-  declare ui_slider $_bracket551(0,1000)
-  declare ui_slider $_bracket552(0,1000)
-  declare ui_slider $_bracket553(0,1000)
-  declare ui_slider $_bracket554(0,1000)
-  declare ui_slider $_bracket555(0,1000)
-  declare ui_slider $_bracket556(0,1000)
-  declare ui_slider $_bracket557(0,1000)
-  declare ui_slider $_bracket558(0,1000)
-  declare ui_slider $_bracket559(0,1000)
-  declare ui_slider $_bracket560(0,1000)
-  declare ui_slider $_bracket561(0,1000)
-  declare ui_slider $_bracket562(0,1000)
-  declare ui_slider $_bracket563(0,1000)
-  declare ui_slider $_bracket564(0,1000)
-  declare ui_slider $_bracket565(0,1000)
-  declare ui_slider $_bracket566(0,1000)
-  declare ui_slider $_bracket567(0,1000)
-  declare ui_slider $_bracket568(0,1000)
-  declare ui_slider $_bracket569(0,1000)
-  declare ui_slider $_bracket570(0,1000)
-  declare ui_slider $_bracket571(0,1000)
-  declare ui_slider $_bracket572(0,1000)
-  declare ui_slider $_bracket573(0,1000)
-  declare ui_slider $_bracket574(0,1000)
-  declare ui_slider $_bracket575(0,1000)
-  $preproc_i := 0
-  while ($preproc_i<=575)
-    %_bracket[$preproc_i] := get_ui_id($_bracket0)+$preproc_i
-    inc($preproc_i)
-  end while
-  $i := 0
-  while ($i<$bracket__size_D1)
-    $v := 0
-    while ($v<$bracket__size_D2)
-      set_control_par(%_bracket[9*$i+$v],$CONTROL_PAR_POS_X,20+($i*18))
-      set_control_par(%_bracket[9*$i+$v],$CONTROL_PAR_POS_Y,100+(($bracket__size_D2-$v)*18))
-      set_control_par(%_bracket[9*$i+$v],$CONTROL_PAR_WIDTH,13)
-      set_control_par(%_bracket[9*$i+$v],$CONTROL_PAR_HEIGHT,13)
-      set_control_par(%_bracket[9*$i+$v],$CONTROL_PAR_HIDE,$HIDE_WHOLE_CONTROL)
-      set_control_par_str(%_bracket[9*$i+$v],$CONTROL_PAR_PICTURE,"circle")
-      inc($v)
-    end while
-    inc($i)
-  end while
   set_voice_limit($NI_VL_TMPRO_STANDARD,100)
   declare %ripple[100]
   declare ui_slider $ripple0(0,127)
@@ -2469,13 +1945,14 @@ on init
   declare ~_vol
   declare ~_db
   declare $_prev_cc64
-  declare $_key_i
+  declare $_i2
   declare $_r3
   declare $_artic4
   declare $_rec_time_pos_in_ripple
   declare $_real_time_pos_in_pulse
   declare $_real_time_ripple_length
   declare $_time_til_end_of_ripple
+  declare $_play_release_sample
   declare $_fade_out_time2
   declare $_history_index
   declare $_ks_index
@@ -2505,8 +1982,8 @@ on init
   declare $_high_note2
   declare $_already_playing := 0
   declare $_offset_real_time
+  declare $_do_legato := 0
   declare $_real_legato_time := 0
-  declare $_first_ripple
   declare $_offset_rec_time
   declare $_note_id3
   declare $_volume
@@ -2518,10 +1995,16 @@ on init
   declare $_time_since_note_off3
   declare $_artic2
   declare $_vol
+  declare $_offset := 50000
+  declare $_play_pos
   declare $_cur_ripple
   declare $_vel
   declare $_fade_out_time
-  declare $_offset
+  declare $_sample_start
+  declare $__vel
+  declare $_release_sample_length
+  declare $_atk_time
+  declare $_dec_time
   declare $_note_id
   declare $_time_played
   declare $_clip_length_ms
@@ -2538,16 +2021,16 @@ on init
   declare $_time_since_note_off2
   declare $_release_length
   declare $_brightness_on_release
+  declare $_key_i2
   declare $_found2 := 0
   declare $_r2
   declare $_time_since_note_off
   declare $_index
   declare $_hist_i
   declare $_note_found := 0
-  declare $_r
-  declare $_found := 0
   declare @_checkmark
   declare $_i
+  declare $_key_i
 end on
 
 function set_key_colors_and_types_and_names
@@ -2591,6 +2074,12 @@ function set_key_colors_and_types_and_names
     if ($_index # -1)
       set_key_color($key_i,$KEY_COLOR_ORANGE)
       set_key_name($key_i,!releaseMode_texts[$_index])
+      set_key_type($key_i,$NI_KEY_TYPE_CONTROL)
+    end if
+    $_index := search(%release_trigger_keyswitches,$key_i)
+    if ($_index # -1)
+      set_key_color($key_i,$KEY_COLOR_MINT)
+      set_key_name($key_i,"Release Trigger Key")
       set_key_type($key_i,$NI_KEY_TYPE_CONTROL)
     end if
     inc($key_i)
@@ -2734,16 +2223,13 @@ function ripple_animations
         set_control_par(%ripple[$r],$CONTROL_PAR_HIDE,$HIDE_WHOLE_CONTROL)
         if (get_control_par(%ripple_swell[$r],$CONTROL_PAR_VALUE)>0)
           $_time_since_note_off2 := $ENGINE_UPTIME-%custom_event_note_off_timestamp[%ripple_id_history[$r] mod 1000000]
-          $_release_length := %custom_event_release_length[%ripple_id_history[$r] mod 1000000]
+          $_release_length := %custom_event_release_sample_length[%ripple_id_history[$r] mod 1000000]/1000
           $_brightness_on_release := %custom_event_brightness_on_release[%ripple_id_history[$r] mod 1000000]
           if ($_release_length=0)
             $_release_length := 1
           end if
           if ($_brightness_on_release=0)
             $_brightness_on_release := 1
-          end if
-          if (%custom_event_release_mode[%ripple_id_history[$r] mod 1000000]=$RELEASE_SAMPLES__LOUD)
-            $_release_length := $_release_length*3
           end if
           if ($_time_since_note_off2>0)
             set_control_par(%ripple_swell[$r],$CONTROL_PAR_VALUE,int(real($_brightness_on_release)+((real($_time_since_note_off2)-real(0))/(real($_release_length)-real(0))*(real(0)-real($_brightness_on_release)))))
@@ -2772,14 +2258,8 @@ end function
 
 function info_graphics_animation
   if ($PLAYED_VOICES_INST>0)
-    ~instructions_opacity := 0.0
     ~midiInstructions_opacity := 0.0
   end if
-  ~smoothed_instructions_opacity := ~smoothed_instructions_opacity+((~instructions_opacity-~smoothed_instructions_opacity)/30.0)
-  if (~smoothed_instructions_opacity<0.0001)
-    ~smoothed_instructions_opacity := 0.0
-  end if
-  set_control_par(get_ui_id($label_instructions),$CONTROL_PAR_PICTURE_STATE,int(real(0)+((~smoothed_instructions_opacity-0.0)/(1.0-0.0)*(real(127)-real(0)))))
   ~smoothed_midiInstructions_opacity := ~smoothed_midiInstructions_opacity+((~midiInstructions_opacity-~smoothed_midiInstructions_opacity)/30.0)
   if (~smoothed_midiInstructions_opacity<0.0001)
     ~smoothed_midiInstructions_opacity := 0.0
@@ -2793,74 +2273,101 @@ function info_graphics_animation
 end function
 
 function play_release_samples_when_its_time
-  if ($slider_releaseSamples>0)
-    $r := 0
-    while ($r<100)
-      if (event_status(%ripple_id_history[$r])=$EVENT_STATUS_NOTE_QUEUE)
-        if (%custom_event_waiting_to_trigger_release_sample[%ripple_id_history[$r] mod 1000000]=1 and (%custom_event_type[%ripple_id_history[$r] mod 1000000] # 1))
-          $_time_since_note_off3 := $ENGINE_UPTIME-%custom_event_note_off_timestamp[%ripple_id_history[$r] mod 1000000]
-          if ($_time_since_note_off3>(%custom_event_time_til_note_off[%ripple_id_history[$r] mod 1000000]-($DURATION_SIXTEENTH/4/1000)))
-            %custom_event_waiting_to_trigger_release_sample[%ripple_id_history[$r] mod 1000000] := 0
-            $_artic2 := %custom_event_artic[%ripple_id_history[$r] mod 1000000]
-            $_vol := get_event_par(%ripple_id_history[$r],$EVENT_PAR_VOLUME)
-            $_cur_ripple := get_event_par(%ripple_id_history[$r],$EVENT_PAR_PLAY_POS) mod %rec_time_sample_lengths[$_artic2]/%rec_time_ripple_lengths[$_artic2]
-            if ($_cur_ripple>3)
-              $_cur_ripple := 4-($_cur_ripple-3)
+  $r := 0
+  while ($r<100)
+    if (event_status(%ripple_id_history[$r])=$EVENT_STATUS_NOTE_QUEUE)
+      if (%custom_event_waiting_to_trigger_release_sample[%ripple_id_history[$r] mod 1000000]=1 and (%custom_event_type[%ripple_id_history[$r] mod 1000000] # 1))
+        $_time_since_note_off3 := $ENGINE_UPTIME-%custom_event_note_off_timestamp[%ripple_id_history[$r] mod 1000000]
+        if ($_time_since_note_off3>(%custom_event_time_til_note_off[%ripple_id_history[$r] mod 1000000]-($DURATION_SIXTEENTH/4/1000)))
+          %custom_event_waiting_to_trigger_release_sample[%ripple_id_history[$r] mod 1000000] := 0
+          $_artic2 := %custom_event_artic[%ripple_id_history[$r] mod 1000000]
+          $_vol := get_event_par(%ripple_id_history[$r],$EVENT_PAR_VOLUME)
+          $_offset := 50000
+          $_play_pos := get_event_par(%ripple_id_history[$r],$EVENT_PAR_PLAY_POS)
+          if ($_play_pos-$_offset<(%rec_time_sample_lengths[$_artic2]/2))
+            $_play_pos := $_play_pos-$_offset
+            if ($_play_pos<0)
+              $_play_pos := 0
             end if
-            $_vel := $_cur_ripple*32+1
-            $_fade_out_time := int(real(ticks_to_ms(%ripple_length_ticks[$_artic2]/%pitch_fractions[$_artic2]))*?speeds[$slider_speed])
-            fade_out(%ripple_id_history[$r],$_fade_out_time,1)
-            %custom_event_release_mode[%ripple_id_history[$r] mod 1000000] := $slider_releaseSamples
+          else
+            $_play_pos := $_play_pos+$_offset
+          end if
+          $_cur_ripple := $_play_pos/%rec_time_ripple_lengths[$_artic2]
+          if ($_cur_ripple>3)
+            $_cur_ripple := 4-($_cur_ripple-3)
+          end if
+          if ($_cur_ripple<0)
+            $_cur_ripple := 0
+          end if
+          if ($_cur_ripple>3)
+            $_cur_ripple := 3
+          end if
+          $__vel := $_cur_ripple*32+1
+          $_fade_out_time := int(real(ticks_to_ms(%ripple_length_ticks[$_artic2]/%pitch_fractions[$_artic2]))*?speeds[$slider_speed])
+          fade_out(%ripple_id_history[$r],$_fade_out_time,1)
+          if ($slider_releaseSamples>0)
             select ($slider_releaseSamples)
               case $RELEASE_SAMPLES__SOFT
-                $_offset := ticks_to_ms(%ripple_length_ticks[$_artic2]/%pitch_fractions[$_artic2])
+                $_sample_start := %rec_time_ripple_lengths[$_artic2]/2
+                $__vel := 24
               case $RELEASE_SAMPLES__LOUD
-                $_offset := 0
+                $_sample_start := 0
+                $__vel := 96
             end select
-            $_note_id := play_note(%custom_event_origin_note[%ripple_id_history[$r] mod 1000000],$_vel,$_offset,0)
-            set_event_par_arr($_note_id,$EVENT_PAR_ALLOW_GROUP,0,$ALL_GROUPS)
-            set_event_par_arr($_note_id,$EVENT_PAR_ALLOW_GROUP,1,%release_group[$_artic2])
-            %custom_event_source[$_note_id mod 1000000] := %custom_event_source[%ripple_id_history[$r] mod 1000000]
-            %custom_event_note[$_note_id mod 1000000] := %custom_event_note[%ripple_id_history[$r] mod 1000000]
-            %custom_event_velocity[$_note_id mod 1000000] := %custom_event_velocity[%ripple_id_history[$r] mod 1000000]
-            %custom_event_low_note[$_note_id mod 1000000] := %custom_event_low_note[%ripple_id_history[$r] mod 1000000]
-            %custom_event_high_note[$_note_id mod 1000000] := %custom_event_high_note[%ripple_id_history[$r] mod 1000000]
-            %custom_event_origin_note[$_note_id mod 1000000] := %custom_event_origin_note[%ripple_id_history[$r] mod 1000000]
-            %custom_event_dest_note[$_note_id mod 1000000] := %custom_event_dest_note[%ripple_id_history[$r] mod 1000000]
-            %custom_event_first_note[$_note_id mod 1000000] := %custom_event_first_note[%ripple_id_history[$r] mod 1000000]
-            %custom_event_second_note[$_note_id mod 1000000] := %custom_event_second_note[%ripple_id_history[$r] mod 1000000]
-            %custom_event_row[$_note_id mod 1000000] := %custom_event_row[%ripple_id_history[$r] mod 1000000]
-            %custom_event_direction[$_note_id mod 1000000] := %custom_event_direction[%ripple_id_history[$r] mod 1000000]
-            %custom_event_artic[$_note_id mod 1000000] := %custom_event_artic[%ripple_id_history[$r] mod 1000000]
-            %custom_event_voice[$_note_id mod 1000000] := %custom_event_voice[%ripple_id_history[$r] mod 1000000]
-            %custom_event_note_off_timestamp[$_note_id mod 1000000] := %custom_event_note_off_timestamp[%ripple_id_history[$r] mod 1000000]
-            %custom_event_release_length[$_note_id mod 1000000] := %custom_event_release_length[%ripple_id_history[$r] mod 1000000]
-            %custom_event_time_til_note_off[$_note_id mod 1000000] := %custom_event_time_til_note_off[%ripple_id_history[$r] mod 1000000]
-            %custom_event_release_note[$_note_id mod 1000000] := %custom_event_release_note[%ripple_id_history[$r] mod 1000000]
-            %custom_event_brightness_on_release[$_note_id mod 1000000] := %custom_event_brightness_on_release[%ripple_id_history[$r] mod 1000000]
-            %custom_event_waiting_to_trigger_release_sample[$_note_id mod 1000000] := %custom_event_waiting_to_trigger_release_sample[%ripple_id_history[$r] mod 1000000]
-            %custom_event_releasing[$_note_id mod 1000000] := %custom_event_releasing[%ripple_id_history[$r] mod 1000000]
-            %custom_event_release_mode[$_note_id mod 1000000] := %custom_event_release_mode[%ripple_id_history[$r] mod 1000000]
-            %custom_event_dest_note_released[$_note_id mod 1000000] := %custom_event_dest_note_released[%ripple_id_history[$r] mod 1000000]
-            %custom_event_start_note_released[$_note_id mod 1000000] := %custom_event_start_note_released[%ripple_id_history[$r] mod 1000000]
-            %custom_event_triggered_by_mf[$_note_id mod 1000000] := %custom_event_triggered_by_mf[%ripple_id_history[$r] mod 1000000]
-            %custom_event_type[$_note_id mod 1000000] := %custom_event_type[%ripple_id_history[$r] mod 1000000]
-            %ripple_id_history[$r] := $_note_id
-            %custom_event_note_off_timestamp[%ripple_id_history[$r] mod 1000000] := $ENGINE_UPTIME
-            %custom_event_release_length[%ripple_id_history[$r] mod 1000000] := $DURATION_QUARTER/1000
-            if ($slider_releaseSamples=$RELEASE_SAMPLES__SOFT)
-              fade_in($_note_id,ticks_to_ms(%ripple_length_ticks[$_artic2]/%pitch_fractions[$_artic2]))
-            end if
-            %custom_event_source[$_note_id mod 1000000] := -1
-            %custom_event_type[$_note_id mod 1000000] := 1
-            change_vol($_note_id,$_vol,0)
-            %custom_event_releasing[%ripple_id_history[$r] mod 1000000] := 1
           end if
+          if (%key_down[$recent_release_trigger_key]=1)
+            $__vel := %velo[$recent_release_trigger_key]
+            $_sample_start := int(real(%rec_time_ripple_lengths[$_artic2]/2)+((real($__vel)-real(1))/(real(127)-real(1))*(real(0)-real(%rec_time_ripple_lengths[$_artic2]/2))))
+          end if
+          $_release_sample_length := %rec_time_ripple_lengths[$_artic2]-$_sample_start
+          $_release_sample_length := int(real(0)+((real($_release_sample_length)-real(0))/(real(%rec_time_ripple_lengths[$_artic2])-real(0))*(real(ticks_to_ms(%ripple_length_ticks[$_artic2]))-real(0))))
+          $_release_sample_length := int(real($_release_sample_length)*?speeds[$slider_speed])
+          %custom_event_release_sample_length[%ripple_id_history[$r] mod 1000000] := $_release_sample_length
+          $_atk_time := int(real(ticks_to_ms(%ripple_length_ticks[$_artic2]/2))+((real($__vel)-real(1))/(real(127)-real(1))*(real(ticks_to_ms(%ripple_length_ticks[$_artic2]/4))-real(ticks_to_ms(%ripple_length_ticks[$_artic2]/2)))))/1000
+          $_dec_time := ticks_to_ms(%ripple_length_ticks[$_artic2]*3)/1000
+          $_atk_time := int(real($_atk_time)*?speeds[$slider_speed])
+          $_dec_time := int(real($_dec_time)*?speeds[$slider_speed])
+          set_engine_par($ENGINE_PAR_ATTACK,real_to_int(1000000.0/(log(1500000.0/100.0+2.0)/log(int_to_real(2))-1.0)*(log(real($_atk_time)*100.0/100.0+2.0)/log(int_to_real(2))-1.0)),%release_group[$_artic2],get_mod_idx(%release_group[$_artic2],"ENV_AHDSR2"),get_target_idx(%release_group[$_artic2],get_mod_idx(%release_group[$_artic2],"ENV_AHDSR2"),"ENV_AHDSR_VOLUME2"))
+          set_engine_par($ENGINE_PAR_DECAY,real_to_int(1000000.0/(log(2500000.0/100.0+2.0)/log(int_to_real(2))-1.0)*(log(real($_dec_time)*100.0/100.0+2.0)/log(int_to_real(2))-1.0)),%release_group[$_artic2],get_mod_idx(%release_group[$_artic2],"ENV_AHDSR2"),get_target_idx(%release_group[$_artic2],get_mod_idx(%release_group[$_artic2],"ENV_AHDSR2"),"ENV_AHDSR_VOLUME2"))
+          $_note_id := play_note(%custom_event_origin_note[%ripple_id_history[$r] mod 1000000],$__vel,$_sample_start,0)
+          set_event_par_arr($_note_id,$EVENT_PAR_ALLOW_GROUP,0,$ALL_GROUPS)
+          set_event_par_arr($_note_id,$EVENT_PAR_ALLOW_GROUP,1,%release_group[$_artic2])
+          %custom_event_source[$_note_id mod 1000000] := %custom_event_source[%ripple_id_history[$r] mod 1000000]
+          %custom_event_note[$_note_id mod 1000000] := %custom_event_note[%ripple_id_history[$r] mod 1000000]
+          %custom_event_velocity[$_note_id mod 1000000] := %custom_event_velocity[%ripple_id_history[$r] mod 1000000]
+          %custom_event_low_note[$_note_id mod 1000000] := %custom_event_low_note[%ripple_id_history[$r] mod 1000000]
+          %custom_event_high_note[$_note_id mod 1000000] := %custom_event_high_note[%ripple_id_history[$r] mod 1000000]
+          %custom_event_origin_note[$_note_id mod 1000000] := %custom_event_origin_note[%ripple_id_history[$r] mod 1000000]
+          %custom_event_dest_note[$_note_id mod 1000000] := %custom_event_dest_note[%ripple_id_history[$r] mod 1000000]
+          %custom_event_first_note[$_note_id mod 1000000] := %custom_event_first_note[%ripple_id_history[$r] mod 1000000]
+          %custom_event_second_note[$_note_id mod 1000000] := %custom_event_second_note[%ripple_id_history[$r] mod 1000000]
+          %custom_event_row[$_note_id mod 1000000] := %custom_event_row[%ripple_id_history[$r] mod 1000000]
+          %custom_event_direction[$_note_id mod 1000000] := %custom_event_direction[%ripple_id_history[$r] mod 1000000]
+          %custom_event_artic[$_note_id mod 1000000] := %custom_event_artic[%ripple_id_history[$r] mod 1000000]
+          %custom_event_voice[$_note_id mod 1000000] := %custom_event_voice[%ripple_id_history[$r] mod 1000000]
+          %custom_event_note_off_timestamp[$_note_id mod 1000000] := %custom_event_note_off_timestamp[%ripple_id_history[$r] mod 1000000]
+          %custom_event_release_length[$_note_id mod 1000000] := %custom_event_release_length[%ripple_id_history[$r] mod 1000000]
+          %custom_event_release_sample_length[$_note_id mod 1000000] := %custom_event_release_sample_length[%ripple_id_history[$r] mod 1000000]
+          %custom_event_time_til_note_off[$_note_id mod 1000000] := %custom_event_time_til_note_off[%ripple_id_history[$r] mod 1000000]
+          %custom_event_release_note[$_note_id mod 1000000] := %custom_event_release_note[%ripple_id_history[$r] mod 1000000]
+          %custom_event_brightness_on_release[$_note_id mod 1000000] := %custom_event_brightness_on_release[%ripple_id_history[$r] mod 1000000]
+          %custom_event_waiting_to_trigger_release_sample[$_note_id mod 1000000] := %custom_event_waiting_to_trigger_release_sample[%ripple_id_history[$r] mod 1000000]
+          %custom_event_releasing[$_note_id mod 1000000] := %custom_event_releasing[%ripple_id_history[$r] mod 1000000]
+          %custom_event_dest_note_released[$_note_id mod 1000000] := %custom_event_dest_note_released[%ripple_id_history[$r] mod 1000000]
+          %custom_event_start_note_released[$_note_id mod 1000000] := %custom_event_start_note_released[%ripple_id_history[$r] mod 1000000]
+          %custom_event_triggered_by_mf[$_note_id mod 1000000] := %custom_event_triggered_by_mf[%ripple_id_history[$r] mod 1000000]
+          %custom_event_type[$_note_id mod 1000000] := %custom_event_type[%ripple_id_history[$r] mod 1000000]
+          %ripple_id_history[$r] := $_note_id
+          %custom_event_note_off_timestamp[%ripple_id_history[$r] mod 1000000] := $ENGINE_UPTIME
+          %custom_event_source[$_note_id mod 1000000] := -1
+          %custom_event_type[$_note_id mod 1000000] := 1
+          change_vol($_note_id,$_vol,0)
+          %custom_event_releasing[%ripple_id_history[$r] mod 1000000] := 1
         end if
       end if
-      inc($r)
-    end while
-  end if
+    end if
+    inc($r)
+  end while
 end function
 
 function crossfaded_looping
@@ -2891,12 +2398,12 @@ function crossfaded_looping
         %custom_event_voice[$_note_id2 mod 1000000] := %custom_event_voice[%ripple_id_history[$r] mod 1000000]
         %custom_event_note_off_timestamp[$_note_id2 mod 1000000] := %custom_event_note_off_timestamp[%ripple_id_history[$r] mod 1000000]
         %custom_event_release_length[$_note_id2 mod 1000000] := %custom_event_release_length[%ripple_id_history[$r] mod 1000000]
+        %custom_event_release_sample_length[$_note_id2 mod 1000000] := %custom_event_release_sample_length[%ripple_id_history[$r] mod 1000000]
         %custom_event_time_til_note_off[$_note_id2 mod 1000000] := %custom_event_time_til_note_off[%ripple_id_history[$r] mod 1000000]
         %custom_event_release_note[$_note_id2 mod 1000000] := %custom_event_release_note[%ripple_id_history[$r] mod 1000000]
         %custom_event_brightness_on_release[$_note_id2 mod 1000000] := %custom_event_brightness_on_release[%ripple_id_history[$r] mod 1000000]
         %custom_event_waiting_to_trigger_release_sample[$_note_id2 mod 1000000] := %custom_event_waiting_to_trigger_release_sample[%ripple_id_history[$r] mod 1000000]
         %custom_event_releasing[$_note_id2 mod 1000000] := %custom_event_releasing[%ripple_id_history[$r] mod 1000000]
-        %custom_event_release_mode[$_note_id2 mod 1000000] := %custom_event_release_mode[%ripple_id_history[$r] mod 1000000]
         %custom_event_dest_note_released[$_note_id2 mod 1000000] := %custom_event_dest_note_released[%ripple_id_history[$r] mod 1000000]
         %custom_event_start_note_released[$_note_id2 mod 1000000] := %custom_event_start_note_released[%ripple_id_history[$r] mod 1000000]
         %custom_event_triggered_by_mf[$_note_id2 mod 1000000] := %custom_event_triggered_by_mf[%ripple_id_history[$r] mod 1000000]
@@ -2908,41 +2415,36 @@ function crossfaded_looping
   end while
 end function
 
+function hide_version
+  if ($ENGINE_UPTIME-$timestamp_version_shown>1000)
+    set_control_par(get_ui_id($label_version),$CONTROL_PAR_HIDE,$HIDE_WHOLE_CONTROL)
+  end if
+end function
+
 function update_midi_visibility
-  set_control_par(get_ui_id($switch_closeMidi),$CONTROL_PAR_HIDE,%hide_states[$switch_showMidi])
-  set_control_par(get_ui_id($paneL_ideas),$CONTROL_PAR_HIDE,%hide_states[$switch_showMidi])
+  set_control_par(get_ui_id($switch_closeMidi),$CONTROL_PAR_HIDE,%hide_states[$button_showMidi])
+  set_control_par(get_ui_id($paneL_midi),$CONTROL_PAR_HIDE,%hide_states[$button_showMidi])
   $i := 0
   while ($i<2)
     set_control_par(%panel_midiPg[$i],$CONTROL_PAR_HIDE,$HIDE_WHOLE_CONTROL)
     inc($i)
   end while
-  set_control_par(%panel_midiPg[$cur_midi_page],$CONTROL_PAR_HIDE,%hide_states[$switch_showMidi])
-  set_control_par(get_ui_id($label_midiInstructions),$CONTROL_PAR_HIDE,%hide_states[$switch_showMidi])
-  ~midiInstructions_opacity := real($switch_showMidi)
-  ~midiCover_opacity := real($switch_showMidi)
-  set_control_par(get_ui_id($panel_articulations),$CONTROL_PAR_HIDE,%hide_states[1-$switch_showMidi])
-  set_control_par(get_ui_id($panel_fx),$CONTROL_PAR_HIDE,%hide_states[1-$switch_showMidi])
-  set_control_par(get_ui_id($panel_speed),$CONTROL_PAR_HIDE,%hide_states[1-$switch_showMidi])
-  set_control_par(get_ui_id($slider_speed),$CONTROL_PAR_HIDE,%hide_states[1-$switch_showMidi])
-  set_control_par(get_ui_id($panel_direction),$CONTROL_PAR_HIDE,%hide_states[1-$switch_showMidi])
-  set_control_par(get_ui_id($slider_direction),$CONTROL_PAR_HIDE,%hide_states[1-$switch_showMidi])
-  set_control_par(get_ui_id($panel_legato),$CONTROL_PAR_HIDE,%hide_states[1-$switch_showMidi])
-  set_control_par(get_ui_id($slider_legato),$CONTROL_PAR_HIDE,%hide_states[1-$switch_showMidi])
-  set_control_par(get_ui_id($panel_releaseSamples),$CONTROL_PAR_HIDE,%hide_states[1-$switch_showMidi])
-  set_control_par(get_ui_id($slider_releaseSamples),$CONTROL_PAR_HIDE,%hide_states[1-$switch_showMidi])
-  set_control_par(get_ui_id($switch_openInfo),$CONTROL_PAR_HIDE,%hide_states[1-$switch_showMidi])
-  set_control_par(get_ui_id($switch_openInfoOptions),$CONTROL_PAR_HIDE,%hide_states[1-$switch_showMidi])
-end function
-
-function count_keys_pressed
-  $num_keys_pressed := 0
-  $key_i := $LOWEST_KEY
-  while ($key_i<=$HIGHEST_KEY)
-    if (%key_active[$key_i]=1)
-      inc($num_keys_pressed)
-    end if
-    inc($key_i)
-  end while
+  set_control_par(%panel_midiPg[$cur_midi_page],$CONTROL_PAR_HIDE,%hide_states[$button_showMidi])
+  set_control_par(get_ui_id($label_midiInstructions),$CONTROL_PAR_HIDE,%hide_states[$button_showMidi])
+  ~midiInstructions_opacity := real($button_showMidi)
+  ~midiCover_opacity := real($button_showMidi)
+  set_control_par(get_ui_id($panel_articulations),$CONTROL_PAR_HIDE,%hide_states[1-$button_showMidi])
+  set_control_par(get_ui_id($panel_fx),$CONTROL_PAR_HIDE,%hide_states[1-$button_showMidi])
+  set_control_par(get_ui_id($panel_speed),$CONTROL_PAR_HIDE,%hide_states[1-$button_showMidi])
+  set_control_par(get_ui_id($slider_speed),$CONTROL_PAR_HIDE,%hide_states[1-$button_showMidi])
+  set_control_par(get_ui_id($panel_direction),$CONTROL_PAR_HIDE,%hide_states[1-$button_showMidi])
+  set_control_par(get_ui_id($slider_direction),$CONTROL_PAR_HIDE,%hide_states[1-$button_showMidi])
+  set_control_par(get_ui_id($panel_legato),$CONTROL_PAR_HIDE,%hide_states[1-$button_showMidi])
+  set_control_par(get_ui_id($slider_legato),$CONTROL_PAR_HIDE,%hide_states[1-$button_showMidi])
+  set_control_par(get_ui_id($panel_releaseSamples),$CONTROL_PAR_HIDE,%hide_states[1-$button_showMidi])
+  set_control_par(get_ui_id($slider_releaseSamples),$CONTROL_PAR_HIDE,%hide_states[1-$button_showMidi])
+  set_control_par(get_ui_id($button_generalInfo),$CONTROL_PAR_HIDE,%hide_states[1-$button_showMidi])
+  set_control_par(get_ui_id($button_optionsInfo),$CONTROL_PAR_HIDE,%hide_states[1-$button_showMidi])
 end function
 
 function count_active_ripples
@@ -3050,6 +2552,76 @@ function update_releaseMode_switches
   end while
 end function
 
+function count_keys_pressed
+  $num_keys_pressed := 0
+  $_key_i2 := $LOWEST_KEY
+  while ($_key_i2<=$HIGHEST_KEY)
+    if (%key_active[$_key_i2]=1)
+      inc($num_keys_pressed)
+    end if
+    inc($_key_i2)
+  end while
+end function
+
+function trigger_release_samples_for_all_ripples
+  $_key_i := $LOWEST_KEY
+  while ($_key_i<=$HIGHEST_KEY)
+    %key_active[$_key_i] := 0
+    $voice_i := 0
+    while ($voice_i<%num_ripple_voices[$_key_i])
+      if ($voice_i=-1)
+        message("voice = " & $voice_i)
+      end if
+      $_r3 := 0
+      while ($_r3<100)
+        if (%ripple_id_history[$_r3] # 0)
+          if ($voice_i=%custom_event_voice[%ripple_id_history[$_r3] mod 1000000])
+            $_artic4 := %custom_event_artic[%ripple_id_history[$_r3] mod 1000000]
+            $_rec_time_pos_in_ripple := get_event_par(%ripple_id_history[$_r3],$EVENT_PAR_PLAY_POS) mod %rec_time_ripple_lengths[$_artic4]
+            $_real_time_pos_in_pulse := int(real(0)+((real($_rec_time_pos_in_ripple)-real(0))/(real(%rec_time_ripple_lengths[$_artic4])-real(0))*(real(ticks_to_ms(%ripple_length_ticks[$_artic4]))-real(0))))
+            $_real_time_pos_in_pulse := int(real($_real_time_pos_in_pulse)*?speeds[$slider_speed])
+            $_real_time_ripple_length := ticks_to_ms(int(real(%ripple_length_ticks[$_artic4])*?speeds[$slider_speed]))
+            $_time_til_end_of_ripple := ($_real_time_ripple_length-$_real_time_pos_in_pulse)/1000
+            if ($_key_i=%custom_event_second_note[%ripple_id_history[$_r3] mod 1000000])
+              %custom_event_note_off_timestamp[%ripple_id_history[$_r3] mod 1000000] := $ENGINE_UPTIME
+              if ($slider_releaseSamples=0)
+                if (%key_down[$recent_release_trigger_key]=1)
+                  $_play_release_sample := 1
+                else
+                  $_play_release_sample := 0
+                end if
+              else
+                if ($slider_releaseSamples>0)
+                  $_play_release_sample := 1
+                end if
+              end if
+              if ($_play_release_sample=0)
+                %custom_event_releasing[%ripple_id_history[$_r3] mod 1000000] := 1
+                $_fade_out_time2 := $_time_til_end_of_ripple
+                %custom_event_release_length[%ripple_id_history[$_r3] mod 1000000] := $_fade_out_time2
+                fade_out(%ripple_id_history[$_r3],$_fade_out_time2*1000,1)
+              else
+                %custom_event_time_til_note_off[%ripple_id_history[$_r3] mod 1000000] := $_time_til_end_of_ripple
+                %custom_event_waiting_to_trigger_release_sample[%ripple_id_history[$_r3] mod 1000000] := 1
+              end if
+            end if
+          end if
+        end if
+        inc($_r3)
+      end while
+      call count_keys_pressed
+      if ($num_keys_pressed=0)
+        $all_keys_released := 1
+      end if
+      inc($voice_i)
+    end while
+    %num_ripple_voices[$_key_i] := 0
+    %key_down[$_key_i] := 0
+    set_key_pressed($_key_i,0)
+    inc($_key_i)
+  end while
+end function
+
 on persistence_changed
   call set_key_colors_and_types_and_names
   call set_keys_pressed
@@ -3061,6 +2633,7 @@ on note
   set_event_par_arr($EVENT_ID,$EVENT_PAR_ALLOW_GROUP,0,$ALL_GROUPS)
   set_key_pressed($EVENT_NOTE,1)
   %key_down[$EVENT_NOTE] := 1
+  %velo[$EVENT_NOTE] := $EVENT_VELOCITY
   $_ks_index := search(%articulation_keyswitches,$EVENT_NOTE)
   if ($_ks_index # -1)
     $cur_artic := $_ks_index
@@ -3086,6 +2659,12 @@ on note
   if ($_ks_index # -1)
     $slider_releaseSamples := $_ks_index
     call update_releaseMode_switches
+  end if
+  $_ks_index := search(%release_trigger_keyswitches,$EVENT_NOTE)
+  if ($_ks_index # -1)
+    $recent_release_trigger_key := %release_trigger_keyswitches[$_ks_index]
+    $switch_releaseTrigger := 1
+    call trigger_release_samples_for_all_ripples
   end if
   if (search(%all_keyswitches,$EVENT_NOTE) # -1)
     call set_keys_pressed
@@ -3245,41 +2824,36 @@ on note
         $r := 0
         while ($r<100)
           if (%ripple_id_history[$r] # 0)
-            if (%custom_event_low_note[%ripple_id_history[$r] mod 1000000]=$_low_note2 and (%custom_event_high_note[%ripple_id_history[$r] mod 1000000]=$_high_note2) and (%custom_event_direction[%ripple_id_history[$r] mod 1000000]=$direction) and (%custom_event_releasing[%ripple_id_history[$r] mod 1000000]=0))
+            if (%custom_event_low_note[%ripple_id_history[$r] mod 1000000]=$_low_note2 and (%key_released[$_low_note2]=0) and (%custom_event_high_note[%ripple_id_history[$r] mod 1000000]=$_high_note2) and (%key_released[$_high_note2]=0) and (%custom_event_high_note[%ripple_id_history[$r] mod 1000000]=$_high_note2) and (%custom_event_direction[%ripple_id_history[$r] mod 1000000]=$direction) and (%custom_event_releasing[%ripple_id_history[$r] mod 1000000]=0))
               $_already_playing := 1
             end if
           end if
           inc($r)
         end while
+        %key_released[$_low_note2] := 0
+        %key_released[$_high_note2] := 0
         if ($_already_playing=0)
+          $_do_legato := 0
           call count_active_ripples
-          if ($num_active_ripples=0)
+          if ($num_active_ripples>0)
+            $_do_legato := 1
+          end if
+          if ($all_keys_released=1)
+            $_do_legato := 0
+          else
+            $_do_legato := 1
+          end if
+          $all_keys_released := 0
+          if ($_do_legato=0)
             $first_ripple_timestamp := $ENGINE_UPTIME
             $_real_legato_time := 0
             $_offset_real_time := 0
           else
-            $_found := 0
-            $_r := 0
-            while ($_r<100)
-              if (%ripple_id_history[$_r] # 0 and (%custom_event_source[%ripple_id_history[$_r] mod 1000000]=-1) and (%custom_event_type[%ripple_id_history[$_r] mod 1000000] # 1) and (%custom_event_releasing[%ripple_id_history[$_r] mod 1000000]=0 or ($slider_legato=$LEGATO_MODE__SYNC_TO_SWELL)) and (get_event_par(%ripple_id_history[$_r],$EVENT_PAR_PLAY_POS)>0) and ($_found=0))
-                $_found := 1
-                $_first_ripple := %ripple_id_history[$_r]
-              end if
-              inc($_r)
-            end while
-            $_found := 0
-            $_r := 0
-            while ($_r<100)
-              if (%ripple_id_history[$_r]=0 and ($_found=0))
-                $_found := 1
-                $_first_ripple := $_r-1
-              end if
-              inc($_r)
-            end while
             $_real_legato_time := ($ENGINE_UPTIME-$first_ripple_timestamp)*1000
             $_real_legato_time := int(real($_real_legato_time)/?speeds[$slider_speed])
             select ($slider_legato)
               case $LEGATO_MODE__SYNC_TO_PITCH
+                $_real_legato_time := $_real_legato_time+ticks_to_ms(1)
                 $_offset_real_time := $_real_legato_time mod ticks_to_ms(%ripple_length_ticks[$cur_artic]/%pitch_fractions[$cur_artic])
               case $LEGATO_MODE__SYNC_TO_RIPPLE
                 $_offset_real_time := $_real_legato_time mod ticks_to_ms(%ripple_length_ticks[$cur_artic])
@@ -3338,9 +2912,13 @@ on note
 end on
 
 on release
+  %key_released[$EVENT_NOTE] := 1
   %key_down[$EVENT_NOTE] := 0
   if (search(%all_keyswitches,$EVENT_NOTE)=-1)
     set_key_pressed($EVENT_NOTE,0)
+  end if
+  if ($EVENT_NOTE=%release_trigger_keyswitches[0] or ($EVENT_NOTE=%release_trigger_keyswitches[1]))
+    $switch_releaseTrigger := 0
   end if
   if (in_range($EVENT_NOTE,$LOWEST_KEY,$HIGHEST_KEY) and (%custom_event_source[$EVENT_ID mod 1000000]=-1))
     set_control_par(%key_ids[$EVENT_NOTE],$CONTROL_PAR_PICTURE_STATE,0)
@@ -3367,79 +2945,57 @@ on release
     end if
     if (%CC[64]<10)
       %key_active[$EVENT_NOTE] := 0
-      $_r3 := 0
-      while ($_r3<100)
-        if (%ripple_id_history[$_r3] # 0)
-          if (%num_ripple_voices[$EVENT_NOTE]-1=%custom_event_voice[%ripple_id_history[$_r3] mod 1000000])
-            $_artic4 := %custom_event_artic[%ripple_id_history[$_r3] mod 1000000]
-            $_rec_time_pos_in_ripple := get_event_par(%ripple_id_history[$_r3],$EVENT_PAR_PLAY_POS) mod %rec_time_ripple_lengths[$_artic4]
-            $_real_time_pos_in_pulse := int(real(0)+((real($_rec_time_pos_in_ripple)-real(0))/(real(%rec_time_ripple_lengths[$_artic4])-real(0))*(real(ticks_to_ms(%ripple_length_ticks[$_artic4]))-real(0))))
-            $_real_time_pos_in_pulse := int(real($_real_time_pos_in_pulse)*?speeds[$slider_speed])
-            $_real_time_ripple_length := ticks_to_ms(int(real(%ripple_length_ticks[$_artic4])*?speeds[$slider_speed]))
-            $_time_til_end_of_ripple := ($_real_time_ripple_length-$_real_time_pos_in_pulse)/1000
-            if ($EVENT_NOTE=%custom_event_second_note[%ripple_id_history[$_r3] mod 1000000])
-              %custom_event_note_off_timestamp[%ripple_id_history[$_r3] mod 1000000] := $ENGINE_UPTIME
-              if ($slider_releaseSamples=0)
-                %custom_event_releasing[%ripple_id_history[$_r3] mod 1000000] := 1
-                $_fade_out_time2 := $_time_til_end_of_ripple
-                %custom_event_release_length[%ripple_id_history[$_r3] mod 1000000] := $_fade_out_time2
-                if ($_fade_out_time2<($DURATION_SIXTEENTH/8/1000))
-                  $_fade_out_time2 := ticks_to_ms(%ripple_length_ticks[$_artic4]/%pitch_fractions[$_artic4])/1000
+      if (%num_ripple_voices[$EVENT_NOTE]=0)
+        if (0=-1)
+          message("voice = " & 0)
+        end if
+        $_r3 := 0
+        while ($_r3<100)
+          if (%ripple_id_history[$_r3] # 0)
+            if (0=%custom_event_voice[%ripple_id_history[$_r3] mod 1000000])
+              $_artic4 := %custom_event_artic[%ripple_id_history[$_r3] mod 1000000]
+              $_rec_time_pos_in_ripple := get_event_par(%ripple_id_history[$_r3],$EVENT_PAR_PLAY_POS) mod %rec_time_ripple_lengths[$_artic4]
+              $_real_time_pos_in_pulse := int(real(0)+((real($_rec_time_pos_in_ripple)-real(0))/(real(%rec_time_ripple_lengths[$_artic4])-real(0))*(real(ticks_to_ms(%ripple_length_ticks[$_artic4]))-real(0))))
+              $_real_time_pos_in_pulse := int(real($_real_time_pos_in_pulse)*?speeds[$slider_speed])
+              $_real_time_ripple_length := ticks_to_ms(int(real(%ripple_length_ticks[$_artic4])*?speeds[$slider_speed]))
+              $_time_til_end_of_ripple := ($_real_time_ripple_length-$_real_time_pos_in_pulse)/1000
+              if ($EVENT_NOTE=%custom_event_second_note[%ripple_id_history[$_r3] mod 1000000])
+                %custom_event_note_off_timestamp[%ripple_id_history[$_r3] mod 1000000] := $ENGINE_UPTIME
+                if ($slider_releaseSamples=0)
+                  if (%key_down[$recent_release_trigger_key]=1)
+                    $_play_release_sample := 1
+                  else
+                    $_play_release_sample := 0
+                  end if
+                else
+                  if ($slider_releaseSamples>0)
+                    $_play_release_sample := 1
+                  end if
                 end if
-                fade_out(%ripple_id_history[$_r3],$_fade_out_time2*1000,1)
-              else
-                %custom_event_time_til_note_off[%ripple_id_history[$_r3] mod 1000000] := $_time_til_end_of_ripple
-                %custom_event_waiting_to_trigger_release_sample[%ripple_id_history[$_r3] mod 1000000] := 1
+                if ($_play_release_sample=0)
+                  %custom_event_releasing[%ripple_id_history[$_r3] mod 1000000] := 1
+                  $_fade_out_time2 := $_time_til_end_of_ripple
+                  %custom_event_release_length[%ripple_id_history[$_r3] mod 1000000] := $_fade_out_time2
+                  fade_out(%ripple_id_history[$_r3],$_fade_out_time2*1000,1)
+                else
+                  %custom_event_time_til_note_off[%ripple_id_history[$_r3] mod 1000000] := $_time_til_end_of_ripple
+                  %custom_event_waiting_to_trigger_release_sample[%ripple_id_history[$_r3] mod 1000000] := 1
+                end if
               end if
             end if
           end if
+          inc($_r3)
+        end while
+        call count_keys_pressed
+        if ($num_keys_pressed=0)
+          $all_keys_released := 1
         end if
-        inc($_r3)
-      end while
-      %num_ripple_voices[$EVENT_NOTE] := 0
-    end if
-  end if
-end on
-
-on controller
-  if ($CC_NUM=64)
-    if (%CC[64]<10 and ($_prev_cc64>=10))
-      $_key_i := $LOWEST_KEY
-      while ($_key_i<=$HIGHEST_KEY)
-        if (%key_down[$_key_i]=0 and (%key_active[$_key_i]=1))
-          %key_active[$_key_i] := 0
-          $_r3 := 0
-          while ($_r3<100)
-            if (%ripple_id_history[$_r3] # 0)
-              if (%num_ripple_voices[$_key_i]-1=%custom_event_voice[%ripple_id_history[$_r3] mod 1000000])
-                $_artic4 := %custom_event_artic[%ripple_id_history[$_r3] mod 1000000]
-                $_rec_time_pos_in_ripple := get_event_par(%ripple_id_history[$_r3],$EVENT_PAR_PLAY_POS) mod %rec_time_ripple_lengths[$_artic4]
-                $_real_time_pos_in_pulse := int(real(0)+((real($_rec_time_pos_in_ripple)-real(0))/(real(%rec_time_ripple_lengths[$_artic4])-real(0))*(real(ticks_to_ms(%ripple_length_ticks[$_artic4]))-real(0))))
-                $_real_time_pos_in_pulse := int(real($_real_time_pos_in_pulse)*?speeds[$slider_speed])
-                $_real_time_ripple_length := ticks_to_ms(int(real(%ripple_length_ticks[$_artic4])*?speeds[$slider_speed]))
-                $_time_til_end_of_ripple := ($_real_time_ripple_length-$_real_time_pos_in_pulse)/1000
-                if ($_key_i=%custom_event_second_note[%ripple_id_history[$_r3] mod 1000000])
-                  %custom_event_note_off_timestamp[%ripple_id_history[$_r3] mod 1000000] := $ENGINE_UPTIME
-                  if ($slider_releaseSamples=0)
-                    %custom_event_releasing[%ripple_id_history[$_r3] mod 1000000] := 1
-                    $_fade_out_time2 := $_time_til_end_of_ripple
-                    %custom_event_release_length[%ripple_id_history[$_r3] mod 1000000] := $_fade_out_time2
-                    if ($_fade_out_time2<($DURATION_SIXTEENTH/8/1000))
-                      $_fade_out_time2 := ticks_to_ms(%ripple_length_ticks[$_artic4]/%pitch_fractions[$_artic4])/1000
-                    end if
-                    fade_out(%ripple_id_history[$_r3],$_fade_out_time2*1000,1)
-                  else
-                    %custom_event_time_til_note_off[%ripple_id_history[$_r3] mod 1000000] := $_time_til_end_of_ripple
-                    %custom_event_waiting_to_trigger_release_sample[%ripple_id_history[$_r3] mod 1000000] := 1
-                  end if
-                end if
-              end if
-            end if
-            inc($_r3)
-          end while
-        end if
+      else
         $voice_i := 0
-        while ($voice_i<=(%num_ripple_voices[$_key_i]-2))
+        while ($voice_i<%num_ripple_voices[$EVENT_NOTE])
+          if ($voice_i=-1)
+            message("voice = " & $voice_i)
+          end if
           $_r3 := 0
           while ($_r3<100)
             if (%ripple_id_history[$_r3] # 0)
@@ -3450,15 +3006,23 @@ on controller
                 $_real_time_pos_in_pulse := int(real($_real_time_pos_in_pulse)*?speeds[$slider_speed])
                 $_real_time_ripple_length := ticks_to_ms(int(real(%ripple_length_ticks[$_artic4])*?speeds[$slider_speed]))
                 $_time_til_end_of_ripple := ($_real_time_ripple_length-$_real_time_pos_in_pulse)/1000
-                if ($_key_i=%custom_event_second_note[%ripple_id_history[$_r3] mod 1000000])
+                if ($EVENT_NOTE=%custom_event_second_note[%ripple_id_history[$_r3] mod 1000000])
                   %custom_event_note_off_timestamp[%ripple_id_history[$_r3] mod 1000000] := $ENGINE_UPTIME
                   if ($slider_releaseSamples=0)
+                    if (%key_down[$recent_release_trigger_key]=1)
+                      $_play_release_sample := 1
+                    else
+                      $_play_release_sample := 0
+                    end if
+                  else
+                    if ($slider_releaseSamples>0)
+                      $_play_release_sample := 1
+                    end if
+                  end if
+                  if ($_play_release_sample=0)
                     %custom_event_releasing[%ripple_id_history[$_r3] mod 1000000] := 1
                     $_fade_out_time2 := $_time_til_end_of_ripple
                     %custom_event_release_length[%ripple_id_history[$_r3] mod 1000000] := $_fade_out_time2
-                    if ($_fade_out_time2<($DURATION_SIXTEENTH/8/1000))
-                      $_fade_out_time2 := ticks_to_ms(%ripple_length_ticks[$_artic4]/%pitch_fractions[$_artic4])/1000
-                    end if
                     fade_out(%ripple_id_history[$_r3],$_fade_out_time2*1000,1)
                   else
                     %custom_event_time_til_note_off[%ripple_id_history[$_r3] mod 1000000] := $_time_til_end_of_ripple
@@ -3469,29 +3033,157 @@ on controller
             end if
             inc($_r3)
           end while
+          call count_keys_pressed
+          if ($num_keys_pressed=0)
+            $all_keys_released := 1
+          end if
           inc($voice_i)
         end while
-        inc($_key_i)
+      end if
+      %num_ripple_voices[$EVENT_NOTE] := 0
+    else
+      %notes_to_release[$num_notes_to_release] := $EVENT_NOTE
+      %voices_to_release[$num_notes_to_release] := %num_ripple_voices[$EVENT_NOTE]-1
+      inc($num_notes_to_release)
+    end if
+  end if
+end on
+
+on controller
+  if ($CC_NUM=64)
+    if (%CC[64]<10 and ($_prev_cc64>=10))
+      $_i2 := 0
+      while ($_i2<$num_notes_to_release)
+        %key_active[%notes_to_release[$_i2]] := %key_down[%notes_to_release[$_i2]]
+        if (%voices_to_release[$_i2]=-1)
+          message("voice = " & %voices_to_release[$_i2])
+        end if
+        $_r3 := 0
+        while ($_r3<100)
+          if (%ripple_id_history[$_r3] # 0)
+            if (%voices_to_release[$_i2]=%custom_event_voice[%ripple_id_history[$_r3] mod 1000000])
+              $_artic4 := %custom_event_artic[%ripple_id_history[$_r3] mod 1000000]
+              $_rec_time_pos_in_ripple := get_event_par(%ripple_id_history[$_r3],$EVENT_PAR_PLAY_POS) mod %rec_time_ripple_lengths[$_artic4]
+              $_real_time_pos_in_pulse := int(real(0)+((real($_rec_time_pos_in_ripple)-real(0))/(real(%rec_time_ripple_lengths[$_artic4])-real(0))*(real(ticks_to_ms(%ripple_length_ticks[$_artic4]))-real(0))))
+              $_real_time_pos_in_pulse := int(real($_real_time_pos_in_pulse)*?speeds[$slider_speed])
+              $_real_time_ripple_length := ticks_to_ms(int(real(%ripple_length_ticks[$_artic4])*?speeds[$slider_speed]))
+              $_time_til_end_of_ripple := ($_real_time_ripple_length-$_real_time_pos_in_pulse)/1000
+              if (%notes_to_release[$_i2]=%custom_event_second_note[%ripple_id_history[$_r3] mod 1000000])
+                %custom_event_note_off_timestamp[%ripple_id_history[$_r3] mod 1000000] := $ENGINE_UPTIME
+                if ($slider_releaseSamples=0)
+                  if (%key_down[$recent_release_trigger_key]=1)
+                    $_play_release_sample := 1
+                  else
+                    $_play_release_sample := 0
+                  end if
+                else
+                  if ($slider_releaseSamples>0)
+                    $_play_release_sample := 1
+                  end if
+                end if
+                if ($_play_release_sample=0)
+                  %custom_event_releasing[%ripple_id_history[$_r3] mod 1000000] := 1
+                  $_fade_out_time2 := $_time_til_end_of_ripple
+                  %custom_event_release_length[%ripple_id_history[$_r3] mod 1000000] := $_fade_out_time2
+                  fade_out(%ripple_id_history[$_r3],$_fade_out_time2*1000,1)
+                else
+                  %custom_event_time_til_note_off[%ripple_id_history[$_r3] mod 1000000] := $_time_til_end_of_ripple
+                  %custom_event_waiting_to_trigger_release_sample[%ripple_id_history[$_r3] mod 1000000] := 1
+                end if
+              end if
+            end if
+          end if
+          inc($_r3)
+        end while
+        call count_keys_pressed
+        if ($num_keys_pressed=0)
+          $all_keys_released := 1
+        end if
+        inc($_i2)
       end while
+      $array_i := 0
+      while ($array_i<num_elements(%notes_to_release))
+        %notes_to_release[$array_i] := 0
+        inc($array_i)
+      end while
+      $array_i := 0
+      while ($array_i<num_elements(%voices_to_release))
+        %voices_to_release[$array_i] := 0
+        inc($array_i)
+      end while
+      $num_notes_to_release := 0
     end if
     $_prev_cc64 := %CC[64]
   end if
 end on
 
 on listener
-  if ($NI_SIGNAL_TYPE=$NI_SIGNAL_TIMER_MS)
-    call remove_ripple_ids_from_history_after_they_have_faded_out
-    call ripple_animations
-    call midi_clip_play_cursors
-    call info_graphics_animation
-    call play_release_samples_when_its_time
-    call crossfaded_looping
-  end if
+  select ($NI_SIGNAL_TYPE)
+    case $NI_SIGNAL_TIMER_MS
+      call remove_ripple_ids_from_history_after_they_have_faded_out
+      call ripple_animations
+      call midi_clip_play_cursors
+      call info_graphics_animation
+      call play_release_samples_when_its_time
+      call crossfaded_looping
+      call hide_version
+    case $NI_SIGNAL_TRANSP_START
+      $first_ripple_timestamp := $ENGINE_UPTIME
+      set_controller(64,0)
+      wait(1)
+      $clip_i := 0
+      while ($clip_i<num_elements(%midi_clip_preview_id))
+        set_control_par(%midi_clip_preview_id[$clip_i],$CONTROL_PAR_VALUE,0)
+        if (%playing[$clip_i]=1)
+          get_event_ids(%event_ids)
+          $e := 0
+          while ($e<num_elements(%event_ids))
+            if (%custom_event_triggered_by_mf[%event_ids[$e] mod 1000000]=($clip_i+1))
+              fade_out(%event_ids[$e],$DURATION_SIXTEENTH,1)
+              if (in_range(get_event_par(%event_ids[$e],$EVENT_PAR_NOTE),$LOWEST_KEY,$HIGHEST_KEY))
+                set_control_par(%key_ids[get_event_par(%event_ids[$e],$EVENT_PAR_NOTE)],$CONTROL_PAR_PICTURE_STATE,0)
+                %key_down[get_event_par(%event_ids[$e],$EVENT_PAR_NOTE)] := 0
+                %key_active[get_event_par(%event_ids[$e],$EVENT_PAR_NOTE)] := 0
+              end if
+            end if
+            inc($e)
+          end while
+          %playing[$clip_i] := 0
+          %looping[$clip_i] := 0
+        end if
+        inc($clip_i)
+      end while
+    case $NI_SIGNAL_TRANSP_STOP
+      set_controller(64,0)
+      wait(1)
+      $clip_i := 0
+      while ($clip_i<num_elements(%midi_clip_preview_id))
+        set_control_par(%midi_clip_preview_id[$clip_i],$CONTROL_PAR_VALUE,0)
+        if (%playing[$clip_i]=1)
+          get_event_ids(%event_ids)
+          $e := 0
+          while ($e<num_elements(%event_ids))
+            if (%custom_event_triggered_by_mf[%event_ids[$e] mod 1000000]=($clip_i+1))
+              fade_out(%event_ids[$e],$DURATION_SIXTEENTH,1)
+              if (in_range(get_event_par(%event_ids[$e],$EVENT_PAR_NOTE),$LOWEST_KEY,$HIGHEST_KEY))
+                set_control_par(%key_ids[get_event_par(%event_ids[$e],$EVENT_PAR_NOTE)],$CONTROL_PAR_PICTURE_STATE,0)
+                %key_down[get_event_par(%event_ids[$e],$EVENT_PAR_NOTE)] := 0
+                %key_active[get_event_par(%event_ids[$e],$EVENT_PAR_NOTE)] := 0
+              end if
+            end if
+            inc($e)
+          end while
+          %playing[$clip_i] := 0
+          %looping[$clip_i] := 0
+        end if
+        inc($clip_i)
+      end while
+  end select
 end on
 
 on ui_controls
-  if ($NI_UI_ID=get_ui_id($switch_showMidi))
-    if ($switch_showMidi=0)
+  if ($NI_UI_ID=get_ui_id($button_showMidi))
+    if ($button_showMidi=0)
       set_controller(64,0)
       wait(1)
       $clip_i := 0
@@ -3505,6 +3197,8 @@ on ui_controls
               fade_out(%_event_ids[$_e],$DURATION_SIXTEENTH,1)
               if (in_range(get_event_par(%_event_ids[$_e],$EVENT_PAR_NOTE),$LOWEST_KEY,$HIGHEST_KEY))
                 set_control_par(%key_ids[get_event_par(%_event_ids[$_e],$EVENT_PAR_NOTE)],$CONTROL_PAR_PICTURE_STATE,0)
+                %key_down[get_event_par(%_event_ids[$_e],$EVENT_PAR_NOTE)] := 0
+                %key_active[get_event_par(%_event_ids[$_e],$EVENT_PAR_NOTE)] := 0
               end if
             end if
             inc($_e)
@@ -3518,7 +3212,7 @@ on ui_controls
     call update_midi_visibility
   end if
   if ($NI_UI_ID=get_ui_id($switch_closeMidi))
-    $switch_showMidi := 0
+    $button_showMidi := 0
     set_controller(64,0)
     wait(1)
     $clip_i := 0
@@ -3532,6 +3226,8 @@ on ui_controls
             fade_out(%_event_ids[$_e],$DURATION_SIXTEENTH,1)
             if (in_range(get_event_par(%_event_ids[$_e],$EVENT_PAR_NOTE),$LOWEST_KEY,$HIGHEST_KEY))
               set_control_par(%key_ids[get_event_par(%_event_ids[$_e],$EVENT_PAR_NOTE)],$CONTROL_PAR_PICTURE_STATE,0)
+              %key_down[get_event_par(%_event_ids[$_e],$EVENT_PAR_NOTE)] := 0
+              %key_active[get_event_par(%_event_ids[$_e],$EVENT_PAR_NOTE)] := 0
             end if
           end if
           inc($_e)
@@ -3557,29 +3253,59 @@ on ui_controls
       inc($i)
     end while
   end if
-  if ($NI_UI_ID=get_ui_id($switch_openInfo))
-    $switch_showMidi := 0
+  if ($NI_UI_ID=get_ui_id($button_generalInfo))
+    $button_showMidi := 0
     call update_midi_visibility
-    if (get_control_par(get_ui_id($switch_info),$CONTROL_PAR_HIDE)=$HIDE_WHOLE_CONTROL)
-      set_control_par(get_ui_id($switch_info),$CONTROL_PAR_HIDE,$HIDE_PART_NOTHING)
+    if (get_control_par(get_ui_id($switch_generalInfoDisp),$CONTROL_PAR_HIDE)=$HIDE_WHOLE_CONTROL)
+      set_control_par(get_ui_id($switch_generalInfoDisp),$CONTROL_PAR_HIDE,$HIDE_PART_NOTHING)
     else
-      set_control_par(get_ui_id($switch_info),$CONTROL_PAR_HIDE,$HIDE_WHOLE_CONTROL)
+      set_control_par(get_ui_id($switch_generalInfoDisp),$CONTROL_PAR_HIDE,$HIDE_WHOLE_CONTROL)
     end if
   end if
-  if ($NI_UI_ID=get_ui_id($switch_Info))
-    set_control_par(get_ui_id($switch_info),$CONTROL_PAR_HIDE,$HIDE_WHOLE_CONTROL)
+  if ($NI_UI_ID=get_ui_id($switch_generalInfoDisp))
+    set_control_par(get_ui_id($switch_generalInfoDisp),$CONTROL_PAR_HIDE,$HIDE_WHOLE_CONTROL)
   end if
-  if ($NI_UI_ID=get_ui_id($switch_openInfoOptions))
-    $switch_showMidi := 0
+  if ($NI_UI_ID=get_ui_id($button_articulationsInfo))
+    set_control_par(get_ui_id($switch_articulationsInfoDisp),$CONTROL_PAR_HIDE,$HIDE_PART_NOTHING)
+  end if
+  if ($NI_UI_ID=get_ui_id($switch_articulationsInfoDisp))
+    set_control_par(get_ui_id($switch_articulationsInfoDisp),$CONTROL_PAR_HIDE,$HIDE_WHOLE_CONTROL)
+  end if
+  if ($NI_UI_ID=get_ui_id($button_optionsInfo))
+    $button_showMidi := 0
     call update_midi_visibility
-    if (get_control_par(get_ui_id($switch_infoOptions),$CONTROL_PAR_HIDE)=$HIDE_WHOLE_CONTROL)
-      set_control_par(get_ui_id($switch_infoOptions),$CONTROL_PAR_HIDE,$HIDE_PART_NOTHING)
+    if (get_control_par(get_ui_id($switch_optionsInfoDisp),$CONTROL_PAR_HIDE)=$HIDE_WHOLE_CONTROL)
+      set_control_par(get_ui_id($switch_optionsInfoDisp),$CONTROL_PAR_HIDE,$HIDE_PART_NOTHING)
     else
-      set_control_par(get_ui_id($switch_infoOptions),$CONTROL_PAR_HIDE,$HIDE_WHOLE_CONTROL)
+      set_control_par(get_ui_id($switch_optionsInfoDisp),$CONTROL_PAR_HIDE,$HIDE_WHOLE_CONTROL)
     end if
   end if
-  if ($NI_UI_ID=get_ui_id($switch_InfoOptions))
-    set_control_par(get_ui_id($switch_InfoOptions),$CONTROL_PAR_HIDE,$HIDE_WHOLE_CONTROL)
+  if ($NI_UI_ID=get_ui_id($switch_optionsInfoDisp))
+    set_control_par(get_ui_id($switch_optionsInfoDisp),$CONTROL_PAR_HIDE,$HIDE_WHOLE_CONTROL)
+  end if
+  if ($NI_UI_ID=get_ui_id($button_speedInfo))
+    set_control_par(get_ui_id($switch_speedInfoDisp),$CONTROL_PAR_HIDE,$HIDE_PART_NOTHING)
+  end if
+  if ($NI_UI_ID=get_ui_id($switch_speedInfoDisp))
+    set_control_par(get_ui_id($switch_speedInfoDisp),$CONTROL_PAR_HIDE,$HIDE_WHOLE_CONTROL)
+  end if
+  if ($NI_UI_ID=get_ui_id($button_directionInfo))
+    set_control_par(get_ui_id($switch_directionInfoDisp),$CONTROL_PAR_HIDE,$HIDE_PART_NOTHING)
+  end if
+  if ($NI_UI_ID=get_ui_id($switch_directionInfoDisp))
+    set_control_par(get_ui_id($switch_directionInfoDisp),$CONTROL_PAR_HIDE,$HIDE_WHOLE_CONTROL)
+  end if
+  if ($NI_UI_ID=get_ui_id($button_legatoInfo))
+    set_control_par(get_ui_id($switch_legatoInfoDisp),$CONTROL_PAR_HIDE,$HIDE_PART_NOTHING)
+  end if
+  if ($NI_UI_ID=get_ui_id($switch_legatoInfoDisp))
+    set_control_par(get_ui_id($switch_legatoInfoDisp),$CONTROL_PAR_HIDE,$HIDE_WHOLE_CONTROL)
+  end if
+  if ($NI_UI_ID=get_ui_id($button_releaseSamplesInfo))
+    set_control_par(get_ui_id($switch_releaseSamplesInfoDisp),$CONTROL_PAR_HIDE,$HIDE_PART_NOTHING)
+  end if
+  if ($NI_UI_ID=get_ui_id($switch_releaseSamplesInfoDisp))
+    set_control_par(get_ui_id($switch_releaseSamplesInfoDisp),$CONTROL_PAR_HIDE,$HIDE_WHOLE_CONTROL)
   end if
   $_index2 := search(%midi_clip_preview_id,$NI_UI_ID)
   if ($_index2 # -1)
@@ -3595,6 +3321,8 @@ on ui_controls
           fade_out(%_event_ids[$_e],$DURATION_SIXTEENTH,1)
           if (in_range(get_event_par(%_event_ids[$_e],$EVENT_PAR_NOTE),$LOWEST_KEY,$HIGHEST_KEY))
             set_control_par(%key_ids[get_event_par(%_event_ids[$_e],$EVENT_PAR_NOTE)],$CONTROL_PAR_PICTURE_STATE,0)
+            %key_down[get_event_par(%_event_ids[$_e],$EVENT_PAR_NOTE)] := 0
+            %key_active[get_event_par(%_event_ids[$_e],$EVENT_PAR_NOTE)] := 0
           end if
         end if
         inc($_e)
@@ -3614,6 +3342,8 @@ on ui_controls
                 fade_out(%_event_ids[$_e],$DURATION_SIXTEENTH,1)
                 if (in_range(get_event_par(%_event_ids[$_e],$EVENT_PAR_NOTE),$LOWEST_KEY,$HIGHEST_KEY))
                   set_control_par(%key_ids[get_event_par(%_event_ids[$_e],$EVENT_PAR_NOTE)],$CONTROL_PAR_PICTURE_STATE,0)
+                  %key_down[get_event_par(%_event_ids[$_e],$EVENT_PAR_NOTE)] := 0
+                  %key_active[get_event_par(%_event_ids[$_e],$EVENT_PAR_NOTE)] := 0
                 end if
               end if
               inc($_e)
@@ -3629,7 +3359,7 @@ on ui_controls
         if (%clip_loop_enabled[get_control_par($NI_UI_ID,$CONTROL_PAR_CUSTOM_ID)]=0)
           %looping[get_control_par($NI_UI_ID,$CONTROL_PAR_CUSTOM_ID)] := 0
         end if
-        if ($switch_showMidi=0)
+        if ($button_showMidi=0)
           %looping[get_control_par($NI_UI_ID,$CONTROL_PAR_CUSTOM_ID)] := 0
         end if
         %cur_event[get_control_par($NI_UI_ID,$CONTROL_PAR_CUSTOM_ID)] := 0
@@ -3649,7 +3379,7 @@ on ui_controls
           if (%cur_event[get_control_par($NI_UI_ID,$CONTROL_PAR_CUSTOM_ID)]>%num_midi_events[get_control_par($NI_UI_ID,$CONTROL_PAR_CUSTOM_ID)])
             %playing[get_control_par($NI_UI_ID,$CONTROL_PAR_CUSTOM_ID)] := 0
           end if
-          if ($switch_showMidi=0)
+          if ($button_showMidi=0)
             %playing[get_control_par($NI_UI_ID,$CONTROL_PAR_CUSTOM_ID)] := 0
           end if
           if (%playing[get_control_par($NI_UI_ID,$CONTROL_PAR_CUSTOM_ID)]=1 and (%cb_id[get_control_par($NI_UI_ID,$CONTROL_PAR_CUSTOM_ID)]=$NI_CALLBACK_ID))
@@ -3664,6 +3394,7 @@ on ui_controls
               set_event_par_arr($_note_id4,$EVENT_PAR_ALLOW_GROUP,0,$ALL_GROUPS)
               set_key_pressed($_note,1)
               %key_down[$_note] := 1
+              %velo[$_note] := $_velocity
               $_ks_index := search(%articulation_keyswitches,$_note)
               if ($_ks_index # -1)
                 $cur_artic := $_ks_index
@@ -3689,6 +3420,12 @@ on ui_controls
               if ($_ks_index # -1)
                 $slider_releaseSamples := $_ks_index
                 call update_releaseMode_switches
+              end if
+              $_ks_index := search(%release_trigger_keyswitches,$_note)
+              if ($_ks_index # -1)
+                $recent_release_trigger_key := %release_trigger_keyswitches[$_ks_index]
+                $switch_releaseTrigger := 1
+                call trigger_release_samples_for_all_ripples
               end if
               if (search(%all_keyswitches,$_note) # -1)
                 call set_keys_pressed
@@ -3848,41 +3585,36 @@ on ui_controls
                     $r := 0
                     while ($r<100)
                       if (%ripple_id_history[$r] # 0)
-                        if (%custom_event_low_note[%ripple_id_history[$r] mod 1000000]=$_low_note2 and (%custom_event_high_note[%ripple_id_history[$r] mod 1000000]=$_high_note2) and (%custom_event_direction[%ripple_id_history[$r] mod 1000000]=$direction) and (%custom_event_releasing[%ripple_id_history[$r] mod 1000000]=0))
+                        if (%custom_event_low_note[%ripple_id_history[$r] mod 1000000]=$_low_note2 and (%key_released[$_low_note2]=0) and (%custom_event_high_note[%ripple_id_history[$r] mod 1000000]=$_high_note2) and (%key_released[$_high_note2]=0) and (%custom_event_high_note[%ripple_id_history[$r] mod 1000000]=$_high_note2) and (%custom_event_direction[%ripple_id_history[$r] mod 1000000]=$direction) and (%custom_event_releasing[%ripple_id_history[$r] mod 1000000]=0))
                           $_already_playing := 1
                         end if
                       end if
                       inc($r)
                     end while
+                    %key_released[$_low_note2] := 0
+                    %key_released[$_high_note2] := 0
                     if ($_already_playing=0)
+                      $_do_legato := 0
                       call count_active_ripples
-                      if ($num_active_ripples=0)
+                      if ($num_active_ripples>0)
+                        $_do_legato := 1
+                      end if
+                      if ($all_keys_released=1)
+                        $_do_legato := 0
+                      else
+                        $_do_legato := 1
+                      end if
+                      $all_keys_released := 0
+                      if ($_do_legato=0)
                         $first_ripple_timestamp := $ENGINE_UPTIME
                         $_real_legato_time := 0
                         $_offset_real_time := 0
                       else
-                        $_found := 0
-                        $_r := 0
-                        while ($_r<100)
-                          if (%ripple_id_history[$_r] # 0 and (%custom_event_source[%ripple_id_history[$_r] mod 1000000]=-1) and (%custom_event_type[%ripple_id_history[$_r] mod 1000000] # 1) and (%custom_event_releasing[%ripple_id_history[$_r] mod 1000000]=0 or ($slider_legato=$LEGATO_MODE__SYNC_TO_SWELL)) and (get_event_par(%ripple_id_history[$_r],$EVENT_PAR_PLAY_POS)>0) and ($_found=0))
-                            $_found := 1
-                            $_first_ripple := %ripple_id_history[$_r]
-                          end if
-                          inc($_r)
-                        end while
-                        $_found := 0
-                        $_r := 0
-                        while ($_r<100)
-                          if (%ripple_id_history[$_r]=0 and ($_found=0))
-                            $_found := 1
-                            $_first_ripple := $_r-1
-                          end if
-                          inc($_r)
-                        end while
                         $_real_legato_time := ($ENGINE_UPTIME-$first_ripple_timestamp)*1000
                         $_real_legato_time := int(real($_real_legato_time)/?speeds[$slider_speed])
                         select ($slider_legato)
                           case $LEGATO_MODE__SYNC_TO_PITCH
+                            $_real_legato_time := $_real_legato_time+ticks_to_ms(1)
                             $_offset_real_time := $_real_legato_time mod ticks_to_ms(%ripple_length_ticks[$cur_artic]/%pitch_fractions[$cur_artic])
                           case $LEGATO_MODE__SYNC_TO_RIPPLE
                             $_offset_real_time := $_real_legato_time mod ticks_to_ms(%ripple_length_ticks[$cur_artic])
@@ -3945,75 +3677,66 @@ on ui_controls
               wait(1)
               if ($_cc_num=64)
                 if (%CC[64]<10 and ($_prev_cc64>=10))
-                  $_key_i := $LOWEST_KEY
-                  while ($_key_i<=$HIGHEST_KEY)
-                    if (%key_down[$_key_i]=0 and (%key_active[$_key_i]=1))
-                      %key_active[$_key_i] := 0
-                      $_r3 := 0
-                      while ($_r3<100)
-                        if (%ripple_id_history[$_r3] # 0)
-                          if (%num_ripple_voices[$_key_i]-1=%custom_event_voice[%ripple_id_history[$_r3] mod 1000000])
-                            $_artic4 := %custom_event_artic[%ripple_id_history[$_r3] mod 1000000]
-                            $_rec_time_pos_in_ripple := get_event_par(%ripple_id_history[$_r3],$EVENT_PAR_PLAY_POS) mod %rec_time_ripple_lengths[$_artic4]
-                            $_real_time_pos_in_pulse := int(real(0)+((real($_rec_time_pos_in_ripple)-real(0))/(real(%rec_time_ripple_lengths[$_artic4])-real(0))*(real(ticks_to_ms(%ripple_length_ticks[$_artic4]))-real(0))))
-                            $_real_time_pos_in_pulse := int(real($_real_time_pos_in_pulse)*?speeds[$slider_speed])
-                            $_real_time_ripple_length := ticks_to_ms(int(real(%ripple_length_ticks[$_artic4])*?speeds[$slider_speed]))
-                            $_time_til_end_of_ripple := ($_real_time_ripple_length-$_real_time_pos_in_pulse)/1000
-                            if ($_key_i=%custom_event_second_note[%ripple_id_history[$_r3] mod 1000000])
-                              %custom_event_note_off_timestamp[%ripple_id_history[$_r3] mod 1000000] := $ENGINE_UPTIME
-                              if ($slider_releaseSamples=0)
-                                %custom_event_releasing[%ripple_id_history[$_r3] mod 1000000] := 1
-                                $_fade_out_time2 := $_time_til_end_of_ripple
-                                %custom_event_release_length[%ripple_id_history[$_r3] mod 1000000] := $_fade_out_time2
-                                if ($_fade_out_time2<($DURATION_SIXTEENTH/8/1000))
-                                  $_fade_out_time2 := ticks_to_ms(%ripple_length_ticks[$_artic4]/%pitch_fractions[$_artic4])/1000
-                                end if
-                                fade_out(%ripple_id_history[$_r3],$_fade_out_time2*1000,1)
-                              else
-                                %custom_event_time_til_note_off[%ripple_id_history[$_r3] mod 1000000] := $_time_til_end_of_ripple
-                                %custom_event_waiting_to_trigger_release_sample[%ripple_id_history[$_r3] mod 1000000] := 1
-                              end if
-                            end if
-                          end if
-                        end if
-                        inc($_r3)
-                      end while
+                  $_i2 := 0
+                  while ($_i2<$num_notes_to_release)
+                    %key_active[%notes_to_release[$_i2]] := %key_down[%notes_to_release[$_i2]]
+                    if (%voices_to_release[$_i2]=-1)
+                      message("voice = " & %voices_to_release[$_i2])
                     end if
-                    $voice_i := 0
-                    while ($voice_i<=(%num_ripple_voices[$_key_i]-2))
-                      $_r3 := 0
-                      while ($_r3<100)
-                        if (%ripple_id_history[$_r3] # 0)
-                          if ($voice_i=%custom_event_voice[%ripple_id_history[$_r3] mod 1000000])
-                            $_artic4 := %custom_event_artic[%ripple_id_history[$_r3] mod 1000000]
-                            $_rec_time_pos_in_ripple := get_event_par(%ripple_id_history[$_r3],$EVENT_PAR_PLAY_POS) mod %rec_time_ripple_lengths[$_artic4]
-                            $_real_time_pos_in_pulse := int(real(0)+((real($_rec_time_pos_in_ripple)-real(0))/(real(%rec_time_ripple_lengths[$_artic4])-real(0))*(real(ticks_to_ms(%ripple_length_ticks[$_artic4]))-real(0))))
-                            $_real_time_pos_in_pulse := int(real($_real_time_pos_in_pulse)*?speeds[$slider_speed])
-                            $_real_time_ripple_length := ticks_to_ms(int(real(%ripple_length_ticks[$_artic4])*?speeds[$slider_speed]))
-                            $_time_til_end_of_ripple := ($_real_time_ripple_length-$_real_time_pos_in_pulse)/1000
-                            if ($_key_i=%custom_event_second_note[%ripple_id_history[$_r3] mod 1000000])
-                              %custom_event_note_off_timestamp[%ripple_id_history[$_r3] mod 1000000] := $ENGINE_UPTIME
-                              if ($slider_releaseSamples=0)
-                                %custom_event_releasing[%ripple_id_history[$_r3] mod 1000000] := 1
-                                $_fade_out_time2 := $_time_til_end_of_ripple
-                                %custom_event_release_length[%ripple_id_history[$_r3] mod 1000000] := $_fade_out_time2
-                                if ($_fade_out_time2<($DURATION_SIXTEENTH/8/1000))
-                                  $_fade_out_time2 := ticks_to_ms(%ripple_length_ticks[$_artic4]/%pitch_fractions[$_artic4])/1000
-                                end if
-                                fade_out(%ripple_id_history[$_r3],$_fade_out_time2*1000,1)
+                    $_r3 := 0
+                    while ($_r3<100)
+                      if (%ripple_id_history[$_r3] # 0)
+                        if (%voices_to_release[$_i2]=%custom_event_voice[%ripple_id_history[$_r3] mod 1000000])
+                          $_artic4 := %custom_event_artic[%ripple_id_history[$_r3] mod 1000000]
+                          $_rec_time_pos_in_ripple := get_event_par(%ripple_id_history[$_r3],$EVENT_PAR_PLAY_POS) mod %rec_time_ripple_lengths[$_artic4]
+                          $_real_time_pos_in_pulse := int(real(0)+((real($_rec_time_pos_in_ripple)-real(0))/(real(%rec_time_ripple_lengths[$_artic4])-real(0))*(real(ticks_to_ms(%ripple_length_ticks[$_artic4]))-real(0))))
+                          $_real_time_pos_in_pulse := int(real($_real_time_pos_in_pulse)*?speeds[$slider_speed])
+                          $_real_time_ripple_length := ticks_to_ms(int(real(%ripple_length_ticks[$_artic4])*?speeds[$slider_speed]))
+                          $_time_til_end_of_ripple := ($_real_time_ripple_length-$_real_time_pos_in_pulse)/1000
+                          if (%notes_to_release[$_i2]=%custom_event_second_note[%ripple_id_history[$_r3] mod 1000000])
+                            %custom_event_note_off_timestamp[%ripple_id_history[$_r3] mod 1000000] := $ENGINE_UPTIME
+                            if ($slider_releaseSamples=0)
+                              if (%key_down[$recent_release_trigger_key]=1)
+                                $_play_release_sample := 1
                               else
-                                %custom_event_time_til_note_off[%ripple_id_history[$_r3] mod 1000000] := $_time_til_end_of_ripple
-                                %custom_event_waiting_to_trigger_release_sample[%ripple_id_history[$_r3] mod 1000000] := 1
+                                $_play_release_sample := 0
                               end if
+                            else
+                              if ($slider_releaseSamples>0)
+                                $_play_release_sample := 1
+                              end if
+                            end if
+                            if ($_play_release_sample=0)
+                              %custom_event_releasing[%ripple_id_history[$_r3] mod 1000000] := 1
+                              $_fade_out_time2 := $_time_til_end_of_ripple
+                              %custom_event_release_length[%ripple_id_history[$_r3] mod 1000000] := $_fade_out_time2
+                              fade_out(%ripple_id_history[$_r3],$_fade_out_time2*1000,1)
+                            else
+                              %custom_event_time_til_note_off[%ripple_id_history[$_r3] mod 1000000] := $_time_til_end_of_ripple
+                              %custom_event_waiting_to_trigger_release_sample[%ripple_id_history[$_r3] mod 1000000] := 1
                             end if
                           end if
                         end if
-                        inc($_r3)
-                      end while
-                      inc($voice_i)
+                      end if
+                      inc($_r3)
                     end while
-                    inc($_key_i)
+                    call count_keys_pressed
+                    if ($num_keys_pressed=0)
+                      $all_keys_released := 1
+                    end if
+                    inc($_i2)
                   end while
+                  $array_i := 0
+                  while ($array_i<num_elements(%notes_to_release))
+                    %notes_to_release[$array_i] := 0
+                    inc($array_i)
+                  end while
+                  $array_i := 0
+                  while ($array_i<num_elements(%voices_to_release))
+                    %voices_to_release[$array_i] := 0
+                    inc($array_i)
+                  end while
+                  $num_notes_to_release := 0
                 end if
                 $_prev_cc64 := %CC[64]
               end if
@@ -4023,7 +3746,7 @@ on ui_controls
           if (%cur_event[get_control_par($NI_UI_ID,$CONTROL_PAR_CUSTOM_ID)]>%num_midi_events[get_control_par($NI_UI_ID,$CONTROL_PAR_CUSTOM_ID)])
             %playing[get_control_par($NI_UI_ID,$CONTROL_PAR_CUSTOM_ID)] := 0
           end if
-          if ($switch_showMidi=0)
+          if ($button_showMidi=0)
             %playing[get_control_par($NI_UI_ID,$CONTROL_PAR_CUSTOM_ID)] := 0
           end if
         end while
@@ -4072,8 +3795,24 @@ on ui_controls
     $slider_releaseSamples := $_index2
     call update_releaseMode_switches
   end if
+  if ($NI_UI_ID=get_ui_id($switch_releaseTrigger))
+    $switch_releaseTrigger := 0
+    %key_down[$recent_release_trigger_key] := 1
+    call trigger_release_samples_for_all_ripples
+    set_key_pressed(%release_trigger_keyswitches[0],1)
+    set_key_pressed(%release_trigger_keyswitches[1],1)
+    wait(100000)
+    set_key_pressed(%release_trigger_keyswitches[0],0)
+    set_key_pressed(%release_trigger_keyswitches[1],0)
+  end if
   if ($NI_UI_ID=get_ui_id($slider_vol))
-    set_engine_par($ENGINE_PAR_SEND_EFFECT_OUTPUT_GAIN,int(real(real_to_int(pow(2.0,(-16000.0-12000.0+346768.2342478351)/18000.0)))+((real($slider_vol)-real(0))/(real(1000000)-real(0))*(real(real_to_int(pow(2.0,(6000.0-12000.0+346768.2342478351)/18000.0)))-real(real_to_int(pow(2.0,(-16000.0-12000.0+346768.2342478351)/18000.0)))))),-1,0,1)
+    if (in_range($slider_vol,0,500000))
+      set_engine_par($ENGINE_PAR_SEND_EFFECT_OUTPUT_GAIN,int(real(real_to_int(pow(2.0,(-16000.0-12000.0+346768.2342478351)/18000.0)))+((real($slider_vol)-real(0))/(real(500000)-real(0))*(real(real_to_int(pow(2.0,(0.0-12000.0+346768.2342478351)/18000.0)))-real(real_to_int(pow(2.0,(-16000.0-12000.0+346768.2342478351)/18000.0)))))),-1,0,1)
+    else
+      if (in_range($slider_vol,500000,1000000))
+        set_engine_par($ENGINE_PAR_SEND_EFFECT_OUTPUT_GAIN,int(real(real_to_int(pow(2.0,(0.0-12000.0+346768.2342478351)/18000.0)))+((real($slider_vol)-real(500000))/(real(1000000)-real(500000))*(real(real_to_int(pow(2.0,(9000.0-12000.0+346768.2342478351)/18000.0)))-real(real_to_int(pow(2.0,(0.0-12000.0+346768.2342478351)/18000.0)))))),-1,0,1)
+      end if
+    end if
     set_control_par_str(get_ui_id($slider_vol),$CONTROL_PAR_LABEL,get_engine_par_disp($ENGINE_PAR_SEND_EFFECT_OUTPUT_GAIN,-1,0,1) & " dB")
   end if
   if ($NI_UI_ID=get_ui_id($menu_reverb))
@@ -4113,6 +3852,8 @@ on ui_controls
     call set_keys_pressed
   end if
   if ($NI_UI_ID=get_ui_id($switch_logoAnimTrigger))
+    set_control_par(get_ui_id($label_version),$CONTROL_PAR_HIDE,$HIDE_PART_NOTHING)
+    $timestamp_version_shown := $ENGINE_UPTIME
     if ($slider_logoAnim=0)
       $slider_logoAnim := 0
       while ($slider_logoAnim<127)

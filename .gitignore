@@ -1,3 +1,6 @@
 *.wav
 *.ncw
 *.nka
+*.rpp
+*.rpp-bak
+*.rpp-UNDO
