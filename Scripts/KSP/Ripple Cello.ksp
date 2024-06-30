@@ -36,6 +36,11 @@ on init
 	define MAX_RIPPLE_HISTORY := 100
 	define NUM_MIDI_PAGES := 2
 	define NUM_MIDI_CLIPS := (12 * NUM_MIDI_PAGES)
+	define NUM_OPTION_SLIDERS := 4
+	define OPTIONS := SPEED, DIRECTION, LEGATO, RELEASESAMPLES
+	define CONTROLS := VOL, REVERB, OPTIONS
+	define NUM_CTRLS := 6
+
 
 	{{ Event pars }}
 	macro declare_event_par(#par#)
@@ -120,7 +125,7 @@ on init
 		ASPLAYED
 		UP
 	end const
-	declare !direction_mode_texts[] := ("Down", "As Played", "Up")
+	declare !direction_texts[] := ("Down", "As Played", "Up")
 
 	// Legato
 	const LEGATO_MODE
@@ -129,7 +134,7 @@ on init
 		SYNC_TO_RIPPLE
 		SYNC_TO_SWELL
 	end const
-	declare !legato_mode_texts[] := ("Off", "Sync to Pitch", "Sync to Ripple", "Sync to Swell")
+	declare !legato_texts[] := ("Off", "Sync to Pitch", "Sync to Ripple", "Sync to Swell")
 
 	// Release samples
 	const RELEASE_SAMPLES
@@ -137,7 +142,7 @@ on init
 		SOFT
 		LOUD
 	end const
-	declare !releaseMode_texts[] := ("Off", "Soft", "Loud")
+	declare !releaseSamples_texts[] := ("Off", "Soft", "Loud")
 
 	declare release_group[ARTIC.SIZE]
 	release_group[ARTIC.QUARTERS]   := get_group_idx("quarters releases")
@@ -238,6 +243,9 @@ on init
 	declare velo[128]
 	declare event_ids[128]
 	velo[recent_release_trigger_key] := 64
+	declare ctrl_ids[NUM_CTRLS]
+	declare !option_texts[NUM_CTRLS, 10]
+	declare !option_texts_shortened[NUM_CTRLS, 10]
 
 	// Fading graphics
 	declare ~midiInstructions_opacity := 0.0
@@ -280,6 +288,7 @@ on init
 	declare k
 	declare n
 	declare e
+	declare c
 	declare event_i
 	declare other_event_i
 	declare row_i
@@ -544,24 +553,26 @@ on init
 		speed_ids[i] -> font_type_on_hover    := get_font_id("Khula Bold Size 11 on hover")
 		speed_ids[i] -> text := speed_texts[i]
 		speed_ids[i] -> width := speed_ids[i] -> width + 14
+		speed_ids[i] -> custom_id := 0
 	end for
 
 	// Direction
 	switch_up       -> text := "Up"
 	switch_down     -> text := "Down"
 	switch_asPlayed -> text := "As Played"
-	declare direction_mode_ids[DIRECTION_MODE.SIZE]
-	direction_mode_ids[0] := get_ui_id(switch_down)
-	direction_mode_ids[1] := get_ui_id(switch_asPlayed)
-	direction_mode_ids[2] := get_ui_id(switch_up)
-	for i := 0 to num_elements(direction_mode_ids) - 1
-		direction_mode_ids[i] -> font_type             := get_font_id("Khula Bold Size 11 off")
-		direction_mode_ids[i] -> font_type_on          := get_font_id("Khula Bold Size 11 on")
-		direction_mode_ids[i] -> font_type_off_pressed := get_font_id("Khula Bold Size 11 off pressed")
-		direction_mode_ids[i] -> font_type_on_pressed  := get_font_id("Khula Bold Size 11 on pressed")
-		direction_mode_ids[i] -> font_type_off_hover   := get_font_id("Khula Bold Size 11 off hover")
-		direction_mode_ids[i] -> font_type_on_hover    := get_font_id("Khula Bold Size 11 on hover")
-		// direction_mode_ids[i] -> text := speed_texts[i]
+	declare direction_ids[DIRECTION_MODE.SIZE]
+	direction_ids[0] := get_ui_id(switch_down)
+	direction_ids[1] := get_ui_id(switch_asPlayed)
+	direction_ids[2] := get_ui_id(switch_up)
+	for i := 0 to num_elements(direction_ids) - 1
+		direction_ids[i] -> font_type             := get_font_id("Khula Bold Size 11 off")
+		direction_ids[i] -> font_type_on          := get_font_id("Khula Bold Size 11 on")
+		direction_ids[i] -> font_type_off_pressed := get_font_id("Khula Bold Size 11 off pressed")
+		direction_ids[i] -> font_type_on_pressed  := get_font_id("Khula Bold Size 11 on pressed")
+		direction_ids[i] -> font_type_off_hover   := get_font_id("Khula Bold Size 11 off hover")
+		direction_ids[i] -> font_type_on_hover    := get_font_id("Khula Bold Size 11 on hover")
+		direction_ids[i] -> custom_id := 1
+		// direction_ids[i] -> text := speed_texts[i]
 	end for
 	switch_down     -> width := switch_down     -> width + 13
 	switch_asPlayed -> width := switch_asPlayed -> width + 19
@@ -584,22 +595,24 @@ on init
 		legato_ids[i] -> font_type_on_pressed  := get_font_id("Khula Bold Size 11 on pressed")
 		legato_ids[i] -> font_type_off_hover   := get_font_id("Khula Bold Size 11 off hover")
 		legato_ids[i] -> font_type_on_hover    := get_font_id("Khula Bold Size 11 on hover")
-		// direction_mode_ids[i] -> text := speed_texts[i]
+		legato_ids[i] -> custom_id := 2
+		// direction_ids[i] -> text := speed_texts[i]
 	end for
 
 	// Release Mode
-	declare releaseMode_ids[RELEASE_SAMPLES.SIZE]
-	releaseMode_ids[0] := get_ui_id(switch_releaseSamples.off)
-	releaseMode_ids[1] := get_ui_id(switch_releaseSamples.soft)
-	releaseMode_ids[2] := get_ui_id(switch_releaseSamples.loud)
-	for i := 0 to num_elements(releaseMode_ids) - 1
-		releaseMode_ids[i] -> font_type             := get_font_id("Khula Bold Size 11 off")
-		releaseMode_ids[i] -> font_type_on          := get_font_id("Khula Bold Size 11 on")
-		releaseMode_ids[i] -> font_type_off_pressed := get_font_id("Khula Bold Size 11 off pressed")
-		releaseMode_ids[i] -> font_type_on_pressed  := get_font_id("Khula Bold Size 11 on pressed")
-		releaseMode_ids[i] -> font_type_off_hover   := get_font_id("Khula Bold Size 11 off hover")
-		releaseMode_ids[i] -> font_type_on_hover    := get_font_id("Khula Bold Size 11 on hover")
-		releaseMode_ids[i] -> text := releaseMode_texts[i]
+	declare releaseSamples_ids[RELEASE_SAMPLES.SIZE]
+	releaseSamples_ids[0] := get_ui_id(switch_releaseSamples.off)
+	releaseSamples_ids[1] := get_ui_id(switch_releaseSamples.soft)
+	releaseSamples_ids[2] := get_ui_id(switch_releaseSamples.loud)
+	for i := 0 to num_elements(releaseSamples_ids) - 1
+		releaseSamples_ids[i] -> font_type             := get_font_id("Khula Bold Size 11 off")
+		releaseSamples_ids[i] -> font_type_on          := get_font_id("Khula Bold Size 11 on")
+		releaseSamples_ids[i] -> font_type_off_pressed := get_font_id("Khula Bold Size 11 off pressed")
+		releaseSamples_ids[i] -> font_type_on_pressed  := get_font_id("Khula Bold Size 11 on pressed")
+		releaseSamples_ids[i] -> font_type_off_hover   := get_font_id("Khula Bold Size 11 off hover")
+		releaseSamples_ids[i] -> font_type_on_hover    := get_font_id("Khula Bold Size 11 on hover")
+		releaseSamples_ids[i] -> text := releaseSamples_texts[i]
+		releaseSamples_ids[i] -> custom_id := 3
 	end for
 	switch_releaseSamples.off  -> width := switch_releaseSamples.off  -> width + 14
 	switch_releaseSamples.soft -> width := switch_releaseSamples.soft -> width + 14
@@ -608,10 +621,34 @@ on init
 	switch_releaseTrigger -> allow_automation := 0
 
 
-	slider_speed       -> mouse_behaviour := 2000
-	slider_direction   -> mouse_behaviour := 2000
-	slider_legato      -> mouse_behaviour := 2000
+	// Options misc setting things up
+	slider_speed          -> mouse_behaviour := 2000
+	slider_direction      -> mouse_behaviour := 2000
+	slider_legato         -> mouse_behaviour := 2000
 	slider_releaseSamples -> mouse_behaviour := 2000
+
+	c := 0
+	macro assign_ctrl_ids_and_texts(#control#)
+		slider_#control# -> custom_id := c
+		ctrl_ids[c] := get_ui_id(slider_#control#)
+		inc(c)
+	end macro
+	literate_macro(assign_ctrl_ids_and_texts) on CONTROLS
+
+	c := 2
+	macro consolidate_option_texts(#control#)
+		for i := 0 to num_elements(#control#_texts) - 1
+			option_texts[c, i] := #control#_texts[i]
+		end for
+		inc(c)
+	end macro
+	literate_macro(consolidate_option_texts) on OPTIONS
+
+	copy_array(_option_texts, _option_texts_shortened)
+	option_texts_shortened[slider_legato -> custom_id, 0] := "Off"
+	option_texts_shortened[slider_legato -> custom_id, 1] := "Pitch"
+	option_texts_shortened[slider_legato -> custom_id, 2] := "Ripple"
+	option_texts_shortened[slider_legato -> custom_id, 3] := "Swell"
 
 	slider_speed     -> default := 2
 	slider_direction -> default := 1
@@ -640,10 +677,20 @@ on init
 	end for
 
 	{{ Automation }}
-	slider_vol -> automation_id := 0
-	slider_vol -> automation_name := "Expression"
-	slider_reverb -> automation_id := 1
-	slider_reverb -> automation_name := "Reverb"
+	START_INC (N, 0, 1)
+		slider_vol            -> automation_id := N
+		slider_vol            -> automation_name := "Expression"
+		slider_reverb         -> automation_id := N
+		slider_reverb         -> automation_name := "Reverb"
+		slider_speed          -> automation_id := N
+		slider_speed          -> automation_name := "Speed"
+		slider_direction      -> automation_id := N
+		slider_direction      -> automation_name := "Direction"
+		slider_legato         -> automation_id := N
+		slider_legato         -> automation_name := "Legato/Quantize"
+		slider_releaseSamples -> automation_id := N
+		slider_releaseSamples -> automation_name := "Release Samples"
+	END_INC
 
 	// DEV
 	group[ARTIC.QUARTERS].speed   := V2E_speed(18*2)
@@ -662,6 +709,9 @@ function persistence_changed_callback()
 	call set_key_colors_and_types_and_names
 	call set_keys_pressed
 	call set_reverb_menu_checkmark
+	for i := 0 to NUM_CTRLS - 1
+		set_nks_label(i)
+	end for
 end function
 
 on note
@@ -686,24 +736,28 @@ function note_callback(note, velocity, event_id)
 		slider_speed := ks_index
 		call update_speed_switches
 		call update_speed
+		set_nks_label(slider_speed -> custom_id)
 	end if
 
 	ks_index := search(direction_keyswitches, note)
 	if ks_index # -1
 		slider_direction := ks_index
 		call update_direction_switches
+		set_nks_label(slider_direction -> custom_id)
 	end if
 
 	ks_index := search(legato_keyswitches, note)
 	if ks_index # -1
 		slider_legato := ks_index
 		call update_legato_switches
+		set_nks_label(slider_legato -> custom_id)
 	end if
 
 	ks_index := search(release_sample_keyswitches, note)
 	if ks_index # -1
 		slider_releaseSamples := ks_index
-		call update_releaseMode_switches
+		call update_releaseSamples_switches
+		set_nks_label(slider_releaseSamples -> custom_id)
 	end if
 
 	ks_index := search(release_trigger_keyswitches, note)
@@ -1273,7 +1327,6 @@ function ui_controls_callback()
 		switch_releaseSamplesInfoDisp -> hide := HIDE_WHOLE_CONTROL
 	end if
 
-
 	index := search(midi_clip_preview_id, NI_UI_ID)
 	if index # -1
 		set_controller(64, 0)
@@ -1424,7 +1477,7 @@ function ui_controls_callback()
 		call update_direction_switches
 	end if
 
-	index := search(direction_mode_ids, NI_UI_ID)
+	index := search(direction_ids, NI_UI_ID)
 	if index # -1
 		slider_direction := index
 		call update_direction_switches
@@ -1443,13 +1496,13 @@ function ui_controls_callback()
 
 	// Release Samples
 	if NI_UI_ID = get_ui_id(slider_releaseSamples)
-		call update_releaseMode_switches
+		call update_releaseSamples_switches
 	end if
 
-	index := search(releaseMode_ids, NI_UI_ID)
+	index := search(releaseSamples_ids, NI_UI_ID)
 	if index # -1
 		slider_releaseSamples := index
-		call update_releaseMode_switches
+		call update_releaseSamples_switches
 	end if
 
 	if NI_UI_ID = get_ui_id(switch_releaseTrigger)
@@ -1471,7 +1524,6 @@ function ui_controls_callback()
 		else if in_range(slider_vol, 500000, 1000000)
 			insert[0].sfx_wet := map_i_2i_2i_i(slider_vol, 500000, 1000000, V2E.volume2(0.0), V2E.volume2(9000.0))
 		end if
-		slider_vol -> label := insert[0].sfx_wet.disp & " dB"
 	end if
 
 	// Reverb
@@ -1504,23 +1556,37 @@ function ui_controls_callback()
 		declare ~vol := real(slider_reverb) / 1000000.0
 		declare ~db := vol_to_db_safe(vol)
 		send[7].send_0 := V2E.volume(db * 1000.0)
-		slider_reverb -> label := send[7].send_0.disp
 		// main[0].raum_reverb := slider_reverb
 	end if
 
 
 	// Set keys pressed
-	if search(articulation_ids  , NI_UI_ID) # -1 ...
-	or search(speed_ids         , NI_UI_ID) # -1 ...
-	or search(direction_mode_ids, NI_UI_ID) # -1 ...
-	or search(legato_ids        , NI_UI_ID) # -1 ...
-	or search(releaseMode_ids   , NI_UI_ID) # -1 ...
+	if search(articulation_ids   , NI_UI_ID) # -1 ...
+	or search(speed_ids          , NI_UI_ID) # -1 ...
+	or search(direction_ids      , NI_UI_ID) # -1 ...
+	or search(legato_ids         , NI_UI_ID) # -1 ...
+	or search(releaseSamples_ids , NI_UI_ID) # -1 ...
 	or NI_UI_ID = get_ui_id(slider_speed) ...
 	or NI_UI_ID = get_ui_id(slider_direction) ...
 	or NI_UI_ID = get_ui_id(slider_legato) ...
 	or NI_UI_ID = get_ui_id(slider_releaseSamples)
 	 	call set_keys_pressed
 	end if
+
+	// Update NKS labels
+	if search(speed_ids          , NI_UI_ID) # -1 ...
+	or search(direction_ids      , NI_UI_ID) # -1 ...
+	or search(legato_ids         , NI_UI_ID) # -1 ...
+	or search(releaseSamples_ids , NI_UI_ID) # -1 ...
+	or NI_UI_ID = get_ui_id(slider_vol) ...
+	or NI_UI_ID = get_ui_id(slider_reverb) ...
+	or NI_UI_ID = get_ui_id(slider_speed) ...
+	or NI_UI_ID = get_ui_id(slider_direction) ...
+	or NI_UI_ID = get_ui_id(slider_legato) ...
+	or NI_UI_ID = get_ui_id(slider_releaseSamples)
+	 	set_nks_label(NI_UI_ID -> custom_id)
+	end if
+
 
 	if NI_UI_ID = get_ui_id(switch_logoAnimTrigger)
 		label_version -> hide := HIDE_PART_NOTHING

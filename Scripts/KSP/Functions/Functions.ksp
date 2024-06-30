@@ -1,5 +1,20 @@
 define V2E_speed(#in#) := 1000000 - (((#in#) - 1) * 90909)
 
+function set_nks_label(ctrl_index)
+	declare ui_id := ctrl_ids[ctrl_index]
+
+	if ctrl_index = slider_vol -> custom_id
+		slider_vol -> label := insert[0].sfx_wet.disp & " dB"
+
+	else if ctrl_index = slider_reverb -> custom_id
+		slider_reverb -> label := send[7].send_0.disp
+
+	else if in_range(ctrl_index, slider_speed -> custom_id, slider_releaseSamples -> custom_id)
+		ui_id -> label := option_texts_shortened[ctrl_index, ui_id -> value]
+
+	end if
+end function
+
 function update_speed
 	for g := 0 to NUM_GROUPS - 1
 		if switch_halfSpeed = 1
@@ -143,21 +158,21 @@ function set_key_colors_and_types_and_names
 		index := search(direction_keyswitches, key_i)
 		if index # -1
 			set_key_color(key_i, KEY_COLOR_YELLOW)
-			set_key_name(key_i, direction_mode_texts[index])
+			set_key_name(key_i, direction_texts[index])
 			set_key_type(key_i, NI_KEY_TYPE_CONTROL)
 		end if
 
 		index := search(legato_keyswitches, key_i)
 		if index # -1
 			set_key_color(key_i, KEY_COLOR_PURPLE)
-			set_key_name(key_i, legato_mode_texts[index])
+			set_key_name(key_i, legato_texts[index])
 			set_key_type(key_i, NI_KEY_TYPE_CONTROL)
 		end if
 
 		index := search(release_sample_keyswitches, key_i)
 		if index # -1
 			set_key_color(key_i, KEY_COLOR_ORANGE)
-			set_key_name(key_i, releaseMode_texts[index])
+			set_key_name(key_i, releaseSamples_texts[index])
 			set_key_type(key_i, NI_KEY_TYPE_CONTROL)
 		end if
 
@@ -273,11 +288,11 @@ function update_speed_switches
 end function
 
 function update_direction_switches
-	for i := 0 to num_elements(direction_mode_ids) - 1
+	for i := 0 to num_elements(direction_ids) - 1
 		if i = slider_direction
-			direction_mode_ids[i] -> value := 1
+			direction_ids[i] -> value := 1
 		else
-			direction_mode_ids[i] -> value := 0
+			direction_ids[i] -> value := 0
 		end if
 	end for
 end function
@@ -292,12 +307,12 @@ function update_legato_switches
 	end for
 end function
 
-function update_releaseMode_switches
-	for i := 0 to num_elements(releaseMode_ids) - 1
+function update_releaseSamples_switches
+	for i := 0 to num_elements(releaseSamples_ids) - 1
 		if i = slider_releaseSamples
-			releaseMode_ids[i] -> value := 1
+			releaseSamples_ids[i] -> value := 1
 		else
-			releaseMode_ids[i] -> value := 0
+			releaseSamples_ids[i] -> value := 0
 		end if
 	end for
 end function

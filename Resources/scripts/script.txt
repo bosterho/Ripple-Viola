@@ -1,4 +1,4 @@
-{ Compiled on Sat Jun 29 11:25:49 2024 }
+{ Compiled on Sat Jun 29 21:27:35 2024 }
 on init
   declare $sksp_dummy
   declare $concat_it
@@ -257,33 +257,33 @@ on init
   declare const $DIRECTION_MODE__DOWN := 0
   declare const $DIRECTION_MODE__ASPLAYED := 1
   declare const $DIRECTION_MODE__UP := 2
-  declare !direction_mode_texts[3]
-  !direction_mode_texts[0] := "Down"
-  !direction_mode_texts[1] := "As Played"
-  !direction_mode_texts[2] := "Up"
-  declare const $direction_mode_texts__SIZE := 3
+  declare !direction_texts[3]
+  !direction_texts[0] := "Down"
+  !direction_texts[1] := "As Played"
+  !direction_texts[2] := "Up"
+  declare const $direction_texts__SIZE := 3
   declare %LEGATO_MODE[4] := (0, 1, 2, 3)
   declare const $LEGATO_MODE__SIZE := 4
   declare const $LEGATO_MODE__OFF := 0
   declare const $LEGATO_MODE__SYNC_TO_PITCH := 1
   declare const $LEGATO_MODE__SYNC_TO_RIPPLE := 2
   declare const $LEGATO_MODE__SYNC_TO_SWELL := 3
-  declare !legato_mode_texts[4]
-  !legato_mode_texts[0] := "Off"
-  !legato_mode_texts[1] := "Sync to Pitch"
-  !legato_mode_texts[2] := "Sync to Ripple"
-  !legato_mode_texts[3] := "Sync to Swell"
-  declare const $legato_mode_texts__SIZE := 4
+  declare !legato_texts[4]
+  !legato_texts[0] := "Off"
+  !legato_texts[1] := "Sync to Pitch"
+  !legato_texts[2] := "Sync to Ripple"
+  !legato_texts[3] := "Sync to Swell"
+  declare const $legato_texts__SIZE := 4
   declare %RELEASE_SAMPLES[3] := (0, 1, 2)
   declare const $RELEASE_SAMPLES__SIZE := 3
   declare const $RELEASE_SAMPLES__OFF := 0
   declare const $RELEASE_SAMPLES__SOFT := 1
   declare const $RELEASE_SAMPLES__LOUD := 2
-  declare !releaseMode_texts[3]
-  !releaseMode_texts[0] := "Off"
-  !releaseMode_texts[1] := "Soft"
-  !releaseMode_texts[2] := "Loud"
-  declare const $releaseMode_texts__SIZE := 3
+  declare !releaseSamples_texts[3]
+  !releaseSamples_texts[0] := "Off"
+  !releaseSamples_texts[1] := "Soft"
+  !releaseSamples_texts[2] := "Loud"
+  declare const $releaseSamples_texts__SIZE := 3
   declare %release_group[$ARTIC__SIZE]
   %release_group[$ARTIC__QUARTERS] := get_group_idx("quarters releases")
   %release_group[$ARTIC__EIGHTHS] := get_group_idx("eighths releases")
@@ -380,6 +380,13 @@ on init
   declare %velo[128]
   declare %event_ids[128]
   %velo[$recent_release_trigger_key] := 64
+  declare %ctrl_ids[6]
+  declare !_option_texts[6*10]
+  declare const $option_texts__SIZE_D1 := 6
+  declare const $option_texts__SIZE_D2 := 10
+  declare !_option_texts_shortened[6*10]
+  declare const $option_texts_shortened__SIZE_D1 := 6
+  declare const $option_texts_shortened__SIZE_D2 := 10
   declare ~midiInstructions_opacity := 0.0
   declare ~midiCover_opacity := 0.0
   declare ~smoothed_midiInstructions_opacity
@@ -425,6 +432,7 @@ on init
   declare $k
   declare $n
   declare $e
+  declare $c
   declare $event_i
   declare $other_event_i
   declare $row_i
@@ -1630,23 +1638,25 @@ on init
     set_control_par(%speed_ids[$i],$CONTROL_PAR_FONT_TYPE_ON_HOVER,get_font_id("Khula Bold Size 11 on hover"))
     set_control_par_str(%speed_ids[$i],$CONTROL_PAR_TEXT,!speed_texts[$i])
     set_control_par(%speed_ids[$i],$CONTROL_PAR_WIDTH,get_control_par(%speed_ids[$i],$CONTROL_PAR_WIDTH)+14)
+    set_control_par(%speed_ids[$i],$CONTROL_PAR_CUSTOM_ID,0)
     inc($i)
   end while
   set_control_par_str(get_ui_id($switch_up),$CONTROL_PAR_TEXT,"Up")
   set_control_par_str(get_ui_id($switch_down),$CONTROL_PAR_TEXT,"Down")
   set_control_par_str(get_ui_id($switch_asPlayed),$CONTROL_PAR_TEXT,"As Played")
-  declare %direction_mode_ids[$DIRECTION_MODE__SIZE]
-  %direction_mode_ids[0] := get_ui_id($switch_down)
-  %direction_mode_ids[1] := get_ui_id($switch_asPlayed)
-  %direction_mode_ids[2] := get_ui_id($switch_up)
+  declare %direction_ids[$DIRECTION_MODE__SIZE]
+  %direction_ids[0] := get_ui_id($switch_down)
+  %direction_ids[1] := get_ui_id($switch_asPlayed)
+  %direction_ids[2] := get_ui_id($switch_up)
   $i := 0
-  while ($i<num_elements(%direction_mode_ids))
-    set_control_par(%direction_mode_ids[$i],$CONTROL_PAR_FONT_TYPE,get_font_id("Khula Bold Size 11 off"))
-    set_control_par(%direction_mode_ids[$i],$CONTROL_PAR_FONT_TYPE_ON,get_font_id("Khula Bold Size 11 on"))
-    set_control_par(%direction_mode_ids[$i],$CONTROL_PAR_FONT_TYPE_OFF_PRESSED,get_font_id("Khula Bold Size 11 off pressed"))
-    set_control_par(%direction_mode_ids[$i],$CONTROL_PAR_FONT_TYPE_ON_PRESSED,get_font_id("Khula Bold Size 11 on pressed"))
-    set_control_par(%direction_mode_ids[$i],$CONTROL_PAR_FONT_TYPE_OFF_HOVER,get_font_id("Khula Bold Size 11 off hover"))
-    set_control_par(%direction_mode_ids[$i],$CONTROL_PAR_FONT_TYPE_ON_HOVER,get_font_id("Khula Bold Size 11 on hover"))
+  while ($i<num_elements(%direction_ids))
+    set_control_par(%direction_ids[$i],$CONTROL_PAR_FONT_TYPE,get_font_id("Khula Bold Size 11 off"))
+    set_control_par(%direction_ids[$i],$CONTROL_PAR_FONT_TYPE_ON,get_font_id("Khula Bold Size 11 on"))
+    set_control_par(%direction_ids[$i],$CONTROL_PAR_FONT_TYPE_OFF_PRESSED,get_font_id("Khula Bold Size 11 off pressed"))
+    set_control_par(%direction_ids[$i],$CONTROL_PAR_FONT_TYPE_ON_PRESSED,get_font_id("Khula Bold Size 11 on pressed"))
+    set_control_par(%direction_ids[$i],$CONTROL_PAR_FONT_TYPE_OFF_HOVER,get_font_id("Khula Bold Size 11 off hover"))
+    set_control_par(%direction_ids[$i],$CONTROL_PAR_FONT_TYPE_ON_HOVER,get_font_id("Khula Bold Size 11 on hover"))
+    set_control_par(%direction_ids[$i],$CONTROL_PAR_CUSTOM_ID,1)
     inc($i)
   end while
   set_control_par(get_ui_id($switch_down),$CONTROL_PAR_WIDTH,get_control_par(get_ui_id($switch_down),$CONTROL_PAR_WIDTH)+13)
@@ -1669,21 +1679,23 @@ on init
     set_control_par(%legato_ids[$i],$CONTROL_PAR_FONT_TYPE_ON_PRESSED,get_font_id("Khula Bold Size 11 on pressed"))
     set_control_par(%legato_ids[$i],$CONTROL_PAR_FONT_TYPE_OFF_HOVER,get_font_id("Khula Bold Size 11 off hover"))
     set_control_par(%legato_ids[$i],$CONTROL_PAR_FONT_TYPE_ON_HOVER,get_font_id("Khula Bold Size 11 on hover"))
+    set_control_par(%legato_ids[$i],$CONTROL_PAR_CUSTOM_ID,2)
     inc($i)
   end while
-  declare %releaseMode_ids[$RELEASE_SAMPLES__SIZE]
-  %releaseMode_ids[0] := get_ui_id($switch_releaseSamples__off)
-  %releaseMode_ids[1] := get_ui_id($switch_releaseSamples__soft)
-  %releaseMode_ids[2] := get_ui_id($switch_releaseSamples__loud)
+  declare %releaseSamples_ids[$RELEASE_SAMPLES__SIZE]
+  %releaseSamples_ids[0] := get_ui_id($switch_releaseSamples__off)
+  %releaseSamples_ids[1] := get_ui_id($switch_releaseSamples__soft)
+  %releaseSamples_ids[2] := get_ui_id($switch_releaseSamples__loud)
   $i := 0
-  while ($i<num_elements(%releaseMode_ids))
-    set_control_par(%releaseMode_ids[$i],$CONTROL_PAR_FONT_TYPE,get_font_id("Khula Bold Size 11 off"))
-    set_control_par(%releaseMode_ids[$i],$CONTROL_PAR_FONT_TYPE_ON,get_font_id("Khula Bold Size 11 on"))
-    set_control_par(%releaseMode_ids[$i],$CONTROL_PAR_FONT_TYPE_OFF_PRESSED,get_font_id("Khula Bold Size 11 off pressed"))
-    set_control_par(%releaseMode_ids[$i],$CONTROL_PAR_FONT_TYPE_ON_PRESSED,get_font_id("Khula Bold Size 11 on pressed"))
-    set_control_par(%releaseMode_ids[$i],$CONTROL_PAR_FONT_TYPE_OFF_HOVER,get_font_id("Khula Bold Size 11 off hover"))
-    set_control_par(%releaseMode_ids[$i],$CONTROL_PAR_FONT_TYPE_ON_HOVER,get_font_id("Khula Bold Size 11 on hover"))
-    set_control_par_str(%releaseMode_ids[$i],$CONTROL_PAR_TEXT,!releaseMode_texts[$i])
+  while ($i<num_elements(%releaseSamples_ids))
+    set_control_par(%releaseSamples_ids[$i],$CONTROL_PAR_FONT_TYPE,get_font_id("Khula Bold Size 11 off"))
+    set_control_par(%releaseSamples_ids[$i],$CONTROL_PAR_FONT_TYPE_ON,get_font_id("Khula Bold Size 11 on"))
+    set_control_par(%releaseSamples_ids[$i],$CONTROL_PAR_FONT_TYPE_OFF_PRESSED,get_font_id("Khula Bold Size 11 off pressed"))
+    set_control_par(%releaseSamples_ids[$i],$CONTROL_PAR_FONT_TYPE_ON_PRESSED,get_font_id("Khula Bold Size 11 on pressed"))
+    set_control_par(%releaseSamples_ids[$i],$CONTROL_PAR_FONT_TYPE_OFF_HOVER,get_font_id("Khula Bold Size 11 off hover"))
+    set_control_par(%releaseSamples_ids[$i],$CONTROL_PAR_FONT_TYPE_ON_HOVER,get_font_id("Khula Bold Size 11 on hover"))
+    set_control_par_str(%releaseSamples_ids[$i],$CONTROL_PAR_TEXT,!releaseSamples_texts[$i])
+    set_control_par(%releaseSamples_ids[$i],$CONTROL_PAR_CUSTOM_ID,3)
     inc($i)
   end while
   set_control_par(get_ui_id($switch_releaseSamples__off),$CONTROL_PAR_WIDTH,get_control_par(get_ui_id($switch_releaseSamples__off),$CONTROL_PAR_WIDTH)+14)
@@ -1694,6 +1706,59 @@ on init
   set_control_par(get_ui_id($slider_direction),$CONTROL_PAR_MOUSE_BEHAVIOUR,2000)
   set_control_par(get_ui_id($slider_legato),$CONTROL_PAR_MOUSE_BEHAVIOUR,2000)
   set_control_par(get_ui_id($slider_releaseSamples),$CONTROL_PAR_MOUSE_BEHAVIOUR,2000)
+  $c := 0
+  set_control_par(get_ui_id($slider_VOL),$CONTROL_PAR_CUSTOM_ID,$c)
+  %ctrl_ids[$c] := get_ui_id($slider_VOL)
+  inc($c)
+  set_control_par(get_ui_id($slider_REVERB),$CONTROL_PAR_CUSTOM_ID,$c)
+  %ctrl_ids[$c] := get_ui_id($slider_REVERB)
+  inc($c)
+  set_control_par(get_ui_id($slider_SPEED),$CONTROL_PAR_CUSTOM_ID,$c)
+  %ctrl_ids[$c] := get_ui_id($slider_SPEED)
+  inc($c)
+  set_control_par(get_ui_id($slider_DIRECTION),$CONTROL_PAR_CUSTOM_ID,$c)
+  %ctrl_ids[$c] := get_ui_id($slider_DIRECTION)
+  inc($c)
+  set_control_par(get_ui_id($slider_LEGATO),$CONTROL_PAR_CUSTOM_ID,$c)
+  %ctrl_ids[$c] := get_ui_id($slider_LEGATO)
+  inc($c)
+  set_control_par(get_ui_id($slider_RELEASESAMPLES),$CONTROL_PAR_CUSTOM_ID,$c)
+  %ctrl_ids[$c] := get_ui_id($slider_RELEASESAMPLES)
+  inc($c)
+  $c := 2
+  $i := 0
+  while ($i<num_elements(!SPEED_texts))
+    !_option_texts[10*$c+$i] := !SPEED_texts[$i]
+    inc($i)
+  end while
+  inc($c)
+  $i := 0
+  while ($i<num_elements(!DIRECTION_texts))
+    !_option_texts[10*$c+$i] := !DIRECTION_texts[$i]
+    inc($i)
+  end while
+  inc($c)
+  $i := 0
+  while ($i<num_elements(!LEGATO_texts))
+    !_option_texts[10*$c+$i] := !LEGATO_texts[$i]
+    inc($i)
+  end while
+  inc($c)
+  $i := 0
+  while ($i<num_elements(!RELEASESAMPLES_texts))
+    !_option_texts[10*$c+$i] := !RELEASESAMPLES_texts[$i]
+    inc($i)
+  end while
+  inc($c)
+  $array_i := 0
+  while ($array_i<num_elements(!_option_texts))
+    !_option_texts_shortened[$array_i] := !_option_texts[$array_i]
+    inc($array_i)
+  end while
+  !_option_texts_shortened[10*get_control_par(get_ui_id($slider_legato),$CONTROL_PAR_CUSTOM_ID)+0] := "Off"
+  !_option_texts_shortened[10*get_control_par(get_ui_id($slider_legato),$CONTROL_PAR_CUSTOM_ID)+1] := "Pitch"
+  !_option_texts_shortened[10*get_control_par(get_ui_id($slider_legato),$CONTROL_PAR_CUSTOM_ID)+2] := "Ripple"
+  !_option_texts_shortened[10*get_control_par(get_ui_id($slider_legato),$CONTROL_PAR_CUSTOM_ID)+3] := "Swell"
   set_control_par(get_ui_id($slider_speed),$CONTROL_PAR_DEFAULT_VALUE,2)
   set_control_par(get_ui_id($slider_direction),$CONTROL_PAR_DEFAULT_VALUE,1)
   set_control_par(get_ui_id($slider_legato),$CONTROL_PAR_DEFAULT_VALUE,0)
@@ -1929,6 +1994,14 @@ on init
   set_control_par_str(get_ui_id($slider_vol),$CONTROL_PAR_AUTOMATION_NAME,"Expression")
   set_control_par(get_ui_id($slider_reverb),$CONTROL_PAR_AUTOMATION_ID,1)
   set_control_par_str(get_ui_id($slider_reverb),$CONTROL_PAR_AUTOMATION_NAME,"Reverb")
+  set_control_par(get_ui_id($slider_speed),$CONTROL_PAR_AUTOMATION_ID,2)
+  set_control_par_str(get_ui_id($slider_speed),$CONTROL_PAR_AUTOMATION_NAME,"Speed")
+  set_control_par(get_ui_id($slider_direction),$CONTROL_PAR_AUTOMATION_ID,3)
+  set_control_par_str(get_ui_id($slider_direction),$CONTROL_PAR_AUTOMATION_NAME,"Direction")
+  set_control_par(get_ui_id($slider_legato),$CONTROL_PAR_AUTOMATION_ID,4)
+  set_control_par_str(get_ui_id($slider_legato),$CONTROL_PAR_AUTOMATION_NAME,"Legato/Quantize")
+  set_control_par(get_ui_id($slider_releaseSamples),$CONTROL_PAR_AUTOMATION_ID,5)
+  set_control_par_str(get_ui_id($slider_releaseSamples),$CONTROL_PAR_AUTOMATION_NAME,"Release Samples")
   set_engine_par($ENGINE_PAR_SPEED,1000000-((18*2-1)*90909),$ARTIC__QUARTERS,-1,-1)
   set_engine_par($ENGINE_PAR_SPEED,1000000-((18-1)*90909),$ARTIC__EIGHTHS,-1,-1)
   set_engine_par($ENGINE_PAR_SPEED,1000000-((18-1)*90909),$ARTIC__SIXTEENTHS,-1,-1)
@@ -2033,6 +2106,7 @@ on init
   declare @_checkmark
   declare $_i
   declare $_key_i
+  declare $_ui_id
 end on
 
 function set_key_colors_and_types_and_names
@@ -2063,19 +2137,19 @@ function set_key_colors_and_types_and_names
     $_index := search(%direction_keyswitches,$key_i)
     if ($_index # -1)
       set_key_color($key_i,$KEY_COLOR_YELLOW)
-      set_key_name($key_i,!direction_mode_texts[$_index])
+      set_key_name($key_i,!direction_texts[$_index])
       set_key_type($key_i,$NI_KEY_TYPE_CONTROL)
     end if
     $_index := search(%legato_keyswitches,$key_i)
     if ($_index # -1)
       set_key_color($key_i,$KEY_COLOR_PURPLE)
-      set_key_name($key_i,!legato_mode_texts[$_index])
+      set_key_name($key_i,!legato_texts[$_index])
       set_key_type($key_i,$NI_KEY_TYPE_CONTROL)
     end if
     $_index := search(%release_sample_keyswitches,$key_i)
     if ($_index # -1)
       set_key_color($key_i,$KEY_COLOR_ORANGE)
-      set_key_name($key_i,!releaseMode_texts[$_index])
+      set_key_name($key_i,!releaseSamples_texts[$_index])
       set_key_type($key_i,$NI_KEY_TYPE_CONTROL)
     end if
     $_index := search(%release_trigger_keyswitches,$key_i)
@@ -2524,11 +2598,11 @@ end function
 
 function update_direction_switches
   $i := 0
-  while ($i<num_elements(%direction_mode_ids))
+  while ($i<num_elements(%direction_ids))
     if ($i=$slider_direction)
-      set_control_par(%direction_mode_ids[$i],$CONTROL_PAR_VALUE,1)
+      set_control_par(%direction_ids[$i],$CONTROL_PAR_VALUE,1)
     else
-      set_control_par(%direction_mode_ids[$i],$CONTROL_PAR_VALUE,0)
+      set_control_par(%direction_ids[$i],$CONTROL_PAR_VALUE,0)
     end if
     inc($i)
   end while
@@ -2546,13 +2620,13 @@ function update_legato_switches
   end while
 end function
 
-function update_releaseMode_switches
+function update_releaseSamples_switches
   $i := 0
-  while ($i<num_elements(%releaseMode_ids))
+  while ($i<num_elements(%releaseSamples_ids))
     if ($i=$slider_releaseSamples)
-      set_control_par(%releaseMode_ids[$i],$CONTROL_PAR_VALUE,1)
+      set_control_par(%releaseSamples_ids[$i],$CONTROL_PAR_VALUE,1)
     else
-      set_control_par(%releaseMode_ids[$i],$CONTROL_PAR_VALUE,0)
+      set_control_par(%releaseSamples_ids[$i],$CONTROL_PAR_VALUE,0)
     end if
     inc($i)
   end while
@@ -2632,6 +2706,22 @@ on persistence_changed
   call set_key_colors_and_types_and_names
   call set_keys_pressed
   call set_reverb_menu_checkmark
+  $i := 0
+  while ($i<6)
+    $_ui_id := %ctrl_ids[$i]
+    if ($i=get_control_par(get_ui_id($slider_vol),$CONTROL_PAR_CUSTOM_ID))
+      set_control_par_str(get_ui_id($slider_vol),$CONTROL_PAR_LABEL,get_engine_par_disp($ENGINE_PAR_SEND_EFFECT_OUTPUT_GAIN,-1,0,1) & " dB")
+    else
+      if ($i=get_control_par(get_ui_id($slider_reverb),$CONTROL_PAR_CUSTOM_ID))
+        set_control_par_str(get_ui_id($slider_reverb),$CONTROL_PAR_LABEL,get_engine_par_disp($ENGINE_PAR_SENDLEVEL_0,-1,7,0))
+      else
+        if (in_range($i,get_control_par(get_ui_id($slider_speed),$CONTROL_PAR_CUSTOM_ID),get_control_par(get_ui_id($slider_releaseSamples),$CONTROL_PAR_CUSTOM_ID)))
+          set_control_par_str($_ui_id,$CONTROL_PAR_LABEL,!_option_texts_shortened[10*$i+get_control_par($_ui_id,$CONTROL_PAR_VALUE)])
+        end if
+      end if
+    end if
+    inc($i)
+  end while
 end on
 
 on note
@@ -2650,21 +2740,69 @@ on note
     $slider_speed := $_ks_index
     call update_speed_switches
     call update_speed
+    $_ui_id := %ctrl_ids[get_control_par(get_ui_id($slider_speed),$CONTROL_PAR_CUSTOM_ID)]
+    if (get_control_par(get_ui_id($slider_speed),$CONTROL_PAR_CUSTOM_ID)=get_control_par(get_ui_id($slider_vol),$CONTROL_PAR_CUSTOM_ID))
+      set_control_par_str(get_ui_id($slider_vol),$CONTROL_PAR_LABEL,get_engine_par_disp($ENGINE_PAR_SEND_EFFECT_OUTPUT_GAIN,-1,0,1) & " dB")
+    else
+      if (get_control_par(get_ui_id($slider_speed),$CONTROL_PAR_CUSTOM_ID)=get_control_par(get_ui_id($slider_reverb),$CONTROL_PAR_CUSTOM_ID))
+        set_control_par_str(get_ui_id($slider_reverb),$CONTROL_PAR_LABEL,get_engine_par_disp($ENGINE_PAR_SENDLEVEL_0,-1,7,0))
+      else
+        if (in_range(get_control_par(get_ui_id($slider_speed),$CONTROL_PAR_CUSTOM_ID),get_control_par(get_ui_id($slider_speed),$CONTROL_PAR_CUSTOM_ID),get_control_par(get_ui_id($slider_releaseSamples),$CONTROL_PAR_CUSTOM_ID)))
+          set_control_par_str($_ui_id,$CONTROL_PAR_LABEL,!_option_texts_shortened[10*get_control_par(get_ui_id($slider_speed),$CONTROL_PAR_CUSTOM_ID)+get_control_par($_ui_id,$CONTROL_PAR_VALUE)])
+        end if
+      end if
+    end if
   end if
   $_ks_index := search(%direction_keyswitches,$EVENT_NOTE)
   if ($_ks_index # -1)
     $slider_direction := $_ks_index
     call update_direction_switches
+    $_ui_id := %ctrl_ids[get_control_par(get_ui_id($slider_direction),$CONTROL_PAR_CUSTOM_ID)]
+    if (get_control_par(get_ui_id($slider_direction),$CONTROL_PAR_CUSTOM_ID)=get_control_par(get_ui_id($slider_vol),$CONTROL_PAR_CUSTOM_ID))
+      set_control_par_str(get_ui_id($slider_vol),$CONTROL_PAR_LABEL,get_engine_par_disp($ENGINE_PAR_SEND_EFFECT_OUTPUT_GAIN,-1,0,1) & " dB")
+    else
+      if (get_control_par(get_ui_id($slider_direction),$CONTROL_PAR_CUSTOM_ID)=get_control_par(get_ui_id($slider_reverb),$CONTROL_PAR_CUSTOM_ID))
+        set_control_par_str(get_ui_id($slider_reverb),$CONTROL_PAR_LABEL,get_engine_par_disp($ENGINE_PAR_SENDLEVEL_0,-1,7,0))
+      else
+        if (in_range(get_control_par(get_ui_id($slider_direction),$CONTROL_PAR_CUSTOM_ID),get_control_par(get_ui_id($slider_speed),$CONTROL_PAR_CUSTOM_ID),get_control_par(get_ui_id($slider_releaseSamples),$CONTROL_PAR_CUSTOM_ID)))
+          set_control_par_str($_ui_id,$CONTROL_PAR_LABEL,!_option_texts_shortened[10*get_control_par(get_ui_id($slider_direction),$CONTROL_PAR_CUSTOM_ID)+get_control_par($_ui_id,$CONTROL_PAR_VALUE)])
+        end if
+      end if
+    end if
   end if
   $_ks_index := search(%legato_keyswitches,$EVENT_NOTE)
   if ($_ks_index # -1)
     $slider_legato := $_ks_index
     call update_legato_switches
+    $_ui_id := %ctrl_ids[get_control_par(get_ui_id($slider_legato),$CONTROL_PAR_CUSTOM_ID)]
+    if (get_control_par(get_ui_id($slider_legato),$CONTROL_PAR_CUSTOM_ID)=get_control_par(get_ui_id($slider_vol),$CONTROL_PAR_CUSTOM_ID))
+      set_control_par_str(get_ui_id($slider_vol),$CONTROL_PAR_LABEL,get_engine_par_disp($ENGINE_PAR_SEND_EFFECT_OUTPUT_GAIN,-1,0,1) & " dB")
+    else
+      if (get_control_par(get_ui_id($slider_legato),$CONTROL_PAR_CUSTOM_ID)=get_control_par(get_ui_id($slider_reverb),$CONTROL_PAR_CUSTOM_ID))
+        set_control_par_str(get_ui_id($slider_reverb),$CONTROL_PAR_LABEL,get_engine_par_disp($ENGINE_PAR_SENDLEVEL_0,-1,7,0))
+      else
+        if (in_range(get_control_par(get_ui_id($slider_legato),$CONTROL_PAR_CUSTOM_ID),get_control_par(get_ui_id($slider_speed),$CONTROL_PAR_CUSTOM_ID),get_control_par(get_ui_id($slider_releaseSamples),$CONTROL_PAR_CUSTOM_ID)))
+          set_control_par_str($_ui_id,$CONTROL_PAR_LABEL,!_option_texts_shortened[10*get_control_par(get_ui_id($slider_legato),$CONTROL_PAR_CUSTOM_ID)+get_control_par($_ui_id,$CONTROL_PAR_VALUE)])
+        end if
+      end if
+    end if
   end if
   $_ks_index := search(%release_sample_keyswitches,$EVENT_NOTE)
   if ($_ks_index # -1)
     $slider_releaseSamples := $_ks_index
-    call update_releaseMode_switches
+    call update_releaseSamples_switches
+    $_ui_id := %ctrl_ids[get_control_par(get_ui_id($slider_releaseSamples),$CONTROL_PAR_CUSTOM_ID)]
+    if (get_control_par(get_ui_id($slider_releaseSamples),$CONTROL_PAR_CUSTOM_ID)=get_control_par(get_ui_id($slider_vol),$CONTROL_PAR_CUSTOM_ID))
+      set_control_par_str(get_ui_id($slider_vol),$CONTROL_PAR_LABEL,get_engine_par_disp($ENGINE_PAR_SEND_EFFECT_OUTPUT_GAIN,-1,0,1) & " dB")
+    else
+      if (get_control_par(get_ui_id($slider_releaseSamples),$CONTROL_PAR_CUSTOM_ID)=get_control_par(get_ui_id($slider_reverb),$CONTROL_PAR_CUSTOM_ID))
+        set_control_par_str(get_ui_id($slider_reverb),$CONTROL_PAR_LABEL,get_engine_par_disp($ENGINE_PAR_SENDLEVEL_0,-1,7,0))
+      else
+        if (in_range(get_control_par(get_ui_id($slider_releaseSamples),$CONTROL_PAR_CUSTOM_ID),get_control_par(get_ui_id($slider_speed),$CONTROL_PAR_CUSTOM_ID),get_control_par(get_ui_id($slider_releaseSamples),$CONTROL_PAR_CUSTOM_ID)))
+          set_control_par_str($_ui_id,$CONTROL_PAR_LABEL,!_option_texts_shortened[10*get_control_par(get_ui_id($slider_releaseSamples),$CONTROL_PAR_CUSTOM_ID)+get_control_par($_ui_id,$CONTROL_PAR_VALUE)])
+        end if
+      end if
+    end if
   end if
   $_ks_index := search(%release_trigger_keyswitches,$EVENT_NOTE)
   if ($_ks_index # -1)
@@ -3429,21 +3567,69 @@ on ui_controls
                 $slider_speed := $_ks_index
                 call update_speed_switches
                 call update_speed
+                $_ui_id := %ctrl_ids[get_control_par(get_ui_id($slider_speed),$CONTROL_PAR_CUSTOM_ID)]
+                if (get_control_par(get_ui_id($slider_speed),$CONTROL_PAR_CUSTOM_ID)=get_control_par(get_ui_id($slider_vol),$CONTROL_PAR_CUSTOM_ID))
+                  set_control_par_str(get_ui_id($slider_vol),$CONTROL_PAR_LABEL,get_engine_par_disp($ENGINE_PAR_SEND_EFFECT_OUTPUT_GAIN,-1,0,1) & " dB")
+                else
+                  if (get_control_par(get_ui_id($slider_speed),$CONTROL_PAR_CUSTOM_ID)=get_control_par(get_ui_id($slider_reverb),$CONTROL_PAR_CUSTOM_ID))
+                    set_control_par_str(get_ui_id($slider_reverb),$CONTROL_PAR_LABEL,get_engine_par_disp($ENGINE_PAR_SENDLEVEL_0,-1,7,0))
+                  else
+                    if (in_range(get_control_par(get_ui_id($slider_speed),$CONTROL_PAR_CUSTOM_ID),get_control_par(get_ui_id($slider_speed),$CONTROL_PAR_CUSTOM_ID),get_control_par(get_ui_id($slider_releaseSamples),$CONTROL_PAR_CUSTOM_ID)))
+                      set_control_par_str($_ui_id,$CONTROL_PAR_LABEL,!_option_texts_shortened[10*get_control_par(get_ui_id($slider_speed),$CONTROL_PAR_CUSTOM_ID)+get_control_par($_ui_id,$CONTROL_PAR_VALUE)])
+                    end if
+                  end if
+                end if
               end if
               $_ks_index := search(%direction_keyswitches,$_note)
               if ($_ks_index # -1)
                 $slider_direction := $_ks_index
                 call update_direction_switches
+                $_ui_id := %ctrl_ids[get_control_par(get_ui_id($slider_direction),$CONTROL_PAR_CUSTOM_ID)]
+                if (get_control_par(get_ui_id($slider_direction),$CONTROL_PAR_CUSTOM_ID)=get_control_par(get_ui_id($slider_vol),$CONTROL_PAR_CUSTOM_ID))
+                  set_control_par_str(get_ui_id($slider_vol),$CONTROL_PAR_LABEL,get_engine_par_disp($ENGINE_PAR_SEND_EFFECT_OUTPUT_GAIN,-1,0,1) & " dB")
+                else
+                  if (get_control_par(get_ui_id($slider_direction),$CONTROL_PAR_CUSTOM_ID)=get_control_par(get_ui_id($slider_reverb),$CONTROL_PAR_CUSTOM_ID))
+                    set_control_par_str(get_ui_id($slider_reverb),$CONTROL_PAR_LABEL,get_engine_par_disp($ENGINE_PAR_SENDLEVEL_0,-1,7,0))
+                  else
+                    if (in_range(get_control_par(get_ui_id($slider_direction),$CONTROL_PAR_CUSTOM_ID),get_control_par(get_ui_id($slider_speed),$CONTROL_PAR_CUSTOM_ID),get_control_par(get_ui_id($slider_releaseSamples),$CONTROL_PAR_CUSTOM_ID)))
+                      set_control_par_str($_ui_id,$CONTROL_PAR_LABEL,!_option_texts_shortened[10*get_control_par(get_ui_id($slider_direction),$CONTROL_PAR_CUSTOM_ID)+get_control_par($_ui_id,$CONTROL_PAR_VALUE)])
+                    end if
+                  end if
+                end if
               end if
               $_ks_index := search(%legato_keyswitches,$_note)
               if ($_ks_index # -1)
                 $slider_legato := $_ks_index
                 call update_legato_switches
+                $_ui_id := %ctrl_ids[get_control_par(get_ui_id($slider_legato),$CONTROL_PAR_CUSTOM_ID)]
+                if (get_control_par(get_ui_id($slider_legato),$CONTROL_PAR_CUSTOM_ID)=get_control_par(get_ui_id($slider_vol),$CONTROL_PAR_CUSTOM_ID))
+                  set_control_par_str(get_ui_id($slider_vol),$CONTROL_PAR_LABEL,get_engine_par_disp($ENGINE_PAR_SEND_EFFECT_OUTPUT_GAIN,-1,0,1) & " dB")
+                else
+                  if (get_control_par(get_ui_id($slider_legato),$CONTROL_PAR_CUSTOM_ID)=get_control_par(get_ui_id($slider_reverb),$CONTROL_PAR_CUSTOM_ID))
+                    set_control_par_str(get_ui_id($slider_reverb),$CONTROL_PAR_LABEL,get_engine_par_disp($ENGINE_PAR_SENDLEVEL_0,-1,7,0))
+                  else
+                    if (in_range(get_control_par(get_ui_id($slider_legato),$CONTROL_PAR_CUSTOM_ID),get_control_par(get_ui_id($slider_speed),$CONTROL_PAR_CUSTOM_ID),get_control_par(get_ui_id($slider_releaseSamples),$CONTROL_PAR_CUSTOM_ID)))
+                      set_control_par_str($_ui_id,$CONTROL_PAR_LABEL,!_option_texts_shortened[10*get_control_par(get_ui_id($slider_legato),$CONTROL_PAR_CUSTOM_ID)+get_control_par($_ui_id,$CONTROL_PAR_VALUE)])
+                    end if
+                  end if
+                end if
               end if
               $_ks_index := search(%release_sample_keyswitches,$_note)
               if ($_ks_index # -1)
                 $slider_releaseSamples := $_ks_index
-                call update_releaseMode_switches
+                call update_releaseSamples_switches
+                $_ui_id := %ctrl_ids[get_control_par(get_ui_id($slider_releaseSamples),$CONTROL_PAR_CUSTOM_ID)]
+                if (get_control_par(get_ui_id($slider_releaseSamples),$CONTROL_PAR_CUSTOM_ID)=get_control_par(get_ui_id($slider_vol),$CONTROL_PAR_CUSTOM_ID))
+                  set_control_par_str(get_ui_id($slider_vol),$CONTROL_PAR_LABEL,get_engine_par_disp($ENGINE_PAR_SEND_EFFECT_OUTPUT_GAIN,-1,0,1) & " dB")
+                else
+                  if (get_control_par(get_ui_id($slider_releaseSamples),$CONTROL_PAR_CUSTOM_ID)=get_control_par(get_ui_id($slider_reverb),$CONTROL_PAR_CUSTOM_ID))
+                    set_control_par_str(get_ui_id($slider_reverb),$CONTROL_PAR_LABEL,get_engine_par_disp($ENGINE_PAR_SENDLEVEL_0,-1,7,0))
+                  else
+                    if (in_range(get_control_par(get_ui_id($slider_releaseSamples),$CONTROL_PAR_CUSTOM_ID),get_control_par(get_ui_id($slider_speed),$CONTROL_PAR_CUSTOM_ID),get_control_par(get_ui_id($slider_releaseSamples),$CONTROL_PAR_CUSTOM_ID)))
+                      set_control_par_str($_ui_id,$CONTROL_PAR_LABEL,!_option_texts_shortened[10*get_control_par(get_ui_id($slider_releaseSamples),$CONTROL_PAR_CUSTOM_ID)+get_control_par($_ui_id,$CONTROL_PAR_VALUE)])
+                    end if
+                  end if
+                end if
               end if
               $_ks_index := search(%release_trigger_keyswitches,$_note)
               if ($_ks_index # -1)
@@ -3798,7 +3984,7 @@ on ui_controls
   if ($NI_UI_ID=get_ui_id($slider_direction))
     call update_direction_switches
   end if
-  $_index2 := search(%direction_mode_ids,$NI_UI_ID)
+  $_index2 := search(%direction_ids,$NI_UI_ID)
   if ($_index2 # -1)
     $slider_direction := $_index2
     call update_direction_switches
@@ -3812,12 +3998,12 @@ on ui_controls
     call update_legato_switches
   end if
   if ($NI_UI_ID=get_ui_id($slider_releaseSamples))
-    call update_releaseMode_switches
+    call update_releaseSamples_switches
   end if
-  $_index2 := search(%releaseMode_ids,$NI_UI_ID)
+  $_index2 := search(%releaseSamples_ids,$NI_UI_ID)
   if ($_index2 # -1)
     $slider_releaseSamples := $_index2
-    call update_releaseMode_switches
+    call update_releaseSamples_switches
   end if
   if ($NI_UI_ID=get_ui_id($switch_releaseTrigger))
     $switch_releaseTrigger := 0
@@ -3837,7 +4023,6 @@ on ui_controls
         set_engine_par($ENGINE_PAR_SEND_EFFECT_OUTPUT_GAIN,int(real(real_to_int(pow(2.0,(0.0-12000.0+346768.2342478351)/18000.0)))+((real($slider_vol)-real(500000))/(real(1000000)-real(500000))*(real(real_to_int(pow(2.0,(9000.0-12000.0+346768.2342478351)/18000.0)))-real(real_to_int(pow(2.0,(0.0-12000.0+346768.2342478351)/18000.0)))))),-1,0,1)
       end if
     end if
-    set_control_par_str(get_ui_id($slider_vol),$CONTROL_PAR_LABEL,get_engine_par_disp($ENGINE_PAR_SEND_EFFECT_OUTPUT_GAIN,-1,0,1) & " dB")
   end if
   if ($NI_UI_ID=get_ui_id($menu_reverb))
     if ($menu_reverb=3)
@@ -3870,10 +4055,23 @@ on ui_controls
     end if
     ~_db := 20.0*(log(~_vol)/log(int_to_real(10)))
     set_engine_par($ENGINE_PAR_SENDLEVEL_0,real_to_int(pow(2.0,(~_db*1000.0+346768.2342478351)/18000.0)),-1,7,0)
-    set_control_par_str(get_ui_id($slider_reverb),$CONTROL_PAR_LABEL,get_engine_par_disp($ENGINE_PAR_SENDLEVEL_0,-1,7,0))
   end if
-  if (search(%articulation_ids,$NI_UI_ID) # -1 or (search(%speed_ids,$NI_UI_ID) # -1) or (search(%direction_mode_ids,$NI_UI_ID) # -1) or (search(%legato_ids,$NI_UI_ID) # -1) or (search(%releaseMode_ids,$NI_UI_ID) # -1) or ($NI_UI_ID=get_ui_id($slider_speed)) or ($NI_UI_ID=get_ui_id($slider_direction)) or ($NI_UI_ID=get_ui_id($slider_legato)) or ($NI_UI_ID=get_ui_id($slider_releaseSamples)))
+  if (search(%articulation_ids,$NI_UI_ID) # -1 or (search(%speed_ids,$NI_UI_ID) # -1) or (search(%direction_ids,$NI_UI_ID) # -1) or (search(%legato_ids,$NI_UI_ID) # -1) or (search(%releaseSamples_ids,$NI_UI_ID) # -1) or ($NI_UI_ID=get_ui_id($slider_speed)) or ($NI_UI_ID=get_ui_id($slider_direction)) or ($NI_UI_ID=get_ui_id($slider_legato)) or ($NI_UI_ID=get_ui_id($slider_releaseSamples)))
     call set_keys_pressed
+  end if
+  if (search(%speed_ids,$NI_UI_ID) # -1 or (search(%direction_ids,$NI_UI_ID) # -1) or (search(%legato_ids,$NI_UI_ID) # -1) or (search(%releaseSamples_ids,$NI_UI_ID) # -1) or ($NI_UI_ID=get_ui_id($slider_vol)) or ($NI_UI_ID=get_ui_id($slider_reverb)) or ($NI_UI_ID=get_ui_id($slider_speed)) or ($NI_UI_ID=get_ui_id($slider_direction)) or ($NI_UI_ID=get_ui_id($slider_legato)) or ($NI_UI_ID=get_ui_id($slider_releaseSamples)))
+    $_ui_id := %ctrl_ids[get_control_par($NI_UI_ID,$CONTROL_PAR_CUSTOM_ID)]
+    if (get_control_par($NI_UI_ID,$CONTROL_PAR_CUSTOM_ID)=get_control_par(get_ui_id($slider_vol),$CONTROL_PAR_CUSTOM_ID))
+      set_control_par_str(get_ui_id($slider_vol),$CONTROL_PAR_LABEL,get_engine_par_disp($ENGINE_PAR_SEND_EFFECT_OUTPUT_GAIN,-1,0,1) & " dB")
+    else
+      if (get_control_par($NI_UI_ID,$CONTROL_PAR_CUSTOM_ID)=get_control_par(get_ui_id($slider_reverb),$CONTROL_PAR_CUSTOM_ID))
+        set_control_par_str(get_ui_id($slider_reverb),$CONTROL_PAR_LABEL,get_engine_par_disp($ENGINE_PAR_SENDLEVEL_0,-1,7,0))
+      else
+        if (in_range(get_control_par($NI_UI_ID,$CONTROL_PAR_CUSTOM_ID),get_control_par(get_ui_id($slider_speed),$CONTROL_PAR_CUSTOM_ID),get_control_par(get_ui_id($slider_releaseSamples),$CONTROL_PAR_CUSTOM_ID)))
+          set_control_par_str($_ui_id,$CONTROL_PAR_LABEL,!_option_texts_shortened[10*get_control_par($NI_UI_ID,$CONTROL_PAR_CUSTOM_ID)+get_control_par($_ui_id,$CONTROL_PAR_VALUE)])
+        end if
+      end if
+    end if
   end if
   if ($NI_UI_ID=get_ui_id($switch_logoAnimTrigger))
     set_control_par(get_ui_id($label_version),$CONTROL_PAR_HIDE,$HIDE_PART_NOTHING)
