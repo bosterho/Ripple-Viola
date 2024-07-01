@@ -1,4 +1,4 @@
-{ Compiled on Sat Jun 29 21:27:35 2024 }
+{ Compiled on Mon Jul  1 16:36:52 2024 }
 on init
   declare $sksp_dummy
   declare $concat_it
@@ -2997,7 +2997,7 @@ on note
             $_real_legato_time := int(real($_real_legato_time)/?speeds[$slider_speed])
             select ($slider_legato)
               case $LEGATO_MODE__SYNC_TO_PITCH
-                $_real_legato_time := $_real_legato_time+ticks_to_ms(1)
+                $_real_legato_time := $_real_legato_time+ticks_to_ms(5)
                 $_offset_real_time := $_real_legato_time mod ticks_to_ms(%ripple_length_ticks[$cur_artic]/%pitch_fractions[$cur_artic])
               case $LEGATO_MODE__SYNC_TO_RIPPLE
                 $_offset_real_time := $_real_legato_time mod ticks_to_ms(%ripple_length_ticks[$cur_artic])
@@ -3824,7 +3824,7 @@ on ui_controls
                         $_real_legato_time := int(real($_real_legato_time)/?speeds[$slider_speed])
                         select ($slider_legato)
                           case $LEGATO_MODE__SYNC_TO_PITCH
-                            $_real_legato_time := $_real_legato_time+ticks_to_ms(1)
+                            $_real_legato_time := $_real_legato_time+ticks_to_ms(5)
                             $_offset_real_time := $_real_legato_time mod ticks_to_ms(%ripple_length_ticks[$cur_artic]/%pitch_fractions[$cur_artic])
                           case $LEGATO_MODE__SYNC_TO_RIPPLE
                             $_offset_real_time := $_real_legato_time mod ticks_to_ms(%ripple_length_ticks[$cur_artic])

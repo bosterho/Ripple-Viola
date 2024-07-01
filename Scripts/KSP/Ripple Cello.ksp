@@ -961,7 +961,7 @@ function note_callback(note, velocity, event_id)
 						real_legato_time := int(real(real_legato_time) / speeds[slider_speed])
 						select slider_legato
 							case LEGATO_MODE.SYNC_TO_PITCH
-								real_legato_time := real_legato_time + ticks_to_ms(1) // For when you add a ripple using grid-snapped notes.
+								real_legato_time := real_legato_time + ticks_to_ms(5) // For when you add a ripple using grid-snapped notes.
 								offset_real_time := real_legato_time mod ticks_to_ms(ripple_length_ticks[cur_artic] / pitch_fractions[cur_artic])
 							case LEGATO_MODE.SYNC_TO_RIPPLE
 								offset_real_time := real_legato_time mod ticks_to_ms(ripple_length_ticks[cur_artic])
