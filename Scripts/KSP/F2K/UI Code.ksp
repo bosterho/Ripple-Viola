@@ -1,8 +1,8 @@
 
 {  
-  Figma to Kontakt UI code generated at 2024/6/29 7:58,
-  run #388 on document "Ripple Cello" on page "Draft 2" 
-  v0.60 2024-06-29
+  Figma to Kontakt UI code generated at 2024/7/3 9:55,
+  run #414 on document "Ripple Cello" on page "Draft 2" 
+  v0.60 2024-07-03
 }
 
   make_perfview
@@ -141,9 +141,9 @@
   declare  ui_panel                     $panel_clip2                             
   declare  ui_panel                     $panel_clip1                             
   declare  ui_panel                     $panel_clip0                             
-  declare read ui_switch                $switch_releaseSamples.loud              
-  declare read ui_switch                $switch_releaseSamples.soft              
-  declare read ui_switch                $switch_releaseSamples.off               
+  declare read ui_switch                $switch_loudRelease                      
+  declare read ui_switch                $switch_softRelease                      
+  declare read ui_switch                $switch_noReleaseSample                  
   declare read ui_switch                $switch_releaseTrigger                   
   declare read ui_switch                $switch_syncToSwell                      
   declare read ui_switch                $switch_syncToRipple                     
@@ -400,6 +400,6 @@
   end while  
 
 {  
-  Figma to Kontakt UI code generated at 2024/6/29 7:58,
-  run #413 on document "Ripple Cello" on page "Draft 2"  
+  Figma to Kontakt UI code generated at 2024/7/3 9:55,
+  run #419 on document "Ripple Cello" on page "Draft 2"  
 }

@@ -1,3 +1,6 @@
+define float(#num#) := int_to_real(#num#)
+define int(#num#) := real_to_int(#num#)
+
 // for change_pan, change_tune, change_vol
 define CHANGE_ABSOLUTE := 0
 define CHANGE_RELATIVE := 1
@@ -34,11 +37,11 @@ macro msg(#m1#, #m2#, #m3#, #m4#, #m5#, #m6#)
 end macro
 
 define normalize_i_2i_f(#input#, #min#, #max#) := ( ...
-	(real(#input#) - real(#min#)) / (real(#max#) - real(#min#)) ...
+	(float(#input#) - float(#min#)) / (float(#max#) - float(#min#)) ...
 )
 
 define normalize_i_2f_f(#input#, #min#, #max#) := ( ...
-	(real(#input#) - #min#) / (#max# - #min#) ...
+	(float(#input#) - #min#) / (#max# - #min#) ...
 )
 
 define normalize_f_2f_f(#input#, #min#, #max#) := ( ...
@@ -46,15 +49,15 @@ define normalize_f_2f_f(#input#, #min#, #max#) := ( ...
 )
 
 define normalize_f_2i_f(#input#, #min#, #max#) := ( ...
-	(#input# - real(#min#)) / (real(#max#) - real(#min#)) ...
+	(#input# - float(#min#)) / (float(#max#) - float(#min#)) ...
 )
 
 define scale_f_2i_f(#input#, #min#, #max#) := ( ...
-	real(#min#) + (#input# * (real(#max#) - real(#min#))) ...
+	float(#min#) + (#input# * (float(#max#) - float(#min#))) ...
 )
 
 define scale_f_2i_i(#input#, #min#, #max#) := int( ...
-	real(#min#) + (#input# * (real(#max#) - real(#min#))) ...
+	float(#min#) + (#input# * (float(#max#) - float(#min#))) ...
 )
 
 define scale_f_2f_f(#input#, #min#, #max#) := ( ...
@@ -144,7 +147,7 @@ define map_f_2f_2f_i(#input#, #src_min#, #src_max#, #dst_min#, #dst_max#) := ...
 	)
 
 function log_b(base, value) -> return 
-	return := log(value) / log(int_to_real(base))
+	return := log(value) / log(float(base))
 end function
 
 define vol_to_db(#vol#) := (20.0 * log_b(10, #vol#))
@@ -353,10 +356,15 @@ macro concat(#input#, #string#)
 end macro
 
 function power_curve(input, range, power) -> output
-	power_curve_norm := real(input) / real(range)
+	power_curve_norm := float(input) / float(range)
 	power_curve_norm := pow(power_curve_norm, power)
-	output := int(power_curve_norm * real(range))
+	output := int(power_curve_norm * float(range))
 end function
 
 // Unisono - Portamento
 define LEGATO_BYPASS := 0
+
+// Returns 0 if a # b and 1 if a = b.
+function is_equal(a, b) -> return 
+	return := ( -sh_right(abs(a - b) - 1, 31) )
+end function

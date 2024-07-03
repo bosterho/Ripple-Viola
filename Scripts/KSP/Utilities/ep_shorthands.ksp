@@ -549,37 +549,37 @@ end macro
 macro add_mod_par(#prop#, engine_par)
     property group.mods.#prop#
         function get(group, mods) -> result
-            result := get_engine_par(engine_par, group, get_mod_idx(group, mods), -1)
+            result := get_engine_par(engine_par, group, find_mod(group, mods), -1)
         end function
 
         function set(group, mods, value)
-            set_engine_par(engine_par, value, group, get_mod_idx(group, mods), -1)
+            set_engine_par(engine_par, value, group, find_mod(group, mods), -1)
         end function
     end property
 
     property group.mods.#prop#.disp
         function get(group, mods) -> result
-            result := get_engine_par_disp(engine_par, group, get_mod_idx(group, mods), -1)
+            result := get_engine_par_disp(engine_par, group, find_mod(group, mods), -1)
         end function
 
         function set(group, mods, value)
-            set_engine_par(engine_par, value, group, get_mod_idx(group, mods), -1)
+            set_engine_par(engine_par, value, group, find_mod(group, mods), -1)
         end function
     end property
 
     property group.mods.target.#prop#
         function get(group, mods, target) -> result
-            result := get_engine_par(engine_par, group, get_mod_idx(group, mods), get_target_idx(group, get_mod_idx(group, mods), target))
+            result := get_engine_par(engine_par, group, find_mod(group, mods), find_target(group, find_mod(group, mods), target))
         end function
 
         function set(group, mods, target, value)
-            set_engine_par(engine_par, value, group, get_mod_idx(group, mods), get_target_idx(group, get_mod_idx(group, mods), target))
+            set_engine_par(engine_par, value, group, find_mod(group, mods), find_target(group, find_mod(group, mods), target))
         end function
     end property
 
     property group.mods.target.#prop#.disp
         function get(group, mods, target) -> result
-            result := get_engine_par_disp(engine_par, group, get_mod_idx(group, mods), get_target_idx(group, get_mod_idx(group, mods), target))
+            result := get_engine_par_disp(engine_par, group, find_mod(group, mods), find_target(group, find_mod(group, mods), target))
         end function
     end property
 end macro
