@@ -6,16 +6,18 @@ taskfunc update_nks_label(ctrl_index)
 		declare value := ui_id -> value
 	end if
 
-	if ctrl_index = control.vol
-		ui_id -> label := insert[0].sfx_wet.disp & " dB"
+	select ctrl_index
+		case control.vol
+			ui_id -> label := insert[0].sfx_wet.disp & " dB"
 
-	else if ctrl_index = control.reverb
-		ui_id -> label := send[7].send_0.disp
+		case control.reverb
+			ui_id -> label := insert[7].send_7.disp & " dB"
+			msg(ui_id -> label)
 
-	else if in_range(ctrl_index, control.speed, control.releaseSamples)
-		ui_id -> label := option_texts_shortened[ctrl_index, value]
+		case control.speed to control.releaseSamples
+			ui_id -> label := option_texts_shortened[ctrl_index, value]
 
-	end if
+	end select
 end taskfunc
 
 taskfunc update_engine_pars(ctrl_index)
@@ -70,11 +72,27 @@ taskfunc update_engine_pars(ctrl_index)
 end taskfunc
 
 function update_reverb_send_levels
-	~vol := float(slider_reverb) / 1000000.0
-	~db := vol_to_db_safe(vol)
-	insert[7].send_0 := is_equal(menu_reverb, 0) * V2E.volume(db * 1000.0)
-	insert[7].send_1 := is_equal(menu_reverb, 1) * V2E.volume(db * 1000.0)
-	insert[7].send_2 := is_equal(menu_reverb, 2) * V2E.volume(db * 1000.0)
+	// vol := float(slider_reverb) / 1000000.0
+	if in_range(slider_reverb, 0, 500000)
+		vol := map_i_2i_2f_f(slider_reverb, 0, 500000, 0.0, 0.5)
+	else if in_range(slider_reverb, 500000, 1000000)
+		vol := map_i_2i_2f_f(slider_reverb, 500000, 1000000, 0.5, 2.0)
+	end if
+	db := vol_to_db_safe(vol)
+	insert[7].send_0 := is_equal(menu_reverb, 0) * is_equal(switch_reverbToggle, 1) * V2E.volume(db * 1000.0)
+	insert[7].send_1 := is_equal(menu_reverb, 1) * is_equal(switch_reverbToggle, 1) * V2E.volume(db * 1000.0)
+	insert[7].send_2 := is_equal(menu_reverb, 2) * is_equal(switch_reverbToggle, 1) * V2E.volume(db * 1000.0)
+
+	// Dummy send, for NKS label
+	insert[7].send_7 := V2E.volume(db * 1000.0)
+end function
+
+function update_reverb_slider_picture
+	if switch_reverbToggle = 0
+		slider_reverb -> picture := "knob gray"
+	else
+		slider_reverb -> picture := "knob"
+	end if
 end function
 
 

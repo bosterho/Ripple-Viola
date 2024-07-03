@@ -565,9 +565,17 @@ on init
 	if dev_mode[0] = 0
 		set_menu_item_visibility(get_ui_id(menu_reverb), NUM_REVERB_PRESETS, 0)
 	end if
-	label_reverb -> text_alignment := 1
+	switch_reverbToggle -> text_alignment := 0
+	switch_reverbToggle -> text := "REVERB"
 	label_vol -> font_type := get_font_id("Khula Bold Size 11 on")
-	label_reverb -> font_type := get_font_id("Khula Bold Size 11 on")
+	switch_reverbToggle -> font_type             := get_font_id("Khula Bold Size 11 off")
+	switch_reverbToggle -> font_type_on          := get_font_id("Khula Bold Size 11 on")
+	switch_reverbToggle -> font_type_off_pressed := get_font_id("Khula Bold Size 11 off pressed")
+	switch_reverbToggle -> font_type_on_pressed  := get_font_id("Khula Bold Size 11 on pressed")
+	switch_reverbToggle -> font_type_off_hover   := get_font_id("Khula Bold Size 11 off hover")
+	switch_reverbToggle -> font_type_on_hover    := get_font_id("Khula Bold Size 11 on hover")
+	switch_reverbToggle -> disable_text_shifting := 1
+	switch_reverbToggle -> automation_name := 0
 
 	// Articulations
 	declare articulation_ids[NUM_artics]
@@ -725,6 +733,7 @@ function persistence_changed_callback(_)
 	call set_key_colors_and_types_and_names
 	call set_keys_pressed
 	call set_reverb_menu_checkmark
+	call update_reverb_slider_picture
 	for i := 0 to NUM_CTRLS - 1
 		update_nks_label(i)
 		update_engine_pars(i)
@@ -1488,7 +1497,7 @@ literate_macro(articulation_switch_callbacks) on artics
 // Vol
 on ui_control(slider_vol)
 	update_engine_pars(control.vol)
-	update_nks_label(control.releaseSamples)
+	update_nks_label(control.vol)
 	call set_keys_pressed
 end on
 
@@ -1500,11 +1509,18 @@ on ui_control(menu_reverb)
 	update_engine_pars(control.reverb_type)
 end on
 
+on ui_control (switch_reverbToggle)
+	call update_reverb_slider_picture
+	call update_reverb_send_levels
+end on
+
+
 on ui_control(slider_reverb)
 	slider_reverb_callback()
 end on
 function slider_reverb_callback
 	update_engine_pars(control.reverb)
+	update_nks_label(control.reverb)
 	call set_keys_pressed
 end function
 
