@@ -80,10 +80,12 @@ on init
 	note_off_timestamp                , ...
 	release_length                    , ...
 	release_sample_length             , ...
-	time_til_note_off                 , ...
 	release_note                      , ...
+	release_triggered                 , ...
+	release_dynamic                   , ...
 	brightness_on_release             , ...
 	waiting_to_trigger_release_sample , ...
+	prev_rec_time_pos_in_ripple       , ...
 	releasing                         , ...
 	dest_note_released                , ...
 	start_note_released               , ...
@@ -272,6 +274,7 @@ on init
 	declare key_active[128]
 	declare key_down[128]
 	declare key_released[128]
+	declare rls_note_ids[128]
 	fill(key_released, 1)
 	declare notes_to_release[1000]
 	declare voices_to_release[1000]
@@ -287,11 +290,10 @@ on init
 	declare cur_midi_page
 	declare read cur_artic
 	declare all_keys_released := 1
-	declare recent_release_trigger_key := release_trigger_keyswitches[0]
 	declare velo[128]
 	declare event_ids[128]
-	velo[recent_release_trigger_key] := 64
 	declare ctrl_ids[NUM_CTRLS]
+	declare recent_release_trigger_key := release_trigger_keyswitches[0]
 
 	// Fading graphics
 	declare ~midiInstructions_opacity := 0.0
@@ -684,7 +686,7 @@ on init
 
 	// Old
 
-	set_voice_limit(NI_VL_TMPRO_STANDARD, MAX_RIPPLE_HISTORY)
+	set_voice_limit(NI_VL_TMPRO_STANDARD, 32)
 	declare ui_slider ripple[MAX_RIPPLE_HISTORY](0,127)
 	for i := 0 to num_elements(ripple) - 1
 		// ripple[i] -> picture := "ripple 0"
@@ -788,8 +790,8 @@ function note_callback(note, velocity, event_id)
 
 	ks_index := search(release_trigger_keyswitches, note)
 	if ks_index # -1
-		recent_release_trigger_key := release_trigger_keyswitches[ks_index]
 		switch_releaseTrigger := 1
+		recent_release_trigger_key := note
 		call trigger_release_samples_for_all_ripples
 	end if
 
@@ -1095,25 +1097,26 @@ function release_callback(note, event_id)
 end function
 
 function release(note, voice)
-	if voice = -1
-		msg(voice)
-	end if
+	// if voice = -1
+	// 	msg(voice)
+	// end if
 
 	declare r
 	for r := 0 to MAX_RIPPLE_HISTORY - 1
 		if ripple_id_history[r] # 0
 			if voice = event[ripple_id_history[r]].voice
+
 				declare artic := event[ripple_id_history[r]].artic
+
 				declare rec_time_pos_in_ripple := ripple_id_history[r] -> play_pos mod rec_time_ripple_lengths[artic]
-				
 				declare real_time_pos_in_pulse := map_i_2i_2i_i(rec_time_pos_in_ripple, 0, rec_time_ripple_lengths[artic], 0, ticks_to_ms(ripple_length_ticks[artic]))
 				real_time_pos_in_pulse := int(float(real_time_pos_in_pulse) * speeds[slider_speed])
 				declare real_time_ripple_length := ticks_to_ms(int(float(ripple_length_ticks[artic]) * speeds[slider_speed]))
 				declare time_til_end_of_ripple := (real_time_ripple_length - real_time_pos_in_pulse) / 1000
 
 				if note = event[ripple_id_history[r]].second_note
-					event[ripple_id_history[r]].note_off_timestamp := ENGINE_UPTIME
 
+					// Decide whether to play release sample
 					declare play_release_sample
 					if slider_releaseSamples = 0
 						if key_down[recent_release_trigger_key] = 1
@@ -1125,6 +1128,8 @@ function release(note, voice)
 						play_release_sample := 1
 					end if
 
+					// Either fade out, or put release sample into queue
+					event[ripple_id_history[r]].note_off_timestamp := ENGINE_UPTIME
 					if play_release_sample = 0
 						event[ripple_id_history[r]].releasing := 1
 						declare fade_out_time := time_til_end_of_ripple //+ ticks_to_ms(ripple_length_ticks[artic])
@@ -1134,7 +1139,8 @@ function release(note, voice)
 						// end if
 						fade_out(ripple_id_history[r], fade_out_time * 1000, STOP_VOICE_AFTER_FADE_OUT)
 					else
-						event[ripple_id_history[r]].time_til_note_off := time_til_end_of_ripple
+						event[ripple_id_history[r]].release_dynamic := velo[recent_release_trigger_key] / 64
+						event[ripple_id_history[r]].release_triggered := 1
 						event[ripple_id_history[r]].waiting_to_trigger_release_sample := 1
 					end if
 				end if
@@ -1596,7 +1602,8 @@ literate_macro(releaseSamples_switch_callbacks) on releaseSampleModes
 
 on ui_control(switch_releaseTrigger)
 	switch_releaseTrigger := 0
-	key_down[recent_release_trigger_key] := 1
+	key_down[release_trigger_keyswitches[0]] := 1
+	key_down[release_trigger_keyswitches[1]] := 1
 	call trigger_release_samples_for_all_ripples
 	set_key_pressed(release_trigger_keyswitches[0], 1)
 	set_key_pressed(release_trigger_keyswitches[1], 1)

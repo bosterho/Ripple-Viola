@@ -12,7 +12,6 @@ taskfunc update_nks_label(ctrl_index)
 
 		case control.reverb
 			ui_id -> label := insert[7].send_7.disp & " dB"
-			msg(ui_id -> label)
 
 		case control.speed to control.releaseSamples
 			ui_id -> label := option_texts_shortened[ctrl_index, value]
@@ -529,24 +528,41 @@ function info_graphics_animation
 end function
 
 function play_release_samples_when_its_time
-	declare ripple_ids_waiting_to_trigger_release_sample[MAX_RIPPLE_HISTORY]
-	fill(ripple_ids_waiting_to_trigger_release_sample, 0)
-	declare num_waiting := 0
-
 	for r := 0 to MAX_RIPPLE_HISTORY - 1
 		if event_status(ripple_id_history[r]) = EVENT_STATUS_NOTE_QUEUE
 			if event[ripple_id_history[r]].waiting_to_trigger_release_sample = 1 ...
 			and event[ripple_id_history[r]].type # RELEASE_SAMPLE_TYPE
-				ripple_ids_waiting_to_trigger_release_sample[num_waiting] := ripple_id_history[r]
-				inc(num_waiting)
 
-				declare time_since_note_off := ENGINE_UPTIME - event[ripple_id_history[r]].note_off_timestamp
-				if time_since_note_off > event[ripple_id_history[r]].time_til_note_off - (DURATION_SIXTEENTH / 4 / 1000)
+				declare release_dynamic
+				declare SOFT := 0
+				declare LOUD := 1
+				declare note := event[ripple_id_history[r]].origin_note
+				if event[ripple_id_history[r]].release_triggered = 0
+					if slider_releaseSamples = releaseSampleMode.softRelease
+						release_dynamic := SOFT
+					else
+						release_dynamic := LOUD
+					end if
+				else
+					release_dynamic := event[ripple_id_history[r]].release_dynamic
+				end if
+
+				declare artic := event[ripple_id_history[r]].artic
+				declare rec_time_pos_in_ripple := ripple_id_history[r] -> play_pos mod rec_time_ripple_lengths[artic]
+				if release_dynamic = SOFT
+					if rec_time_pos_in_ripple > rec_time_ripple_lengths[artic] / 2
+						fade_out(ripple_id_history[r], ticks_to_ms(ripple_length_ticks[artic] / 2), STOP_VOICE_AFTER_FADE_OUT)
+					end if
+				else if release_dynamic = LOUD
+					if rec_time_pos_in_ripple > rec_time_ripple_lengths[artic] / 4 * 3
+						fade_out(ripple_id_history[r], ticks_to_ms(ripple_length_ticks[artic] / 4), STOP_VOICE_AFTER_FADE_OUT)
+					end if
+				end if
+				
+				if rec_time_pos_in_ripple < event[ripple_id_history[r]].prev_rec_time_pos_in_ripple // If it has wrapped
 					event[ripple_id_history[r]].waiting_to_trigger_release_sample := 0
-					declare artic := event[ripple_id_history[r]].artic
 
-					// Stop ripple
-					// Must grab these values from the Ripple before stopping it, though
+					// Grab these values right before the ripple finishes fading out
 					declare vol := ripple_id_history[r] -> volume
 					declare offset := 50000 // Used to make it err on the side of choosing a ripple that's softer.
 					declare play_pos := ripple_id_history[r] -> play_pos
@@ -565,80 +581,61 @@ function play_release_samples_when_its_time
 					constrain(cur_ripple, 0, 3)
 					declare vel := (cur_ripple * 32 + 1)
 
-					// fade_out(ripple_id_history[r], DURATION_SIXTEENTH / 2, STOP_VOICE_AFTER_FADE_OUT)
-					declare fade_out_time := int(float(ticks_to_ms(ripple_length_ticks[artic] / pitch_fractions[artic])) * speeds[slider_speed])
-					fade_out(ripple_id_history[r], fade_out_time, STOP_VOICE_AFTER_FADE_OUT)
-
-					
 					// Play release-sample
-					declare release_sample_will_already_be_triggered := 0
-					declare i
-					for i := 0 to num_waiting - 1
-						if i # r
-							if event[ripple_ids_waiting_to_trigger_release_sample[i]].origin_note = event[ripple_id_history[r]].origin_note
-								release_sample_will_already_be_triggered := 1
-							end if
-						end if
-					end for
-					if release_sample_will_already_be_triggered = 0
-						// Set sample start, based on release sample options
-						declare sample_start
-						declare vel
-						if slider_releaseSamples > 0
-							select slider_releaseSamples
-								case releaseSampleMode.softRelease
-									sample_start := rec_time_ripple_lengths[artic] / 2
-									vel := 24
-								case releaseSampleMode.loudRelease
-									sample_start := 0
-									vel := 96
-							end select
-						end if
-
-						// Override sample start if the release trigger key is being used
-						if key_down[recent_release_trigger_key] = 1
-							vel := velo[recent_release_trigger_key]
-							sample_start := map_i_2i_2i_i(vel, 1, 127, rec_time_ripple_lengths[artic] / 2, 0)
-						end if
-
-						declare release_sample_length := rec_time_ripple_lengths[artic] - sample_start
-						release_sample_length := map_i_2i_2i_i(release_sample_length, 0, rec_time_ripple_lengths[artic], 0, ticks_to_ms(ripple_length_ticks[artic]))
-						release_sample_length := int(float(release_sample_length) * speeds[slider_speed])
-						event[ripple_id_history[r]].release_sample_length := release_sample_length // for animations
-
-						declare atk_time := map_i_2i_2i_i(vel, 1, 127, ticks_to_ms(ripple_length_ticks[artic] / 2), ticks_to_ms(ripple_length_ticks[artic] / 4)) / 1000
-						// declare dec_time := map_i_2i_2i_i(vel, 1, 127, ticks_to_ms(ripple_length_ticks[artic]), 0) / 1000
-						declare dec_time := ticks_to_ms(ripple_length_ticks[artic]*3) / 1000
-						atk_time := int(float(atk_time) * speeds[slider_speed])
-						dec_time := int(float(dec_time) * speeds[slider_speed])
-						group[release_group[artic]].mods["ENV_AHDSR2"].target["ENV_AHDSR_VOLUME2"].env_atk := V2E.AtkTime(float(atk_time) * 100.0)
-						group[release_group[artic]].mods["ENV_AHDSR2"].target["ENV_AHDSR_VOLUME2"].env_dec := V2E.DRTime(float(dec_time) * 100.0)
-
-						declare note_id := play_note(event[ripple_id_history[r]].origin_note, vel, sample_start, 0)
-						set_event_par_arr(note_id, EVENT_PAR_ALLOW_GROUP, 0, ALL_GROUPS)
-						set_event_par_arr(note_id, EVENT_PAR_ALLOW_GROUP, 1, release_group[artic])
-
-						literate_macro(copy_ripple_history_pars_to_note_id_pars) on CUSTOM_EVENT_PARS
-						ripple_id_history[r] := note_id
-
-						event[ripple_id_history[r]].note_off_timestamp := ENGINE_UPTIME
-
-						// Release-sample fade and vol
-						// declare mod_value := map_i_2i_2i_i(velo[recent_release_trigger_key], 1, 127, 0, 750000)
-						// set_event_par_arr(note_id, EVENT_PAR_MOD_VALUE_ID, mod_value, 2)
-						// fade_in(note_id, ticks_to_ms(ripple_length_ticks[artic] / 4))
-						// wait(1)
-						// declare fade_out_time := map_i_2i_2i_i(velo[recent_release_trigger_key], 1, 127, 0, ticks_to_ms(ripple_length_ticks[artic] * 2))
-						// msg(fade_out_time)
-						// fade_out(note_id, 100000*10, STOP_VOICE_AFTER_FADE_OUT)
-
-						event[note_id].source := OUTSIDE_SOURCE
-						event[note_id].type := RELEASE_SAMPLE_TYPE
-						change_vol(note_id, vol, CHANGE_ABSOLUTE)
+					// Set Sample start and Fade time
+					declare sample_start
+					declare fade_time
+					if release_dynamic = SOFT
+						sample_start := rec_time_ripple_lengths[artic] / 4
+						fade_time := 100000
+					else if release_dynamic = LOUD
+						sample_start := 0
+						fade_time := 50000
 					end if
+
+					group[release_group[artic]].mods["ENV_AHDSR"].target["ENV_AHDSR_VOLUME"].env_atk := V2E.AtkTime(float(fade_time) / 10.0)
+
+					declare release_sample_length := rec_time_ripple_lengths[artic] - sample_start
+					release_sample_length := map_i_2i_2i_i(release_sample_length, 0, rec_time_ripple_lengths[artic], 0, ticks_to_ms(ripple_length_ticks[artic]))
+					release_sample_length := int(float(release_sample_length) * speeds[slider_speed])
+					event[ripple_id_history[r]].release_sample_length := release_sample_length // for animations
+
+					// 2nd envelope
+					// declare atk_time := map_i_2i_2i_i(vel, 1, 127, ticks_to_ms(ripple_length_ticks[artic] / 2), ticks_to_ms(ripple_length_ticks[artic] / 4)) / 1000
+					// declare dec_time := map_i_2i_2i_i(vel, 1, 127, ticks_to_ms(ripple_length_ticks[artic]), 0) / 1000
+					// declare dec_time := ticks_to_ms(ripple_length_ticks[artic]*3) / 1000
+					// atk_time := int(float(atk_time) * speeds[slider_speed])
+					// dec_time := int(float(dec_time) * speeds[slider_speed]) 
+					// group[release_group[artic]].mods["ENV_AHDSR2"].target["ENV_AHDSR_VOLUME2"].env_atk := V2E.AtkTime(float(atk_time) * 100.0) 
+					// group[release_group[artic]].mods["ENV_AHDSR2"].target["ENV_AHDSR_VOLUME2"].env_dec := V2E.DRTime(float(dec_time) * 100.0)
+
+					fade_out(rls_note_ids[note], fade_time, STOP_VOICE_AFTER_FADE_OUT) // cut off redundant release samples
+					declare note_id := play_note(note, vel, sample_start, 0)
+					rls_note_ids[note] := note_id
+					set_event_par_arr(note_id, EVENT_PAR_ALLOW_GROUP, 0, ALL_GROUPS)
+					set_event_par_arr(note_id, EVENT_PAR_ALLOW_GROUP, 1, release_group[artic])
+
+					literate_macro(copy_ripple_history_pars_to_note_id_pars) on CUSTOM_EVENT_PARS
+					ripple_id_history[r] := note_id
+
+					event[ripple_id_history[r]].note_off_timestamp := ENGINE_UPTIME
+
+					// Release-sample fade and vol
+					// declare mod_value := map_i_2i_2i_i(velo[recent_release_trigger_key], 1, 127, 0, 750000)
+					// set_event_par_arr(note_id, EVENT_PAR_MOD_VALUE_ID, mod_value, 2)
+					// fade_in(note_id, ticks_to_ms(ripple_length_ticks[artic] / 4))
+					// wait(1)
+					// declare fade_out_time := map_i_2i_2i_i(velo[recent_release_trigger_key], 1, 127, 0, ticks_to_ms(ripple_length_ticks[artic] * 2))
+					// msg(fade_out_time)
+					// fade_out(note_id, 100000*10, STOP_VOICE_AFTER_FADE_OUT)
+
+					event[note_id].source := OUTSIDE_SOURCE
+					event[note_id].type := RELEASE_SAMPLE_TYPE
+					change_vol(note_id, vol, CHANGE_ABSOLUTE)
 
 					event[ripple_id_history[r]].releasing := 1
 				end if
+				event[ripple_id_history[r]].prev_rec_time_pos_in_ripple := rec_time_pos_in_ripple
 			end if
 		end if
 	end for
