@@ -29,6 +29,8 @@ on init
 	define UI_HEIGHT := 427
 	declare const DOWN := 0
 	declare const UP := 1
+	declare const SOFT := 0
+	declare const LOUD := 1
 	declare const NUM_RRS := 4
 	declare const MAX_NUM_CHORD_IDS := 1000
 	define MAX_NUM_NOTES := 64
@@ -73,7 +75,6 @@ on init
 	dest_note                         , ...
 	first_note                        , ...
 	second_note                       , ...
-	row                               , ...
 	direction                         , ...
 	artic                             , ...
 	voice                             , ...
@@ -81,14 +82,12 @@ on init
 	release_length                    , ...
 	release_sample_length             , ...
 	release_note                      , ...
-	release_triggered                 , ...
+	triggered_by_keyswitch            , ...
 	release_dynamic                   , ...
-	brightness_on_release             , ...
+	brightness_when_released          , ...
 	waiting_to_trigger_release_sample , ...
 	prev_rec_time_pos_in_ripple       , ...
 	releasing                         , ...
-	dest_note_released                , ...
-	start_note_released               , ...
 	triggered_by_mf                   , ...
 	preview_being_stopped             , ...
 	type
@@ -101,12 +100,6 @@ on init
 	declare const MAX_INTERVAL := 5
 	declare const MIN_BRIGHTNESS := 24
 	define CLIP_MARGIN := 4
-
-	// list !ir_paths
-	// 	get_folder(GET_FOLDER_FACTORY_DIR) & "/Presets/Effects/Convolution/9 Medium Rooms/IR Samples/SoftnBright.wav"
-	// 	get_folder(GET_FOLDER_FACTORY_DIR) & "/Presets/Effects/Convolution/10 Big Rooms/IR Samples/Masterverb Hall.wav"
-	// 	get_folder(GET_FOLDER_FACTORY_DIR) & "/Presets/Effects/Convolution/10 Big Rooms/IR Samples/ndb_cathedral_ir_32bit.wav"
-	// end list
 
 	{{ Options constants }}
 	// Speed
@@ -345,7 +338,6 @@ on init
 	define MF_BUFFER_SIZE := 1000
 	mf_set_buffer_size(MF_BUFFER_SIZE)
 	mf_set_num_export_areas(NUM_MIDI_CLIPS + 1)
-	// declare ui_label midi_clip[NUM_MIDI_CLIPS](2,2)
 	mf_insert_file(get_folder(GET_FOLDER_PATCH_DIR) & "/../Data/midi.mid", 0, 0, 0)
 
 	// Insert midi data into arrays to be played back
@@ -447,7 +439,7 @@ on init
 					else
 						clip_loop_enabled[clip_i] := 0
 					end if
-					// mf_remove_event(mf_get_id()) // clean up
+					// mf_remove_event(mf_get_id()) // clean up. This caused problems though, and I'm not sure why.
 				end if
 			end if
 			mf_get_next(clip_i)
@@ -541,7 +533,6 @@ on init
 	panel_releaseSamples -> z_layer := 1
 
 
-
 	declare key_ids[128]
 	macro assign_key_id(#i#)
 		key_ids[#i# + LOWEST_KEY]        := get_ui_id(label_oct0.note#i#)
@@ -562,11 +553,6 @@ on init
 	for i := 0 to NUM_REVERB_PRESETS - 1
 		add_menu_item(menu_reverb, reverb_preset_names[i], i)
 	end for
-	add_menu_item(menu_reverb, "save preset", NUM_REVERB_PRESETS)
-	declare read prev_reverb := menu_reverb
-	if dev_mode[0] = 0
-		set_menu_item_visibility(get_ui_id(menu_reverb), NUM_REVERB_PRESETS, 0)
-	end if
 	switch_reverbToggle -> text_alignment := 0
 	switch_reverbToggle -> text := "REVERB"
 	label_vol -> font_type := get_font_id("Khula Bold Size 11 on")
@@ -662,8 +648,7 @@ on init
 
 	switch_releaseTrigger -> allow_automation := 0
 
-
-	// Options misc setting things up
+	// Options
 	define OPTIONS_MOUSE_BEHAVIOR := 2000
 	slider_speed          -> mouse_behaviour := OPTIONS_MOUSE_BEHAVIOR
 	slider_direction      -> mouse_behaviour := OPTIONS_MOUSE_BEHAVIOR
@@ -684,19 +669,14 @@ on init
 
 	menu_reverb -> textpos_y := 100
 
-	// Old
-
-	set_voice_limit(NI_VL_TMPRO_STANDARD, 32)
 	declare ui_slider ripple[MAX_RIPPLE_HISTORY](0,127)
 	for i := 0 to num_elements(ripple) - 1
-		// ripple[i] -> picture := "ripple 0"
 		ripple[i] -> z_layer := -1
 		ripple[i] -> hide := HIDE_WHOLE_CONTROL
 	end for
 
 	declare ui_slider ripple_swell[MAX_RIPPLE_HISTORY](0,127)
 	for i := 0 to num_elements(ripple_swell) - 1
-		// ripple_swell[i] -> picture := "ripple_swell 0"
 		ripple_swell[i] -> z_layer := -1
 		ripple_swell[i] -> hide := HIDE_WHOLE_CONTROL
 	end for
@@ -704,7 +684,7 @@ on init
 	{{ Automation }}
 	START_INC (N, 0, 1)
 		slider_vol            -> automation_id := N
-		slider_vol            -> automation_name := "VOL"
+		slider_vol            -> automation_name := "Expression"
 		slider_reverb         -> automation_id := N
 		slider_reverb         -> automation_name := "Reverb"
 		slider_speed          -> automation_id := N
@@ -717,14 +697,14 @@ on init
 		slider_releaseSamples -> automation_name := "Release Samples"
 	END_INC
 
-	// DEV
+	// Misc setting things up
+	set_voice_limit(NI_VL_TMPRO_STANDARD, 32)
 	declare @siln2 := "START_EVENTS_INTEGERS_ENGINE"
 	group[artic.quarters].speed   := V2E_speed(18*2)
 	group[artic.eighths].speed    := V2E_speed(18)
 	group[artic.sixteenths].speed := V2E_speed(18)
 	group[find_group("quarters releases")].speed := V2E_speed(12)
 	group[find_group("eighths releases")].speed := V2E_speed(12)
-
 
 end on
 
@@ -1134,20 +1114,18 @@ function release(note, voice)
 						event[ripple_id_history[r]].releasing := 1
 						declare fade_out_time := time_til_end_of_ripple //+ ticks_to_ms(ripple_length_ticks[artic])
 						event[ripple_id_history[r]].release_length := fade_out_time
-						// if fade_out_time < DURATION_SIXTEENTH / 8 / 1000
-						// 	fade_out_time := ticks_to_ms(ripple_length_ticks[artic] / pitch_fractions[artic]) / 1000
-						// end if
 						fade_out(ripple_id_history[r], fade_out_time * 1000, STOP_VOICE_AFTER_FADE_OUT)
 					else
-						event[ripple_id_history[r]].release_dynamic := velo[recent_release_trigger_key] / 64
-						event[ripple_id_history[r]].release_triggered := 1
+						if velo[recent_release_trigger_key] < 64
+							event[ripple_id_history[r]].release_dynamic := SOFT
+						else
+							event[ripple_id_history[r]].release_dynamic := LOUD
+						end if
+						event[ripple_id_history[r]].triggered_by_keyswitch := 1
 						event[ripple_id_history[r]].waiting_to_trigger_release_sample := 1
 					end if
 				end if
 
-				// Old:
-				// dynamic_release(note)
-				// immediate_release(note)
 			end if
 		end if
 	end for
@@ -1510,8 +1488,6 @@ end on
 // Reverb
 on ui_control(menu_reverb)
 	call set_reverb_menu_checkmark
-	prev_reverb := menu_reverb
-	call set_keys_pressed
 	update_engine_pars(control.reverb_type)
 end on
 
@@ -1527,7 +1503,6 @@ end on
 function slider_reverb_callback
 	update_engine_pars(control.reverb)
 	update_nks_label(control.reverb)
-	call set_keys_pressed
 end function
 
 // Speed

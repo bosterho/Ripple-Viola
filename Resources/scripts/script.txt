@@ -1,4 +1,4 @@
-{ Compiled on Thu Jul  4 08:32:19 2024 }
+{ Compiled on Thu Jul  4 10:27:10 2024 }
 on init
   declare $sksp_dummy
   declare $concat_it
@@ -187,6 +187,8 @@ on init
   declare $i
   declare const $DOWN := 0
   declare const $UP := 1
+  declare const $SOFT := 0
+  declare const $LOUD := 1
   declare const $NUM_RRS := 4
   declare const $MAX_NUM_CHORD_IDS := 1000
   declare const $control__vol := 0
@@ -205,7 +207,6 @@ on init
   declare %custom_event_dest_note[1000000]
   declare %custom_event_first_note[1000000]
   declare %custom_event_second_note[1000000]
-  declare %custom_event_row[1000000]
   declare %custom_event_direction[1000000]
   declare %custom_event_artic[1000000]
   declare %custom_event_voice[1000000]
@@ -213,14 +214,12 @@ on init
   declare %custom_event_release_length[1000000]
   declare %custom_event_release_sample_length[1000000]
   declare %custom_event_release_note[1000000]
-  declare %custom_event_release_triggered[1000000]
+  declare %custom_event_triggered_by_keyswitch[1000000]
   declare %custom_event_release_dynamic[1000000]
-  declare %custom_event_brightness_on_release[1000000]
+  declare %custom_event_brightness_when_released[1000000]
   declare %custom_event_waiting_to_trigger_release_sample[1000000]
   declare %custom_event_prev_rec_time_pos_in_ripple[1000000]
   declare %custom_event_releasing[1000000]
-  declare %custom_event_dest_note_released[1000000]
-  declare %custom_event_start_note_released[1000000]
   declare %custom_event_triggered_by_mf[1000000]
   declare %custom_event_preview_being_stopped[1000000]
   declare %custom_event_type[1000000]
@@ -1628,14 +1627,6 @@ on init
     add_menu_item($menu_reverb,!reverb_preset_names[$i],$i)
     inc($i)
   end while
-  add_menu_item($menu_reverb,"save preset",3)
-  declare $prev_reverb
-  make_persistent($prev_reverb)
-  read_persistent_var($prev_reverb)
-  $prev_reverb := $menu_reverb
-  if (%dev_mode[0]=0)
-    set_menu_item_visibility(get_ui_id($menu_reverb),3,0)
-  end if
   set_control_par(get_ui_id($switch_reverbToggle),$CONTROL_PAR_TEXT_ALIGNMENT,0)
   set_control_par_str(get_ui_id($switch_reverbToggle),$CONTROL_PAR_TEXT,"REVERB")
   set_control_par(get_ui_id($label_vol),$CONTROL_PAR_FONT_TYPE,get_font_id("Khula Bold Size 11 on"))
@@ -1743,7 +1734,6 @@ on init
   set_control_par(get_ui_id($slider_vol),$CONTROL_PAR_DEFAULT_VALUE,500000)
   set_control_par(get_ui_id($slider_reverb),$CONTROL_PAR_DEFAULT_VALUE,500000)
   set_control_par(get_ui_id($menu_reverb),$CONTROL_PAR_TEXTPOS_Y,100)
-  set_voice_limit($NI_VL_TMPRO_STANDARD,32)
   declare %ripple[100]
   declare ui_slider $ripple0(0,127)
   declare ui_slider $ripple1(0,127)
@@ -1969,7 +1959,7 @@ on init
     inc($i)
   end while
   set_control_par(get_ui_id($slider_vol),$CONTROL_PAR_AUTOMATION_ID,0)
-  set_control_par_str(get_ui_id($slider_vol),$CONTROL_PAR_AUTOMATION_NAME,"VOL")
+  set_control_par_str(get_ui_id($slider_vol),$CONTROL_PAR_AUTOMATION_NAME,"Expression")
   set_control_par(get_ui_id($slider_reverb),$CONTROL_PAR_AUTOMATION_ID,1)
   set_control_par_str(get_ui_id($slider_reverb),$CONTROL_PAR_AUTOMATION_NAME,"Reverb")
   set_control_par(get_ui_id($slider_speed),$CONTROL_PAR_AUTOMATION_ID,2)
@@ -1980,6 +1970,7 @@ on init
   set_control_par_str(get_ui_id($slider_legato),$CONTROL_PAR_AUTOMATION_NAME,"Legato/Quantize")
   set_control_par(get_ui_id($slider_releaseSamples),$CONTROL_PAR_AUTOMATION_ID,5)
   set_control_par_str(get_ui_id($slider_releaseSamples),$CONTROL_PAR_AUTOMATION_NAME,"Release Samples")
+  set_voice_limit($NI_VL_TMPRO_STANDARD,32)
   declare @siln2
   @siln2 := "START_EVENTS_INTEGERS_ENGINE"
   set_engine_par($ENGINE_PAR_SPEED,1000000-((18*2-1)*90909),$artic__quarters,-1,-1)
@@ -2204,8 +2195,6 @@ on init
   declare $_offset2
   declare $_note_id2
   declare $_release_dynamic
-  declare $_SOFT := 0
-  declare $_LOUD := 1
   declare $_note
   declare $_artic2
   declare $_rec_time_pos_in_ripple
@@ -2227,12 +2216,11 @@ on init
   declare $_artic
   declare ~_speed_curve
   declare ~_brightness_curve
-  declare $_row
   declare $_play_pos_in_beat
   declare $_pos_in_swell
   declare $_time_since_note_off2
   declare $_release_length
-  declare $_brightness_on_release
+  declare $_brightness_when_released
   declare $_key_i2
   declare $_found2 := 0
   declare $_r2
@@ -2345,7 +2333,6 @@ function ripple_animations
             end if
           end if
         end if
-        $_row := %custom_event_row[%ripple_id_history[$r] mod 1000000]
         set_control_par(%ripple[$r],$CONTROL_PAR_POS_X,get_control_par(get_ui_id($panel_keyboard),$CONTROL_PAR_POS_X)+get_control_par(%key_ids[$_low_note],$CONTROL_PAR_POS_X)+(get_control_par(%key_ids[$_low_note],$CONTROL_PAR_WIDTH)/2))
         if ($_interval<0)
           set_control_par(%ripple[$r],$CONTROL_PAR_POS_Y,get_control_par(get_ui_id($panel_keyboard),$CONTROL_PAR_POS_Y)-((22*abs($_interval)+1)/2)-1)
@@ -2367,7 +2354,7 @@ function ripple_animations
         end if
         set_control_par(%ripple_swell[$r],$CONTROL_PAR_HIDE,get_control_par(%ripple[$r],$CONTROL_PAR_HIDE))
         set_control_par(%ripple_swell[$r],$CONTROL_PAR_HIDE,$HIDE_PART_NOTHING)
-        %custom_event_brightness_on_release[%ripple_id_history[$r] mod 1000000] := get_control_par(%ripple_swell[$r],$CONTROL_PAR_VALUE)
+        %custom_event_brightness_when_released[%ripple_id_history[$r] mod 1000000] := get_control_par(%ripple_swell[$r],$CONTROL_PAR_VALUE)
       end if
     else
       if (%custom_event_releasing[%ripple_id_history[$r] mod 1000000]=1)
@@ -2375,15 +2362,15 @@ function ripple_animations
         if (get_control_par(%ripple_swell[$r],$CONTROL_PAR_VALUE)>0)
           $_time_since_note_off2 := $ENGINE_UPTIME-%custom_event_note_off_timestamp[%ripple_id_history[$r] mod 1000000]
           $_release_length := %custom_event_release_sample_length[%ripple_id_history[$r] mod 1000000]/1000
-          $_brightness_on_release := %custom_event_brightness_on_release[%ripple_id_history[$r] mod 1000000]
+          $_brightness_when_released := %custom_event_brightness_when_released[%ripple_id_history[$r] mod 1000000]
           if ($_release_length=0)
             $_release_length := 1
           end if
-          if ($_brightness_on_release=0)
-            $_brightness_on_release := 1
+          if ($_brightness_when_released=0)
+            $_brightness_when_released := 1
           end if
           if ($_time_since_note_off2>0)
-            set_control_par(%ripple_swell[$r],$CONTROL_PAR_VALUE,real_to_int(int_to_real($_brightness_on_release)+((int_to_real($_time_since_note_off2)-int_to_real(0))/(int_to_real($_release_length)-int_to_real(0))*(int_to_real(0)-int_to_real($_brightness_on_release)))))
+            set_control_par(%ripple_swell[$r],$CONTROL_PAR_VALUE,real_to_int(int_to_real($_brightness_when_released)+((int_to_real($_time_since_note_off2)-int_to_real(0))/(int_to_real($_release_length)-int_to_real(0))*(int_to_real(0)-int_to_real($_brightness_when_released)))))
           end if
         end if
       end if
@@ -2428,26 +2415,26 @@ function play_release_samples_when_its_time
   while ($r<100)
     if (event_status(%ripple_id_history[$r])=$EVENT_STATUS_NOTE_QUEUE)
       if (%custom_event_waiting_to_trigger_release_sample[%ripple_id_history[$r] mod 1000000]=1 and (%custom_event_type[%ripple_id_history[$r] mod 1000000] # 1))
-        $_SOFT := 0
-        $_LOUD := 1
         $_note := %custom_event_origin_note[%ripple_id_history[$r] mod 1000000]
-        if (%custom_event_release_triggered[%ripple_id_history[$r] mod 1000000]=0)
+        if (%custom_event_triggered_by_keyswitch[%ripple_id_history[$r] mod 1000000]=0)
           if ($slider_releaseSamples=$releaseSampleMode__softRelease)
-            $_release_dynamic := $_SOFT
+            $_release_dynamic := $SOFT
           else
-            $_release_dynamic := $_LOUD
+            $_release_dynamic := $LOUD
           end if
         else
-          $_release_dynamic := %custom_event_release_dynamic[%ripple_id_history[$r] mod 1000000]
+          if (%custom_event_triggered_by_keyswitch[%ripple_id_history[$r] mod 1000000]=1)
+            $_release_dynamic := %custom_event_release_dynamic[%ripple_id_history[$r] mod 1000000]
+          end if
         end if
         $_artic2 := %custom_event_artic[%ripple_id_history[$r] mod 1000000]
         $_rec_time_pos_in_ripple := get_event_par(%ripple_id_history[$r],$EVENT_PAR_PLAY_POS) mod %rec_time_ripple_lengths[$_artic2]
-        if ($_release_dynamic=$_SOFT)
+        if ($_release_dynamic=$SOFT)
           if ($_rec_time_pos_in_ripple>(%rec_time_ripple_lengths[$_artic2]/2))
             fade_out(%ripple_id_history[$r],ticks_to_ms(%ripple_length_ticks[$_artic2]/2),1)
           end if
         else
-          if ($_release_dynamic=$_LOUD)
+          if ($_release_dynamic=$LOUD)
             if ($_rec_time_pos_in_ripple>(%rec_time_ripple_lengths[$_artic2]/4*3))
               fade_out(%ripple_id_history[$r],ticks_to_ms(%ripple_length_ticks[$_artic2]/4),1)
             end if
@@ -2477,11 +2464,11 @@ function play_release_samples_when_its_time
             $_cur_ripple := 3
           end if
           $_vel := $_cur_ripple*32+1
-          if ($_release_dynamic=$_SOFT)
+          if ($_release_dynamic=$SOFT)
             $_sample_start := %rec_time_ripple_lengths[$_artic2]/4
             $_fade_time := 100000
           else
-            if ($_release_dynamic=$_LOUD)
+            if ($_release_dynamic=$LOUD)
               $_sample_start := 0
               $_fade_time := 50000
             end if
@@ -2505,7 +2492,6 @@ function play_release_samples_when_its_time
           %custom_event_dest_note[$_note_id mod 1000000] := %custom_event_dest_note[%ripple_id_history[$r] mod 1000000]
           %custom_event_first_note[$_note_id mod 1000000] := %custom_event_first_note[%ripple_id_history[$r] mod 1000000]
           %custom_event_second_note[$_note_id mod 1000000] := %custom_event_second_note[%ripple_id_history[$r] mod 1000000]
-          %custom_event_row[$_note_id mod 1000000] := %custom_event_row[%ripple_id_history[$r] mod 1000000]
           %custom_event_direction[$_note_id mod 1000000] := %custom_event_direction[%ripple_id_history[$r] mod 1000000]
           %custom_event_artic[$_note_id mod 1000000] := %custom_event_artic[%ripple_id_history[$r] mod 1000000]
           %custom_event_voice[$_note_id mod 1000000] := %custom_event_voice[%ripple_id_history[$r] mod 1000000]
@@ -2513,22 +2499,20 @@ function play_release_samples_when_its_time
           %custom_event_release_length[$_note_id mod 1000000] := %custom_event_release_length[%ripple_id_history[$r] mod 1000000]
           %custom_event_release_sample_length[$_note_id mod 1000000] := %custom_event_release_sample_length[%ripple_id_history[$r] mod 1000000]
           %custom_event_release_note[$_note_id mod 1000000] := %custom_event_release_note[%ripple_id_history[$r] mod 1000000]
-          %custom_event_release_triggered[$_note_id mod 1000000] := %custom_event_release_triggered[%ripple_id_history[$r] mod 1000000]
+          %custom_event_triggered_by_keyswitch[$_note_id mod 1000000] := %custom_event_triggered_by_keyswitch[%ripple_id_history[$r] mod 1000000]
           %custom_event_release_dynamic[$_note_id mod 1000000] := %custom_event_release_dynamic[%ripple_id_history[$r] mod 1000000]
-          %custom_event_brightness_on_release[$_note_id mod 1000000] := %custom_event_brightness_on_release[%ripple_id_history[$r] mod 1000000]
+          %custom_event_brightness_when_released[$_note_id mod 1000000] := %custom_event_brightness_when_released[%ripple_id_history[$r] mod 1000000]
           %custom_event_waiting_to_trigger_release_sample[$_note_id mod 1000000] := %custom_event_waiting_to_trigger_release_sample[%ripple_id_history[$r] mod 1000000]
           %custom_event_prev_rec_time_pos_in_ripple[$_note_id mod 1000000] := %custom_event_prev_rec_time_pos_in_ripple[%ripple_id_history[$r] mod 1000000]
           %custom_event_releasing[$_note_id mod 1000000] := %custom_event_releasing[%ripple_id_history[$r] mod 1000000]
-          %custom_event_dest_note_released[$_note_id mod 1000000] := %custom_event_dest_note_released[%ripple_id_history[$r] mod 1000000]
-          %custom_event_start_note_released[$_note_id mod 1000000] := %custom_event_start_note_released[%ripple_id_history[$r] mod 1000000]
           %custom_event_triggered_by_mf[$_note_id mod 1000000] := %custom_event_triggered_by_mf[%ripple_id_history[$r] mod 1000000]
           %custom_event_preview_being_stopped[$_note_id mod 1000000] := %custom_event_preview_being_stopped[%ripple_id_history[$r] mod 1000000]
           %custom_event_type[$_note_id mod 1000000] := %custom_event_type[%ripple_id_history[$r] mod 1000000]
           %ripple_id_history[$r] := $_note_id
-          %custom_event_note_off_timestamp[%ripple_id_history[$r] mod 1000000] := $ENGINE_UPTIME
           %custom_event_source[$_note_id mod 1000000] := -1
           %custom_event_type[$_note_id mod 1000000] := 1
           change_vol($_note_id,$_vol,0)
+          %custom_event_note_off_timestamp[%ripple_id_history[$r] mod 1000000] := $ENGINE_UPTIME
           %custom_event_releasing[%ripple_id_history[$r] mod 1000000] := 1
         end if
         %custom_event_prev_rec_time_pos_in_ripple[%ripple_id_history[$r] mod 1000000] := $_rec_time_pos_in_ripple
@@ -2561,7 +2545,6 @@ function crossfaded_looping
           %custom_event_dest_note[$_note_id2 mod 1000000] := %custom_event_dest_note[%ripple_id_history[$r] mod 1000000]
           %custom_event_first_note[$_note_id2 mod 1000000] := %custom_event_first_note[%ripple_id_history[$r] mod 1000000]
           %custom_event_second_note[$_note_id2 mod 1000000] := %custom_event_second_note[%ripple_id_history[$r] mod 1000000]
-          %custom_event_row[$_note_id2 mod 1000000] := %custom_event_row[%ripple_id_history[$r] mod 1000000]
           %custom_event_direction[$_note_id2 mod 1000000] := %custom_event_direction[%ripple_id_history[$r] mod 1000000]
           %custom_event_artic[$_note_id2 mod 1000000] := %custom_event_artic[%ripple_id_history[$r] mod 1000000]
           %custom_event_voice[$_note_id2 mod 1000000] := %custom_event_voice[%ripple_id_history[$r] mod 1000000]
@@ -2569,14 +2552,12 @@ function crossfaded_looping
           %custom_event_release_length[$_note_id2 mod 1000000] := %custom_event_release_length[%ripple_id_history[$r] mod 1000000]
           %custom_event_release_sample_length[$_note_id2 mod 1000000] := %custom_event_release_sample_length[%ripple_id_history[$r] mod 1000000]
           %custom_event_release_note[$_note_id2 mod 1000000] := %custom_event_release_note[%ripple_id_history[$r] mod 1000000]
-          %custom_event_release_triggered[$_note_id2 mod 1000000] := %custom_event_release_triggered[%ripple_id_history[$r] mod 1000000]
+          %custom_event_triggered_by_keyswitch[$_note_id2 mod 1000000] := %custom_event_triggered_by_keyswitch[%ripple_id_history[$r] mod 1000000]
           %custom_event_release_dynamic[$_note_id2 mod 1000000] := %custom_event_release_dynamic[%ripple_id_history[$r] mod 1000000]
-          %custom_event_brightness_on_release[$_note_id2 mod 1000000] := %custom_event_brightness_on_release[%ripple_id_history[$r] mod 1000000]
+          %custom_event_brightness_when_released[$_note_id2 mod 1000000] := %custom_event_brightness_when_released[%ripple_id_history[$r] mod 1000000]
           %custom_event_waiting_to_trigger_release_sample[$_note_id2 mod 1000000] := %custom_event_waiting_to_trigger_release_sample[%ripple_id_history[$r] mod 1000000]
           %custom_event_prev_rec_time_pos_in_ripple[$_note_id2 mod 1000000] := %custom_event_prev_rec_time_pos_in_ripple[%ripple_id_history[$r] mod 1000000]
           %custom_event_releasing[$_note_id2 mod 1000000] := %custom_event_releasing[%ripple_id_history[$r] mod 1000000]
-          %custom_event_dest_note_released[$_note_id2 mod 1000000] := %custom_event_dest_note_released[%ripple_id_history[$r] mod 1000000]
-          %custom_event_start_note_released[$_note_id2 mod 1000000] := %custom_event_start_note_released[%ripple_id_history[$r] mod 1000000]
           %custom_event_triggered_by_mf[$_note_id2 mod 1000000] := %custom_event_triggered_by_mf[%ripple_id_history[$r] mod 1000000]
           %custom_event_preview_being_stopped[$_note_id2 mod 1000000] := %custom_event_preview_being_stopped[%ripple_id_history[$r] mod 1000000]
           %custom_event_type[$_note_id2 mod 1000000] := %custom_event_type[%ripple_id_history[$r] mod 1000000]
@@ -2701,54 +2682,6 @@ function update_nks_label
   $sp := $sp+4
 end function
 
-function set_keys_pressed
-  $i := 0
-  while ($i<3)
-    if ($i=$cur_artic)
-      set_key_pressed(%articulation_keyswitches[$i],1)
-    else
-      set_key_pressed(%articulation_keyswitches[$i],0)
-    end if
-    inc($i)
-  end while
-  $i := 0
-  while ($i<5)
-    if ($i=$slider_speed)
-      set_key_pressed(%speed_keyswitches[$i],1)
-    else
-      set_key_pressed(%speed_keyswitches[$i],0)
-    end if
-    inc($i)
-  end while
-  $i := 0
-  while ($i<3)
-    if ($i=$slider_direction)
-      set_key_pressed(%direction_keyswitches[$i],1)
-    else
-      set_key_pressed(%direction_keyswitches[$i],0)
-    end if
-    inc($i)
-  end while
-  $i := 0
-  while ($i<4)
-    if ($i=$slider_legato)
-      set_key_pressed(%legato_keyswitches[$i],1)
-    else
-      set_key_pressed(%legato_keyswitches[$i],0)
-    end if
-    inc($i)
-  end while
-  $i := 0
-  while ($i<3)
-    if ($i=$slider_releaseSamples)
-      set_key_pressed(%release_sample_keyswitches[$i],1)
-    else
-      set_key_pressed(%release_sample_keyswitches[$i],0)
-    end if
-    inc($i)
-  end while
-end function
-
 function update_midi_visibility
   set_control_par(get_ui_id($switch_closeMidi),$CONTROL_PAR_HIDE,%hide_states[$button_showMidi])
   set_control_par(get_ui_id($paneL_midi),$CONTROL_PAR_HIDE,%hide_states[$button_showMidi])
@@ -2821,8 +2754,12 @@ function trigger_release_samples_for_all_ripples
                 %custom_event_release_length[%ripple_id_history[$_r3] mod 1000000] := $_fade_out_time
                 fade_out(%ripple_id_history[$_r3],$_fade_out_time*1000,1)
               else
-                %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := %velo[$recent_release_trigger_key]/64
-                %custom_event_release_triggered[%ripple_id_history[$_r3] mod 1000000] := 1
+                if (%velo[$recent_release_trigger_key]<64)
+                  %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $SOFT
+                else
+                  %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $LOUD
+                end if
+                %custom_event_triggered_by_keyswitch[%ripple_id_history[$_r3] mod 1000000] := 1
                 %custom_event_waiting_to_trigger_release_sample[%ripple_id_history[$_r3] mod 1000000] := 1
               end if
             end if
@@ -2921,6 +2858,54 @@ function update_releaseSamples_switches
       set_control_par(%releaseSamples_ids[$i],$CONTROL_PAR_VALUE,1)
     else
       set_control_par(%releaseSamples_ids[$i],$CONTROL_PAR_VALUE,0)
+    end if
+    inc($i)
+  end while
+end function
+
+function set_keys_pressed
+  $i := 0
+  while ($i<3)
+    if ($i=$cur_artic)
+      set_key_pressed(%articulation_keyswitches[$i],1)
+    else
+      set_key_pressed(%articulation_keyswitches[$i],0)
+    end if
+    inc($i)
+  end while
+  $i := 0
+  while ($i<5)
+    if ($i=$slider_speed)
+      set_key_pressed(%speed_keyswitches[$i],1)
+    else
+      set_key_pressed(%speed_keyswitches[$i],0)
+    end if
+    inc($i)
+  end while
+  $i := 0
+  while ($i<3)
+    if ($i=$slider_direction)
+      set_key_pressed(%direction_keyswitches[$i],1)
+    else
+      set_key_pressed(%direction_keyswitches[$i],0)
+    end if
+    inc($i)
+  end while
+  $i := 0
+  while ($i<4)
+    if ($i=$slider_legato)
+      set_key_pressed(%legato_keyswitches[$i],1)
+    else
+      set_key_pressed(%legato_keyswitches[$i],0)
+    end if
+    inc($i)
+  end while
+  $i := 0
+  while ($i<3)
+    if ($i=$slider_releaseSamples)
+      set_key_pressed(%release_sample_keyswitches[$i],1)
+    else
+      set_key_pressed(%release_sample_keyswitches[$i],0)
     end if
     inc($i)
   end while
@@ -3297,8 +3282,12 @@ on release
                   %custom_event_release_length[%ripple_id_history[$_r3] mod 1000000] := $_fade_out_time
                   fade_out(%ripple_id_history[$_r3],$_fade_out_time*1000,1)
                 else
-                  %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := %velo[$recent_release_trigger_key]/64
-                  %custom_event_release_triggered[%ripple_id_history[$_r3] mod 1000000] := 1
+                  if (%velo[$recent_release_trigger_key]<64)
+                    %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $SOFT
+                  else
+                    %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $LOUD
+                  end if
+                  %custom_event_triggered_by_keyswitch[%ripple_id_history[$_r3] mod 1000000] := 1
                   %custom_event_waiting_to_trigger_release_sample[%ripple_id_history[$_r3] mod 1000000] := 1
                 end if
               end if
@@ -3342,8 +3331,12 @@ on release
                     %custom_event_release_length[%ripple_id_history[$_r3] mod 1000000] := $_fade_out_time
                     fade_out(%ripple_id_history[$_r3],$_fade_out_time*1000,1)
                   else
-                    %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := %velo[$recent_release_trigger_key]/64
-                    %custom_event_release_triggered[%ripple_id_history[$_r3] mod 1000000] := 1
+                    if (%velo[$recent_release_trigger_key]<64)
+                      %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $SOFT
+                    else
+                      %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $LOUD
+                    end if
+                    %custom_event_triggered_by_keyswitch[%ripple_id_history[$_r3] mod 1000000] := 1
                     %custom_event_waiting_to_trigger_release_sample[%ripple_id_history[$_r3] mod 1000000] := 1
                   end if
                 end if
@@ -3402,8 +3395,12 @@ on controller
                   %custom_event_release_length[%ripple_id_history[$_r3] mod 1000000] := $_fade_out_time
                   fade_out(%ripple_id_history[$_r3],$_fade_out_time*1000,1)
                 else
-                  %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := %velo[$recent_release_trigger_key]/64
-                  %custom_event_release_triggered[%ripple_id_history[$_r3] mod 1000000] := 1
+                  if (%velo[$recent_release_trigger_key]<64)
+                    %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $SOFT
+                  else
+                    %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $LOUD
+                  end if
+                  %custom_event_triggered_by_keyswitch[%ripple_id_history[$_r3] mod 1000000] := 1
                   %custom_event_waiting_to_trigger_release_sample[%ripple_id_history[$_r3] mod 1000000] := 1
                 end if
               end if
@@ -3646,8 +3643,6 @@ end on
 
 on ui_control($menu_reverb)
   call set_reverb_menu_checkmark
-  $prev_reverb := $menu_reverb
-  call set_keys_pressed
   %p[$sp-1] := $control__reverb_type
   call update_engine_pars
 end on
@@ -3662,7 +3657,6 @@ on ui_control($slider_reverb)
   call update_engine_pars
   %p[$sp-1] := $control__reverb
   call update_nks_label
-  call set_keys_pressed
 end on
 
 on ui_control($slider_speed)
@@ -4164,8 +4158,12 @@ on ui_control($switch_preview0)
                             %custom_event_release_length[%ripple_id_history[$_r3] mod 1000000] := $_fade_out_time
                             fade_out(%ripple_id_history[$_r3],$_fade_out_time*1000,1)
                           else
-                            %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := %velo[$recent_release_trigger_key]/64
-                            %custom_event_release_triggered[%ripple_id_history[$_r3] mod 1000000] := 1
+                            if (%velo[$recent_release_trigger_key]<64)
+                              %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $SOFT
+                            else
+                              %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $LOUD
+                            end if
+                            %custom_event_triggered_by_keyswitch[%ripple_id_history[$_r3] mod 1000000] := 1
                             %custom_event_waiting_to_trigger_release_sample[%ripple_id_history[$_r3] mod 1000000] := 1
                           end if
                         end if
@@ -4626,8 +4624,12 @@ on ui_control($switch_preview1)
                             %custom_event_release_length[%ripple_id_history[$_r3] mod 1000000] := $_fade_out_time
                             fade_out(%ripple_id_history[$_r3],$_fade_out_time*1000,1)
                           else
-                            %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := %velo[$recent_release_trigger_key]/64
-                            %custom_event_release_triggered[%ripple_id_history[$_r3] mod 1000000] := 1
+                            if (%velo[$recent_release_trigger_key]<64)
+                              %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $SOFT
+                            else
+                              %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $LOUD
+                            end if
+                            %custom_event_triggered_by_keyswitch[%ripple_id_history[$_r3] mod 1000000] := 1
                             %custom_event_waiting_to_trigger_release_sample[%ripple_id_history[$_r3] mod 1000000] := 1
                           end if
                         end if
@@ -5088,8 +5090,12 @@ on ui_control($switch_preview2)
                             %custom_event_release_length[%ripple_id_history[$_r3] mod 1000000] := $_fade_out_time
                             fade_out(%ripple_id_history[$_r3],$_fade_out_time*1000,1)
                           else
-                            %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := %velo[$recent_release_trigger_key]/64
-                            %custom_event_release_triggered[%ripple_id_history[$_r3] mod 1000000] := 1
+                            if (%velo[$recent_release_trigger_key]<64)
+                              %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $SOFT
+                            else
+                              %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $LOUD
+                            end if
+                            %custom_event_triggered_by_keyswitch[%ripple_id_history[$_r3] mod 1000000] := 1
                             %custom_event_waiting_to_trigger_release_sample[%ripple_id_history[$_r3] mod 1000000] := 1
                           end if
                         end if
@@ -5550,8 +5556,12 @@ on ui_control($switch_preview3)
                             %custom_event_release_length[%ripple_id_history[$_r3] mod 1000000] := $_fade_out_time
                             fade_out(%ripple_id_history[$_r3],$_fade_out_time*1000,1)
                           else
-                            %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := %velo[$recent_release_trigger_key]/64
-                            %custom_event_release_triggered[%ripple_id_history[$_r3] mod 1000000] := 1
+                            if (%velo[$recent_release_trigger_key]<64)
+                              %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $SOFT
+                            else
+                              %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $LOUD
+                            end if
+                            %custom_event_triggered_by_keyswitch[%ripple_id_history[$_r3] mod 1000000] := 1
                             %custom_event_waiting_to_trigger_release_sample[%ripple_id_history[$_r3] mod 1000000] := 1
                           end if
                         end if
@@ -6012,8 +6022,12 @@ on ui_control($switch_preview4)
                             %custom_event_release_length[%ripple_id_history[$_r3] mod 1000000] := $_fade_out_time
                             fade_out(%ripple_id_history[$_r3],$_fade_out_time*1000,1)
                           else
-                            %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := %velo[$recent_release_trigger_key]/64
-                            %custom_event_release_triggered[%ripple_id_history[$_r3] mod 1000000] := 1
+                            if (%velo[$recent_release_trigger_key]<64)
+                              %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $SOFT
+                            else
+                              %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $LOUD
+                            end if
+                            %custom_event_triggered_by_keyswitch[%ripple_id_history[$_r3] mod 1000000] := 1
                             %custom_event_waiting_to_trigger_release_sample[%ripple_id_history[$_r3] mod 1000000] := 1
                           end if
                         end if
@@ -6474,8 +6488,12 @@ on ui_control($switch_preview5)
                             %custom_event_release_length[%ripple_id_history[$_r3] mod 1000000] := $_fade_out_time
                             fade_out(%ripple_id_history[$_r3],$_fade_out_time*1000,1)
                           else
-                            %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := %velo[$recent_release_trigger_key]/64
-                            %custom_event_release_triggered[%ripple_id_history[$_r3] mod 1000000] := 1
+                            if (%velo[$recent_release_trigger_key]<64)
+                              %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $SOFT
+                            else
+                              %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $LOUD
+                            end if
+                            %custom_event_triggered_by_keyswitch[%ripple_id_history[$_r3] mod 1000000] := 1
                             %custom_event_waiting_to_trigger_release_sample[%ripple_id_history[$_r3] mod 1000000] := 1
                           end if
                         end if
@@ -6936,8 +6954,12 @@ on ui_control($switch_preview6)
                             %custom_event_release_length[%ripple_id_history[$_r3] mod 1000000] := $_fade_out_time
                             fade_out(%ripple_id_history[$_r3],$_fade_out_time*1000,1)
                           else
-                            %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := %velo[$recent_release_trigger_key]/64
-                            %custom_event_release_triggered[%ripple_id_history[$_r3] mod 1000000] := 1
+                            if (%velo[$recent_release_trigger_key]<64)
+                              %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $SOFT
+                            else
+                              %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $LOUD
+                            end if
+                            %custom_event_triggered_by_keyswitch[%ripple_id_history[$_r3] mod 1000000] := 1
                             %custom_event_waiting_to_trigger_release_sample[%ripple_id_history[$_r3] mod 1000000] := 1
                           end if
                         end if
@@ -7398,8 +7420,12 @@ on ui_control($switch_preview7)
                             %custom_event_release_length[%ripple_id_history[$_r3] mod 1000000] := $_fade_out_time
                             fade_out(%ripple_id_history[$_r3],$_fade_out_time*1000,1)
                           else
-                            %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := %velo[$recent_release_trigger_key]/64
-                            %custom_event_release_triggered[%ripple_id_history[$_r3] mod 1000000] := 1
+                            if (%velo[$recent_release_trigger_key]<64)
+                              %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $SOFT
+                            else
+                              %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $LOUD
+                            end if
+                            %custom_event_triggered_by_keyswitch[%ripple_id_history[$_r3] mod 1000000] := 1
                             %custom_event_waiting_to_trigger_release_sample[%ripple_id_history[$_r3] mod 1000000] := 1
                           end if
                         end if
@@ -7860,8 +7886,12 @@ on ui_control($switch_preview8)
                             %custom_event_release_length[%ripple_id_history[$_r3] mod 1000000] := $_fade_out_time
                             fade_out(%ripple_id_history[$_r3],$_fade_out_time*1000,1)
                           else
-                            %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := %velo[$recent_release_trigger_key]/64
-                            %custom_event_release_triggered[%ripple_id_history[$_r3] mod 1000000] := 1
+                            if (%velo[$recent_release_trigger_key]<64)
+                              %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $SOFT
+                            else
+                              %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $LOUD
+                            end if
+                            %custom_event_triggered_by_keyswitch[%ripple_id_history[$_r3] mod 1000000] := 1
                             %custom_event_waiting_to_trigger_release_sample[%ripple_id_history[$_r3] mod 1000000] := 1
                           end if
                         end if
@@ -8322,8 +8352,12 @@ on ui_control($switch_preview9)
                             %custom_event_release_length[%ripple_id_history[$_r3] mod 1000000] := $_fade_out_time
                             fade_out(%ripple_id_history[$_r3],$_fade_out_time*1000,1)
                           else
-                            %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := %velo[$recent_release_trigger_key]/64
-                            %custom_event_release_triggered[%ripple_id_history[$_r3] mod 1000000] := 1
+                            if (%velo[$recent_release_trigger_key]<64)
+                              %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $SOFT
+                            else
+                              %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $LOUD
+                            end if
+                            %custom_event_triggered_by_keyswitch[%ripple_id_history[$_r3] mod 1000000] := 1
                             %custom_event_waiting_to_trigger_release_sample[%ripple_id_history[$_r3] mod 1000000] := 1
                           end if
                         end if
@@ -8784,8 +8818,12 @@ on ui_control($switch_preview10)
                             %custom_event_release_length[%ripple_id_history[$_r3] mod 1000000] := $_fade_out_time
                             fade_out(%ripple_id_history[$_r3],$_fade_out_time*1000,1)
                           else
-                            %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := %velo[$recent_release_trigger_key]/64
-                            %custom_event_release_triggered[%ripple_id_history[$_r3] mod 1000000] := 1
+                            if (%velo[$recent_release_trigger_key]<64)
+                              %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $SOFT
+                            else
+                              %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $LOUD
+                            end if
+                            %custom_event_triggered_by_keyswitch[%ripple_id_history[$_r3] mod 1000000] := 1
                             %custom_event_waiting_to_trigger_release_sample[%ripple_id_history[$_r3] mod 1000000] := 1
                           end if
                         end if
@@ -9246,8 +9284,12 @@ on ui_control($switch_preview11)
                             %custom_event_release_length[%ripple_id_history[$_r3] mod 1000000] := $_fade_out_time
                             fade_out(%ripple_id_history[$_r3],$_fade_out_time*1000,1)
                           else
-                            %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := %velo[$recent_release_trigger_key]/64
-                            %custom_event_release_triggered[%ripple_id_history[$_r3] mod 1000000] := 1
+                            if (%velo[$recent_release_trigger_key]<64)
+                              %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $SOFT
+                            else
+                              %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $LOUD
+                            end if
+                            %custom_event_triggered_by_keyswitch[%ripple_id_history[$_r3] mod 1000000] := 1
                             %custom_event_waiting_to_trigger_release_sample[%ripple_id_history[$_r3] mod 1000000] := 1
                           end if
                         end if
@@ -9708,8 +9750,12 @@ on ui_control($switch_preview12)
                             %custom_event_release_length[%ripple_id_history[$_r3] mod 1000000] := $_fade_out_time
                             fade_out(%ripple_id_history[$_r3],$_fade_out_time*1000,1)
                           else
-                            %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := %velo[$recent_release_trigger_key]/64
-                            %custom_event_release_triggered[%ripple_id_history[$_r3] mod 1000000] := 1
+                            if (%velo[$recent_release_trigger_key]<64)
+                              %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $SOFT
+                            else
+                              %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $LOUD
+                            end if
+                            %custom_event_triggered_by_keyswitch[%ripple_id_history[$_r3] mod 1000000] := 1
                             %custom_event_waiting_to_trigger_release_sample[%ripple_id_history[$_r3] mod 1000000] := 1
                           end if
                         end if
@@ -10170,8 +10216,12 @@ on ui_control($switch_preview13)
                             %custom_event_release_length[%ripple_id_history[$_r3] mod 1000000] := $_fade_out_time
                             fade_out(%ripple_id_history[$_r3],$_fade_out_time*1000,1)
                           else
-                            %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := %velo[$recent_release_trigger_key]/64
-                            %custom_event_release_triggered[%ripple_id_history[$_r3] mod 1000000] := 1
+                            if (%velo[$recent_release_trigger_key]<64)
+                              %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $SOFT
+                            else
+                              %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $LOUD
+                            end if
+                            %custom_event_triggered_by_keyswitch[%ripple_id_history[$_r3] mod 1000000] := 1
                             %custom_event_waiting_to_trigger_release_sample[%ripple_id_history[$_r3] mod 1000000] := 1
                           end if
                         end if
@@ -10632,8 +10682,12 @@ on ui_control($switch_preview14)
                             %custom_event_release_length[%ripple_id_history[$_r3] mod 1000000] := $_fade_out_time
                             fade_out(%ripple_id_history[$_r3],$_fade_out_time*1000,1)
                           else
-                            %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := %velo[$recent_release_trigger_key]/64
-                            %custom_event_release_triggered[%ripple_id_history[$_r3] mod 1000000] := 1
+                            if (%velo[$recent_release_trigger_key]<64)
+                              %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $SOFT
+                            else
+                              %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $LOUD
+                            end if
+                            %custom_event_triggered_by_keyswitch[%ripple_id_history[$_r3] mod 1000000] := 1
                             %custom_event_waiting_to_trigger_release_sample[%ripple_id_history[$_r3] mod 1000000] := 1
                           end if
                         end if
@@ -11094,8 +11148,12 @@ on ui_control($switch_preview15)
                             %custom_event_release_length[%ripple_id_history[$_r3] mod 1000000] := $_fade_out_time
                             fade_out(%ripple_id_history[$_r3],$_fade_out_time*1000,1)
                           else
-                            %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := %velo[$recent_release_trigger_key]/64
-                            %custom_event_release_triggered[%ripple_id_history[$_r3] mod 1000000] := 1
+                            if (%velo[$recent_release_trigger_key]<64)
+                              %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $SOFT
+                            else
+                              %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $LOUD
+                            end if
+                            %custom_event_triggered_by_keyswitch[%ripple_id_history[$_r3] mod 1000000] := 1
                             %custom_event_waiting_to_trigger_release_sample[%ripple_id_history[$_r3] mod 1000000] := 1
                           end if
                         end if
@@ -11556,8 +11614,12 @@ on ui_control($switch_preview16)
                             %custom_event_release_length[%ripple_id_history[$_r3] mod 1000000] := $_fade_out_time
                             fade_out(%ripple_id_history[$_r3],$_fade_out_time*1000,1)
                           else
-                            %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := %velo[$recent_release_trigger_key]/64
-                            %custom_event_release_triggered[%ripple_id_history[$_r3] mod 1000000] := 1
+                            if (%velo[$recent_release_trigger_key]<64)
+                              %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $SOFT
+                            else
+                              %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $LOUD
+                            end if
+                            %custom_event_triggered_by_keyswitch[%ripple_id_history[$_r3] mod 1000000] := 1
                             %custom_event_waiting_to_trigger_release_sample[%ripple_id_history[$_r3] mod 1000000] := 1
                           end if
                         end if
@@ -12018,8 +12080,12 @@ on ui_control($switch_preview17)
                             %custom_event_release_length[%ripple_id_history[$_r3] mod 1000000] := $_fade_out_time
                             fade_out(%ripple_id_history[$_r3],$_fade_out_time*1000,1)
                           else
-                            %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := %velo[$recent_release_trigger_key]/64
-                            %custom_event_release_triggered[%ripple_id_history[$_r3] mod 1000000] := 1
+                            if (%velo[$recent_release_trigger_key]<64)
+                              %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $SOFT
+                            else
+                              %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $LOUD
+                            end if
+                            %custom_event_triggered_by_keyswitch[%ripple_id_history[$_r3] mod 1000000] := 1
                             %custom_event_waiting_to_trigger_release_sample[%ripple_id_history[$_r3] mod 1000000] := 1
                           end if
                         end if
@@ -12480,8 +12546,12 @@ on ui_control($switch_preview18)
                             %custom_event_release_length[%ripple_id_history[$_r3] mod 1000000] := $_fade_out_time
                             fade_out(%ripple_id_history[$_r3],$_fade_out_time*1000,1)
                           else
-                            %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := %velo[$recent_release_trigger_key]/64
-                            %custom_event_release_triggered[%ripple_id_history[$_r3] mod 1000000] := 1
+                            if (%velo[$recent_release_trigger_key]<64)
+                              %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $SOFT
+                            else
+                              %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $LOUD
+                            end if
+                            %custom_event_triggered_by_keyswitch[%ripple_id_history[$_r3] mod 1000000] := 1
                             %custom_event_waiting_to_trigger_release_sample[%ripple_id_history[$_r3] mod 1000000] := 1
                           end if
                         end if
@@ -12942,8 +13012,12 @@ on ui_control($switch_preview19)
                             %custom_event_release_length[%ripple_id_history[$_r3] mod 1000000] := $_fade_out_time
                             fade_out(%ripple_id_history[$_r3],$_fade_out_time*1000,1)
                           else
-                            %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := %velo[$recent_release_trigger_key]/64
-                            %custom_event_release_triggered[%ripple_id_history[$_r3] mod 1000000] := 1
+                            if (%velo[$recent_release_trigger_key]<64)
+                              %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $SOFT
+                            else
+                              %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $LOUD
+                            end if
+                            %custom_event_triggered_by_keyswitch[%ripple_id_history[$_r3] mod 1000000] := 1
                             %custom_event_waiting_to_trigger_release_sample[%ripple_id_history[$_r3] mod 1000000] := 1
                           end if
                         end if
@@ -13404,8 +13478,12 @@ on ui_control($switch_preview20)
                             %custom_event_release_length[%ripple_id_history[$_r3] mod 1000000] := $_fade_out_time
                             fade_out(%ripple_id_history[$_r3],$_fade_out_time*1000,1)
                           else
-                            %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := %velo[$recent_release_trigger_key]/64
-                            %custom_event_release_triggered[%ripple_id_history[$_r3] mod 1000000] := 1
+                            if (%velo[$recent_release_trigger_key]<64)
+                              %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $SOFT
+                            else
+                              %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $LOUD
+                            end if
+                            %custom_event_triggered_by_keyswitch[%ripple_id_history[$_r3] mod 1000000] := 1
                             %custom_event_waiting_to_trigger_release_sample[%ripple_id_history[$_r3] mod 1000000] := 1
                           end if
                         end if
@@ -13866,8 +13944,12 @@ on ui_control($switch_preview21)
                             %custom_event_release_length[%ripple_id_history[$_r3] mod 1000000] := $_fade_out_time
                             fade_out(%ripple_id_history[$_r3],$_fade_out_time*1000,1)
                           else
-                            %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := %velo[$recent_release_trigger_key]/64
-                            %custom_event_release_triggered[%ripple_id_history[$_r3] mod 1000000] := 1
+                            if (%velo[$recent_release_trigger_key]<64)
+                              %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $SOFT
+                            else
+                              %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $LOUD
+                            end if
+                            %custom_event_triggered_by_keyswitch[%ripple_id_history[$_r3] mod 1000000] := 1
                             %custom_event_waiting_to_trigger_release_sample[%ripple_id_history[$_r3] mod 1000000] := 1
                           end if
                         end if
@@ -14328,8 +14410,12 @@ on ui_control($switch_preview22)
                             %custom_event_release_length[%ripple_id_history[$_r3] mod 1000000] := $_fade_out_time
                             fade_out(%ripple_id_history[$_r3],$_fade_out_time*1000,1)
                           else
-                            %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := %velo[$recent_release_trigger_key]/64
-                            %custom_event_release_triggered[%ripple_id_history[$_r3] mod 1000000] := 1
+                            if (%velo[$recent_release_trigger_key]<64)
+                              %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $SOFT
+                            else
+                              %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $LOUD
+                            end if
+                            %custom_event_triggered_by_keyswitch[%ripple_id_history[$_r3] mod 1000000] := 1
                             %custom_event_waiting_to_trigger_release_sample[%ripple_id_history[$_r3] mod 1000000] := 1
                           end if
                         end if
@@ -14790,8 +14876,12 @@ on ui_control($switch_preview23)
                             %custom_event_release_length[%ripple_id_history[$_r3] mod 1000000] := $_fade_out_time
                             fade_out(%ripple_id_history[$_r3],$_fade_out_time*1000,1)
                           else
-                            %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := %velo[$recent_release_trigger_key]/64
-                            %custom_event_release_triggered[%ripple_id_history[$_r3] mod 1000000] := 1
+                            if (%velo[$recent_release_trigger_key]<64)
+                              %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $SOFT
+                            else
+                              %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $LOUD
+                            end if
+                            %custom_event_triggered_by_keyswitch[%ripple_id_history[$_r3] mod 1000000] := 1
                             %custom_event_waiting_to_trigger_release_sample[%ripple_id_history[$_r3] mod 1000000] := 1
                           end if
                         end if

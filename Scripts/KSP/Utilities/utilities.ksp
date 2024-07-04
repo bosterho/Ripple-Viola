@@ -368,3 +368,5 @@ define LEGATO_BYPASS := 0
 function is_equal(a, b) -> return 
 	return := ( -sh_right(abs(a - b) - 1, 31) )
 end function
+
+define V2E_speed(#in#) := 1000000 - (((#in#) - 1) * 90909)
