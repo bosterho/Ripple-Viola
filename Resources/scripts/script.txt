@@ -1,4 +1,4 @@
-{ Compiled on Thu Jul  4 10:27:10 2024 }
+{ Compiled on Thu Jul  4 14:58:58 2024 }
 on init
   declare $sksp_dummy
   declare $concat_it
@@ -187,8 +187,8 @@ on init
   declare $i
   declare const $DOWN := 0
   declare const $UP := 1
-  declare const $SOFT := 0
-  declare const $LOUD := 1
+  declare const $SHORT := 0
+  declare const $LONG := 1
   declare const $NUM_RRS := 4
   declare const $MAX_NUM_CHORD_IDS := 1000
   declare const $control__vol := 0
@@ -273,12 +273,12 @@ on init
   declare const $legatoMode__syncToSwell := 3
   declare !releaseSamples_texts[3]
   !releaseSamples_texts[0] := "Off"
-  !releaseSamples_texts[1] := "Soft"
-  !releaseSamples_texts[2] := "Loud"
+  !releaseSamples_texts[1] := "Short"
+  !releaseSamples_texts[2] := "Long"
   declare const $releaseSamples_texts__SIZE := 3
   declare const $releaseSampleMode__noReleaseSample := 0
-  declare const $releaseSampleMode__softRelease := 1
-  declare const $releaseSampleMode__loudRelease := 2
+  declare const $releaseSampleMode__shortRelease := 1
+  declare const $releaseSampleMode__longRelease := 2
   declare !_option_texts[7*10]
   declare const $option_texts__SIZE_D1 := 7
   declare const $option_texts__SIZE_D2 := 10
@@ -559,6 +559,232 @@ on init
     end while
     inc($clip_i)
   end while
+  declare ui_panel $ripples_panel
+  set_control_par(get_ui_id($ripples_panel),$CONTROL_PAR_Z_LAYER,-1)
+  declare %ripple[100]
+  declare ui_slider $ripple0(0,127)
+  declare ui_slider $ripple1(0,127)
+  declare ui_slider $ripple2(0,127)
+  declare ui_slider $ripple3(0,127)
+  declare ui_slider $ripple4(0,127)
+  declare ui_slider $ripple5(0,127)
+  declare ui_slider $ripple6(0,127)
+  declare ui_slider $ripple7(0,127)
+  declare ui_slider $ripple8(0,127)
+  declare ui_slider $ripple9(0,127)
+  declare ui_slider $ripple10(0,127)
+  declare ui_slider $ripple11(0,127)
+  declare ui_slider $ripple12(0,127)
+  declare ui_slider $ripple13(0,127)
+  declare ui_slider $ripple14(0,127)
+  declare ui_slider $ripple15(0,127)
+  declare ui_slider $ripple16(0,127)
+  declare ui_slider $ripple17(0,127)
+  declare ui_slider $ripple18(0,127)
+  declare ui_slider $ripple19(0,127)
+  declare ui_slider $ripple20(0,127)
+  declare ui_slider $ripple21(0,127)
+  declare ui_slider $ripple22(0,127)
+  declare ui_slider $ripple23(0,127)
+  declare ui_slider $ripple24(0,127)
+  declare ui_slider $ripple25(0,127)
+  declare ui_slider $ripple26(0,127)
+  declare ui_slider $ripple27(0,127)
+  declare ui_slider $ripple28(0,127)
+  declare ui_slider $ripple29(0,127)
+  declare ui_slider $ripple30(0,127)
+  declare ui_slider $ripple31(0,127)
+  declare ui_slider $ripple32(0,127)
+  declare ui_slider $ripple33(0,127)
+  declare ui_slider $ripple34(0,127)
+  declare ui_slider $ripple35(0,127)
+  declare ui_slider $ripple36(0,127)
+  declare ui_slider $ripple37(0,127)
+  declare ui_slider $ripple38(0,127)
+  declare ui_slider $ripple39(0,127)
+  declare ui_slider $ripple40(0,127)
+  declare ui_slider $ripple41(0,127)
+  declare ui_slider $ripple42(0,127)
+  declare ui_slider $ripple43(0,127)
+  declare ui_slider $ripple44(0,127)
+  declare ui_slider $ripple45(0,127)
+  declare ui_slider $ripple46(0,127)
+  declare ui_slider $ripple47(0,127)
+  declare ui_slider $ripple48(0,127)
+  declare ui_slider $ripple49(0,127)
+  declare ui_slider $ripple50(0,127)
+  declare ui_slider $ripple51(0,127)
+  declare ui_slider $ripple52(0,127)
+  declare ui_slider $ripple53(0,127)
+  declare ui_slider $ripple54(0,127)
+  declare ui_slider $ripple55(0,127)
+  declare ui_slider $ripple56(0,127)
+  declare ui_slider $ripple57(0,127)
+  declare ui_slider $ripple58(0,127)
+  declare ui_slider $ripple59(0,127)
+  declare ui_slider $ripple60(0,127)
+  declare ui_slider $ripple61(0,127)
+  declare ui_slider $ripple62(0,127)
+  declare ui_slider $ripple63(0,127)
+  declare ui_slider $ripple64(0,127)
+  declare ui_slider $ripple65(0,127)
+  declare ui_slider $ripple66(0,127)
+  declare ui_slider $ripple67(0,127)
+  declare ui_slider $ripple68(0,127)
+  declare ui_slider $ripple69(0,127)
+  declare ui_slider $ripple70(0,127)
+  declare ui_slider $ripple71(0,127)
+  declare ui_slider $ripple72(0,127)
+  declare ui_slider $ripple73(0,127)
+  declare ui_slider $ripple74(0,127)
+  declare ui_slider $ripple75(0,127)
+  declare ui_slider $ripple76(0,127)
+  declare ui_slider $ripple77(0,127)
+  declare ui_slider $ripple78(0,127)
+  declare ui_slider $ripple79(0,127)
+  declare ui_slider $ripple80(0,127)
+  declare ui_slider $ripple81(0,127)
+  declare ui_slider $ripple82(0,127)
+  declare ui_slider $ripple83(0,127)
+  declare ui_slider $ripple84(0,127)
+  declare ui_slider $ripple85(0,127)
+  declare ui_slider $ripple86(0,127)
+  declare ui_slider $ripple87(0,127)
+  declare ui_slider $ripple88(0,127)
+  declare ui_slider $ripple89(0,127)
+  declare ui_slider $ripple90(0,127)
+  declare ui_slider $ripple91(0,127)
+  declare ui_slider $ripple92(0,127)
+  declare ui_slider $ripple93(0,127)
+  declare ui_slider $ripple94(0,127)
+  declare ui_slider $ripple95(0,127)
+  declare ui_slider $ripple96(0,127)
+  declare ui_slider $ripple97(0,127)
+  declare ui_slider $ripple98(0,127)
+  declare ui_slider $ripple99(0,127)
+  $preproc_i := 0
+  while ($preproc_i<=99)
+    %ripple[$preproc_i] := get_ui_id($ripple0)+$preproc_i
+    inc($preproc_i)
+  end while
+  $i := 0
+  while ($i<num_elements(%ripple))
+    set_control_par(%ripple[$i],$CONTROL_PAR_PARENT_PANEL,get_ui_id($ripples_panel))
+    set_control_par(%ripple[$i],$CONTROL_PAR_HIDE,$HIDE_WHOLE_CONTROL)
+    inc($i)
+  end while
+  declare %ripple_swell[100]
+  declare ui_slider $ripple_swell0(0,127)
+  declare ui_slider $ripple_swell1(0,127)
+  declare ui_slider $ripple_swell2(0,127)
+  declare ui_slider $ripple_swell3(0,127)
+  declare ui_slider $ripple_swell4(0,127)
+  declare ui_slider $ripple_swell5(0,127)
+  declare ui_slider $ripple_swell6(0,127)
+  declare ui_slider $ripple_swell7(0,127)
+  declare ui_slider $ripple_swell8(0,127)
+  declare ui_slider $ripple_swell9(0,127)
+  declare ui_slider $ripple_swell10(0,127)
+  declare ui_slider $ripple_swell11(0,127)
+  declare ui_slider $ripple_swell12(0,127)
+  declare ui_slider $ripple_swell13(0,127)
+  declare ui_slider $ripple_swell14(0,127)
+  declare ui_slider $ripple_swell15(0,127)
+  declare ui_slider $ripple_swell16(0,127)
+  declare ui_slider $ripple_swell17(0,127)
+  declare ui_slider $ripple_swell18(0,127)
+  declare ui_slider $ripple_swell19(0,127)
+  declare ui_slider $ripple_swell20(0,127)
+  declare ui_slider $ripple_swell21(0,127)
+  declare ui_slider $ripple_swell22(0,127)
+  declare ui_slider $ripple_swell23(0,127)
+  declare ui_slider $ripple_swell24(0,127)
+  declare ui_slider $ripple_swell25(0,127)
+  declare ui_slider $ripple_swell26(0,127)
+  declare ui_slider $ripple_swell27(0,127)
+  declare ui_slider $ripple_swell28(0,127)
+  declare ui_slider $ripple_swell29(0,127)
+  declare ui_slider $ripple_swell30(0,127)
+  declare ui_slider $ripple_swell31(0,127)
+  declare ui_slider $ripple_swell32(0,127)
+  declare ui_slider $ripple_swell33(0,127)
+  declare ui_slider $ripple_swell34(0,127)
+  declare ui_slider $ripple_swell35(0,127)
+  declare ui_slider $ripple_swell36(0,127)
+  declare ui_slider $ripple_swell37(0,127)
+  declare ui_slider $ripple_swell38(0,127)
+  declare ui_slider $ripple_swell39(0,127)
+  declare ui_slider $ripple_swell40(0,127)
+  declare ui_slider $ripple_swell41(0,127)
+  declare ui_slider $ripple_swell42(0,127)
+  declare ui_slider $ripple_swell43(0,127)
+  declare ui_slider $ripple_swell44(0,127)
+  declare ui_slider $ripple_swell45(0,127)
+  declare ui_slider $ripple_swell46(0,127)
+  declare ui_slider $ripple_swell47(0,127)
+  declare ui_slider $ripple_swell48(0,127)
+  declare ui_slider $ripple_swell49(0,127)
+  declare ui_slider $ripple_swell50(0,127)
+  declare ui_slider $ripple_swell51(0,127)
+  declare ui_slider $ripple_swell52(0,127)
+  declare ui_slider $ripple_swell53(0,127)
+  declare ui_slider $ripple_swell54(0,127)
+  declare ui_slider $ripple_swell55(0,127)
+  declare ui_slider $ripple_swell56(0,127)
+  declare ui_slider $ripple_swell57(0,127)
+  declare ui_slider $ripple_swell58(0,127)
+  declare ui_slider $ripple_swell59(0,127)
+  declare ui_slider $ripple_swell60(0,127)
+  declare ui_slider $ripple_swell61(0,127)
+  declare ui_slider $ripple_swell62(0,127)
+  declare ui_slider $ripple_swell63(0,127)
+  declare ui_slider $ripple_swell64(0,127)
+  declare ui_slider $ripple_swell65(0,127)
+  declare ui_slider $ripple_swell66(0,127)
+  declare ui_slider $ripple_swell67(0,127)
+  declare ui_slider $ripple_swell68(0,127)
+  declare ui_slider $ripple_swell69(0,127)
+  declare ui_slider $ripple_swell70(0,127)
+  declare ui_slider $ripple_swell71(0,127)
+  declare ui_slider $ripple_swell72(0,127)
+  declare ui_slider $ripple_swell73(0,127)
+  declare ui_slider $ripple_swell74(0,127)
+  declare ui_slider $ripple_swell75(0,127)
+  declare ui_slider $ripple_swell76(0,127)
+  declare ui_slider $ripple_swell77(0,127)
+  declare ui_slider $ripple_swell78(0,127)
+  declare ui_slider $ripple_swell79(0,127)
+  declare ui_slider $ripple_swell80(0,127)
+  declare ui_slider $ripple_swell81(0,127)
+  declare ui_slider $ripple_swell82(0,127)
+  declare ui_slider $ripple_swell83(0,127)
+  declare ui_slider $ripple_swell84(0,127)
+  declare ui_slider $ripple_swell85(0,127)
+  declare ui_slider $ripple_swell86(0,127)
+  declare ui_slider $ripple_swell87(0,127)
+  declare ui_slider $ripple_swell88(0,127)
+  declare ui_slider $ripple_swell89(0,127)
+  declare ui_slider $ripple_swell90(0,127)
+  declare ui_slider $ripple_swell91(0,127)
+  declare ui_slider $ripple_swell92(0,127)
+  declare ui_slider $ripple_swell93(0,127)
+  declare ui_slider $ripple_swell94(0,127)
+  declare ui_slider $ripple_swell95(0,127)
+  declare ui_slider $ripple_swell96(0,127)
+  declare ui_slider $ripple_swell97(0,127)
+  declare ui_slider $ripple_swell98(0,127)
+  declare ui_slider $ripple_swell99(0,127)
+  $preproc_i := 0
+  while ($preproc_i<=99)
+    %ripple_swell[$preproc_i] := get_ui_id($ripple_swell0)+$preproc_i
+    inc($preproc_i)
+  end while
+  $i := 0
+  while ($i<num_elements(%ripple_swell))
+    set_control_par(%ripple_swell[$i],$CONTROL_PAR_PARENT_PANEL,get_ui_id($ripples_panel))
+    set_control_par(%ripple_swell[$i],$CONTROL_PAR_HIDE,$HIDE_WHOLE_CONTROL)
+    inc($i)
+  end while
   make_perfview
   set_ui_width_px(900)
   set_ui_height_px(427)
@@ -566,138 +792,137 @@ on init
   set_control_par_str($INST_WALLPAPER_ID,$CONTROL_PAR_PICTURE,"ui_background")
   declare $figma_counter
   declare $figma_counter_multi_line_labels
-  declare %UI_x[224] := (0, 2, 723, 538, 359, 120, 607, 168, 48, 2, 26, 0, 2, 422, 11, 740, 592, 444, 296, 148, 0, 740, 592, 444, 296, 148, 0, 11, 740, 592, 444, 296, 148, 0, 740, 592, 444, 296, 148, 0, 95, ...
-  51, 9, 140, 128, 84, 45, 10, 129, 56, 7, 183, 137, 86, 41, 5, 0, 0, 0, 0, 0, 0, 0, 9, 467, 339, 211, 716, -1, 31, 117, 117, 117, 117, 117, 117, 117, 117, 117, 117, 117, ...
-  117, 117, 117, 117, 117, 117, 117, 117, 117, 117, 117, 117, 117, -1, 0, 0, 0, 0, 0, 5, 704, 4, 20, 48, 88, 27, 4, 6, 18, 57, 3, 236, 829, 806, 760, 714, 668, 645, 599, 553, ...
-  783, 737, 691, 622, 576, 530, 484, 438, 392, 369, 323, 277, 507, 461, 415, 346, 300, 254, 208, 162, 116, 93, 47, 1, 231, 185, 139, 70, 24, 865, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, ...
+  declare %UI_x[223] := (0, 2, 723, 538, 359, 120, 607, 168, 48, 2, 26, 0, 2, 422, 11, 740, 592, 444, 296, 148, 0, 740, 592, 444, 296, 148, 0, 11, 740, 592, 444, 296, 148, 0, 740, 592, 444, 296, 148, 0, 95, ...
+  47, 9, 128, 84, 45, 10, 129, 56, 7, 183, 137, 86, 41, 5, 9, 467, 339, 211, 716, -1, 31, 117, 117, 117, 117, 117, 117, 117, 117, 117, 117, 117, 117, 117, 117, 117, 117, 117, 117, 117, ...
+  117, 117, 117, 117, 117, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 704, 4, 20, 48, 88, 27, 4, 6, 18, 57, 3, 236, 829, 806, 760, 714, 668, 645, 599, 553, 783, ...
+  737, 691, 622, 576, 530, 484, 438, 392, 369, 323, 277, 507, 461, 415, 346, 300, 254, 208, 162, 116, 93, 47, 1, 231, 185, 139, 70, 24, 865, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, ...
   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, ...
-  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
-  declare %UI_y[224] := (0, 330, 14, 14, 14, 14, 234, 8, 8, 234, 131, 0, 1, 201, 242, 92, 92, 92, 92, 92, 92, 0, 0, 0, 0, 0, 0, 242, 92, 92, 92, 92, 92, 92, 0, 0, 0, 0, 0, 0, 49, ...
-  49, 49, 2, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, -1, -1, -1, -1, -1, -1, -1, 70, 26, 26, 26, 6, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, ...
-  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, -1, 17, 17, 17, 17, 0, 0, 2, -1, -1, -1, -1, 22, 24, 72, 15, 71, 70, 75, 1, 1, 1, 1, 1, 1, 1, 1, ...
-  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 49, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, ...
+  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+  declare %UI_y[223] := (0, 330, 14, 14, 14, 14, 234, 8, 8, 234, 131, 0, 1, 201, 242, 92, 92, 92, 92, 92, 92, 0, 0, 0, 0, 0, 0, 242, 92, 92, 92, 92, 92, 92, 0, 0, 0, 0, 0, 0, 49, ...
+  49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 70, 26, 26, 26, 6, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, ...
+  1, 1, 1, 1, 1, -1, -1, -1, 2, -1, -1, -1, -1, 17, 17, 17, 17, 0, 0, 2, -1, -1, -1, -1, 22, 24, 72, 15, 71, 70, 75, 1, 1, 1, 1, 1, 1, 1, 1, 1, ...
+  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 49, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, ...
   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, ...
-  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
-  declare %UI_width[224] := (900, 896, 158, 171, 165, 231, 291, 74, 83, 604, 852, 898, 896, 54, 876, 136, 136, 136, 136, 136, 136, 136, 136, 136, 136, 136, 136, 876, 136, 136, 136, 136, 136, 136, 136, 136, 136, 136, 136, 136, 40, ...
-  35, 34, 18, 43, 50, 42, 35, 26, 61, 43, 48, 45, 52, 45, 35, 899, 899, 899, 899, 899, 899, 899, 54, 91, 91, 91, 170, 23, 23, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18, ...
-  18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 901, 136, 171, 165, 225, 74, 74, 193, 133, 131, 73, 48, 74, 174, 30, 33, 18, 77, 430, 22, 22, 22, 22, 22, 22, 22, 22, ...
-  22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 38, 896, 136, 109, 136, 136, 109, 136, 136, 109, 136, ...
-  136, 109, 136, 136, 109, 136, 136, 109, 136, 136, 109, 136, 136, 109, 136, 136, 109, 136, 136, 109, 136, 136, 109, 136, 136, 109, 136, 136, 109, 136, 136, 109, 136, 136, 109, 136, 136, 109, 136, 136, ...
-  109, 136, 136, 109, 136, 136, 109, 136, 136, 109, 136, 136, 109, 136, 136, 109, 136, 136, 109, 136, 136, 109, 136)
-  declare %UI_height[224] := (427, 95, 64, 64, 64, 64, 95, 85, 88, 95, 38, 427, 424, 24, 182, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 182, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 15, ...
-  15, 15, 16, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 423, 423, 423, 423, 423, 423, 423, 19, 43, 43, 43, 50, 23, 23, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, ...
-  16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 147, 33, 33, 33, 33, 74, 74, 70, 21, 21, 21, 21, 45, 45, 30, 35, 13, 18, 49, 36, 36, 36, 36, 36, 36, 36, 36, ...
-  36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 18, 424, 80, 80, 80, 80, 80, 80, 80, 80, 80, ...
+  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+  declare %UI_width[223] := (900, 896, 158, 171, 165, 231, 291, 74, 83, 604, 852, 898, 896, 54, 876, 136, 136, 136, 136, 136, 136, 136, 136, 136, 136, 136, 136, 876, 136, 136, 136, 136, 136, 136, 136, 136, 136, 136, 136, 136, 40, ...
+  42, 34, 43, 50, 42, 35, 26, 61, 43, 48, 45, 52, 45, 35, 54, 91, 91, 91, 170, 23, 23, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18, ...
+  18, 18, 18, 18, 18, 901, 899, 899, 899, 899, 899, 899, 899, 136, 171, 165, 225, 74, 74, 193, 133, 131, 73, 48, 74, 174, 30, 33, 18, 77, 430, 22, 22, 22, 22, 22, 22, 22, 22, 22, ...
+  22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 38, 896, 136, 109, 136, 136, 109, 136, 136, 109, 136, 136, ...
+  109, 136, 136, 109, 136, 136, 109, 136, 136, 109, 136, 136, 109, 136, 136, 109, 136, 136, 109, 136, 136, 109, 136, 136, 109, 136, 136, 109, 136, 136, 109, 136, 136, 109, 136, 136, 109, 136, 136, 109, ...
+  136, 136, 109, 136, 136, 109, 136, 136, 109, 136, 136, 109, 136, 136, 109, 136, 136, 109, 136, 136, 109, 136)
+  declare %UI_height[223] := (427, 95, 64, 64, 64, 64, 95, 85, 88, 95, 38, 427, 424, 24, 182, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 182, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 15, ...
+  19, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 19, 43, 43, 43, 50, 23, 23, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, ...
+  16, 16, 16, 16, 16, 147, 423, 423, 423, 423, 423, 423, 423, 33, 33, 33, 33, 74, 74, 70, 21, 21, 21, 21, 45, 45, 30, 35, 13, 18, 49, 36, 36, 36, 36, 36, 36, 36, 36, 36, ...
+  36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 18, 424, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, ...
   80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, ...
-  80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80)
-  declare %UI_skin[224] := (-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0, ...
-  0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 9, 13, 13, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, ...
-  14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 0, 15, 16, 17, 18, 19, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 0, 30, 31, 31, 31, 31, 31, 31, 31, 31, ...
-  32, 32, 32, 32, 32, 31, 31, 31, 31, 31, 31, 31, 32, 32, 32, 32, 32, 31, 31, 31, 31, 31, 31, 31, 32, 32, 32, 32, 32, 0, 33, 34, 9, 35, 34, 9, 36, 34, 9, 37, ...
-  34, 9, 38, 34, 9, 39, 34, 9, 40, 34, 9, 41, 34, 9, 42, 34, 9, 43, 34, 9, 44, 34, 9, 45, 34, 9, 46, 34, 9, 47, 34, 9, 48, 34, 9, 49, 34, 9, 50, 34, ...
-  9, 51, 34, 9, 52, 34, 9, 53, 34, 9, 54, 34, 9, 55, 34, 9, 56, 34, 9, 57, 34, 9, 58)
-  declare %UI_font[224] := (-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, ...
-  -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, ...
-  -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0, -1, -1, -1, -1, -1, -1, -1, -1, ...
-  -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, ...
-  -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, ...
-  -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1)
-  declare %UI_label_text[224] := (-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, ...
+  80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80)
+  declare %UI_skin[223] := (-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0, ...
+  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 3, 4, 1, 5, 5, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, ...
+  6, 6, 6, 6, 6, 0, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 0, 29, 30, 30, 30, 30, 30, 30, 30, 30, 31, ...
+  31, 31, 31, 31, 30, 30, 30, 30, 30, 30, 30, 31, 31, 31, 31, 31, 30, 30, 30, 30, 30, 30, 30, 31, 31, 31, 31, 31, 0, 32, 33, 1, 34, 33, 1, 35, 33, 1, 36, 33, ...
+  1, 37, 33, 1, 38, 33, 1, 39, 33, 1, 40, 33, 1, 41, 33, 1, 42, 33, 1, 43, 33, 1, 44, 33, 1, 45, 33, 1, 46, 33, 1, 47, 33, 1, 48, 33, 1, 49, 33, 1, ...
+  50, 33, 1, 51, 33, 1, 52, 33, 1, 53, 33, 1, 54, 33, 1, 55, 33, 1, 56, 33, 1, 57)
+  declare %UI_font[223] := (-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, ...
   -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, ...
   -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0, -1, -1, -1, -1, -1, -1, -1, -1, -1, ...
-  -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, ...
+  -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, ...
   -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, ...
-  -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1)
-  declare %UI_default_value[224] := (-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, ...
+  -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1)
+  declare %UI_label_text[223] := (-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, ...
   -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, ...
+  -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, ...
+  -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, ...
   -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, ...
-  -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, ...
-  -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, ...
-  -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1)
-  declare %UI_mouse_behaviour[224] := (-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, ...
-  -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, ...
-  -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -800, -800, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, ...
-  -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, ...
-  -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, ...
-  -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1)
-  declare %UI_mouse_behaviour_x[224] := (-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, ...
+  -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1)
+  declare %UI_default_value[223] := (-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, ...
   -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, ...
   -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, ...
   -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, ...
   -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, ...
-  -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1)
-  declare %UI_mouse_behaviour_y[224] := (-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, ...
+  -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1)
+  declare %UI_mouse_behaviour[223] := (-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, ...
+  -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, ...
+  -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -800, -800, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, ...
+  -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, ...
+  -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, ...
+  -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1)
+  declare %UI_mouse_behaviour_x[223] := (-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, ...
   -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, ...
   -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, ...
   -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, ...
   -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, ...
-  -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1)
-  declare %UI_z_layer[224] := (-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, ...
-  -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, ...
+  -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1)
+  declare %UI_mouse_behaviour_y[223] := (-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, ...
   -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, ...
-  1, 1, 1, 1, 1, -1, -1, -1, -1, -1, -1, -1, 1, 1, 1, 1, 1, -1, -1, -1, -1, -1, -1, -1, 1, 1, 1, 1, 1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, ...
   -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, ...
-  -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1)
-  declare !skin_picture[59]
+  -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, ...
+  -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, ...
+  -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1)
+  declare %UI_z_layer[223] := (-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, ...
+  -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, ...
+  -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 1, ...
+  1, 1, 1, 1, -1, -1, -1, -1, -1, -1, -1, 1, 1, 1, 1, 1, -1, -1, -1, -1, -1, -1, -1, 1, 1, 1, 1, 1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, ...
+  -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, ...
+  -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1)
+  declare !skin_picture[58]
   !skin_picture[0] := "label_transparent"
-  !skin_picture[1] := "release trigger"
-  !skin_picture[2] := "switch_releaseSamplesInfoDisp"
-  !skin_picture[3] := "switch_legatoInfoDisp"
-  !skin_picture[4] := "switch_directionInfoDisp"
-  !skin_picture[5] := "switch_speedInfoDisp"
-  !skin_picture[6] := "switch_optionsInfoDisp"
-  !skin_picture[7] := "switch_articulationsInfoDisp"
-  !skin_picture[8] := "switch_generalInfoDisp"
-  !skin_picture[9] := "blank"
-  !skin_picture[10] := "sixteenths"
-  !skin_picture[11] := "eighths"
-  !skin_picture[12] := "quarters"
-  !skin_picture[13] := "dot"
-  !skin_picture[14] := "preview"
-  !skin_picture[15] := "3 step slider small"
-  !skin_picture[16] := "4 step slider"
-  !skin_picture[17] := "3 step slider"
-  !skin_picture[18] := "5 step slider"
-  !skin_picture[19] := "knob"
-  !skin_picture[20] := "Logo animation"
-  !skin_picture[21] := "release samples info"
-  !skin_picture[22] := "legato info"
-  !skin_picture[23] := "direction info"
-  !skin_picture[24] := "speed info"
-  !skin_picture[25] := "options info"
-  !skin_picture[26] := "articulations info"
-  !skin_picture[27] := "general info"
-  !skin_picture[28] := "lightbulb"
-  !skin_picture[29] := "reverb menu"
-  !skin_picture[30] := "label_midiInstructions"
-  !skin_picture[31] := "white key"
-  !skin_picture[32] := "black key"
-  !skin_picture[33] := "label_midiCover"
-  !skin_picture[34] := "label_clipOutline"
-  !skin_picture[35] := "clip23"
-  !skin_picture[36] := "clip22"
-  !skin_picture[37] := "clip21"
-  !skin_picture[38] := "clip20"
-  !skin_picture[39] := "clip19"
-  !skin_picture[40] := "clip18"
-  !skin_picture[41] := "clip17"
-  !skin_picture[42] := "clip16"
-  !skin_picture[43] := "clip15"
-  !skin_picture[44] := "clip14"
-  !skin_picture[45] := "clip13"
-  !skin_picture[46] := "clip12"
-  !skin_picture[47] := "clip11"
-  !skin_picture[48] := "clip10"
-  !skin_picture[49] := "clip9"
-  !skin_picture[50] := "clip8"
-  !skin_picture[51] := "clip7"
-  !skin_picture[52] := "clip6"
-  !skin_picture[53] := "clip5"
-  !skin_picture[54] := "clip4"
-  !skin_picture[55] := "clip3"
-  !skin_picture[56] := "clip2"
-  !skin_picture[57] := "clip1"
-  !skin_picture[58] := "clip0"
+  !skin_picture[1] := "blank"
+  !skin_picture[2] := "sixteenths"
+  !skin_picture[3] := "eighths"
+  !skin_picture[4] := "quarters"
+  !skin_picture[5] := "dot"
+  !skin_picture[6] := "preview"
+  !skin_picture[7] := "switch_releaseSamplesInfoDisp"
+  !skin_picture[8] := "switch_legatoInfoDisp"
+  !skin_picture[9] := "switch_directionInfoDisp"
+  !skin_picture[10] := "switch_speedInfoDisp"
+  !skin_picture[11] := "switch_optionsInfoDisp"
+  !skin_picture[12] := "switch_articulationsInfoDisp"
+  !skin_picture[13] := "switch_generalInfoDisp"
+  !skin_picture[14] := "3 step slider small"
+  !skin_picture[15] := "4 step slider"
+  !skin_picture[16] := "3 step slider"
+  !skin_picture[17] := "5 step slider"
+  !skin_picture[18] := "knob"
+  !skin_picture[19] := "Logo animation"
+  !skin_picture[20] := "release samples info"
+  !skin_picture[21] := "legato info"
+  !skin_picture[22] := "direction info"
+  !skin_picture[23] := "speed info"
+  !skin_picture[24] := "options info"
+  !skin_picture[25] := "articulations info"
+  !skin_picture[26] := "general info"
+  !skin_picture[27] := "lightbulb"
+  !skin_picture[28] := "reverb menu"
+  !skin_picture[29] := "label_midiInstructions"
+  !skin_picture[30] := "white key"
+  !skin_picture[31] := "black key"
+  !skin_picture[32] := "label_midiCover"
+  !skin_picture[33] := "label_clipOutline"
+  !skin_picture[34] := "clip23"
+  !skin_picture[35] := "clip22"
+  !skin_picture[36] := "clip21"
+  !skin_picture[37] := "clip20"
+  !skin_picture[38] := "clip19"
+  !skin_picture[39] := "clip18"
+  !skin_picture[40] := "clip17"
+  !skin_picture[41] := "clip16"
+  !skin_picture[42] := "clip15"
+  !skin_picture[43] := "clip14"
+  !skin_picture[44] := "clip13"
+  !skin_picture[45] := "clip12"
+  !skin_picture[46] := "clip11"
+  !skin_picture[47] := "clip10"
+  !skin_picture[48] := "clip9"
+  !skin_picture[49] := "clip8"
+  !skin_picture[50] := "clip7"
+  !skin_picture[51] := "clip6"
+  !skin_picture[52] := "clip5"
+  !skin_picture[53] := "clip4"
+  !skin_picture[54] := "clip3"
+  !skin_picture[55] := "clip2"
+  !skin_picture[56] := "clip1"
+  !skin_picture[57] := "clip0"
   declare !_labels_text[2*10]
   declare const $labels_text__SIZE_D1 := 2
   declare const $labels_text__SIZE_D2 := 10
@@ -747,18 +972,15 @@ on init
   declare ui_panel $panel_clip2
   declare ui_panel $panel_clip1
   declare ui_panel $panel_clip0
-  declare ui_switch $switch_loudRelease
-  make_persistent($switch_loudRelease)
-  read_persistent_var($switch_loudRelease)
-  declare ui_switch $switch_softRelease
-  make_persistent($switch_softRelease)
-  read_persistent_var($switch_softRelease)
+  declare ui_switch $switch_longRelease
+  make_persistent($switch_longRelease)
+  read_persistent_var($switch_longRelease)
+  declare ui_switch $switch_shortRelease
+  make_persistent($switch_shortRelease)
+  read_persistent_var($switch_shortRelease)
   declare ui_switch $switch_noReleaseSample
   make_persistent($switch_noReleaseSample)
   read_persistent_var($switch_noReleaseSample)
-  declare ui_switch $switch_releaseTrigger
-  make_persistent($switch_releaseTrigger)
-  read_persistent_var($switch_releaseTrigger)
   declare ui_switch $switch_syncToSwell
   make_persistent($switch_syncToSwell)
   read_persistent_var($switch_syncToSwell)
@@ -795,27 +1017,6 @@ on init
   declare ui_switch $switch_halfSpeed
   make_persistent($switch_halfSpeed)
   read_persistent_var($switch_halfSpeed)
-  declare ui_switch $switch_releaseSamplesInfoDisp
-  make_persistent($switch_releaseSamplesInfoDisp)
-  read_persistent_var($switch_releaseSamplesInfoDisp)
-  declare ui_switch $switch_legatoInfoDisp
-  make_persistent($switch_legatoInfoDisp)
-  read_persistent_var($switch_legatoInfoDisp)
-  declare ui_switch $switch_directionInfoDisp
-  make_persistent($switch_directionInfoDisp)
-  read_persistent_var($switch_directionInfoDisp)
-  declare ui_switch $switch_speedInfoDisp
-  make_persistent($switch_speedInfoDisp)
-  read_persistent_var($switch_speedInfoDisp)
-  declare ui_switch $switch_optionsInfoDisp
-  make_persistent($switch_optionsInfoDisp)
-  read_persistent_var($switch_optionsInfoDisp)
-  declare ui_switch $switch_articulationsInfoDisp
-  make_persistent($switch_articulationsInfoDisp)
-  read_persistent_var($switch_articulationsInfoDisp)
-  declare ui_switch $switch_generalInfoDisp
-  make_persistent($switch_generalInfoDisp)
-  read_persistent_var($switch_generalInfoDisp)
   declare ui_switch $switch_reverbToggle
   make_persistent($switch_reverbToggle)
   read_persistent_var($switch_reverbToggle)
@@ -912,6 +1113,27 @@ on init
   declare ui_switch $switch_closeMidi
   make_persistent($switch_closeMidi)
   read_persistent_var($switch_closeMidi)
+  declare ui_switch $switch_releaseSamplesInfoDisp
+  make_persistent($switch_releaseSamplesInfoDisp)
+  read_persistent_var($switch_releaseSamplesInfoDisp)
+  declare ui_switch $switch_legatoInfoDisp
+  make_persistent($switch_legatoInfoDisp)
+  read_persistent_var($switch_legatoInfoDisp)
+  declare ui_switch $switch_directionInfoDisp
+  make_persistent($switch_directionInfoDisp)
+  read_persistent_var($switch_directionInfoDisp)
+  declare ui_switch $switch_speedInfoDisp
+  make_persistent($switch_speedInfoDisp)
+  read_persistent_var($switch_speedInfoDisp)
+  declare ui_switch $switch_optionsInfoDisp
+  make_persistent($switch_optionsInfoDisp)
+  read_persistent_var($switch_optionsInfoDisp)
+  declare ui_switch $switch_articulationsInfoDisp
+  make_persistent($switch_articulationsInfoDisp)
+  read_persistent_var($switch_articulationsInfoDisp)
+  declare ui_switch $switch_generalInfoDisp
+  make_persistent($switch_generalInfoDisp)
+  read_persistent_var($switch_generalInfoDisp)
   declare ui_slider $slider_releaseSamples(0,2)
   make_persistent($slider_releaseSamples)
   read_persistent_var($slider_releaseSamples)
@@ -1302,22 +1524,22 @@ on init
   declare %UI_ID[10000] := (0)
   %UI_ID[0] := get_ui_id($panel_UI)
   $figma_counter := 1
-  while ($figma_counter<224)
+  while ($figma_counter<223)
     %UI_ID[$figma_counter] := %UI_ID[0]+$figma_counter
     inc($figma_counter)
   end while
-  declare %panel_idx[224] := (0, 1, 1, 1, 1, 0, 6, 6, 0, 0, 0, 11, 11, 11, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 11, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 2, 2, ...
-  2, 2, 3, 3, 3, 3, 4, 4, 4, 5, 5, 5, 5, 5, 0, 0, 0, 0, 0, 0, 0, 7, 9, 9, 9, 0, 13, 13, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, ...
-  28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 0, 2, 3, 4, 5, 7, 8, 0, 2, 3, 4, 5, 1, 9, 0, 0, 7, 8, 0, 10, 10, 10, 10, 10, 10, 10, 10, 10, ...
-  10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 0, 12, 15, 15, 15, 16, 16, 16, 17, 17, 17, 18, ...
-  18, 18, 19, 19, 19, 20, 20, 20, 21, 21, 21, 22, 22, 22, 23, 23, 23, 24, 24, 24, 25, 25, 25, 26, 26, 26, 28, 28, 28, 29, 29, 29, 30, 30, 30, 31, 31, 31, 32, 32, ...
-  32, 33, 33, 33, 34, 34, 34, 35, 35, 35, 36, 36, 36, 37, 37, 37, 38, 38, 38, 39, 39, 39)
-  declare %element_idx[224] := (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, ...
+  declare %panel_idx[223] := (0, 1, 1, 1, 1, 0, 6, 6, 0, 0, 0, 11, 11, 11, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 11, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 2, 2, ...
+  2, 3, 3, 3, 3, 4, 4, 4, 5, 5, 5, 5, 5, 7, 9, 9, 9, 0, 13, 13, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 28, 29, 30, 31, 32, 33, 34, 35, ...
+  36, 37, 38, 39, 0, 0, 0, 0, 0, 0, 0, 0, 2, 3, 4, 5, 7, 8, 0, 2, 3, 4, 5, 1, 9, 0, 0, 7, 8, 0, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, ...
+  10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 0, 12, 15, 15, 15, 16, 16, 16, 17, 17, 17, 18, 18, ...
+  18, 19, 19, 19, 20, 20, 20, 21, 21, 21, 22, 22, 22, 23, 23, 23, 24, 24, 24, 25, 25, 25, 26, 26, 26, 28, 28, 28, 29, 29, 29, 30, 30, 30, 31, 31, 31, 32, 32, 32, ...
+  33, 33, 33, 34, 34, 34, 35, 35, 35, 36, 36, 36, 37, 37, 37, 38, 38, 38, 39, 39, 39)
+  declare %element_idx[223] := (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, ...
   42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, ...
   82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119, 120, 121, ...
   122, 123, 124, 125, 126, 127, 128, 129, 130, 131, 132, 133, 134, 135, 136, 137, 138, 139, 140, 141, 142, 143, 144, 145, 146, 147, 148, 149, 150, 151, 152, 153, 154, 155, 156, 157, 158, 159, 160, 161, ...
   162, 163, 164, 165, 166, 167, 168, 169, 170, 171, 172, 173, 174, 175, 176, 177, 178, 179, 180, 181, 182, 183, 184, 185, 186, 187, 188, 189, 190, 191, 192, 193, 194, 195, 196, 197, 198, 199, 200, 201, ...
-  202, 203, 204, 205, 206, 207, 208, 209, 210, 211, 212, 213, 214, 215, 216, 217, 218, 219, 220, 221, 222, 223)
+  202, 203, 204, 205, 206, 207, 208, 209, 210, 211, 212, 213, 214, 215, 216, 217, 218, 219, 220, 221, 222)
   $figma_counter := 1
   while ($figma_counter<num_elements(%panel_idx))
     if (%panel_idx[$figma_counter] # -1)
@@ -1326,7 +1548,7 @@ on init
     inc($figma_counter)
   end while
   $figma_counter := 0
-  while ($figma_counter<224)
+  while ($figma_counter<223)
     set_control_par_str(%UI_ID[$figma_counter],$CONTROL_PAR_TEXT,"")
     set_control_par(%UI_ID[$figma_counter],$CONTROL_PAR_WIDTH,%UI_width[$figma_counter])
     set_control_par(%UI_ID[$figma_counter],$CONTROL_PAR_HEIGHT,%UI_height[$figma_counter])
@@ -1701,8 +1923,8 @@ on init
   end while
   declare %releaseSamples_ids[3]
   %releaseSamples_ids[$releaseSampleMode__noReleaseSample] := get_ui_id($switch_noReleaseSample)
-  %releaseSamples_ids[$releaseSampleMode__softRelease] := get_ui_id($switch_softRelease)
-  %releaseSamples_ids[$releaseSampleMode__loudRelease] := get_ui_id($switch_loudRelease)
+  %releaseSamples_ids[$releaseSampleMode__shortRelease] := get_ui_id($switch_shortRelease)
+  %releaseSamples_ids[$releaseSampleMode__longRelease] := get_ui_id($switch_longRelease)
   $i := 0
   while ($i<num_elements(%releaseSamples_ids))
     set_control_par(%releaseSamples_ids[$i],$CONTROL_PAR_FONT_TYPE,get_font_id("Khula Bold Size 11 off"))
@@ -1715,9 +1937,8 @@ on init
     inc($i)
   end while
   set_control_par(get_ui_id($switch_noReleaseSample),$CONTROL_PAR_WIDTH,get_control_par(get_ui_id($switch_noReleaseSample),$CONTROL_PAR_WIDTH)+14)
-  set_control_par(get_ui_id($switch_softRelease),$CONTROL_PAR_WIDTH,get_control_par(get_ui_id($switch_softRelease),$CONTROL_PAR_WIDTH)+14)
-  set_control_par(get_ui_id($switch_loudRelease),$CONTROL_PAR_WIDTH,get_control_par(get_ui_id($switch_loudRelease),$CONTROL_PAR_WIDTH)+14)
-  set_control_par(get_ui_id($switch_releaseTrigger),$CONTROL_PAR_ALLOW_AUTOMATION,0)
+  set_control_par(get_ui_id($switch_shortRelease),$CONTROL_PAR_WIDTH,get_control_par(get_ui_id($switch_shortRelease),$CONTROL_PAR_WIDTH)+14)
+  set_control_par(get_ui_id($switch_longRelease),$CONTROL_PAR_WIDTH,get_control_par(get_ui_id($switch_longRelease),$CONTROL_PAR_WIDTH)+14)
   set_control_par(get_ui_id($slider_speed),$CONTROL_PAR_MOUSE_BEHAVIOUR,2000)
   set_control_par(get_ui_id($slider_direction),$CONTROL_PAR_MOUSE_BEHAVIOUR,2000)
   set_control_par(get_ui_id($slider_legato),$CONTROL_PAR_MOUSE_BEHAVIOUR,2000)
@@ -1734,230 +1955,6 @@ on init
   set_control_par(get_ui_id($slider_vol),$CONTROL_PAR_DEFAULT_VALUE,500000)
   set_control_par(get_ui_id($slider_reverb),$CONTROL_PAR_DEFAULT_VALUE,500000)
   set_control_par(get_ui_id($menu_reverb),$CONTROL_PAR_TEXTPOS_Y,100)
-  declare %ripple[100]
-  declare ui_slider $ripple0(0,127)
-  declare ui_slider $ripple1(0,127)
-  declare ui_slider $ripple2(0,127)
-  declare ui_slider $ripple3(0,127)
-  declare ui_slider $ripple4(0,127)
-  declare ui_slider $ripple5(0,127)
-  declare ui_slider $ripple6(0,127)
-  declare ui_slider $ripple7(0,127)
-  declare ui_slider $ripple8(0,127)
-  declare ui_slider $ripple9(0,127)
-  declare ui_slider $ripple10(0,127)
-  declare ui_slider $ripple11(0,127)
-  declare ui_slider $ripple12(0,127)
-  declare ui_slider $ripple13(0,127)
-  declare ui_slider $ripple14(0,127)
-  declare ui_slider $ripple15(0,127)
-  declare ui_slider $ripple16(0,127)
-  declare ui_slider $ripple17(0,127)
-  declare ui_slider $ripple18(0,127)
-  declare ui_slider $ripple19(0,127)
-  declare ui_slider $ripple20(0,127)
-  declare ui_slider $ripple21(0,127)
-  declare ui_slider $ripple22(0,127)
-  declare ui_slider $ripple23(0,127)
-  declare ui_slider $ripple24(0,127)
-  declare ui_slider $ripple25(0,127)
-  declare ui_slider $ripple26(0,127)
-  declare ui_slider $ripple27(0,127)
-  declare ui_slider $ripple28(0,127)
-  declare ui_slider $ripple29(0,127)
-  declare ui_slider $ripple30(0,127)
-  declare ui_slider $ripple31(0,127)
-  declare ui_slider $ripple32(0,127)
-  declare ui_slider $ripple33(0,127)
-  declare ui_slider $ripple34(0,127)
-  declare ui_slider $ripple35(0,127)
-  declare ui_slider $ripple36(0,127)
-  declare ui_slider $ripple37(0,127)
-  declare ui_slider $ripple38(0,127)
-  declare ui_slider $ripple39(0,127)
-  declare ui_slider $ripple40(0,127)
-  declare ui_slider $ripple41(0,127)
-  declare ui_slider $ripple42(0,127)
-  declare ui_slider $ripple43(0,127)
-  declare ui_slider $ripple44(0,127)
-  declare ui_slider $ripple45(0,127)
-  declare ui_slider $ripple46(0,127)
-  declare ui_slider $ripple47(0,127)
-  declare ui_slider $ripple48(0,127)
-  declare ui_slider $ripple49(0,127)
-  declare ui_slider $ripple50(0,127)
-  declare ui_slider $ripple51(0,127)
-  declare ui_slider $ripple52(0,127)
-  declare ui_slider $ripple53(0,127)
-  declare ui_slider $ripple54(0,127)
-  declare ui_slider $ripple55(0,127)
-  declare ui_slider $ripple56(0,127)
-  declare ui_slider $ripple57(0,127)
-  declare ui_slider $ripple58(0,127)
-  declare ui_slider $ripple59(0,127)
-  declare ui_slider $ripple60(0,127)
-  declare ui_slider $ripple61(0,127)
-  declare ui_slider $ripple62(0,127)
-  declare ui_slider $ripple63(0,127)
-  declare ui_slider $ripple64(0,127)
-  declare ui_slider $ripple65(0,127)
-  declare ui_slider $ripple66(0,127)
-  declare ui_slider $ripple67(0,127)
-  declare ui_slider $ripple68(0,127)
-  declare ui_slider $ripple69(0,127)
-  declare ui_slider $ripple70(0,127)
-  declare ui_slider $ripple71(0,127)
-  declare ui_slider $ripple72(0,127)
-  declare ui_slider $ripple73(0,127)
-  declare ui_slider $ripple74(0,127)
-  declare ui_slider $ripple75(0,127)
-  declare ui_slider $ripple76(0,127)
-  declare ui_slider $ripple77(0,127)
-  declare ui_slider $ripple78(0,127)
-  declare ui_slider $ripple79(0,127)
-  declare ui_slider $ripple80(0,127)
-  declare ui_slider $ripple81(0,127)
-  declare ui_slider $ripple82(0,127)
-  declare ui_slider $ripple83(0,127)
-  declare ui_slider $ripple84(0,127)
-  declare ui_slider $ripple85(0,127)
-  declare ui_slider $ripple86(0,127)
-  declare ui_slider $ripple87(0,127)
-  declare ui_slider $ripple88(0,127)
-  declare ui_slider $ripple89(0,127)
-  declare ui_slider $ripple90(0,127)
-  declare ui_slider $ripple91(0,127)
-  declare ui_slider $ripple92(0,127)
-  declare ui_slider $ripple93(0,127)
-  declare ui_slider $ripple94(0,127)
-  declare ui_slider $ripple95(0,127)
-  declare ui_slider $ripple96(0,127)
-  declare ui_slider $ripple97(0,127)
-  declare ui_slider $ripple98(0,127)
-  declare ui_slider $ripple99(0,127)
-  $preproc_i := 0
-  while ($preproc_i<=99)
-    %ripple[$preproc_i] := get_ui_id($ripple0)+$preproc_i
-    inc($preproc_i)
-  end while
-  $i := 0
-  while ($i<num_elements(%ripple))
-    set_control_par(%ripple[$i],$CONTROL_PAR_Z_LAYER,-1)
-    set_control_par(%ripple[$i],$CONTROL_PAR_HIDE,$HIDE_WHOLE_CONTROL)
-    inc($i)
-  end while
-  declare %ripple_swell[100]
-  declare ui_slider $ripple_swell0(0,127)
-  declare ui_slider $ripple_swell1(0,127)
-  declare ui_slider $ripple_swell2(0,127)
-  declare ui_slider $ripple_swell3(0,127)
-  declare ui_slider $ripple_swell4(0,127)
-  declare ui_slider $ripple_swell5(0,127)
-  declare ui_slider $ripple_swell6(0,127)
-  declare ui_slider $ripple_swell7(0,127)
-  declare ui_slider $ripple_swell8(0,127)
-  declare ui_slider $ripple_swell9(0,127)
-  declare ui_slider $ripple_swell10(0,127)
-  declare ui_slider $ripple_swell11(0,127)
-  declare ui_slider $ripple_swell12(0,127)
-  declare ui_slider $ripple_swell13(0,127)
-  declare ui_slider $ripple_swell14(0,127)
-  declare ui_slider $ripple_swell15(0,127)
-  declare ui_slider $ripple_swell16(0,127)
-  declare ui_slider $ripple_swell17(0,127)
-  declare ui_slider $ripple_swell18(0,127)
-  declare ui_slider $ripple_swell19(0,127)
-  declare ui_slider $ripple_swell20(0,127)
-  declare ui_slider $ripple_swell21(0,127)
-  declare ui_slider $ripple_swell22(0,127)
-  declare ui_slider $ripple_swell23(0,127)
-  declare ui_slider $ripple_swell24(0,127)
-  declare ui_slider $ripple_swell25(0,127)
-  declare ui_slider $ripple_swell26(0,127)
-  declare ui_slider $ripple_swell27(0,127)
-  declare ui_slider $ripple_swell28(0,127)
-  declare ui_slider $ripple_swell29(0,127)
-  declare ui_slider $ripple_swell30(0,127)
-  declare ui_slider $ripple_swell31(0,127)
-  declare ui_slider $ripple_swell32(0,127)
-  declare ui_slider $ripple_swell33(0,127)
-  declare ui_slider $ripple_swell34(0,127)
-  declare ui_slider $ripple_swell35(0,127)
-  declare ui_slider $ripple_swell36(0,127)
-  declare ui_slider $ripple_swell37(0,127)
-  declare ui_slider $ripple_swell38(0,127)
-  declare ui_slider $ripple_swell39(0,127)
-  declare ui_slider $ripple_swell40(0,127)
-  declare ui_slider $ripple_swell41(0,127)
-  declare ui_slider $ripple_swell42(0,127)
-  declare ui_slider $ripple_swell43(0,127)
-  declare ui_slider $ripple_swell44(0,127)
-  declare ui_slider $ripple_swell45(0,127)
-  declare ui_slider $ripple_swell46(0,127)
-  declare ui_slider $ripple_swell47(0,127)
-  declare ui_slider $ripple_swell48(0,127)
-  declare ui_slider $ripple_swell49(0,127)
-  declare ui_slider $ripple_swell50(0,127)
-  declare ui_slider $ripple_swell51(0,127)
-  declare ui_slider $ripple_swell52(0,127)
-  declare ui_slider $ripple_swell53(0,127)
-  declare ui_slider $ripple_swell54(0,127)
-  declare ui_slider $ripple_swell55(0,127)
-  declare ui_slider $ripple_swell56(0,127)
-  declare ui_slider $ripple_swell57(0,127)
-  declare ui_slider $ripple_swell58(0,127)
-  declare ui_slider $ripple_swell59(0,127)
-  declare ui_slider $ripple_swell60(0,127)
-  declare ui_slider $ripple_swell61(0,127)
-  declare ui_slider $ripple_swell62(0,127)
-  declare ui_slider $ripple_swell63(0,127)
-  declare ui_slider $ripple_swell64(0,127)
-  declare ui_slider $ripple_swell65(0,127)
-  declare ui_slider $ripple_swell66(0,127)
-  declare ui_slider $ripple_swell67(0,127)
-  declare ui_slider $ripple_swell68(0,127)
-  declare ui_slider $ripple_swell69(0,127)
-  declare ui_slider $ripple_swell70(0,127)
-  declare ui_slider $ripple_swell71(0,127)
-  declare ui_slider $ripple_swell72(0,127)
-  declare ui_slider $ripple_swell73(0,127)
-  declare ui_slider $ripple_swell74(0,127)
-  declare ui_slider $ripple_swell75(0,127)
-  declare ui_slider $ripple_swell76(0,127)
-  declare ui_slider $ripple_swell77(0,127)
-  declare ui_slider $ripple_swell78(0,127)
-  declare ui_slider $ripple_swell79(0,127)
-  declare ui_slider $ripple_swell80(0,127)
-  declare ui_slider $ripple_swell81(0,127)
-  declare ui_slider $ripple_swell82(0,127)
-  declare ui_slider $ripple_swell83(0,127)
-  declare ui_slider $ripple_swell84(0,127)
-  declare ui_slider $ripple_swell85(0,127)
-  declare ui_slider $ripple_swell86(0,127)
-  declare ui_slider $ripple_swell87(0,127)
-  declare ui_slider $ripple_swell88(0,127)
-  declare ui_slider $ripple_swell89(0,127)
-  declare ui_slider $ripple_swell90(0,127)
-  declare ui_slider $ripple_swell91(0,127)
-  declare ui_slider $ripple_swell92(0,127)
-  declare ui_slider $ripple_swell93(0,127)
-  declare ui_slider $ripple_swell94(0,127)
-  declare ui_slider $ripple_swell95(0,127)
-  declare ui_slider $ripple_swell96(0,127)
-  declare ui_slider $ripple_swell97(0,127)
-  declare ui_slider $ripple_swell98(0,127)
-  declare ui_slider $ripple_swell99(0,127)
-  $preproc_i := 0
-  while ($preproc_i<=99)
-    %ripple_swell[$preproc_i] := get_ui_id($ripple_swell0)+$preproc_i
-    inc($preproc_i)
-  end while
-  $i := 0
-  while ($i<num_elements(%ripple_swell))
-    set_control_par(%ripple_swell[$i],$CONTROL_PAR_Z_LAYER,-1)
-    set_control_par(%ripple_swell[$i],$CONTROL_PAR_HIDE,$HIDE_WHOLE_CONTROL)
-    inc($i)
-  end while
   set_control_par(get_ui_id($slider_vol),$CONTROL_PAR_AUTOMATION_ID,0)
   set_control_par_str(get_ui_id($slider_vol),$CONTROL_PAR_AUTOMATION_NAME,"Expression")
   set_control_par(get_ui_id($slider_reverb),$CONTROL_PAR_AUTOMATION_ID,1)
@@ -2194,9 +2191,8 @@ on init
   declare $_artic3
   declare $_offset2
   declare $_note_id2
-  declare $_release_dynamic
-  declare $_note
   declare $_artic2
+  declare $_release_dynamic
   declare $_rec_time_pos_in_ripple
   declare $_vol
   declare $_offset := 50000
@@ -2206,6 +2202,7 @@ on init
   declare $_sample_start
   declare $_fade_time
   declare $_release_sample_length
+  declare $_note
   declare $_note_id
   declare $_time_played
   declare $_clip_length_ms
@@ -2415,29 +2412,16 @@ function play_release_samples_when_its_time
   while ($r<100)
     if (event_status(%ripple_id_history[$r])=$EVENT_STATUS_NOTE_QUEUE)
       if (%custom_event_waiting_to_trigger_release_sample[%ripple_id_history[$r] mod 1000000]=1 and (%custom_event_type[%ripple_id_history[$r] mod 1000000] # 1))
-        $_note := %custom_event_origin_note[%ripple_id_history[$r] mod 1000000]
-        if (%custom_event_triggered_by_keyswitch[%ripple_id_history[$r] mod 1000000]=0)
-          if ($slider_releaseSamples=$releaseSampleMode__softRelease)
-            $_release_dynamic := $SOFT
-          else
-            $_release_dynamic := $LOUD
-          end if
-        else
-          if (%custom_event_triggered_by_keyswitch[%ripple_id_history[$r] mod 1000000]=1)
-            $_release_dynamic := %custom_event_release_dynamic[%ripple_id_history[$r] mod 1000000]
-          end if
-        end if
         $_artic2 := %custom_event_artic[%ripple_id_history[$r] mod 1000000]
+        $_release_dynamic := %custom_event_release_dynamic[%ripple_id_history[$r] mod 1000000]
         $_rec_time_pos_in_ripple := get_event_par(%ripple_id_history[$r],$EVENT_PAR_PLAY_POS) mod %rec_time_ripple_lengths[$_artic2]
-        if ($_release_dynamic=$SOFT)
-          if ($_rec_time_pos_in_ripple>(%rec_time_ripple_lengths[$_artic2]/2))
-            fade_out(%ripple_id_history[$r],ticks_to_ms(%ripple_length_ticks[$_artic2]/2),1)
+        if ($_artic2=$artic__sixteenths)
+          if ($_rec_time_pos_in_ripple>(%rec_time_ripple_lengths[$_artic2]/4*3))
+            fade_out(%ripple_id_history[$r],ticks_to_ms(%ripple_length_ticks[$_artic2]/4),1)
           end if
         else
-          if ($_release_dynamic=$LOUD)
-            if ($_rec_time_pos_in_ripple>(%rec_time_ripple_lengths[$_artic2]/4*3))
-              fade_out(%ripple_id_history[$r],ticks_to_ms(%ripple_length_ticks[$_artic2]/4),1)
-            end if
+          if ($_rec_time_pos_in_ripple>(%rec_time_ripple_lengths[$_artic2]/8*7))
+            fade_out(%ripple_id_history[$r],ticks_to_ms(%ripple_length_ticks[$_artic2]/4),1)
           end if
         end if
         if ($_rec_time_pos_in_ripple<%custom_event_prev_rec_time_pos_in_ripple[%ripple_id_history[$r] mod 1000000])
@@ -2464,13 +2448,13 @@ function play_release_samples_when_its_time
             $_cur_ripple := 3
           end if
           $_vel := $_cur_ripple*32+1
-          if ($_release_dynamic=$SOFT)
-            $_sample_start := %rec_time_ripple_lengths[$_artic2]/4
-            $_fade_time := 100000
+          if ($_release_dynamic=$SHORT)
+            $_sample_start := real_to_int(int_to_real(%rec_time_ripple_lengths[$_artic2])/3.5)
+            $_fade_time := ticks_to_ms(real_to_int(int_to_real(%ripple_length_ticks[$_artic2])*?speeds[$_artic2]/7.0))
           else
-            if ($_release_dynamic=$LOUD)
+            if ($_release_dynamic=$LONG)
               $_sample_start := 0
-              $_fade_time := 50000
+              $_fade_time := ticks_to_ms(real_to_int(int_to_real(%ripple_length_ticks[$_artic2])*?speeds[$_artic2]/15.0))
             end if
           end if
           set_engine_par($ENGINE_PAR_ATTACK,real_to_int(1000000.0/(log(1500000.0/100.0+2.0)/log(int_to_real(2))-1.0)*(log(int_to_real($_fade_time)/10.0/100.0+2.0)/log(int_to_real(2))-1.0)),%release_group[$_artic2],find_mod(%release_group[$_artic2],"ENV_AHDSR"),find_target(%release_group[$_artic2],find_mod(%release_group[$_artic2],"ENV_AHDSR"),"ENV_AHDSR_VOLUME"))
@@ -2478,6 +2462,7 @@ function play_release_samples_when_its_time
           $_release_sample_length := real_to_int(int_to_real(0)+((int_to_real($_release_sample_length)-int_to_real(0))/(int_to_real(%rec_time_ripple_lengths[$_artic2])-int_to_real(0))*(int_to_real(ticks_to_ms(%ripple_length_ticks[$_artic2]))-int_to_real(0))))
           $_release_sample_length := real_to_int(int_to_real($_release_sample_length)*?speeds[$slider_speed])
           %custom_event_release_sample_length[%ripple_id_history[$r] mod 1000000] := $_release_sample_length
+          $_note := %custom_event_origin_note[%ripple_id_history[$r] mod 1000000]
           fade_out(%rls_note_ids[$_note],$_fade_time,1)
           $_note_id := play_note($_note,$_vel,$_sample_start,0)
           %rls_note_ids[$_note] := $_note_id
@@ -2737,14 +2722,26 @@ function trigger_release_samples_for_all_ripples
             $_time_til_end_of_ripple := ($_real_time_ripple_length-$_real_time_pos_in_pulse)/1000
             if ($_key_i=%custom_event_second_note[%ripple_id_history[$_r3] mod 1000000])
               if ($slider_releaseSamples=0)
-                if (%key_down[$recent_release_trigger_key]=1)
-                  $_play_release_sample := 1
-                else
-                  $_play_release_sample := 0
-                end if
+                $_play_release_sample := 0
               else
                 if ($slider_releaseSamples>0)
                   $_play_release_sample := 1
+                  if ($slider_releaseSamples=$releaseSampleMode__shortRelease)
+                    %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $SHORT
+                  else
+                    if ($slider_releaseSamples=$releaseSampleMode__longRelease)
+                      %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $LONG
+                    end if
+                  end if
+                end if
+              end if
+              if (%key_down[$recent_release_trigger_key]=1)
+                $_play_release_sample := 1
+                %custom_event_triggered_by_keyswitch[%ripple_id_history[$_r3] mod 1000000] := 1
+                if (%velo[$recent_release_trigger_key]<64)
+                  %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $SHORT
+                else
+                  %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $LONG
                 end if
               end if
               %custom_event_note_off_timestamp[%ripple_id_history[$_r3] mod 1000000] := $ENGINE_UPTIME
@@ -2754,12 +2751,6 @@ function trigger_release_samples_for_all_ripples
                 %custom_event_release_length[%ripple_id_history[$_r3] mod 1000000] := $_fade_out_time
                 fade_out(%ripple_id_history[$_r3],$_fade_out_time*1000,1)
               else
-                if (%velo[$recent_release_trigger_key]<64)
-                  %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $SOFT
-                else
-                  %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $LOUD
-                end if
-                %custom_event_triggered_by_keyswitch[%ripple_id_history[$_r3] mod 1000000] := 1
                 %custom_event_waiting_to_trigger_release_sample[%ripple_id_history[$_r3] mod 1000000] := 1
               end if
             end if
@@ -2969,7 +2960,6 @@ on note
   end if
   $_ks_index := search(%release_trigger_keyswitches,$EVENT_NOTE)
   if ($_ks_index # -1)
-    $switch_releaseTrigger := 1
     $recent_release_trigger_key := $EVENT_NOTE
     call trigger_release_samples_for_all_ripples
   end if
@@ -3224,9 +3214,6 @@ on release
   if (search(%all_keyswitches,$EVENT_NOTE)=-1)
     set_key_pressed($EVENT_NOTE,0)
   end if
-  if ($EVENT_NOTE=%release_trigger_keyswitches[0] or ($EVENT_NOTE=%release_trigger_keyswitches[1]))
-    $switch_releaseTrigger := 0
-  end if
   if (in_range($EVENT_NOTE,$LOWEST_KEY,$HIGHEST_KEY) and (%custom_event_source[$EVENT_ID mod 1000000]=-1))
     set_control_par(%key_ids[$EVENT_NOTE],$CONTROL_PAR_PICTURE_STATE,0)
     $_note_found := 0
@@ -3265,14 +3252,26 @@ on release
               $_time_til_end_of_ripple := ($_real_time_ripple_length-$_real_time_pos_in_pulse)/1000
               if ($EVENT_NOTE=%custom_event_second_note[%ripple_id_history[$_r3] mod 1000000])
                 if ($slider_releaseSamples=0)
-                  if (%key_down[$recent_release_trigger_key]=1)
-                    $_play_release_sample := 1
-                  else
-                    $_play_release_sample := 0
-                  end if
+                  $_play_release_sample := 0
                 else
                   if ($slider_releaseSamples>0)
                     $_play_release_sample := 1
+                    if ($slider_releaseSamples=$releaseSampleMode__shortRelease)
+                      %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $SHORT
+                    else
+                      if ($slider_releaseSamples=$releaseSampleMode__longRelease)
+                        %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $LONG
+                      end if
+                    end if
+                  end if
+                end if
+                if (%key_down[$recent_release_trigger_key]=1)
+                  $_play_release_sample := 1
+                  %custom_event_triggered_by_keyswitch[%ripple_id_history[$_r3] mod 1000000] := 1
+                  if (%velo[$recent_release_trigger_key]<64)
+                    %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $SHORT
+                  else
+                    %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $LONG
                   end if
                 end if
                 %custom_event_note_off_timestamp[%ripple_id_history[$_r3] mod 1000000] := $ENGINE_UPTIME
@@ -3282,12 +3281,6 @@ on release
                   %custom_event_release_length[%ripple_id_history[$_r3] mod 1000000] := $_fade_out_time
                   fade_out(%ripple_id_history[$_r3],$_fade_out_time*1000,1)
                 else
-                  if (%velo[$recent_release_trigger_key]<64)
-                    %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $SOFT
-                  else
-                    %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $LOUD
-                  end if
-                  %custom_event_triggered_by_keyswitch[%ripple_id_history[$_r3] mod 1000000] := 1
                   %custom_event_waiting_to_trigger_release_sample[%ripple_id_history[$_r3] mod 1000000] := 1
                 end if
               end if
@@ -3314,14 +3307,26 @@ on release
                 $_time_til_end_of_ripple := ($_real_time_ripple_length-$_real_time_pos_in_pulse)/1000
                 if ($EVENT_NOTE=%custom_event_second_note[%ripple_id_history[$_r3] mod 1000000])
                   if ($slider_releaseSamples=0)
-                    if (%key_down[$recent_release_trigger_key]=1)
-                      $_play_release_sample := 1
-                    else
-                      $_play_release_sample := 0
-                    end if
+                    $_play_release_sample := 0
                   else
                     if ($slider_releaseSamples>0)
                       $_play_release_sample := 1
+                      if ($slider_releaseSamples=$releaseSampleMode__shortRelease)
+                        %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $SHORT
+                      else
+                        if ($slider_releaseSamples=$releaseSampleMode__longRelease)
+                          %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $LONG
+                        end if
+                      end if
+                    end if
+                  end if
+                  if (%key_down[$recent_release_trigger_key]=1)
+                    $_play_release_sample := 1
+                    %custom_event_triggered_by_keyswitch[%ripple_id_history[$_r3] mod 1000000] := 1
+                    if (%velo[$recent_release_trigger_key]<64)
+                      %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $SHORT
+                    else
+                      %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $LONG
                     end if
                   end if
                   %custom_event_note_off_timestamp[%ripple_id_history[$_r3] mod 1000000] := $ENGINE_UPTIME
@@ -3331,12 +3336,6 @@ on release
                     %custom_event_release_length[%ripple_id_history[$_r3] mod 1000000] := $_fade_out_time
                     fade_out(%ripple_id_history[$_r3],$_fade_out_time*1000,1)
                   else
-                    if (%velo[$recent_release_trigger_key]<64)
-                      %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $SOFT
-                    else
-                      %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $LOUD
-                    end if
-                    %custom_event_triggered_by_keyswitch[%ripple_id_history[$_r3] mod 1000000] := 1
                     %custom_event_waiting_to_trigger_release_sample[%ripple_id_history[$_r3] mod 1000000] := 1
                   end if
                 end if
@@ -3378,14 +3377,26 @@ on controller
               $_time_til_end_of_ripple := ($_real_time_ripple_length-$_real_time_pos_in_pulse)/1000
               if (%notes_to_release[$_i2]=%custom_event_second_note[%ripple_id_history[$_r3] mod 1000000])
                 if ($slider_releaseSamples=0)
-                  if (%key_down[$recent_release_trigger_key]=1)
-                    $_play_release_sample := 1
-                  else
-                    $_play_release_sample := 0
-                  end if
+                  $_play_release_sample := 0
                 else
                   if ($slider_releaseSamples>0)
                     $_play_release_sample := 1
+                    if ($slider_releaseSamples=$releaseSampleMode__shortRelease)
+                      %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $SHORT
+                    else
+                      if ($slider_releaseSamples=$releaseSampleMode__longRelease)
+                        %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $LONG
+                      end if
+                    end if
+                  end if
+                end if
+                if (%key_down[$recent_release_trigger_key]=1)
+                  $_play_release_sample := 1
+                  %custom_event_triggered_by_keyswitch[%ripple_id_history[$_r3] mod 1000000] := 1
+                  if (%velo[$recent_release_trigger_key]<64)
+                    %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $SHORT
+                  else
+                    %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $LONG
                   end if
                 end if
                 %custom_event_note_off_timestamp[%ripple_id_history[$_r3] mod 1000000] := $ENGINE_UPTIME
@@ -3395,12 +3406,6 @@ on controller
                   %custom_event_release_length[%ripple_id_history[$_r3] mod 1000000] := $_fade_out_time
                   fade_out(%ripple_id_history[$_r3],$_fade_out_time*1000,1)
                 else
-                  if (%velo[$recent_release_trigger_key]<64)
-                    %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $SOFT
-                  else
-                    %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $LOUD
-                  end if
-                  %custom_event_triggered_by_keyswitch[%ripple_id_history[$_r3] mod 1000000] := 1
                   %custom_event_waiting_to_trigger_release_sample[%ripple_id_history[$_r3] mod 1000000] := 1
                 end if
               end if
@@ -3689,18 +3694,6 @@ on ui_control($slider_releaseSamples)
   call set_keys_pressed
 end on
 
-on ui_control($switch_releaseTrigger)
-  $switch_releaseTrigger := 0
-  %key_down[%release_trigger_keyswitches[0]] := 1
-  %key_down[%release_trigger_keyswitches[1]] := 1
-  call trigger_release_samples_for_all_ripples
-  set_key_pressed(%release_trigger_keyswitches[0],1)
-  set_key_pressed(%release_trigger_keyswitches[1],1)
-  wait(100000)
-  set_key_pressed(%release_trigger_keyswitches[0],0)
-  set_key_pressed(%release_trigger_keyswitches[1],0)
-end on
-
 on ui_control($switch_logoAnimTrigger)
   set_control_par(get_ui_id($label_version),$CONTROL_PAR_HIDE,$HIDE_PART_NOTHING)
   $timestamp_version_shown := $ENGINE_UPTIME
@@ -3872,7 +3865,6 @@ on ui_control($switch_preview0)
             end if
             $_ks_index := search(%release_trigger_keyswitches,$_note2)
             if ($_ks_index # -1)
-              $switch_releaseTrigger := 1
               $recent_release_trigger_key := $_note2
               call trigger_release_samples_for_all_ripples
             end if
@@ -4141,14 +4133,26 @@ on ui_control($switch_preview0)
                         $_time_til_end_of_ripple := ($_real_time_ripple_length-$_real_time_pos_in_pulse)/1000
                         if (%notes_to_release[$_i2]=%custom_event_second_note[%ripple_id_history[$_r3] mod 1000000])
                           if ($slider_releaseSamples=0)
-                            if (%key_down[$recent_release_trigger_key]=1)
-                              $_play_release_sample := 1
-                            else
-                              $_play_release_sample := 0
-                            end if
+                            $_play_release_sample := 0
                           else
                             if ($slider_releaseSamples>0)
                               $_play_release_sample := 1
+                              if ($slider_releaseSamples=$releaseSampleMode__shortRelease)
+                                %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $SHORT
+                              else
+                                if ($slider_releaseSamples=$releaseSampleMode__longRelease)
+                                  %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $LONG
+                                end if
+                              end if
+                            end if
+                          end if
+                          if (%key_down[$recent_release_trigger_key]=1)
+                            $_play_release_sample := 1
+                            %custom_event_triggered_by_keyswitch[%ripple_id_history[$_r3] mod 1000000] := 1
+                            if (%velo[$recent_release_trigger_key]<64)
+                              %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $SHORT
+                            else
+                              %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $LONG
                             end if
                           end if
                           %custom_event_note_off_timestamp[%ripple_id_history[$_r3] mod 1000000] := $ENGINE_UPTIME
@@ -4158,12 +4162,6 @@ on ui_control($switch_preview0)
                             %custom_event_release_length[%ripple_id_history[$_r3] mod 1000000] := $_fade_out_time
                             fade_out(%ripple_id_history[$_r3],$_fade_out_time*1000,1)
                           else
-                            if (%velo[$recent_release_trigger_key]<64)
-                              %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $SOFT
-                            else
-                              %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $LOUD
-                            end if
-                            %custom_event_triggered_by_keyswitch[%ripple_id_history[$_r3] mod 1000000] := 1
                             %custom_event_waiting_to_trigger_release_sample[%ripple_id_history[$_r3] mod 1000000] := 1
                           end if
                         end if
@@ -4338,7 +4336,6 @@ on ui_control($switch_preview1)
             end if
             $_ks_index := search(%release_trigger_keyswitches,$_note3)
             if ($_ks_index # -1)
-              $switch_releaseTrigger := 1
               $recent_release_trigger_key := $_note3
               call trigger_release_samples_for_all_ripples
             end if
@@ -4607,14 +4604,26 @@ on ui_control($switch_preview1)
                         $_time_til_end_of_ripple := ($_real_time_ripple_length-$_real_time_pos_in_pulse)/1000
                         if (%notes_to_release[$_i2]=%custom_event_second_note[%ripple_id_history[$_r3] mod 1000000])
                           if ($slider_releaseSamples=0)
-                            if (%key_down[$recent_release_trigger_key]=1)
-                              $_play_release_sample := 1
-                            else
-                              $_play_release_sample := 0
-                            end if
+                            $_play_release_sample := 0
                           else
                             if ($slider_releaseSamples>0)
                               $_play_release_sample := 1
+                              if ($slider_releaseSamples=$releaseSampleMode__shortRelease)
+                                %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $SHORT
+                              else
+                                if ($slider_releaseSamples=$releaseSampleMode__longRelease)
+                                  %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $LONG
+                                end if
+                              end if
+                            end if
+                          end if
+                          if (%key_down[$recent_release_trigger_key]=1)
+                            $_play_release_sample := 1
+                            %custom_event_triggered_by_keyswitch[%ripple_id_history[$_r3] mod 1000000] := 1
+                            if (%velo[$recent_release_trigger_key]<64)
+                              %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $SHORT
+                            else
+                              %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $LONG
                             end if
                           end if
                           %custom_event_note_off_timestamp[%ripple_id_history[$_r3] mod 1000000] := $ENGINE_UPTIME
@@ -4624,12 +4633,6 @@ on ui_control($switch_preview1)
                             %custom_event_release_length[%ripple_id_history[$_r3] mod 1000000] := $_fade_out_time
                             fade_out(%ripple_id_history[$_r3],$_fade_out_time*1000,1)
                           else
-                            if (%velo[$recent_release_trigger_key]<64)
-                              %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $SOFT
-                            else
-                              %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $LOUD
-                            end if
-                            %custom_event_triggered_by_keyswitch[%ripple_id_history[$_r3] mod 1000000] := 1
                             %custom_event_waiting_to_trigger_release_sample[%ripple_id_history[$_r3] mod 1000000] := 1
                           end if
                         end if
@@ -4804,7 +4807,6 @@ on ui_control($switch_preview2)
             end if
             $_ks_index := search(%release_trigger_keyswitches,$_note4)
             if ($_ks_index # -1)
-              $switch_releaseTrigger := 1
               $recent_release_trigger_key := $_note4
               call trigger_release_samples_for_all_ripples
             end if
@@ -5073,14 +5075,26 @@ on ui_control($switch_preview2)
                         $_time_til_end_of_ripple := ($_real_time_ripple_length-$_real_time_pos_in_pulse)/1000
                         if (%notes_to_release[$_i2]=%custom_event_second_note[%ripple_id_history[$_r3] mod 1000000])
                           if ($slider_releaseSamples=0)
-                            if (%key_down[$recent_release_trigger_key]=1)
-                              $_play_release_sample := 1
-                            else
-                              $_play_release_sample := 0
-                            end if
+                            $_play_release_sample := 0
                           else
                             if ($slider_releaseSamples>0)
                               $_play_release_sample := 1
+                              if ($slider_releaseSamples=$releaseSampleMode__shortRelease)
+                                %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $SHORT
+                              else
+                                if ($slider_releaseSamples=$releaseSampleMode__longRelease)
+                                  %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $LONG
+                                end if
+                              end if
+                            end if
+                          end if
+                          if (%key_down[$recent_release_trigger_key]=1)
+                            $_play_release_sample := 1
+                            %custom_event_triggered_by_keyswitch[%ripple_id_history[$_r3] mod 1000000] := 1
+                            if (%velo[$recent_release_trigger_key]<64)
+                              %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $SHORT
+                            else
+                              %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $LONG
                             end if
                           end if
                           %custom_event_note_off_timestamp[%ripple_id_history[$_r3] mod 1000000] := $ENGINE_UPTIME
@@ -5090,12 +5104,6 @@ on ui_control($switch_preview2)
                             %custom_event_release_length[%ripple_id_history[$_r3] mod 1000000] := $_fade_out_time
                             fade_out(%ripple_id_history[$_r3],$_fade_out_time*1000,1)
                           else
-                            if (%velo[$recent_release_trigger_key]<64)
-                              %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $SOFT
-                            else
-                              %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $LOUD
-                            end if
-                            %custom_event_triggered_by_keyswitch[%ripple_id_history[$_r3] mod 1000000] := 1
                             %custom_event_waiting_to_trigger_release_sample[%ripple_id_history[$_r3] mod 1000000] := 1
                           end if
                         end if
@@ -5270,7 +5278,6 @@ on ui_control($switch_preview3)
             end if
             $_ks_index := search(%release_trigger_keyswitches,$_note5)
             if ($_ks_index # -1)
-              $switch_releaseTrigger := 1
               $recent_release_trigger_key := $_note5
               call trigger_release_samples_for_all_ripples
             end if
@@ -5539,14 +5546,26 @@ on ui_control($switch_preview3)
                         $_time_til_end_of_ripple := ($_real_time_ripple_length-$_real_time_pos_in_pulse)/1000
                         if (%notes_to_release[$_i2]=%custom_event_second_note[%ripple_id_history[$_r3] mod 1000000])
                           if ($slider_releaseSamples=0)
-                            if (%key_down[$recent_release_trigger_key]=1)
-                              $_play_release_sample := 1
-                            else
-                              $_play_release_sample := 0
-                            end if
+                            $_play_release_sample := 0
                           else
                             if ($slider_releaseSamples>0)
                               $_play_release_sample := 1
+                              if ($slider_releaseSamples=$releaseSampleMode__shortRelease)
+                                %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $SHORT
+                              else
+                                if ($slider_releaseSamples=$releaseSampleMode__longRelease)
+                                  %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $LONG
+                                end if
+                              end if
+                            end if
+                          end if
+                          if (%key_down[$recent_release_trigger_key]=1)
+                            $_play_release_sample := 1
+                            %custom_event_triggered_by_keyswitch[%ripple_id_history[$_r3] mod 1000000] := 1
+                            if (%velo[$recent_release_trigger_key]<64)
+                              %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $SHORT
+                            else
+                              %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $LONG
                             end if
                           end if
                           %custom_event_note_off_timestamp[%ripple_id_history[$_r3] mod 1000000] := $ENGINE_UPTIME
@@ -5556,12 +5575,6 @@ on ui_control($switch_preview3)
                             %custom_event_release_length[%ripple_id_history[$_r3] mod 1000000] := $_fade_out_time
                             fade_out(%ripple_id_history[$_r3],$_fade_out_time*1000,1)
                           else
-                            if (%velo[$recent_release_trigger_key]<64)
-                              %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $SOFT
-                            else
-                              %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $LOUD
-                            end if
-                            %custom_event_triggered_by_keyswitch[%ripple_id_history[$_r3] mod 1000000] := 1
                             %custom_event_waiting_to_trigger_release_sample[%ripple_id_history[$_r3] mod 1000000] := 1
                           end if
                         end if
@@ -5736,7 +5749,6 @@ on ui_control($switch_preview4)
             end if
             $_ks_index := search(%release_trigger_keyswitches,$_note6)
             if ($_ks_index # -1)
-              $switch_releaseTrigger := 1
               $recent_release_trigger_key := $_note6
               call trigger_release_samples_for_all_ripples
             end if
@@ -6005,14 +6017,26 @@ on ui_control($switch_preview4)
                         $_time_til_end_of_ripple := ($_real_time_ripple_length-$_real_time_pos_in_pulse)/1000
                         if (%notes_to_release[$_i2]=%custom_event_second_note[%ripple_id_history[$_r3] mod 1000000])
                           if ($slider_releaseSamples=0)
-                            if (%key_down[$recent_release_trigger_key]=1)
-                              $_play_release_sample := 1
-                            else
-                              $_play_release_sample := 0
-                            end if
+                            $_play_release_sample := 0
                           else
                             if ($slider_releaseSamples>0)
                               $_play_release_sample := 1
+                              if ($slider_releaseSamples=$releaseSampleMode__shortRelease)
+                                %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $SHORT
+                              else
+                                if ($slider_releaseSamples=$releaseSampleMode__longRelease)
+                                  %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $LONG
+                                end if
+                              end if
+                            end if
+                          end if
+                          if (%key_down[$recent_release_trigger_key]=1)
+                            $_play_release_sample := 1
+                            %custom_event_triggered_by_keyswitch[%ripple_id_history[$_r3] mod 1000000] := 1
+                            if (%velo[$recent_release_trigger_key]<64)
+                              %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $SHORT
+                            else
+                              %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $LONG
                             end if
                           end if
                           %custom_event_note_off_timestamp[%ripple_id_history[$_r3] mod 1000000] := $ENGINE_UPTIME
@@ -6022,12 +6046,6 @@ on ui_control($switch_preview4)
                             %custom_event_release_length[%ripple_id_history[$_r3] mod 1000000] := $_fade_out_time
                             fade_out(%ripple_id_history[$_r3],$_fade_out_time*1000,1)
                           else
-                            if (%velo[$recent_release_trigger_key]<64)
-                              %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $SOFT
-                            else
-                              %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $LOUD
-                            end if
-                            %custom_event_triggered_by_keyswitch[%ripple_id_history[$_r3] mod 1000000] := 1
                             %custom_event_waiting_to_trigger_release_sample[%ripple_id_history[$_r3] mod 1000000] := 1
                           end if
                         end if
@@ -6202,7 +6220,6 @@ on ui_control($switch_preview5)
             end if
             $_ks_index := search(%release_trigger_keyswitches,$_note7)
             if ($_ks_index # -1)
-              $switch_releaseTrigger := 1
               $recent_release_trigger_key := $_note7
               call trigger_release_samples_for_all_ripples
             end if
@@ -6471,14 +6488,26 @@ on ui_control($switch_preview5)
                         $_time_til_end_of_ripple := ($_real_time_ripple_length-$_real_time_pos_in_pulse)/1000
                         if (%notes_to_release[$_i2]=%custom_event_second_note[%ripple_id_history[$_r3] mod 1000000])
                           if ($slider_releaseSamples=0)
-                            if (%key_down[$recent_release_trigger_key]=1)
-                              $_play_release_sample := 1
-                            else
-                              $_play_release_sample := 0
-                            end if
+                            $_play_release_sample := 0
                           else
                             if ($slider_releaseSamples>0)
                               $_play_release_sample := 1
+                              if ($slider_releaseSamples=$releaseSampleMode__shortRelease)
+                                %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $SHORT
+                              else
+                                if ($slider_releaseSamples=$releaseSampleMode__longRelease)
+                                  %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $LONG
+                                end if
+                              end if
+                            end if
+                          end if
+                          if (%key_down[$recent_release_trigger_key]=1)
+                            $_play_release_sample := 1
+                            %custom_event_triggered_by_keyswitch[%ripple_id_history[$_r3] mod 1000000] := 1
+                            if (%velo[$recent_release_trigger_key]<64)
+                              %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $SHORT
+                            else
+                              %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $LONG
                             end if
                           end if
                           %custom_event_note_off_timestamp[%ripple_id_history[$_r3] mod 1000000] := $ENGINE_UPTIME
@@ -6488,12 +6517,6 @@ on ui_control($switch_preview5)
                             %custom_event_release_length[%ripple_id_history[$_r3] mod 1000000] := $_fade_out_time
                             fade_out(%ripple_id_history[$_r3],$_fade_out_time*1000,1)
                           else
-                            if (%velo[$recent_release_trigger_key]<64)
-                              %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $SOFT
-                            else
-                              %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $LOUD
-                            end if
-                            %custom_event_triggered_by_keyswitch[%ripple_id_history[$_r3] mod 1000000] := 1
                             %custom_event_waiting_to_trigger_release_sample[%ripple_id_history[$_r3] mod 1000000] := 1
                           end if
                         end if
@@ -6668,7 +6691,6 @@ on ui_control($switch_preview6)
             end if
             $_ks_index := search(%release_trigger_keyswitches,$_note8)
             if ($_ks_index # -1)
-              $switch_releaseTrigger := 1
               $recent_release_trigger_key := $_note8
               call trigger_release_samples_for_all_ripples
             end if
@@ -6937,14 +6959,26 @@ on ui_control($switch_preview6)
                         $_time_til_end_of_ripple := ($_real_time_ripple_length-$_real_time_pos_in_pulse)/1000
                         if (%notes_to_release[$_i2]=%custom_event_second_note[%ripple_id_history[$_r3] mod 1000000])
                           if ($slider_releaseSamples=0)
-                            if (%key_down[$recent_release_trigger_key]=1)
-                              $_play_release_sample := 1
-                            else
-                              $_play_release_sample := 0
-                            end if
+                            $_play_release_sample := 0
                           else
                             if ($slider_releaseSamples>0)
                               $_play_release_sample := 1
+                              if ($slider_releaseSamples=$releaseSampleMode__shortRelease)
+                                %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $SHORT
+                              else
+                                if ($slider_releaseSamples=$releaseSampleMode__longRelease)
+                                  %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $LONG
+                                end if
+                              end if
+                            end if
+                          end if
+                          if (%key_down[$recent_release_trigger_key]=1)
+                            $_play_release_sample := 1
+                            %custom_event_triggered_by_keyswitch[%ripple_id_history[$_r3] mod 1000000] := 1
+                            if (%velo[$recent_release_trigger_key]<64)
+                              %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $SHORT
+                            else
+                              %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $LONG
                             end if
                           end if
                           %custom_event_note_off_timestamp[%ripple_id_history[$_r3] mod 1000000] := $ENGINE_UPTIME
@@ -6954,12 +6988,6 @@ on ui_control($switch_preview6)
                             %custom_event_release_length[%ripple_id_history[$_r3] mod 1000000] := $_fade_out_time
                             fade_out(%ripple_id_history[$_r3],$_fade_out_time*1000,1)
                           else
-                            if (%velo[$recent_release_trigger_key]<64)
-                              %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $SOFT
-                            else
-                              %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $LOUD
-                            end if
-                            %custom_event_triggered_by_keyswitch[%ripple_id_history[$_r3] mod 1000000] := 1
                             %custom_event_waiting_to_trigger_release_sample[%ripple_id_history[$_r3] mod 1000000] := 1
                           end if
                         end if
@@ -7134,7 +7162,6 @@ on ui_control($switch_preview7)
             end if
             $_ks_index := search(%release_trigger_keyswitches,$_note9)
             if ($_ks_index # -1)
-              $switch_releaseTrigger := 1
               $recent_release_trigger_key := $_note9
               call trigger_release_samples_for_all_ripples
             end if
@@ -7403,14 +7430,26 @@ on ui_control($switch_preview7)
                         $_time_til_end_of_ripple := ($_real_time_ripple_length-$_real_time_pos_in_pulse)/1000
                         if (%notes_to_release[$_i2]=%custom_event_second_note[%ripple_id_history[$_r3] mod 1000000])
                           if ($slider_releaseSamples=0)
-                            if (%key_down[$recent_release_trigger_key]=1)
-                              $_play_release_sample := 1
-                            else
-                              $_play_release_sample := 0
-                            end if
+                            $_play_release_sample := 0
                           else
                             if ($slider_releaseSamples>0)
                               $_play_release_sample := 1
+                              if ($slider_releaseSamples=$releaseSampleMode__shortRelease)
+                                %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $SHORT
+                              else
+                                if ($slider_releaseSamples=$releaseSampleMode__longRelease)
+                                  %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $LONG
+                                end if
+                              end if
+                            end if
+                          end if
+                          if (%key_down[$recent_release_trigger_key]=1)
+                            $_play_release_sample := 1
+                            %custom_event_triggered_by_keyswitch[%ripple_id_history[$_r3] mod 1000000] := 1
+                            if (%velo[$recent_release_trigger_key]<64)
+                              %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $SHORT
+                            else
+                              %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $LONG
                             end if
                           end if
                           %custom_event_note_off_timestamp[%ripple_id_history[$_r3] mod 1000000] := $ENGINE_UPTIME
@@ -7420,12 +7459,6 @@ on ui_control($switch_preview7)
                             %custom_event_release_length[%ripple_id_history[$_r3] mod 1000000] := $_fade_out_time
                             fade_out(%ripple_id_history[$_r3],$_fade_out_time*1000,1)
                           else
-                            if (%velo[$recent_release_trigger_key]<64)
-                              %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $SOFT
-                            else
-                              %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $LOUD
-                            end if
-                            %custom_event_triggered_by_keyswitch[%ripple_id_history[$_r3] mod 1000000] := 1
                             %custom_event_waiting_to_trigger_release_sample[%ripple_id_history[$_r3] mod 1000000] := 1
                           end if
                         end if
@@ -7600,7 +7633,6 @@ on ui_control($switch_preview8)
             end if
             $_ks_index := search(%release_trigger_keyswitches,$_note10)
             if ($_ks_index # -1)
-              $switch_releaseTrigger := 1
               $recent_release_trigger_key := $_note10
               call trigger_release_samples_for_all_ripples
             end if
@@ -7869,14 +7901,26 @@ on ui_control($switch_preview8)
                         $_time_til_end_of_ripple := ($_real_time_ripple_length-$_real_time_pos_in_pulse)/1000
                         if (%notes_to_release[$_i2]=%custom_event_second_note[%ripple_id_history[$_r3] mod 1000000])
                           if ($slider_releaseSamples=0)
-                            if (%key_down[$recent_release_trigger_key]=1)
-                              $_play_release_sample := 1
-                            else
-                              $_play_release_sample := 0
-                            end if
+                            $_play_release_sample := 0
                           else
                             if ($slider_releaseSamples>0)
                               $_play_release_sample := 1
+                              if ($slider_releaseSamples=$releaseSampleMode__shortRelease)
+                                %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $SHORT
+                              else
+                                if ($slider_releaseSamples=$releaseSampleMode__longRelease)
+                                  %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $LONG
+                                end if
+                              end if
+                            end if
+                          end if
+                          if (%key_down[$recent_release_trigger_key]=1)
+                            $_play_release_sample := 1
+                            %custom_event_triggered_by_keyswitch[%ripple_id_history[$_r3] mod 1000000] := 1
+                            if (%velo[$recent_release_trigger_key]<64)
+                              %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $SHORT
+                            else
+                              %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $LONG
                             end if
                           end if
                           %custom_event_note_off_timestamp[%ripple_id_history[$_r3] mod 1000000] := $ENGINE_UPTIME
@@ -7886,12 +7930,6 @@ on ui_control($switch_preview8)
                             %custom_event_release_length[%ripple_id_history[$_r3] mod 1000000] := $_fade_out_time
                             fade_out(%ripple_id_history[$_r3],$_fade_out_time*1000,1)
                           else
-                            if (%velo[$recent_release_trigger_key]<64)
-                              %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $SOFT
-                            else
-                              %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $LOUD
-                            end if
-                            %custom_event_triggered_by_keyswitch[%ripple_id_history[$_r3] mod 1000000] := 1
                             %custom_event_waiting_to_trigger_release_sample[%ripple_id_history[$_r3] mod 1000000] := 1
                           end if
                         end if
@@ -8066,7 +8104,6 @@ on ui_control($switch_preview9)
             end if
             $_ks_index := search(%release_trigger_keyswitches,$_note11)
             if ($_ks_index # -1)
-              $switch_releaseTrigger := 1
               $recent_release_trigger_key := $_note11
               call trigger_release_samples_for_all_ripples
             end if
@@ -8335,14 +8372,26 @@ on ui_control($switch_preview9)
                         $_time_til_end_of_ripple := ($_real_time_ripple_length-$_real_time_pos_in_pulse)/1000
                         if (%notes_to_release[$_i2]=%custom_event_second_note[%ripple_id_history[$_r3] mod 1000000])
                           if ($slider_releaseSamples=0)
-                            if (%key_down[$recent_release_trigger_key]=1)
-                              $_play_release_sample := 1
-                            else
-                              $_play_release_sample := 0
-                            end if
+                            $_play_release_sample := 0
                           else
                             if ($slider_releaseSamples>0)
                               $_play_release_sample := 1
+                              if ($slider_releaseSamples=$releaseSampleMode__shortRelease)
+                                %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $SHORT
+                              else
+                                if ($slider_releaseSamples=$releaseSampleMode__longRelease)
+                                  %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $LONG
+                                end if
+                              end if
+                            end if
+                          end if
+                          if (%key_down[$recent_release_trigger_key]=1)
+                            $_play_release_sample := 1
+                            %custom_event_triggered_by_keyswitch[%ripple_id_history[$_r3] mod 1000000] := 1
+                            if (%velo[$recent_release_trigger_key]<64)
+                              %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $SHORT
+                            else
+                              %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $LONG
                             end if
                           end if
                           %custom_event_note_off_timestamp[%ripple_id_history[$_r3] mod 1000000] := $ENGINE_UPTIME
@@ -8352,12 +8401,6 @@ on ui_control($switch_preview9)
                             %custom_event_release_length[%ripple_id_history[$_r3] mod 1000000] := $_fade_out_time
                             fade_out(%ripple_id_history[$_r3],$_fade_out_time*1000,1)
                           else
-                            if (%velo[$recent_release_trigger_key]<64)
-                              %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $SOFT
-                            else
-                              %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $LOUD
-                            end if
-                            %custom_event_triggered_by_keyswitch[%ripple_id_history[$_r3] mod 1000000] := 1
                             %custom_event_waiting_to_trigger_release_sample[%ripple_id_history[$_r3] mod 1000000] := 1
                           end if
                         end if
@@ -8532,7 +8575,6 @@ on ui_control($switch_preview10)
             end if
             $_ks_index := search(%release_trigger_keyswitches,$_note12)
             if ($_ks_index # -1)
-              $switch_releaseTrigger := 1
               $recent_release_trigger_key := $_note12
               call trigger_release_samples_for_all_ripples
             end if
@@ -8801,14 +8843,26 @@ on ui_control($switch_preview10)
                         $_time_til_end_of_ripple := ($_real_time_ripple_length-$_real_time_pos_in_pulse)/1000
                         if (%notes_to_release[$_i2]=%custom_event_second_note[%ripple_id_history[$_r3] mod 1000000])
                           if ($slider_releaseSamples=0)
-                            if (%key_down[$recent_release_trigger_key]=1)
-                              $_play_release_sample := 1
-                            else
-                              $_play_release_sample := 0
-                            end if
+                            $_play_release_sample := 0
                           else
                             if ($slider_releaseSamples>0)
                               $_play_release_sample := 1
+                              if ($slider_releaseSamples=$releaseSampleMode__shortRelease)
+                                %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $SHORT
+                              else
+                                if ($slider_releaseSamples=$releaseSampleMode__longRelease)
+                                  %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $LONG
+                                end if
+                              end if
+                            end if
+                          end if
+                          if (%key_down[$recent_release_trigger_key]=1)
+                            $_play_release_sample := 1
+                            %custom_event_triggered_by_keyswitch[%ripple_id_history[$_r3] mod 1000000] := 1
+                            if (%velo[$recent_release_trigger_key]<64)
+                              %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $SHORT
+                            else
+                              %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $LONG
                             end if
                           end if
                           %custom_event_note_off_timestamp[%ripple_id_history[$_r3] mod 1000000] := $ENGINE_UPTIME
@@ -8818,12 +8872,6 @@ on ui_control($switch_preview10)
                             %custom_event_release_length[%ripple_id_history[$_r3] mod 1000000] := $_fade_out_time
                             fade_out(%ripple_id_history[$_r3],$_fade_out_time*1000,1)
                           else
-                            if (%velo[$recent_release_trigger_key]<64)
-                              %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $SOFT
-                            else
-                              %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $LOUD
-                            end if
-                            %custom_event_triggered_by_keyswitch[%ripple_id_history[$_r3] mod 1000000] := 1
                             %custom_event_waiting_to_trigger_release_sample[%ripple_id_history[$_r3] mod 1000000] := 1
                           end if
                         end if
@@ -8998,7 +9046,6 @@ on ui_control($switch_preview11)
             end if
             $_ks_index := search(%release_trigger_keyswitches,$_note13)
             if ($_ks_index # -1)
-              $switch_releaseTrigger := 1
               $recent_release_trigger_key := $_note13
               call trigger_release_samples_for_all_ripples
             end if
@@ -9267,14 +9314,26 @@ on ui_control($switch_preview11)
                         $_time_til_end_of_ripple := ($_real_time_ripple_length-$_real_time_pos_in_pulse)/1000
                         if (%notes_to_release[$_i2]=%custom_event_second_note[%ripple_id_history[$_r3] mod 1000000])
                           if ($slider_releaseSamples=0)
-                            if (%key_down[$recent_release_trigger_key]=1)
-                              $_play_release_sample := 1
-                            else
-                              $_play_release_sample := 0
-                            end if
+                            $_play_release_sample := 0
                           else
                             if ($slider_releaseSamples>0)
                               $_play_release_sample := 1
+                              if ($slider_releaseSamples=$releaseSampleMode__shortRelease)
+                                %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $SHORT
+                              else
+                                if ($slider_releaseSamples=$releaseSampleMode__longRelease)
+                                  %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $LONG
+                                end if
+                              end if
+                            end if
+                          end if
+                          if (%key_down[$recent_release_trigger_key]=1)
+                            $_play_release_sample := 1
+                            %custom_event_triggered_by_keyswitch[%ripple_id_history[$_r3] mod 1000000] := 1
+                            if (%velo[$recent_release_trigger_key]<64)
+                              %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $SHORT
+                            else
+                              %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $LONG
                             end if
                           end if
                           %custom_event_note_off_timestamp[%ripple_id_history[$_r3] mod 1000000] := $ENGINE_UPTIME
@@ -9284,12 +9343,6 @@ on ui_control($switch_preview11)
                             %custom_event_release_length[%ripple_id_history[$_r3] mod 1000000] := $_fade_out_time
                             fade_out(%ripple_id_history[$_r3],$_fade_out_time*1000,1)
                           else
-                            if (%velo[$recent_release_trigger_key]<64)
-                              %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $SOFT
-                            else
-                              %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $LOUD
-                            end if
-                            %custom_event_triggered_by_keyswitch[%ripple_id_history[$_r3] mod 1000000] := 1
                             %custom_event_waiting_to_trigger_release_sample[%ripple_id_history[$_r3] mod 1000000] := 1
                           end if
                         end if
@@ -9464,7 +9517,6 @@ on ui_control($switch_preview12)
             end if
             $_ks_index := search(%release_trigger_keyswitches,$_note14)
             if ($_ks_index # -1)
-              $switch_releaseTrigger := 1
               $recent_release_trigger_key := $_note14
               call trigger_release_samples_for_all_ripples
             end if
@@ -9733,14 +9785,26 @@ on ui_control($switch_preview12)
                         $_time_til_end_of_ripple := ($_real_time_ripple_length-$_real_time_pos_in_pulse)/1000
                         if (%notes_to_release[$_i2]=%custom_event_second_note[%ripple_id_history[$_r3] mod 1000000])
                           if ($slider_releaseSamples=0)
-                            if (%key_down[$recent_release_trigger_key]=1)
-                              $_play_release_sample := 1
-                            else
-                              $_play_release_sample := 0
-                            end if
+                            $_play_release_sample := 0
                           else
                             if ($slider_releaseSamples>0)
                               $_play_release_sample := 1
+                              if ($slider_releaseSamples=$releaseSampleMode__shortRelease)
+                                %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $SHORT
+                              else
+                                if ($slider_releaseSamples=$releaseSampleMode__longRelease)
+                                  %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $LONG
+                                end if
+                              end if
+                            end if
+                          end if
+                          if (%key_down[$recent_release_trigger_key]=1)
+                            $_play_release_sample := 1
+                            %custom_event_triggered_by_keyswitch[%ripple_id_history[$_r3] mod 1000000] := 1
+                            if (%velo[$recent_release_trigger_key]<64)
+                              %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $SHORT
+                            else
+                              %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $LONG
                             end if
                           end if
                           %custom_event_note_off_timestamp[%ripple_id_history[$_r3] mod 1000000] := $ENGINE_UPTIME
@@ -9750,12 +9814,6 @@ on ui_control($switch_preview12)
                             %custom_event_release_length[%ripple_id_history[$_r3] mod 1000000] := $_fade_out_time
                             fade_out(%ripple_id_history[$_r3],$_fade_out_time*1000,1)
                           else
-                            if (%velo[$recent_release_trigger_key]<64)
-                              %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $SOFT
-                            else
-                              %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $LOUD
-                            end if
-                            %custom_event_triggered_by_keyswitch[%ripple_id_history[$_r3] mod 1000000] := 1
                             %custom_event_waiting_to_trigger_release_sample[%ripple_id_history[$_r3] mod 1000000] := 1
                           end if
                         end if
@@ -9930,7 +9988,6 @@ on ui_control($switch_preview13)
             end if
             $_ks_index := search(%release_trigger_keyswitches,$_note15)
             if ($_ks_index # -1)
-              $switch_releaseTrigger := 1
               $recent_release_trigger_key := $_note15
               call trigger_release_samples_for_all_ripples
             end if
@@ -10199,14 +10256,26 @@ on ui_control($switch_preview13)
                         $_time_til_end_of_ripple := ($_real_time_ripple_length-$_real_time_pos_in_pulse)/1000
                         if (%notes_to_release[$_i2]=%custom_event_second_note[%ripple_id_history[$_r3] mod 1000000])
                           if ($slider_releaseSamples=0)
-                            if (%key_down[$recent_release_trigger_key]=1)
-                              $_play_release_sample := 1
-                            else
-                              $_play_release_sample := 0
-                            end if
+                            $_play_release_sample := 0
                           else
                             if ($slider_releaseSamples>0)
                               $_play_release_sample := 1
+                              if ($slider_releaseSamples=$releaseSampleMode__shortRelease)
+                                %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $SHORT
+                              else
+                                if ($slider_releaseSamples=$releaseSampleMode__longRelease)
+                                  %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $LONG
+                                end if
+                              end if
+                            end if
+                          end if
+                          if (%key_down[$recent_release_trigger_key]=1)
+                            $_play_release_sample := 1
+                            %custom_event_triggered_by_keyswitch[%ripple_id_history[$_r3] mod 1000000] := 1
+                            if (%velo[$recent_release_trigger_key]<64)
+                              %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $SHORT
+                            else
+                              %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $LONG
                             end if
                           end if
                           %custom_event_note_off_timestamp[%ripple_id_history[$_r3] mod 1000000] := $ENGINE_UPTIME
@@ -10216,12 +10285,6 @@ on ui_control($switch_preview13)
                             %custom_event_release_length[%ripple_id_history[$_r3] mod 1000000] := $_fade_out_time
                             fade_out(%ripple_id_history[$_r3],$_fade_out_time*1000,1)
                           else
-                            if (%velo[$recent_release_trigger_key]<64)
-                              %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $SOFT
-                            else
-                              %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $LOUD
-                            end if
-                            %custom_event_triggered_by_keyswitch[%ripple_id_history[$_r3] mod 1000000] := 1
                             %custom_event_waiting_to_trigger_release_sample[%ripple_id_history[$_r3] mod 1000000] := 1
                           end if
                         end if
@@ -10396,7 +10459,6 @@ on ui_control($switch_preview14)
             end if
             $_ks_index := search(%release_trigger_keyswitches,$_note16)
             if ($_ks_index # -1)
-              $switch_releaseTrigger := 1
               $recent_release_trigger_key := $_note16
               call trigger_release_samples_for_all_ripples
             end if
@@ -10665,14 +10727,26 @@ on ui_control($switch_preview14)
                         $_time_til_end_of_ripple := ($_real_time_ripple_length-$_real_time_pos_in_pulse)/1000
                         if (%notes_to_release[$_i2]=%custom_event_second_note[%ripple_id_history[$_r3] mod 1000000])
                           if ($slider_releaseSamples=0)
-                            if (%key_down[$recent_release_trigger_key]=1)
-                              $_play_release_sample := 1
-                            else
-                              $_play_release_sample := 0
-                            end if
+                            $_play_release_sample := 0
                           else
                             if ($slider_releaseSamples>0)
                               $_play_release_sample := 1
+                              if ($slider_releaseSamples=$releaseSampleMode__shortRelease)
+                                %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $SHORT
+                              else
+                                if ($slider_releaseSamples=$releaseSampleMode__longRelease)
+                                  %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $LONG
+                                end if
+                              end if
+                            end if
+                          end if
+                          if (%key_down[$recent_release_trigger_key]=1)
+                            $_play_release_sample := 1
+                            %custom_event_triggered_by_keyswitch[%ripple_id_history[$_r3] mod 1000000] := 1
+                            if (%velo[$recent_release_trigger_key]<64)
+                              %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $SHORT
+                            else
+                              %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $LONG
                             end if
                           end if
                           %custom_event_note_off_timestamp[%ripple_id_history[$_r3] mod 1000000] := $ENGINE_UPTIME
@@ -10682,12 +10756,6 @@ on ui_control($switch_preview14)
                             %custom_event_release_length[%ripple_id_history[$_r3] mod 1000000] := $_fade_out_time
                             fade_out(%ripple_id_history[$_r3],$_fade_out_time*1000,1)
                           else
-                            if (%velo[$recent_release_trigger_key]<64)
-                              %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $SOFT
-                            else
-                              %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $LOUD
-                            end if
-                            %custom_event_triggered_by_keyswitch[%ripple_id_history[$_r3] mod 1000000] := 1
                             %custom_event_waiting_to_trigger_release_sample[%ripple_id_history[$_r3] mod 1000000] := 1
                           end if
                         end if
@@ -10862,7 +10930,6 @@ on ui_control($switch_preview15)
             end if
             $_ks_index := search(%release_trigger_keyswitches,$_note17)
             if ($_ks_index # -1)
-              $switch_releaseTrigger := 1
               $recent_release_trigger_key := $_note17
               call trigger_release_samples_for_all_ripples
             end if
@@ -11131,14 +11198,26 @@ on ui_control($switch_preview15)
                         $_time_til_end_of_ripple := ($_real_time_ripple_length-$_real_time_pos_in_pulse)/1000
                         if (%notes_to_release[$_i2]=%custom_event_second_note[%ripple_id_history[$_r3] mod 1000000])
                           if ($slider_releaseSamples=0)
-                            if (%key_down[$recent_release_trigger_key]=1)
-                              $_play_release_sample := 1
-                            else
-                              $_play_release_sample := 0
-                            end if
+                            $_play_release_sample := 0
                           else
                             if ($slider_releaseSamples>0)
                               $_play_release_sample := 1
+                              if ($slider_releaseSamples=$releaseSampleMode__shortRelease)
+                                %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $SHORT
+                              else
+                                if ($slider_releaseSamples=$releaseSampleMode__longRelease)
+                                  %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $LONG
+                                end if
+                              end if
+                            end if
+                          end if
+                          if (%key_down[$recent_release_trigger_key]=1)
+                            $_play_release_sample := 1
+                            %custom_event_triggered_by_keyswitch[%ripple_id_history[$_r3] mod 1000000] := 1
+                            if (%velo[$recent_release_trigger_key]<64)
+                              %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $SHORT
+                            else
+                              %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $LONG
                             end if
                           end if
                           %custom_event_note_off_timestamp[%ripple_id_history[$_r3] mod 1000000] := $ENGINE_UPTIME
@@ -11148,12 +11227,6 @@ on ui_control($switch_preview15)
                             %custom_event_release_length[%ripple_id_history[$_r3] mod 1000000] := $_fade_out_time
                             fade_out(%ripple_id_history[$_r3],$_fade_out_time*1000,1)
                           else
-                            if (%velo[$recent_release_trigger_key]<64)
-                              %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $SOFT
-                            else
-                              %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $LOUD
-                            end if
-                            %custom_event_triggered_by_keyswitch[%ripple_id_history[$_r3] mod 1000000] := 1
                             %custom_event_waiting_to_trigger_release_sample[%ripple_id_history[$_r3] mod 1000000] := 1
                           end if
                         end if
@@ -11328,7 +11401,6 @@ on ui_control($switch_preview16)
             end if
             $_ks_index := search(%release_trigger_keyswitches,$_note18)
             if ($_ks_index # -1)
-              $switch_releaseTrigger := 1
               $recent_release_trigger_key := $_note18
               call trigger_release_samples_for_all_ripples
             end if
@@ -11597,14 +11669,26 @@ on ui_control($switch_preview16)
                         $_time_til_end_of_ripple := ($_real_time_ripple_length-$_real_time_pos_in_pulse)/1000
                         if (%notes_to_release[$_i2]=%custom_event_second_note[%ripple_id_history[$_r3] mod 1000000])
                           if ($slider_releaseSamples=0)
-                            if (%key_down[$recent_release_trigger_key]=1)
-                              $_play_release_sample := 1
-                            else
-                              $_play_release_sample := 0
-                            end if
+                            $_play_release_sample := 0
                           else
                             if ($slider_releaseSamples>0)
                               $_play_release_sample := 1
+                              if ($slider_releaseSamples=$releaseSampleMode__shortRelease)
+                                %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $SHORT
+                              else
+                                if ($slider_releaseSamples=$releaseSampleMode__longRelease)
+                                  %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $LONG
+                                end if
+                              end if
+                            end if
+                          end if
+                          if (%key_down[$recent_release_trigger_key]=1)
+                            $_play_release_sample := 1
+                            %custom_event_triggered_by_keyswitch[%ripple_id_history[$_r3] mod 1000000] := 1
+                            if (%velo[$recent_release_trigger_key]<64)
+                              %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $SHORT
+                            else
+                              %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $LONG
                             end if
                           end if
                           %custom_event_note_off_timestamp[%ripple_id_history[$_r3] mod 1000000] := $ENGINE_UPTIME
@@ -11614,12 +11698,6 @@ on ui_control($switch_preview16)
                             %custom_event_release_length[%ripple_id_history[$_r3] mod 1000000] := $_fade_out_time
                             fade_out(%ripple_id_history[$_r3],$_fade_out_time*1000,1)
                           else
-                            if (%velo[$recent_release_trigger_key]<64)
-                              %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $SOFT
-                            else
-                              %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $LOUD
-                            end if
-                            %custom_event_triggered_by_keyswitch[%ripple_id_history[$_r3] mod 1000000] := 1
                             %custom_event_waiting_to_trigger_release_sample[%ripple_id_history[$_r3] mod 1000000] := 1
                           end if
                         end if
@@ -11794,7 +11872,6 @@ on ui_control($switch_preview17)
             end if
             $_ks_index := search(%release_trigger_keyswitches,$_note19)
             if ($_ks_index # -1)
-              $switch_releaseTrigger := 1
               $recent_release_trigger_key := $_note19
               call trigger_release_samples_for_all_ripples
             end if
@@ -12063,14 +12140,26 @@ on ui_control($switch_preview17)
                         $_time_til_end_of_ripple := ($_real_time_ripple_length-$_real_time_pos_in_pulse)/1000
                         if (%notes_to_release[$_i2]=%custom_event_second_note[%ripple_id_history[$_r3] mod 1000000])
                           if ($slider_releaseSamples=0)
-                            if (%key_down[$recent_release_trigger_key]=1)
-                              $_play_release_sample := 1
-                            else
-                              $_play_release_sample := 0
-                            end if
+                            $_play_release_sample := 0
                           else
                             if ($slider_releaseSamples>0)
                               $_play_release_sample := 1
+                              if ($slider_releaseSamples=$releaseSampleMode__shortRelease)
+                                %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $SHORT
+                              else
+                                if ($slider_releaseSamples=$releaseSampleMode__longRelease)
+                                  %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $LONG
+                                end if
+                              end if
+                            end if
+                          end if
+                          if (%key_down[$recent_release_trigger_key]=1)
+                            $_play_release_sample := 1
+                            %custom_event_triggered_by_keyswitch[%ripple_id_history[$_r3] mod 1000000] := 1
+                            if (%velo[$recent_release_trigger_key]<64)
+                              %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $SHORT
+                            else
+                              %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $LONG
                             end if
                           end if
                           %custom_event_note_off_timestamp[%ripple_id_history[$_r3] mod 1000000] := $ENGINE_UPTIME
@@ -12080,12 +12169,6 @@ on ui_control($switch_preview17)
                             %custom_event_release_length[%ripple_id_history[$_r3] mod 1000000] := $_fade_out_time
                             fade_out(%ripple_id_history[$_r3],$_fade_out_time*1000,1)
                           else
-                            if (%velo[$recent_release_trigger_key]<64)
-                              %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $SOFT
-                            else
-                              %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $LOUD
-                            end if
-                            %custom_event_triggered_by_keyswitch[%ripple_id_history[$_r3] mod 1000000] := 1
                             %custom_event_waiting_to_trigger_release_sample[%ripple_id_history[$_r3] mod 1000000] := 1
                           end if
                         end if
@@ -12260,7 +12343,6 @@ on ui_control($switch_preview18)
             end if
             $_ks_index := search(%release_trigger_keyswitches,$_note20)
             if ($_ks_index # -1)
-              $switch_releaseTrigger := 1
               $recent_release_trigger_key := $_note20
               call trigger_release_samples_for_all_ripples
             end if
@@ -12529,14 +12611,26 @@ on ui_control($switch_preview18)
                         $_time_til_end_of_ripple := ($_real_time_ripple_length-$_real_time_pos_in_pulse)/1000
                         if (%notes_to_release[$_i2]=%custom_event_second_note[%ripple_id_history[$_r3] mod 1000000])
                           if ($slider_releaseSamples=0)
-                            if (%key_down[$recent_release_trigger_key]=1)
-                              $_play_release_sample := 1
-                            else
-                              $_play_release_sample := 0
-                            end if
+                            $_play_release_sample := 0
                           else
                             if ($slider_releaseSamples>0)
                               $_play_release_sample := 1
+                              if ($slider_releaseSamples=$releaseSampleMode__shortRelease)
+                                %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $SHORT
+                              else
+                                if ($slider_releaseSamples=$releaseSampleMode__longRelease)
+                                  %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $LONG
+                                end if
+                              end if
+                            end if
+                          end if
+                          if (%key_down[$recent_release_trigger_key]=1)
+                            $_play_release_sample := 1
+                            %custom_event_triggered_by_keyswitch[%ripple_id_history[$_r3] mod 1000000] := 1
+                            if (%velo[$recent_release_trigger_key]<64)
+                              %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $SHORT
+                            else
+                              %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $LONG
                             end if
                           end if
                           %custom_event_note_off_timestamp[%ripple_id_history[$_r3] mod 1000000] := $ENGINE_UPTIME
@@ -12546,12 +12640,6 @@ on ui_control($switch_preview18)
                             %custom_event_release_length[%ripple_id_history[$_r3] mod 1000000] := $_fade_out_time
                             fade_out(%ripple_id_history[$_r3],$_fade_out_time*1000,1)
                           else
-                            if (%velo[$recent_release_trigger_key]<64)
-                              %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $SOFT
-                            else
-                              %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $LOUD
-                            end if
-                            %custom_event_triggered_by_keyswitch[%ripple_id_history[$_r3] mod 1000000] := 1
                             %custom_event_waiting_to_trigger_release_sample[%ripple_id_history[$_r3] mod 1000000] := 1
                           end if
                         end if
@@ -12726,7 +12814,6 @@ on ui_control($switch_preview19)
             end if
             $_ks_index := search(%release_trigger_keyswitches,$_note21)
             if ($_ks_index # -1)
-              $switch_releaseTrigger := 1
               $recent_release_trigger_key := $_note21
               call trigger_release_samples_for_all_ripples
             end if
@@ -12995,14 +13082,26 @@ on ui_control($switch_preview19)
                         $_time_til_end_of_ripple := ($_real_time_ripple_length-$_real_time_pos_in_pulse)/1000
                         if (%notes_to_release[$_i2]=%custom_event_second_note[%ripple_id_history[$_r3] mod 1000000])
                           if ($slider_releaseSamples=0)
-                            if (%key_down[$recent_release_trigger_key]=1)
-                              $_play_release_sample := 1
-                            else
-                              $_play_release_sample := 0
-                            end if
+                            $_play_release_sample := 0
                           else
                             if ($slider_releaseSamples>0)
                               $_play_release_sample := 1
+                              if ($slider_releaseSamples=$releaseSampleMode__shortRelease)
+                                %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $SHORT
+                              else
+                                if ($slider_releaseSamples=$releaseSampleMode__longRelease)
+                                  %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $LONG
+                                end if
+                              end if
+                            end if
+                          end if
+                          if (%key_down[$recent_release_trigger_key]=1)
+                            $_play_release_sample := 1
+                            %custom_event_triggered_by_keyswitch[%ripple_id_history[$_r3] mod 1000000] := 1
+                            if (%velo[$recent_release_trigger_key]<64)
+                              %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $SHORT
+                            else
+                              %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $LONG
                             end if
                           end if
                           %custom_event_note_off_timestamp[%ripple_id_history[$_r3] mod 1000000] := $ENGINE_UPTIME
@@ -13012,12 +13111,6 @@ on ui_control($switch_preview19)
                             %custom_event_release_length[%ripple_id_history[$_r3] mod 1000000] := $_fade_out_time
                             fade_out(%ripple_id_history[$_r3],$_fade_out_time*1000,1)
                           else
-                            if (%velo[$recent_release_trigger_key]<64)
-                              %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $SOFT
-                            else
-                              %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $LOUD
-                            end if
-                            %custom_event_triggered_by_keyswitch[%ripple_id_history[$_r3] mod 1000000] := 1
                             %custom_event_waiting_to_trigger_release_sample[%ripple_id_history[$_r3] mod 1000000] := 1
                           end if
                         end if
@@ -13192,7 +13285,6 @@ on ui_control($switch_preview20)
             end if
             $_ks_index := search(%release_trigger_keyswitches,$_note22)
             if ($_ks_index # -1)
-              $switch_releaseTrigger := 1
               $recent_release_trigger_key := $_note22
               call trigger_release_samples_for_all_ripples
             end if
@@ -13461,14 +13553,26 @@ on ui_control($switch_preview20)
                         $_time_til_end_of_ripple := ($_real_time_ripple_length-$_real_time_pos_in_pulse)/1000
                         if (%notes_to_release[$_i2]=%custom_event_second_note[%ripple_id_history[$_r3] mod 1000000])
                           if ($slider_releaseSamples=0)
-                            if (%key_down[$recent_release_trigger_key]=1)
-                              $_play_release_sample := 1
-                            else
-                              $_play_release_sample := 0
-                            end if
+                            $_play_release_sample := 0
                           else
                             if ($slider_releaseSamples>0)
                               $_play_release_sample := 1
+                              if ($slider_releaseSamples=$releaseSampleMode__shortRelease)
+                                %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $SHORT
+                              else
+                                if ($slider_releaseSamples=$releaseSampleMode__longRelease)
+                                  %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $LONG
+                                end if
+                              end if
+                            end if
+                          end if
+                          if (%key_down[$recent_release_trigger_key]=1)
+                            $_play_release_sample := 1
+                            %custom_event_triggered_by_keyswitch[%ripple_id_history[$_r3] mod 1000000] := 1
+                            if (%velo[$recent_release_trigger_key]<64)
+                              %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $SHORT
+                            else
+                              %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $LONG
                             end if
                           end if
                           %custom_event_note_off_timestamp[%ripple_id_history[$_r3] mod 1000000] := $ENGINE_UPTIME
@@ -13478,12 +13582,6 @@ on ui_control($switch_preview20)
                             %custom_event_release_length[%ripple_id_history[$_r3] mod 1000000] := $_fade_out_time
                             fade_out(%ripple_id_history[$_r3],$_fade_out_time*1000,1)
                           else
-                            if (%velo[$recent_release_trigger_key]<64)
-                              %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $SOFT
-                            else
-                              %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $LOUD
-                            end if
-                            %custom_event_triggered_by_keyswitch[%ripple_id_history[$_r3] mod 1000000] := 1
                             %custom_event_waiting_to_trigger_release_sample[%ripple_id_history[$_r3] mod 1000000] := 1
                           end if
                         end if
@@ -13658,7 +13756,6 @@ on ui_control($switch_preview21)
             end if
             $_ks_index := search(%release_trigger_keyswitches,$_note23)
             if ($_ks_index # -1)
-              $switch_releaseTrigger := 1
               $recent_release_trigger_key := $_note23
               call trigger_release_samples_for_all_ripples
             end if
@@ -13927,14 +14024,26 @@ on ui_control($switch_preview21)
                         $_time_til_end_of_ripple := ($_real_time_ripple_length-$_real_time_pos_in_pulse)/1000
                         if (%notes_to_release[$_i2]=%custom_event_second_note[%ripple_id_history[$_r3] mod 1000000])
                           if ($slider_releaseSamples=0)
-                            if (%key_down[$recent_release_trigger_key]=1)
-                              $_play_release_sample := 1
-                            else
-                              $_play_release_sample := 0
-                            end if
+                            $_play_release_sample := 0
                           else
                             if ($slider_releaseSamples>0)
                               $_play_release_sample := 1
+                              if ($slider_releaseSamples=$releaseSampleMode__shortRelease)
+                                %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $SHORT
+                              else
+                                if ($slider_releaseSamples=$releaseSampleMode__longRelease)
+                                  %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $LONG
+                                end if
+                              end if
+                            end if
+                          end if
+                          if (%key_down[$recent_release_trigger_key]=1)
+                            $_play_release_sample := 1
+                            %custom_event_triggered_by_keyswitch[%ripple_id_history[$_r3] mod 1000000] := 1
+                            if (%velo[$recent_release_trigger_key]<64)
+                              %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $SHORT
+                            else
+                              %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $LONG
                             end if
                           end if
                           %custom_event_note_off_timestamp[%ripple_id_history[$_r3] mod 1000000] := $ENGINE_UPTIME
@@ -13944,12 +14053,6 @@ on ui_control($switch_preview21)
                             %custom_event_release_length[%ripple_id_history[$_r3] mod 1000000] := $_fade_out_time
                             fade_out(%ripple_id_history[$_r3],$_fade_out_time*1000,1)
                           else
-                            if (%velo[$recent_release_trigger_key]<64)
-                              %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $SOFT
-                            else
-                              %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $LOUD
-                            end if
-                            %custom_event_triggered_by_keyswitch[%ripple_id_history[$_r3] mod 1000000] := 1
                             %custom_event_waiting_to_trigger_release_sample[%ripple_id_history[$_r3] mod 1000000] := 1
                           end if
                         end if
@@ -14124,7 +14227,6 @@ on ui_control($switch_preview22)
             end if
             $_ks_index := search(%release_trigger_keyswitches,$_note24)
             if ($_ks_index # -1)
-              $switch_releaseTrigger := 1
               $recent_release_trigger_key := $_note24
               call trigger_release_samples_for_all_ripples
             end if
@@ -14393,14 +14495,26 @@ on ui_control($switch_preview22)
                         $_time_til_end_of_ripple := ($_real_time_ripple_length-$_real_time_pos_in_pulse)/1000
                         if (%notes_to_release[$_i2]=%custom_event_second_note[%ripple_id_history[$_r3] mod 1000000])
                           if ($slider_releaseSamples=0)
-                            if (%key_down[$recent_release_trigger_key]=1)
-                              $_play_release_sample := 1
-                            else
-                              $_play_release_sample := 0
-                            end if
+                            $_play_release_sample := 0
                           else
                             if ($slider_releaseSamples>0)
                               $_play_release_sample := 1
+                              if ($slider_releaseSamples=$releaseSampleMode__shortRelease)
+                                %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $SHORT
+                              else
+                                if ($slider_releaseSamples=$releaseSampleMode__longRelease)
+                                  %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $LONG
+                                end if
+                              end if
+                            end if
+                          end if
+                          if (%key_down[$recent_release_trigger_key]=1)
+                            $_play_release_sample := 1
+                            %custom_event_triggered_by_keyswitch[%ripple_id_history[$_r3] mod 1000000] := 1
+                            if (%velo[$recent_release_trigger_key]<64)
+                              %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $SHORT
+                            else
+                              %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $LONG
                             end if
                           end if
                           %custom_event_note_off_timestamp[%ripple_id_history[$_r3] mod 1000000] := $ENGINE_UPTIME
@@ -14410,12 +14524,6 @@ on ui_control($switch_preview22)
                             %custom_event_release_length[%ripple_id_history[$_r3] mod 1000000] := $_fade_out_time
                             fade_out(%ripple_id_history[$_r3],$_fade_out_time*1000,1)
                           else
-                            if (%velo[$recent_release_trigger_key]<64)
-                              %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $SOFT
-                            else
-                              %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $LOUD
-                            end if
-                            %custom_event_triggered_by_keyswitch[%ripple_id_history[$_r3] mod 1000000] := 1
                             %custom_event_waiting_to_trigger_release_sample[%ripple_id_history[$_r3] mod 1000000] := 1
                           end if
                         end if
@@ -14590,7 +14698,6 @@ on ui_control($switch_preview23)
             end if
             $_ks_index := search(%release_trigger_keyswitches,$_note25)
             if ($_ks_index # -1)
-              $switch_releaseTrigger := 1
               $recent_release_trigger_key := $_note25
               call trigger_release_samples_for_all_ripples
             end if
@@ -14859,14 +14966,26 @@ on ui_control($switch_preview23)
                         $_time_til_end_of_ripple := ($_real_time_ripple_length-$_real_time_pos_in_pulse)/1000
                         if (%notes_to_release[$_i2]=%custom_event_second_note[%ripple_id_history[$_r3] mod 1000000])
                           if ($slider_releaseSamples=0)
-                            if (%key_down[$recent_release_trigger_key]=1)
-                              $_play_release_sample := 1
-                            else
-                              $_play_release_sample := 0
-                            end if
+                            $_play_release_sample := 0
                           else
                             if ($slider_releaseSamples>0)
                               $_play_release_sample := 1
+                              if ($slider_releaseSamples=$releaseSampleMode__shortRelease)
+                                %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $SHORT
+                              else
+                                if ($slider_releaseSamples=$releaseSampleMode__longRelease)
+                                  %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $LONG
+                                end if
+                              end if
+                            end if
+                          end if
+                          if (%key_down[$recent_release_trigger_key]=1)
+                            $_play_release_sample := 1
+                            %custom_event_triggered_by_keyswitch[%ripple_id_history[$_r3] mod 1000000] := 1
+                            if (%velo[$recent_release_trigger_key]<64)
+                              %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $SHORT
+                            else
+                              %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $LONG
                             end if
                           end if
                           %custom_event_note_off_timestamp[%ripple_id_history[$_r3] mod 1000000] := $ENGINE_UPTIME
@@ -14876,12 +14995,6 @@ on ui_control($switch_preview23)
                             %custom_event_release_length[%ripple_id_history[$_r3] mod 1000000] := $_fade_out_time
                             fade_out(%ripple_id_history[$_r3],$_fade_out_time*1000,1)
                           else
-                            if (%velo[$recent_release_trigger_key]<64)
-                              %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $SOFT
-                            else
-                              %custom_event_release_dynamic[%ripple_id_history[$_r3] mod 1000000] := $LOUD
-                            end if
-                            %custom_event_triggered_by_keyswitch[%ripple_id_history[$_r3] mod 1000000] := 1
                             %custom_event_waiting_to_trigger_release_sample[%ripple_id_history[$_r3] mod 1000000] := 1
                           end if
                         end if
@@ -15058,16 +15171,16 @@ on ui_control($switch_noReleaseSample)
   call set_keys_pressed
 end on
 
-on ui_control($switch_softRelease)
-  $slider_releaseSamples := $releaseSampleMode__softRelease
+on ui_control($switch_shortRelease)
+  $slider_releaseSamples := $releaseSampleMode__shortRelease
   call update_releaseSamples_switches
   %p[$sp-1] := $control__releaseSamples
   call update_nks_label
   call set_keys_pressed
 end on
 
-on ui_control($switch_loudRelease)
-  $slider_releaseSamples := $releaseSampleMode__loudRelease
+on ui_control($switch_longRelease)
+  $slider_releaseSamples := $releaseSampleMode__longRelease
   call update_releaseSamples_switches
   %p[$sp-1] := $control__releaseSamples
   call update_nks_label

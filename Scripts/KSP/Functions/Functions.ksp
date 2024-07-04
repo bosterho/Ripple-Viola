@@ -530,29 +530,24 @@ function play_release_samples_when_its_time
 			if event[ripple_id_history[r]].waiting_to_trigger_release_sample = 1 ...
 			and event[ripple_id_history[r]].type # RELEASE_SAMPLE_TYPE
 
-				declare release_dynamic
-				declare note := event[ripple_id_history[r]].origin_note
-				if event[ripple_id_history[r]].triggered_by_keyswitch = 0
-					if slider_releaseSamples = releaseSampleMode.softRelease
-						release_dynamic := SOFT
-					else
-						release_dynamic := LOUD
-					end if
-				else if event[ripple_id_history[r]].triggered_by_keyswitch = 1
-					release_dynamic := event[ripple_id_history[r]].release_dynamic
-				end if
-
 				declare artic := event[ripple_id_history[r]].artic
+				declare release_dynamic := event[ripple_id_history[r]].release_dynamic
 				declare rec_time_pos_in_ripple := ripple_id_history[r] -> play_pos mod rec_time_ripple_lengths[artic]
-				if release_dynamic = SOFT
-					if rec_time_pos_in_ripple > rec_time_ripple_lengths[artic] / 2
-						fade_out(ripple_id_history[r], ticks_to_ms(ripple_length_ticks[artic] / 2), STOP_VOICE_AFTER_FADE_OUT)
+				// if release_dynamic = SHORT
+				// 	if rec_time_pos_in_ripple > rec_time_ripple_lengths[artic] / 2
+				// 		fade_out(ripple_id_history[r], ticks_to_ms(ripple_length_ticks[artic] / 2), STOP_VOICE_AFTER_FADE_OUT)
+				// 	end if
+				// else if release_dynamic = LONG
+					if artic = artic.sixteenths
+						if rec_time_pos_in_ripple > rec_time_ripple_lengths[artic] / 4 * 3
+							fade_out(ripple_id_history[r], ticks_to_ms(ripple_length_ticks[artic] / 4), STOP_VOICE_AFTER_FADE_OUT)
+						end if
+					else
+						if rec_time_pos_in_ripple > rec_time_ripple_lengths[artic] / 8 * 7
+							fade_out(ripple_id_history[r], ticks_to_ms(ripple_length_ticks[artic] / 4), STOP_VOICE_AFTER_FADE_OUT)
+						end if
 					end if
-				else if release_dynamic = LOUD
-					if rec_time_pos_in_ripple > rec_time_ripple_lengths[artic] / 4 * 3
-						fade_out(ripple_id_history[r], ticks_to_ms(ripple_length_ticks[artic] / 4), STOP_VOICE_AFTER_FADE_OUT)
-					end if
-				end if
+				// end if
 				
 				if rec_time_pos_in_ripple < event[ripple_id_history[r]].prev_rec_time_pos_in_ripple // If it has wrapped
 					event[ripple_id_history[r]].waiting_to_trigger_release_sample := 0
@@ -577,16 +572,18 @@ function play_release_samples_when_its_time
 					declare vel := (cur_ripple * 32 + 1)
 
 					// Play release-sample
-					// Set Sample start and Fade time
 					declare sample_start
 					declare fade_time
-					if release_dynamic = SOFT
-						sample_start := rec_time_ripple_lengths[artic] / 4
-						fade_time := 100000
-					else if release_dynamic = LOUD
+					if release_dynamic = SHORT
+						sample_start := int(float(rec_time_ripple_lengths[artic]) / 3.5)
+						// fade_time := 100000
+						fade_time := ticks_to_ms(int(float(ripple_length_ticks[artic]) * speeds[artic] / 7.0))
+					else if release_dynamic = LONG
 						sample_start := 0
-						fade_time := 50000
+						// fade_time := 50000
+						fade_time := ticks_to_ms(int(float(ripple_length_ticks[artic]) * speeds[artic] / 15.0))
 					end if
+					// msg(fade_time)
 
 					group[release_group[artic]].mods["ENV_AHDSR"].target["ENV_AHDSR_VOLUME"].env_atk := V2E.AtkTime(float(fade_time) / 10.0)
 
@@ -595,6 +592,7 @@ function play_release_samples_when_its_time
 					release_sample_length := int(float(release_sample_length) * speeds[slider_speed])
 					event[ripple_id_history[r]].release_sample_length := release_sample_length // for animations
 
+					declare note := event[ripple_id_history[r]].origin_note
 					fade_out(rls_note_ids[note], fade_time, STOP_VOICE_AFTER_FADE_OUT) // cut off redundant release samples
 					declare note_id := play_note(note, vel, sample_start, 0)
 					rls_note_ids[note] := note_id

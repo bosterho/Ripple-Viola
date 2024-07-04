@@ -29,8 +29,8 @@ on init
 	define UI_HEIGHT := 427
 	declare const DOWN := 0
 	declare const UP := 1
-	declare const SOFT := 0
-	declare const LOUD := 1
+	declare const SHORT := 0
+	declare const LONG := 1
 	declare const NUM_RRS := 4
 	declare const MAX_NUM_CHORD_IDS := 1000
 	define MAX_NUM_NOTES := 64
@@ -156,8 +156,8 @@ on init
 
 	// Release samples
 	define NUM_releaseSampleModes := 3
-	define releaseSampleModes := noReleaseSample, softRelease, loudRelease
-	declare !releaseSamples_texts[] := ("Off", "Soft", "Loud")
+	define releaseSampleModes := noReleaseSample, shortRelease, longRelease
+	declare !releaseSamples_texts[] := ("Off", "Short", "Long")
 	macro declare_release_sample_mode_constants(#name#)
 		declare const releaseSampleMode.#name# := N
 	end macro
@@ -447,6 +447,22 @@ on init
 	end for
 
 	{{ UI }}
+	// Declare ripples first so that they can go underneath all the info panels
+	declare ui_panel ripples_panel
+	ripples_panel -> z_layer := -1
+
+	declare ui_slider ripple[MAX_RIPPLE_HISTORY](0,127)
+	for i := 0 to num_elements(ripple) - 1
+		ripple[i] -> parent_panel := get_ui_id(ripples_panel)
+		ripple[i] -> hide := HIDE_WHOLE_CONTROL
+	end for
+
+	declare ui_slider ripple_swell[MAX_RIPPLE_HISTORY](0,127)
+	for i := 0 to num_elements(ripple_swell) - 1
+		ripple_swell[i] -> parent_panel := get_ui_id(ripples_panel)
+		ripple_swell[i] -> hide := HIDE_WHOLE_CONTROL
+	end for
+
 	import "F2K/UI Code.ksp"
 	set_control_par_str(INST_ICON_ID, CONTROL_PAR_PICTURE, "insticon")
 
@@ -643,10 +659,8 @@ on init
 		releaseSamples_ids[i] -> text := releaseSamples_texts[i]
 	end for
 	switch_noReleaseSample  -> width := switch_noReleaseSample  -> width + 14
-	switch_softRelease      -> width := switch_softRelease      -> width + 14
-	switch_loudRelease      -> width := switch_loudRelease      -> width + 14
-
-	switch_releaseTrigger -> allow_automation := 0
+	switch_shortRelease     -> width := switch_shortRelease     -> width + 14
+	switch_longRelease      -> width := switch_longRelease      -> width + 14
 
 	// Options
 	define OPTIONS_MOUSE_BEHAVIOR := 2000
@@ -668,18 +682,6 @@ on init
 	slider_reverb -> default := 500000
 
 	menu_reverb -> textpos_y := 100
-
-	declare ui_slider ripple[MAX_RIPPLE_HISTORY](0,127)
-	for i := 0 to num_elements(ripple) - 1
-		ripple[i] -> z_layer := -1
-		ripple[i] -> hide := HIDE_WHOLE_CONTROL
-	end for
-
-	declare ui_slider ripple_swell[MAX_RIPPLE_HISTORY](0,127)
-	for i := 0 to num_elements(ripple_swell) - 1
-		ripple_swell[i] -> z_layer := -1
-		ripple_swell[i] -> hide := HIDE_WHOLE_CONTROL
-	end for
 
 	{{ Automation }}
 	START_INC (N, 0, 1)
@@ -770,7 +772,6 @@ function note_callback(note, velocity, event_id)
 
 	ks_index := search(release_trigger_keyswitches, note)
 	if ks_index # -1
-		switch_releaseTrigger := 1
 		recent_release_trigger_key := note
 		call trigger_release_samples_for_all_ripples
 	end if
@@ -1042,10 +1043,6 @@ function release_callback(note, event_id)
 		set_key_pressed(note, 0)
 	end if
 
-	if note = release_trigger_keyswitches[0] or note = release_trigger_keyswitches[1]
-		switch_releaseTrigger := 0
-	end if
-
 	if in_range(note, LOWEST_KEY, HIGHEST_KEY) and event[event_id].source = OUTSIDE_SOURCE
 		key_ids[note] -> picture_state := 0
 
@@ -1099,13 +1096,25 @@ function release(note, voice)
 					// Decide whether to play release sample
 					declare play_release_sample
 					if slider_releaseSamples = 0
-						if key_down[recent_release_trigger_key] = 1
-							play_release_sample := 1
-						else
-							play_release_sample := 0
-						end if
+						play_release_sample := 0
 					else if slider_releaseSamples > 0
 						play_release_sample := 1
+						if slider_releaseSamples = releaseSampleMode.shortRelease
+							event[ripple_id_history[r]].release_dynamic := SHORT
+						else if slider_releaseSamples = releaseSampleMode.longRelease
+							event[ripple_id_history[r]].release_dynamic := LONG
+						end if
+					end if
+
+					// Always override dynamic set by slider, if triggered by keyswitch
+					if key_down[recent_release_trigger_key] = 1
+						play_release_sample := 1
+						event[ripple_id_history[r]].triggered_by_keyswitch := 1
+						if velo[recent_release_trigger_key] < 64
+							event[ripple_id_history[r]].release_dynamic := SHORT
+						else
+							event[ripple_id_history[r]].release_dynamic := LONG
+						end if
 					end if
 
 					// Either fade out, or put release sample into queue
@@ -1116,12 +1125,6 @@ function release(note, voice)
 						event[ripple_id_history[r]].release_length := fade_out_time
 						fade_out(ripple_id_history[r], fade_out_time * 1000, STOP_VOICE_AFTER_FADE_OUT)
 					else
-						if velo[recent_release_trigger_key] < 64
-							event[ripple_id_history[r]].release_dynamic := SOFT
-						else
-							event[ripple_id_history[r]].release_dynamic := LOUD
-						end if
-						event[ripple_id_history[r]].triggered_by_keyswitch := 1
 						event[ripple_id_history[r]].waiting_to_trigger_release_sample := 1
 					end if
 				end if
@@ -1574,18 +1577,6 @@ macro releaseSamples_switch_callbacks(#mode#)
 	end on
 end macro
 literate_macro(releaseSamples_switch_callbacks) on releaseSampleModes
-
-on ui_control(switch_releaseTrigger)
-	switch_releaseTrigger := 0
-	key_down[release_trigger_keyswitches[0]] := 1
-	key_down[release_trigger_keyswitches[1]] := 1
-	call trigger_release_samples_for_all_ripples
-	set_key_pressed(release_trigger_keyswitches[0], 1)
-	set_key_pressed(release_trigger_keyswitches[1], 1)
-	wait(100000)
-	set_key_pressed(release_trigger_keyswitches[0], 0)
-	set_key_pressed(release_trigger_keyswitches[1], 0)
-end on
 
 on ui_control (switch_logoAnimTrigger)
 	label_version -> hide := HIDE_PART_NOTHING
