@@ -1,4 +1,4 @@
-{ Compiled on Thu Jul  4 14:58:58 2024 }
+{ Compiled on Mon Jul  8 11:57:40 2024 }
 on init
   declare $sksp_dummy
   declare $concat_it
@@ -2179,6 +2179,8 @@ on init
   declare $_ripple_i
   declare $_low_note2
   declare $_high_note2
+  declare $_origin_note
+  declare $_dest_note
   declare $_already_playing := 0
   declare $_offset_real_time
   declare $_do_legato := 0
@@ -3117,11 +3119,13 @@ on note
         else
           $direction := $DOWN
         end if
+        $_origin_note := %__notes[$_ripple_i]
+        $_dest_note := %__notes[$_ripple_i]+%__intervals[$_ripple_i]
         $_already_playing := 0
         $r := 0
         while ($r<100)
           if (%ripple_id_history[$r] # 0)
-            if (%custom_event_low_note[%ripple_id_history[$r] mod 1000000]=$_low_note2 and (%key_released[$_low_note2]=0) and (%custom_event_high_note[%ripple_id_history[$r] mod 1000000]=$_high_note2) and (%key_released[$_high_note2]=0) and (%custom_event_high_note[%ripple_id_history[$r] mod 1000000]=$_high_note2) and (%custom_event_direction[%ripple_id_history[$r] mod 1000000]=$direction) and (%custom_event_releasing[%ripple_id_history[$r] mod 1000000]=0))
+            if (%custom_event_low_note[%ripple_id_history[$r] mod 1000000]=$_low_note2 and (%key_released[$_low_note2]=0) and (%custom_event_high_note[%ripple_id_history[$r] mod 1000000]=$_high_note2) and (%key_released[$_high_note2]=0) or (%custom_event_origin_note[%ripple_id_history[$r] mod 1000000]=$_origin_note and (%custom_event_dest_note[%ripple_id_history[$r] mod 1000000]=$_dest_note) and (%custom_event_direction[%ripple_id_history[$r] mod 1000000]=$direction) and (%custom_event_releasing[%ripple_id_history[$r] mod 1000000]=0)))
               $_already_playing := 1
             end if
           end if
@@ -3171,8 +3175,8 @@ on note
           %custom_event_note[$_note_id3 mod 1000000] := $EVENT_NOTE
           %custom_event_low_note[$_note_id3 mod 1000000] := $_low_note2
           %custom_event_high_note[$_note_id3 mod 1000000] := $_high_note2
-          %custom_event_origin_note[$_note_id3 mod 1000000] := %__notes[$_ripple_i]
-          %custom_event_dest_note[$_note_id3 mod 1000000] := %__notes[$_ripple_i]+%__intervals[$_ripple_i]
+          %custom_event_origin_note[$_note_id3 mod 1000000] := $_origin_note
+          %custom_event_dest_note[$_note_id3 mod 1000000] := $_dest_note
           %custom_event_first_note[$_note_id3 mod 1000000] := %_played_notes[$_ripple_i]
           %custom_event_second_note[$_note_id3 mod 1000000] := %_played_notes[$_ripple_i]+%_played_intervals[$_ripple_i]
           %custom_event_velocity[$_note_id3 mod 1000000] := $EVENT_VELOCITY
@@ -4022,11 +4026,13 @@ on ui_control($switch_preview0)
                   else
                     $direction := $DOWN
                   end if
+                  $_origin_note := %__notes[$_ripple_i]
+                  $_dest_note := %__notes[$_ripple_i]+%__intervals[$_ripple_i]
                   $_already_playing := 0
                   $r := 0
                   while ($r<100)
                     if (%ripple_id_history[$r] # 0)
-                      if (%custom_event_low_note[%ripple_id_history[$r] mod 1000000]=$_low_note2 and (%key_released[$_low_note2]=0) and (%custom_event_high_note[%ripple_id_history[$r] mod 1000000]=$_high_note2) and (%key_released[$_high_note2]=0) and (%custom_event_high_note[%ripple_id_history[$r] mod 1000000]=$_high_note2) and (%custom_event_direction[%ripple_id_history[$r] mod 1000000]=$direction) and (%custom_event_releasing[%ripple_id_history[$r] mod 1000000]=0))
+                      if (%custom_event_low_note[%ripple_id_history[$r] mod 1000000]=$_low_note2 and (%key_released[$_low_note2]=0) and (%custom_event_high_note[%ripple_id_history[$r] mod 1000000]=$_high_note2) and (%key_released[$_high_note2]=0) or (%custom_event_origin_note[%ripple_id_history[$r] mod 1000000]=$_origin_note and (%custom_event_dest_note[%ripple_id_history[$r] mod 1000000]=$_dest_note) and (%custom_event_direction[%ripple_id_history[$r] mod 1000000]=$direction) and (%custom_event_releasing[%ripple_id_history[$r] mod 1000000]=0)))
                         $_already_playing := 1
                       end if
                     end if
@@ -4076,8 +4082,8 @@ on ui_control($switch_preview0)
                     %custom_event_note[$_note_id3 mod 1000000] := $_note2
                     %custom_event_low_note[$_note_id3 mod 1000000] := $_low_note2
                     %custom_event_high_note[$_note_id3 mod 1000000] := $_high_note2
-                    %custom_event_origin_note[$_note_id3 mod 1000000] := %__notes[$_ripple_i]
-                    %custom_event_dest_note[$_note_id3 mod 1000000] := %__notes[$_ripple_i]+%__intervals[$_ripple_i]
+                    %custom_event_origin_note[$_note_id3 mod 1000000] := $_origin_note
+                    %custom_event_dest_note[$_note_id3 mod 1000000] := $_dest_note
                     %custom_event_first_note[$_note_id3 mod 1000000] := %_played_notes[$_ripple_i]
                     %custom_event_second_note[$_note_id3 mod 1000000] := %_played_notes[$_ripple_i]+%_played_intervals[$_ripple_i]
                     %custom_event_velocity[$_note_id3 mod 1000000] := $_velocity
@@ -4493,11 +4499,13 @@ on ui_control($switch_preview1)
                   else
                     $direction := $DOWN
                   end if
+                  $_origin_note := %__notes[$_ripple_i]
+                  $_dest_note := %__notes[$_ripple_i]+%__intervals[$_ripple_i]
                   $_already_playing := 0
                   $r := 0
                   while ($r<100)
                     if (%ripple_id_history[$r] # 0)
-                      if (%custom_event_low_note[%ripple_id_history[$r] mod 1000000]=$_low_note2 and (%key_released[$_low_note2]=0) and (%custom_event_high_note[%ripple_id_history[$r] mod 1000000]=$_high_note2) and (%key_released[$_high_note2]=0) and (%custom_event_high_note[%ripple_id_history[$r] mod 1000000]=$_high_note2) and (%custom_event_direction[%ripple_id_history[$r] mod 1000000]=$direction) and (%custom_event_releasing[%ripple_id_history[$r] mod 1000000]=0))
+                      if (%custom_event_low_note[%ripple_id_history[$r] mod 1000000]=$_low_note2 and (%key_released[$_low_note2]=0) and (%custom_event_high_note[%ripple_id_history[$r] mod 1000000]=$_high_note2) and (%key_released[$_high_note2]=0) or (%custom_event_origin_note[%ripple_id_history[$r] mod 1000000]=$_origin_note and (%custom_event_dest_note[%ripple_id_history[$r] mod 1000000]=$_dest_note) and (%custom_event_direction[%ripple_id_history[$r] mod 1000000]=$direction) and (%custom_event_releasing[%ripple_id_history[$r] mod 1000000]=0)))
                         $_already_playing := 1
                       end if
                     end if
@@ -4547,8 +4555,8 @@ on ui_control($switch_preview1)
                     %custom_event_note[$_note_id3 mod 1000000] := $_note3
                     %custom_event_low_note[$_note_id3 mod 1000000] := $_low_note2
                     %custom_event_high_note[$_note_id3 mod 1000000] := $_high_note2
-                    %custom_event_origin_note[$_note_id3 mod 1000000] := %__notes[$_ripple_i]
-                    %custom_event_dest_note[$_note_id3 mod 1000000] := %__notes[$_ripple_i]+%__intervals[$_ripple_i]
+                    %custom_event_origin_note[$_note_id3 mod 1000000] := $_origin_note
+                    %custom_event_dest_note[$_note_id3 mod 1000000] := $_dest_note
                     %custom_event_first_note[$_note_id3 mod 1000000] := %_played_notes[$_ripple_i]
                     %custom_event_second_note[$_note_id3 mod 1000000] := %_played_notes[$_ripple_i]+%_played_intervals[$_ripple_i]
                     %custom_event_velocity[$_note_id3 mod 1000000] := $_velocity2
@@ -4964,11 +4972,13 @@ on ui_control($switch_preview2)
                   else
                     $direction := $DOWN
                   end if
+                  $_origin_note := %__notes[$_ripple_i]
+                  $_dest_note := %__notes[$_ripple_i]+%__intervals[$_ripple_i]
                   $_already_playing := 0
                   $r := 0
                   while ($r<100)
                     if (%ripple_id_history[$r] # 0)
-                      if (%custom_event_low_note[%ripple_id_history[$r] mod 1000000]=$_low_note2 and (%key_released[$_low_note2]=0) and (%custom_event_high_note[%ripple_id_history[$r] mod 1000000]=$_high_note2) and (%key_released[$_high_note2]=0) and (%custom_event_high_note[%ripple_id_history[$r] mod 1000000]=$_high_note2) and (%custom_event_direction[%ripple_id_history[$r] mod 1000000]=$direction) and (%custom_event_releasing[%ripple_id_history[$r] mod 1000000]=0))
+                      if (%custom_event_low_note[%ripple_id_history[$r] mod 1000000]=$_low_note2 and (%key_released[$_low_note2]=0) and (%custom_event_high_note[%ripple_id_history[$r] mod 1000000]=$_high_note2) and (%key_released[$_high_note2]=0) or (%custom_event_origin_note[%ripple_id_history[$r] mod 1000000]=$_origin_note and (%custom_event_dest_note[%ripple_id_history[$r] mod 1000000]=$_dest_note) and (%custom_event_direction[%ripple_id_history[$r] mod 1000000]=$direction) and (%custom_event_releasing[%ripple_id_history[$r] mod 1000000]=0)))
                         $_already_playing := 1
                       end if
                     end if
@@ -5018,8 +5028,8 @@ on ui_control($switch_preview2)
                     %custom_event_note[$_note_id3 mod 1000000] := $_note4
                     %custom_event_low_note[$_note_id3 mod 1000000] := $_low_note2
                     %custom_event_high_note[$_note_id3 mod 1000000] := $_high_note2
-                    %custom_event_origin_note[$_note_id3 mod 1000000] := %__notes[$_ripple_i]
-                    %custom_event_dest_note[$_note_id3 mod 1000000] := %__notes[$_ripple_i]+%__intervals[$_ripple_i]
+                    %custom_event_origin_note[$_note_id3 mod 1000000] := $_origin_note
+                    %custom_event_dest_note[$_note_id3 mod 1000000] := $_dest_note
                     %custom_event_first_note[$_note_id3 mod 1000000] := %_played_notes[$_ripple_i]
                     %custom_event_second_note[$_note_id3 mod 1000000] := %_played_notes[$_ripple_i]+%_played_intervals[$_ripple_i]
                     %custom_event_velocity[$_note_id3 mod 1000000] := $_velocity3
@@ -5435,11 +5445,13 @@ on ui_control($switch_preview3)
                   else
                     $direction := $DOWN
                   end if
+                  $_origin_note := %__notes[$_ripple_i]
+                  $_dest_note := %__notes[$_ripple_i]+%__intervals[$_ripple_i]
                   $_already_playing := 0
                   $r := 0
                   while ($r<100)
                     if (%ripple_id_history[$r] # 0)
-                      if (%custom_event_low_note[%ripple_id_history[$r] mod 1000000]=$_low_note2 and (%key_released[$_low_note2]=0) and (%custom_event_high_note[%ripple_id_history[$r] mod 1000000]=$_high_note2) and (%key_released[$_high_note2]=0) and (%custom_event_high_note[%ripple_id_history[$r] mod 1000000]=$_high_note2) and (%custom_event_direction[%ripple_id_history[$r] mod 1000000]=$direction) and (%custom_event_releasing[%ripple_id_history[$r] mod 1000000]=0))
+                      if (%custom_event_low_note[%ripple_id_history[$r] mod 1000000]=$_low_note2 and (%key_released[$_low_note2]=0) and (%custom_event_high_note[%ripple_id_history[$r] mod 1000000]=$_high_note2) and (%key_released[$_high_note2]=0) or (%custom_event_origin_note[%ripple_id_history[$r] mod 1000000]=$_origin_note and (%custom_event_dest_note[%ripple_id_history[$r] mod 1000000]=$_dest_note) and (%custom_event_direction[%ripple_id_history[$r] mod 1000000]=$direction) and (%custom_event_releasing[%ripple_id_history[$r] mod 1000000]=0)))
                         $_already_playing := 1
                       end if
                     end if
@@ -5489,8 +5501,8 @@ on ui_control($switch_preview3)
                     %custom_event_note[$_note_id3 mod 1000000] := $_note5
                     %custom_event_low_note[$_note_id3 mod 1000000] := $_low_note2
                     %custom_event_high_note[$_note_id3 mod 1000000] := $_high_note2
-                    %custom_event_origin_note[$_note_id3 mod 1000000] := %__notes[$_ripple_i]
-                    %custom_event_dest_note[$_note_id3 mod 1000000] := %__notes[$_ripple_i]+%__intervals[$_ripple_i]
+                    %custom_event_origin_note[$_note_id3 mod 1000000] := $_origin_note
+                    %custom_event_dest_note[$_note_id3 mod 1000000] := $_dest_note
                     %custom_event_first_note[$_note_id3 mod 1000000] := %_played_notes[$_ripple_i]
                     %custom_event_second_note[$_note_id3 mod 1000000] := %_played_notes[$_ripple_i]+%_played_intervals[$_ripple_i]
                     %custom_event_velocity[$_note_id3 mod 1000000] := $_velocity4
@@ -5906,11 +5918,13 @@ on ui_control($switch_preview4)
                   else
                     $direction := $DOWN
                   end if
+                  $_origin_note := %__notes[$_ripple_i]
+                  $_dest_note := %__notes[$_ripple_i]+%__intervals[$_ripple_i]
                   $_already_playing := 0
                   $r := 0
                   while ($r<100)
                     if (%ripple_id_history[$r] # 0)
-                      if (%custom_event_low_note[%ripple_id_history[$r] mod 1000000]=$_low_note2 and (%key_released[$_low_note2]=0) and (%custom_event_high_note[%ripple_id_history[$r] mod 1000000]=$_high_note2) and (%key_released[$_high_note2]=0) and (%custom_event_high_note[%ripple_id_history[$r] mod 1000000]=$_high_note2) and (%custom_event_direction[%ripple_id_history[$r] mod 1000000]=$direction) and (%custom_event_releasing[%ripple_id_history[$r] mod 1000000]=0))
+                      if (%custom_event_low_note[%ripple_id_history[$r] mod 1000000]=$_low_note2 and (%key_released[$_low_note2]=0) and (%custom_event_high_note[%ripple_id_history[$r] mod 1000000]=$_high_note2) and (%key_released[$_high_note2]=0) or (%custom_event_origin_note[%ripple_id_history[$r] mod 1000000]=$_origin_note and (%custom_event_dest_note[%ripple_id_history[$r] mod 1000000]=$_dest_note) and (%custom_event_direction[%ripple_id_history[$r] mod 1000000]=$direction) and (%custom_event_releasing[%ripple_id_history[$r] mod 1000000]=0)))
                         $_already_playing := 1
                       end if
                     end if
@@ -5960,8 +5974,8 @@ on ui_control($switch_preview4)
                     %custom_event_note[$_note_id3 mod 1000000] := $_note6
                     %custom_event_low_note[$_note_id3 mod 1000000] := $_low_note2
                     %custom_event_high_note[$_note_id3 mod 1000000] := $_high_note2
-                    %custom_event_origin_note[$_note_id3 mod 1000000] := %__notes[$_ripple_i]
-                    %custom_event_dest_note[$_note_id3 mod 1000000] := %__notes[$_ripple_i]+%__intervals[$_ripple_i]
+                    %custom_event_origin_note[$_note_id3 mod 1000000] := $_origin_note
+                    %custom_event_dest_note[$_note_id3 mod 1000000] := $_dest_note
                     %custom_event_first_note[$_note_id3 mod 1000000] := %_played_notes[$_ripple_i]
                     %custom_event_second_note[$_note_id3 mod 1000000] := %_played_notes[$_ripple_i]+%_played_intervals[$_ripple_i]
                     %custom_event_velocity[$_note_id3 mod 1000000] := $_velocity5
@@ -6377,11 +6391,13 @@ on ui_control($switch_preview5)
                   else
                     $direction := $DOWN
                   end if
+                  $_origin_note := %__notes[$_ripple_i]
+                  $_dest_note := %__notes[$_ripple_i]+%__intervals[$_ripple_i]
                   $_already_playing := 0
                   $r := 0
                   while ($r<100)
                     if (%ripple_id_history[$r] # 0)
-                      if (%custom_event_low_note[%ripple_id_history[$r] mod 1000000]=$_low_note2 and (%key_released[$_low_note2]=0) and (%custom_event_high_note[%ripple_id_history[$r] mod 1000000]=$_high_note2) and (%key_released[$_high_note2]=0) and (%custom_event_high_note[%ripple_id_history[$r] mod 1000000]=$_high_note2) and (%custom_event_direction[%ripple_id_history[$r] mod 1000000]=$direction) and (%custom_event_releasing[%ripple_id_history[$r] mod 1000000]=0))
+                      if (%custom_event_low_note[%ripple_id_history[$r] mod 1000000]=$_low_note2 and (%key_released[$_low_note2]=0) and (%custom_event_high_note[%ripple_id_history[$r] mod 1000000]=$_high_note2) and (%key_released[$_high_note2]=0) or (%custom_event_origin_note[%ripple_id_history[$r] mod 1000000]=$_origin_note and (%custom_event_dest_note[%ripple_id_history[$r] mod 1000000]=$_dest_note) and (%custom_event_direction[%ripple_id_history[$r] mod 1000000]=$direction) and (%custom_event_releasing[%ripple_id_history[$r] mod 1000000]=0)))
                         $_already_playing := 1
                       end if
                     end if
@@ -6431,8 +6447,8 @@ on ui_control($switch_preview5)
                     %custom_event_note[$_note_id3 mod 1000000] := $_note7
                     %custom_event_low_note[$_note_id3 mod 1000000] := $_low_note2
                     %custom_event_high_note[$_note_id3 mod 1000000] := $_high_note2
-                    %custom_event_origin_note[$_note_id3 mod 1000000] := %__notes[$_ripple_i]
-                    %custom_event_dest_note[$_note_id3 mod 1000000] := %__notes[$_ripple_i]+%__intervals[$_ripple_i]
+                    %custom_event_origin_note[$_note_id3 mod 1000000] := $_origin_note
+                    %custom_event_dest_note[$_note_id3 mod 1000000] := $_dest_note
                     %custom_event_first_note[$_note_id3 mod 1000000] := %_played_notes[$_ripple_i]
                     %custom_event_second_note[$_note_id3 mod 1000000] := %_played_notes[$_ripple_i]+%_played_intervals[$_ripple_i]
                     %custom_event_velocity[$_note_id3 mod 1000000] := $_velocity6
@@ -6848,11 +6864,13 @@ on ui_control($switch_preview6)
                   else
                     $direction := $DOWN
                   end if
+                  $_origin_note := %__notes[$_ripple_i]
+                  $_dest_note := %__notes[$_ripple_i]+%__intervals[$_ripple_i]
                   $_already_playing := 0
                   $r := 0
                   while ($r<100)
                     if (%ripple_id_history[$r] # 0)
-                      if (%custom_event_low_note[%ripple_id_history[$r] mod 1000000]=$_low_note2 and (%key_released[$_low_note2]=0) and (%custom_event_high_note[%ripple_id_history[$r] mod 1000000]=$_high_note2) and (%key_released[$_high_note2]=0) and (%custom_event_high_note[%ripple_id_history[$r] mod 1000000]=$_high_note2) and (%custom_event_direction[%ripple_id_history[$r] mod 1000000]=$direction) and (%custom_event_releasing[%ripple_id_history[$r] mod 1000000]=0))
+                      if (%custom_event_low_note[%ripple_id_history[$r] mod 1000000]=$_low_note2 and (%key_released[$_low_note2]=0) and (%custom_event_high_note[%ripple_id_history[$r] mod 1000000]=$_high_note2) and (%key_released[$_high_note2]=0) or (%custom_event_origin_note[%ripple_id_history[$r] mod 1000000]=$_origin_note and (%custom_event_dest_note[%ripple_id_history[$r] mod 1000000]=$_dest_note) and (%custom_event_direction[%ripple_id_history[$r] mod 1000000]=$direction) and (%custom_event_releasing[%ripple_id_history[$r] mod 1000000]=0)))
                         $_already_playing := 1
                       end if
                     end if
@@ -6902,8 +6920,8 @@ on ui_control($switch_preview6)
                     %custom_event_note[$_note_id3 mod 1000000] := $_note8
                     %custom_event_low_note[$_note_id3 mod 1000000] := $_low_note2
                     %custom_event_high_note[$_note_id3 mod 1000000] := $_high_note2
-                    %custom_event_origin_note[$_note_id3 mod 1000000] := %__notes[$_ripple_i]
-                    %custom_event_dest_note[$_note_id3 mod 1000000] := %__notes[$_ripple_i]+%__intervals[$_ripple_i]
+                    %custom_event_origin_note[$_note_id3 mod 1000000] := $_origin_note
+                    %custom_event_dest_note[$_note_id3 mod 1000000] := $_dest_note
                     %custom_event_first_note[$_note_id3 mod 1000000] := %_played_notes[$_ripple_i]
                     %custom_event_second_note[$_note_id3 mod 1000000] := %_played_notes[$_ripple_i]+%_played_intervals[$_ripple_i]
                     %custom_event_velocity[$_note_id3 mod 1000000] := $_velocity7
@@ -7319,11 +7337,13 @@ on ui_control($switch_preview7)
                   else
                     $direction := $DOWN
                   end if
+                  $_origin_note := %__notes[$_ripple_i]
+                  $_dest_note := %__notes[$_ripple_i]+%__intervals[$_ripple_i]
                   $_already_playing := 0
                   $r := 0
                   while ($r<100)
                     if (%ripple_id_history[$r] # 0)
-                      if (%custom_event_low_note[%ripple_id_history[$r] mod 1000000]=$_low_note2 and (%key_released[$_low_note2]=0) and (%custom_event_high_note[%ripple_id_history[$r] mod 1000000]=$_high_note2) and (%key_released[$_high_note2]=0) and (%custom_event_high_note[%ripple_id_history[$r] mod 1000000]=$_high_note2) and (%custom_event_direction[%ripple_id_history[$r] mod 1000000]=$direction) and (%custom_event_releasing[%ripple_id_history[$r] mod 1000000]=0))
+                      if (%custom_event_low_note[%ripple_id_history[$r] mod 1000000]=$_low_note2 and (%key_released[$_low_note2]=0) and (%custom_event_high_note[%ripple_id_history[$r] mod 1000000]=$_high_note2) and (%key_released[$_high_note2]=0) or (%custom_event_origin_note[%ripple_id_history[$r] mod 1000000]=$_origin_note and (%custom_event_dest_note[%ripple_id_history[$r] mod 1000000]=$_dest_note) and (%custom_event_direction[%ripple_id_history[$r] mod 1000000]=$direction) and (%custom_event_releasing[%ripple_id_history[$r] mod 1000000]=0)))
                         $_already_playing := 1
                       end if
                     end if
@@ -7373,8 +7393,8 @@ on ui_control($switch_preview7)
                     %custom_event_note[$_note_id3 mod 1000000] := $_note9
                     %custom_event_low_note[$_note_id3 mod 1000000] := $_low_note2
                     %custom_event_high_note[$_note_id3 mod 1000000] := $_high_note2
-                    %custom_event_origin_note[$_note_id3 mod 1000000] := %__notes[$_ripple_i]
-                    %custom_event_dest_note[$_note_id3 mod 1000000] := %__notes[$_ripple_i]+%__intervals[$_ripple_i]
+                    %custom_event_origin_note[$_note_id3 mod 1000000] := $_origin_note
+                    %custom_event_dest_note[$_note_id3 mod 1000000] := $_dest_note
                     %custom_event_first_note[$_note_id3 mod 1000000] := %_played_notes[$_ripple_i]
                     %custom_event_second_note[$_note_id3 mod 1000000] := %_played_notes[$_ripple_i]+%_played_intervals[$_ripple_i]
                     %custom_event_velocity[$_note_id3 mod 1000000] := $_velocity8
@@ -7790,11 +7810,13 @@ on ui_control($switch_preview8)
                   else
                     $direction := $DOWN
                   end if
+                  $_origin_note := %__notes[$_ripple_i]
+                  $_dest_note := %__notes[$_ripple_i]+%__intervals[$_ripple_i]
                   $_already_playing := 0
                   $r := 0
                   while ($r<100)
                     if (%ripple_id_history[$r] # 0)
-                      if (%custom_event_low_note[%ripple_id_history[$r] mod 1000000]=$_low_note2 and (%key_released[$_low_note2]=0) and (%custom_event_high_note[%ripple_id_history[$r] mod 1000000]=$_high_note2) and (%key_released[$_high_note2]=0) and (%custom_event_high_note[%ripple_id_history[$r] mod 1000000]=$_high_note2) and (%custom_event_direction[%ripple_id_history[$r] mod 1000000]=$direction) and (%custom_event_releasing[%ripple_id_history[$r] mod 1000000]=0))
+                      if (%custom_event_low_note[%ripple_id_history[$r] mod 1000000]=$_low_note2 and (%key_released[$_low_note2]=0) and (%custom_event_high_note[%ripple_id_history[$r] mod 1000000]=$_high_note2) and (%key_released[$_high_note2]=0) or (%custom_event_origin_note[%ripple_id_history[$r] mod 1000000]=$_origin_note and (%custom_event_dest_note[%ripple_id_history[$r] mod 1000000]=$_dest_note) and (%custom_event_direction[%ripple_id_history[$r] mod 1000000]=$direction) and (%custom_event_releasing[%ripple_id_history[$r] mod 1000000]=0)))
                         $_already_playing := 1
                       end if
                     end if
@@ -7844,8 +7866,8 @@ on ui_control($switch_preview8)
                     %custom_event_note[$_note_id3 mod 1000000] := $_note10
                     %custom_event_low_note[$_note_id3 mod 1000000] := $_low_note2
                     %custom_event_high_note[$_note_id3 mod 1000000] := $_high_note2
-                    %custom_event_origin_note[$_note_id3 mod 1000000] := %__notes[$_ripple_i]
-                    %custom_event_dest_note[$_note_id3 mod 1000000] := %__notes[$_ripple_i]+%__intervals[$_ripple_i]
+                    %custom_event_origin_note[$_note_id3 mod 1000000] := $_origin_note
+                    %custom_event_dest_note[$_note_id3 mod 1000000] := $_dest_note
                     %custom_event_first_note[$_note_id3 mod 1000000] := %_played_notes[$_ripple_i]
                     %custom_event_second_note[$_note_id3 mod 1000000] := %_played_notes[$_ripple_i]+%_played_intervals[$_ripple_i]
                     %custom_event_velocity[$_note_id3 mod 1000000] := $_velocity9
@@ -8261,11 +8283,13 @@ on ui_control($switch_preview9)
                   else
                     $direction := $DOWN
                   end if
+                  $_origin_note := %__notes[$_ripple_i]
+                  $_dest_note := %__notes[$_ripple_i]+%__intervals[$_ripple_i]
                   $_already_playing := 0
                   $r := 0
                   while ($r<100)
                     if (%ripple_id_history[$r] # 0)
-                      if (%custom_event_low_note[%ripple_id_history[$r] mod 1000000]=$_low_note2 and (%key_released[$_low_note2]=0) and (%custom_event_high_note[%ripple_id_history[$r] mod 1000000]=$_high_note2) and (%key_released[$_high_note2]=0) and (%custom_event_high_note[%ripple_id_history[$r] mod 1000000]=$_high_note2) and (%custom_event_direction[%ripple_id_history[$r] mod 1000000]=$direction) and (%custom_event_releasing[%ripple_id_history[$r] mod 1000000]=0))
+                      if (%custom_event_low_note[%ripple_id_history[$r] mod 1000000]=$_low_note2 and (%key_released[$_low_note2]=0) and (%custom_event_high_note[%ripple_id_history[$r] mod 1000000]=$_high_note2) and (%key_released[$_high_note2]=0) or (%custom_event_origin_note[%ripple_id_history[$r] mod 1000000]=$_origin_note and (%custom_event_dest_note[%ripple_id_history[$r] mod 1000000]=$_dest_note) and (%custom_event_direction[%ripple_id_history[$r] mod 1000000]=$direction) and (%custom_event_releasing[%ripple_id_history[$r] mod 1000000]=0)))
                         $_already_playing := 1
                       end if
                     end if
@@ -8315,8 +8339,8 @@ on ui_control($switch_preview9)
                     %custom_event_note[$_note_id3 mod 1000000] := $_note11
                     %custom_event_low_note[$_note_id3 mod 1000000] := $_low_note2
                     %custom_event_high_note[$_note_id3 mod 1000000] := $_high_note2
-                    %custom_event_origin_note[$_note_id3 mod 1000000] := %__notes[$_ripple_i]
-                    %custom_event_dest_note[$_note_id3 mod 1000000] := %__notes[$_ripple_i]+%__intervals[$_ripple_i]
+                    %custom_event_origin_note[$_note_id3 mod 1000000] := $_origin_note
+                    %custom_event_dest_note[$_note_id3 mod 1000000] := $_dest_note
                     %custom_event_first_note[$_note_id3 mod 1000000] := %_played_notes[$_ripple_i]
                     %custom_event_second_note[$_note_id3 mod 1000000] := %_played_notes[$_ripple_i]+%_played_intervals[$_ripple_i]
                     %custom_event_velocity[$_note_id3 mod 1000000] := $_velocity10
@@ -8732,11 +8756,13 @@ on ui_control($switch_preview10)
                   else
                     $direction := $DOWN
                   end if
+                  $_origin_note := %__notes[$_ripple_i]
+                  $_dest_note := %__notes[$_ripple_i]+%__intervals[$_ripple_i]
                   $_already_playing := 0
                   $r := 0
                   while ($r<100)
                     if (%ripple_id_history[$r] # 0)
-                      if (%custom_event_low_note[%ripple_id_history[$r] mod 1000000]=$_low_note2 and (%key_released[$_low_note2]=0) and (%custom_event_high_note[%ripple_id_history[$r] mod 1000000]=$_high_note2) and (%key_released[$_high_note2]=0) and (%custom_event_high_note[%ripple_id_history[$r] mod 1000000]=$_high_note2) and (%custom_event_direction[%ripple_id_history[$r] mod 1000000]=$direction) and (%custom_event_releasing[%ripple_id_history[$r] mod 1000000]=0))
+                      if (%custom_event_low_note[%ripple_id_history[$r] mod 1000000]=$_low_note2 and (%key_released[$_low_note2]=0) and (%custom_event_high_note[%ripple_id_history[$r] mod 1000000]=$_high_note2) and (%key_released[$_high_note2]=0) or (%custom_event_origin_note[%ripple_id_history[$r] mod 1000000]=$_origin_note and (%custom_event_dest_note[%ripple_id_history[$r] mod 1000000]=$_dest_note) and (%custom_event_direction[%ripple_id_history[$r] mod 1000000]=$direction) and (%custom_event_releasing[%ripple_id_history[$r] mod 1000000]=0)))
                         $_already_playing := 1
                       end if
                     end if
@@ -8786,8 +8812,8 @@ on ui_control($switch_preview10)
                     %custom_event_note[$_note_id3 mod 1000000] := $_note12
                     %custom_event_low_note[$_note_id3 mod 1000000] := $_low_note2
                     %custom_event_high_note[$_note_id3 mod 1000000] := $_high_note2
-                    %custom_event_origin_note[$_note_id3 mod 1000000] := %__notes[$_ripple_i]
-                    %custom_event_dest_note[$_note_id3 mod 1000000] := %__notes[$_ripple_i]+%__intervals[$_ripple_i]
+                    %custom_event_origin_note[$_note_id3 mod 1000000] := $_origin_note
+                    %custom_event_dest_note[$_note_id3 mod 1000000] := $_dest_note
                     %custom_event_first_note[$_note_id3 mod 1000000] := %_played_notes[$_ripple_i]
                     %custom_event_second_note[$_note_id3 mod 1000000] := %_played_notes[$_ripple_i]+%_played_intervals[$_ripple_i]
                     %custom_event_velocity[$_note_id3 mod 1000000] := $_velocity11
@@ -9203,11 +9229,13 @@ on ui_control($switch_preview11)
                   else
                     $direction := $DOWN
                   end if
+                  $_origin_note := %__notes[$_ripple_i]
+                  $_dest_note := %__notes[$_ripple_i]+%__intervals[$_ripple_i]
                   $_already_playing := 0
                   $r := 0
                   while ($r<100)
                     if (%ripple_id_history[$r] # 0)
-                      if (%custom_event_low_note[%ripple_id_history[$r] mod 1000000]=$_low_note2 and (%key_released[$_low_note2]=0) and (%custom_event_high_note[%ripple_id_history[$r] mod 1000000]=$_high_note2) and (%key_released[$_high_note2]=0) and (%custom_event_high_note[%ripple_id_history[$r] mod 1000000]=$_high_note2) and (%custom_event_direction[%ripple_id_history[$r] mod 1000000]=$direction) and (%custom_event_releasing[%ripple_id_history[$r] mod 1000000]=0))
+                      if (%custom_event_low_note[%ripple_id_history[$r] mod 1000000]=$_low_note2 and (%key_released[$_low_note2]=0) and (%custom_event_high_note[%ripple_id_history[$r] mod 1000000]=$_high_note2) and (%key_released[$_high_note2]=0) or (%custom_event_origin_note[%ripple_id_history[$r] mod 1000000]=$_origin_note and (%custom_event_dest_note[%ripple_id_history[$r] mod 1000000]=$_dest_note) and (%custom_event_direction[%ripple_id_history[$r] mod 1000000]=$direction) and (%custom_event_releasing[%ripple_id_history[$r] mod 1000000]=0)))
                         $_already_playing := 1
                       end if
                     end if
@@ -9257,8 +9285,8 @@ on ui_control($switch_preview11)
                     %custom_event_note[$_note_id3 mod 1000000] := $_note13
                     %custom_event_low_note[$_note_id3 mod 1000000] := $_low_note2
                     %custom_event_high_note[$_note_id3 mod 1000000] := $_high_note2
-                    %custom_event_origin_note[$_note_id3 mod 1000000] := %__notes[$_ripple_i]
-                    %custom_event_dest_note[$_note_id3 mod 1000000] := %__notes[$_ripple_i]+%__intervals[$_ripple_i]
+                    %custom_event_origin_note[$_note_id3 mod 1000000] := $_origin_note
+                    %custom_event_dest_note[$_note_id3 mod 1000000] := $_dest_note
                     %custom_event_first_note[$_note_id3 mod 1000000] := %_played_notes[$_ripple_i]
                     %custom_event_second_note[$_note_id3 mod 1000000] := %_played_notes[$_ripple_i]+%_played_intervals[$_ripple_i]
                     %custom_event_velocity[$_note_id3 mod 1000000] := $_velocity12
@@ -9674,11 +9702,13 @@ on ui_control($switch_preview12)
                   else
                     $direction := $DOWN
                   end if
+                  $_origin_note := %__notes[$_ripple_i]
+                  $_dest_note := %__notes[$_ripple_i]+%__intervals[$_ripple_i]
                   $_already_playing := 0
                   $r := 0
                   while ($r<100)
                     if (%ripple_id_history[$r] # 0)
-                      if (%custom_event_low_note[%ripple_id_history[$r] mod 1000000]=$_low_note2 and (%key_released[$_low_note2]=0) and (%custom_event_high_note[%ripple_id_history[$r] mod 1000000]=$_high_note2) and (%key_released[$_high_note2]=0) and (%custom_event_high_note[%ripple_id_history[$r] mod 1000000]=$_high_note2) and (%custom_event_direction[%ripple_id_history[$r] mod 1000000]=$direction) and (%custom_event_releasing[%ripple_id_history[$r] mod 1000000]=0))
+                      if (%custom_event_low_note[%ripple_id_history[$r] mod 1000000]=$_low_note2 and (%key_released[$_low_note2]=0) and (%custom_event_high_note[%ripple_id_history[$r] mod 1000000]=$_high_note2) and (%key_released[$_high_note2]=0) or (%custom_event_origin_note[%ripple_id_history[$r] mod 1000000]=$_origin_note and (%custom_event_dest_note[%ripple_id_history[$r] mod 1000000]=$_dest_note) and (%custom_event_direction[%ripple_id_history[$r] mod 1000000]=$direction) and (%custom_event_releasing[%ripple_id_history[$r] mod 1000000]=0)))
                         $_already_playing := 1
                       end if
                     end if
@@ -9728,8 +9758,8 @@ on ui_control($switch_preview12)
                     %custom_event_note[$_note_id3 mod 1000000] := $_note14
                     %custom_event_low_note[$_note_id3 mod 1000000] := $_low_note2
                     %custom_event_high_note[$_note_id3 mod 1000000] := $_high_note2
-                    %custom_event_origin_note[$_note_id3 mod 1000000] := %__notes[$_ripple_i]
-                    %custom_event_dest_note[$_note_id3 mod 1000000] := %__notes[$_ripple_i]+%__intervals[$_ripple_i]
+                    %custom_event_origin_note[$_note_id3 mod 1000000] := $_origin_note
+                    %custom_event_dest_note[$_note_id3 mod 1000000] := $_dest_note
                     %custom_event_first_note[$_note_id3 mod 1000000] := %_played_notes[$_ripple_i]
                     %custom_event_second_note[$_note_id3 mod 1000000] := %_played_notes[$_ripple_i]+%_played_intervals[$_ripple_i]
                     %custom_event_velocity[$_note_id3 mod 1000000] := $_velocity13
@@ -10145,11 +10175,13 @@ on ui_control($switch_preview13)
                   else
                     $direction := $DOWN
                   end if
+                  $_origin_note := %__notes[$_ripple_i]
+                  $_dest_note := %__notes[$_ripple_i]+%__intervals[$_ripple_i]
                   $_already_playing := 0
                   $r := 0
                   while ($r<100)
                     if (%ripple_id_history[$r] # 0)
-                      if (%custom_event_low_note[%ripple_id_history[$r] mod 1000000]=$_low_note2 and (%key_released[$_low_note2]=0) and (%custom_event_high_note[%ripple_id_history[$r] mod 1000000]=$_high_note2) and (%key_released[$_high_note2]=0) and (%custom_event_high_note[%ripple_id_history[$r] mod 1000000]=$_high_note2) and (%custom_event_direction[%ripple_id_history[$r] mod 1000000]=$direction) and (%custom_event_releasing[%ripple_id_history[$r] mod 1000000]=0))
+                      if (%custom_event_low_note[%ripple_id_history[$r] mod 1000000]=$_low_note2 and (%key_released[$_low_note2]=0) and (%custom_event_high_note[%ripple_id_history[$r] mod 1000000]=$_high_note2) and (%key_released[$_high_note2]=0) or (%custom_event_origin_note[%ripple_id_history[$r] mod 1000000]=$_origin_note and (%custom_event_dest_note[%ripple_id_history[$r] mod 1000000]=$_dest_note) and (%custom_event_direction[%ripple_id_history[$r] mod 1000000]=$direction) and (%custom_event_releasing[%ripple_id_history[$r] mod 1000000]=0)))
                         $_already_playing := 1
                       end if
                     end if
@@ -10199,8 +10231,8 @@ on ui_control($switch_preview13)
                     %custom_event_note[$_note_id3 mod 1000000] := $_note15
                     %custom_event_low_note[$_note_id3 mod 1000000] := $_low_note2
                     %custom_event_high_note[$_note_id3 mod 1000000] := $_high_note2
-                    %custom_event_origin_note[$_note_id3 mod 1000000] := %__notes[$_ripple_i]
-                    %custom_event_dest_note[$_note_id3 mod 1000000] := %__notes[$_ripple_i]+%__intervals[$_ripple_i]
+                    %custom_event_origin_note[$_note_id3 mod 1000000] := $_origin_note
+                    %custom_event_dest_note[$_note_id3 mod 1000000] := $_dest_note
                     %custom_event_first_note[$_note_id3 mod 1000000] := %_played_notes[$_ripple_i]
                     %custom_event_second_note[$_note_id3 mod 1000000] := %_played_notes[$_ripple_i]+%_played_intervals[$_ripple_i]
                     %custom_event_velocity[$_note_id3 mod 1000000] := $_velocity14
@@ -10616,11 +10648,13 @@ on ui_control($switch_preview14)
                   else
                     $direction := $DOWN
                   end if
+                  $_origin_note := %__notes[$_ripple_i]
+                  $_dest_note := %__notes[$_ripple_i]+%__intervals[$_ripple_i]
                   $_already_playing := 0
                   $r := 0
                   while ($r<100)
                     if (%ripple_id_history[$r] # 0)
-                      if (%custom_event_low_note[%ripple_id_history[$r] mod 1000000]=$_low_note2 and (%key_released[$_low_note2]=0) and (%custom_event_high_note[%ripple_id_history[$r] mod 1000000]=$_high_note2) and (%key_released[$_high_note2]=0) and (%custom_event_high_note[%ripple_id_history[$r] mod 1000000]=$_high_note2) and (%custom_event_direction[%ripple_id_history[$r] mod 1000000]=$direction) and (%custom_event_releasing[%ripple_id_history[$r] mod 1000000]=0))
+                      if (%custom_event_low_note[%ripple_id_history[$r] mod 1000000]=$_low_note2 and (%key_released[$_low_note2]=0) and (%custom_event_high_note[%ripple_id_history[$r] mod 1000000]=$_high_note2) and (%key_released[$_high_note2]=0) or (%custom_event_origin_note[%ripple_id_history[$r] mod 1000000]=$_origin_note and (%custom_event_dest_note[%ripple_id_history[$r] mod 1000000]=$_dest_note) and (%custom_event_direction[%ripple_id_history[$r] mod 1000000]=$direction) and (%custom_event_releasing[%ripple_id_history[$r] mod 1000000]=0)))
                         $_already_playing := 1
                       end if
                     end if
@@ -10670,8 +10704,8 @@ on ui_control($switch_preview14)
                     %custom_event_note[$_note_id3 mod 1000000] := $_note16
                     %custom_event_low_note[$_note_id3 mod 1000000] := $_low_note2
                     %custom_event_high_note[$_note_id3 mod 1000000] := $_high_note2
-                    %custom_event_origin_note[$_note_id3 mod 1000000] := %__notes[$_ripple_i]
-                    %custom_event_dest_note[$_note_id3 mod 1000000] := %__notes[$_ripple_i]+%__intervals[$_ripple_i]
+                    %custom_event_origin_note[$_note_id3 mod 1000000] := $_origin_note
+                    %custom_event_dest_note[$_note_id3 mod 1000000] := $_dest_note
                     %custom_event_first_note[$_note_id3 mod 1000000] := %_played_notes[$_ripple_i]
                     %custom_event_second_note[$_note_id3 mod 1000000] := %_played_notes[$_ripple_i]+%_played_intervals[$_ripple_i]
                     %custom_event_velocity[$_note_id3 mod 1000000] := $_velocity15
@@ -11087,11 +11121,13 @@ on ui_control($switch_preview15)
                   else
                     $direction := $DOWN
                   end if
+                  $_origin_note := %__notes[$_ripple_i]
+                  $_dest_note := %__notes[$_ripple_i]+%__intervals[$_ripple_i]
                   $_already_playing := 0
                   $r := 0
                   while ($r<100)
                     if (%ripple_id_history[$r] # 0)
-                      if (%custom_event_low_note[%ripple_id_history[$r] mod 1000000]=$_low_note2 and (%key_released[$_low_note2]=0) and (%custom_event_high_note[%ripple_id_history[$r] mod 1000000]=$_high_note2) and (%key_released[$_high_note2]=0) and (%custom_event_high_note[%ripple_id_history[$r] mod 1000000]=$_high_note2) and (%custom_event_direction[%ripple_id_history[$r] mod 1000000]=$direction) and (%custom_event_releasing[%ripple_id_history[$r] mod 1000000]=0))
+                      if (%custom_event_low_note[%ripple_id_history[$r] mod 1000000]=$_low_note2 and (%key_released[$_low_note2]=0) and (%custom_event_high_note[%ripple_id_history[$r] mod 1000000]=$_high_note2) and (%key_released[$_high_note2]=0) or (%custom_event_origin_note[%ripple_id_history[$r] mod 1000000]=$_origin_note and (%custom_event_dest_note[%ripple_id_history[$r] mod 1000000]=$_dest_note) and (%custom_event_direction[%ripple_id_history[$r] mod 1000000]=$direction) and (%custom_event_releasing[%ripple_id_history[$r] mod 1000000]=0)))
                         $_already_playing := 1
                       end if
                     end if
@@ -11141,8 +11177,8 @@ on ui_control($switch_preview15)
                     %custom_event_note[$_note_id3 mod 1000000] := $_note17
                     %custom_event_low_note[$_note_id3 mod 1000000] := $_low_note2
                     %custom_event_high_note[$_note_id3 mod 1000000] := $_high_note2
-                    %custom_event_origin_note[$_note_id3 mod 1000000] := %__notes[$_ripple_i]
-                    %custom_event_dest_note[$_note_id3 mod 1000000] := %__notes[$_ripple_i]+%__intervals[$_ripple_i]
+                    %custom_event_origin_note[$_note_id3 mod 1000000] := $_origin_note
+                    %custom_event_dest_note[$_note_id3 mod 1000000] := $_dest_note
                     %custom_event_first_note[$_note_id3 mod 1000000] := %_played_notes[$_ripple_i]
                     %custom_event_second_note[$_note_id3 mod 1000000] := %_played_notes[$_ripple_i]+%_played_intervals[$_ripple_i]
                     %custom_event_velocity[$_note_id3 mod 1000000] := $_velocity16
@@ -11558,11 +11594,13 @@ on ui_control($switch_preview16)
                   else
                     $direction := $DOWN
                   end if
+                  $_origin_note := %__notes[$_ripple_i]
+                  $_dest_note := %__notes[$_ripple_i]+%__intervals[$_ripple_i]
                   $_already_playing := 0
                   $r := 0
                   while ($r<100)
                     if (%ripple_id_history[$r] # 0)
-                      if (%custom_event_low_note[%ripple_id_history[$r] mod 1000000]=$_low_note2 and (%key_released[$_low_note2]=0) and (%custom_event_high_note[%ripple_id_history[$r] mod 1000000]=$_high_note2) and (%key_released[$_high_note2]=0) and (%custom_event_high_note[%ripple_id_history[$r] mod 1000000]=$_high_note2) and (%custom_event_direction[%ripple_id_history[$r] mod 1000000]=$direction) and (%custom_event_releasing[%ripple_id_history[$r] mod 1000000]=0))
+                      if (%custom_event_low_note[%ripple_id_history[$r] mod 1000000]=$_low_note2 and (%key_released[$_low_note2]=0) and (%custom_event_high_note[%ripple_id_history[$r] mod 1000000]=$_high_note2) and (%key_released[$_high_note2]=0) or (%custom_event_origin_note[%ripple_id_history[$r] mod 1000000]=$_origin_note and (%custom_event_dest_note[%ripple_id_history[$r] mod 1000000]=$_dest_note) and (%custom_event_direction[%ripple_id_history[$r] mod 1000000]=$direction) and (%custom_event_releasing[%ripple_id_history[$r] mod 1000000]=0)))
                         $_already_playing := 1
                       end if
                     end if
@@ -11612,8 +11650,8 @@ on ui_control($switch_preview16)
                     %custom_event_note[$_note_id3 mod 1000000] := $_note18
                     %custom_event_low_note[$_note_id3 mod 1000000] := $_low_note2
                     %custom_event_high_note[$_note_id3 mod 1000000] := $_high_note2
-                    %custom_event_origin_note[$_note_id3 mod 1000000] := %__notes[$_ripple_i]
-                    %custom_event_dest_note[$_note_id3 mod 1000000] := %__notes[$_ripple_i]+%__intervals[$_ripple_i]
+                    %custom_event_origin_note[$_note_id3 mod 1000000] := $_origin_note
+                    %custom_event_dest_note[$_note_id3 mod 1000000] := $_dest_note
                     %custom_event_first_note[$_note_id3 mod 1000000] := %_played_notes[$_ripple_i]
                     %custom_event_second_note[$_note_id3 mod 1000000] := %_played_notes[$_ripple_i]+%_played_intervals[$_ripple_i]
                     %custom_event_velocity[$_note_id3 mod 1000000] := $_velocity17
@@ -12029,11 +12067,13 @@ on ui_control($switch_preview17)
                   else
                     $direction := $DOWN
                   end if
+                  $_origin_note := %__notes[$_ripple_i]
+                  $_dest_note := %__notes[$_ripple_i]+%__intervals[$_ripple_i]
                   $_already_playing := 0
                   $r := 0
                   while ($r<100)
                     if (%ripple_id_history[$r] # 0)
-                      if (%custom_event_low_note[%ripple_id_history[$r] mod 1000000]=$_low_note2 and (%key_released[$_low_note2]=0) and (%custom_event_high_note[%ripple_id_history[$r] mod 1000000]=$_high_note2) and (%key_released[$_high_note2]=0) and (%custom_event_high_note[%ripple_id_history[$r] mod 1000000]=$_high_note2) and (%custom_event_direction[%ripple_id_history[$r] mod 1000000]=$direction) and (%custom_event_releasing[%ripple_id_history[$r] mod 1000000]=0))
+                      if (%custom_event_low_note[%ripple_id_history[$r] mod 1000000]=$_low_note2 and (%key_released[$_low_note2]=0) and (%custom_event_high_note[%ripple_id_history[$r] mod 1000000]=$_high_note2) and (%key_released[$_high_note2]=0) or (%custom_event_origin_note[%ripple_id_history[$r] mod 1000000]=$_origin_note and (%custom_event_dest_note[%ripple_id_history[$r] mod 1000000]=$_dest_note) and (%custom_event_direction[%ripple_id_history[$r] mod 1000000]=$direction) and (%custom_event_releasing[%ripple_id_history[$r] mod 1000000]=0)))
                         $_already_playing := 1
                       end if
                     end if
@@ -12083,8 +12123,8 @@ on ui_control($switch_preview17)
                     %custom_event_note[$_note_id3 mod 1000000] := $_note19
                     %custom_event_low_note[$_note_id3 mod 1000000] := $_low_note2
                     %custom_event_high_note[$_note_id3 mod 1000000] := $_high_note2
-                    %custom_event_origin_note[$_note_id3 mod 1000000] := %__notes[$_ripple_i]
-                    %custom_event_dest_note[$_note_id3 mod 1000000] := %__notes[$_ripple_i]+%__intervals[$_ripple_i]
+                    %custom_event_origin_note[$_note_id3 mod 1000000] := $_origin_note
+                    %custom_event_dest_note[$_note_id3 mod 1000000] := $_dest_note
                     %custom_event_first_note[$_note_id3 mod 1000000] := %_played_notes[$_ripple_i]
                     %custom_event_second_note[$_note_id3 mod 1000000] := %_played_notes[$_ripple_i]+%_played_intervals[$_ripple_i]
                     %custom_event_velocity[$_note_id3 mod 1000000] := $_velocity18
@@ -12500,11 +12540,13 @@ on ui_control($switch_preview18)
                   else
                     $direction := $DOWN
                   end if
+                  $_origin_note := %__notes[$_ripple_i]
+                  $_dest_note := %__notes[$_ripple_i]+%__intervals[$_ripple_i]
                   $_already_playing := 0
                   $r := 0
                   while ($r<100)
                     if (%ripple_id_history[$r] # 0)
-                      if (%custom_event_low_note[%ripple_id_history[$r] mod 1000000]=$_low_note2 and (%key_released[$_low_note2]=0) and (%custom_event_high_note[%ripple_id_history[$r] mod 1000000]=$_high_note2) and (%key_released[$_high_note2]=0) and (%custom_event_high_note[%ripple_id_history[$r] mod 1000000]=$_high_note2) and (%custom_event_direction[%ripple_id_history[$r] mod 1000000]=$direction) and (%custom_event_releasing[%ripple_id_history[$r] mod 1000000]=0))
+                      if (%custom_event_low_note[%ripple_id_history[$r] mod 1000000]=$_low_note2 and (%key_released[$_low_note2]=0) and (%custom_event_high_note[%ripple_id_history[$r] mod 1000000]=$_high_note2) and (%key_released[$_high_note2]=0) or (%custom_event_origin_note[%ripple_id_history[$r] mod 1000000]=$_origin_note and (%custom_event_dest_note[%ripple_id_history[$r] mod 1000000]=$_dest_note) and (%custom_event_direction[%ripple_id_history[$r] mod 1000000]=$direction) and (%custom_event_releasing[%ripple_id_history[$r] mod 1000000]=0)))
                         $_already_playing := 1
                       end if
                     end if
@@ -12554,8 +12596,8 @@ on ui_control($switch_preview18)
                     %custom_event_note[$_note_id3 mod 1000000] := $_note20
                     %custom_event_low_note[$_note_id3 mod 1000000] := $_low_note2
                     %custom_event_high_note[$_note_id3 mod 1000000] := $_high_note2
-                    %custom_event_origin_note[$_note_id3 mod 1000000] := %__notes[$_ripple_i]
-                    %custom_event_dest_note[$_note_id3 mod 1000000] := %__notes[$_ripple_i]+%__intervals[$_ripple_i]
+                    %custom_event_origin_note[$_note_id3 mod 1000000] := $_origin_note
+                    %custom_event_dest_note[$_note_id3 mod 1000000] := $_dest_note
                     %custom_event_first_note[$_note_id3 mod 1000000] := %_played_notes[$_ripple_i]
                     %custom_event_second_note[$_note_id3 mod 1000000] := %_played_notes[$_ripple_i]+%_played_intervals[$_ripple_i]
                     %custom_event_velocity[$_note_id3 mod 1000000] := $_velocity19
@@ -12971,11 +13013,13 @@ on ui_control($switch_preview19)
                   else
                     $direction := $DOWN
                   end if
+                  $_origin_note := %__notes[$_ripple_i]
+                  $_dest_note := %__notes[$_ripple_i]+%__intervals[$_ripple_i]
                   $_already_playing := 0
                   $r := 0
                   while ($r<100)
                     if (%ripple_id_history[$r] # 0)
-                      if (%custom_event_low_note[%ripple_id_history[$r] mod 1000000]=$_low_note2 and (%key_released[$_low_note2]=0) and (%custom_event_high_note[%ripple_id_history[$r] mod 1000000]=$_high_note2) and (%key_released[$_high_note2]=0) and (%custom_event_high_note[%ripple_id_history[$r] mod 1000000]=$_high_note2) and (%custom_event_direction[%ripple_id_history[$r] mod 1000000]=$direction) and (%custom_event_releasing[%ripple_id_history[$r] mod 1000000]=0))
+                      if (%custom_event_low_note[%ripple_id_history[$r] mod 1000000]=$_low_note2 and (%key_released[$_low_note2]=0) and (%custom_event_high_note[%ripple_id_history[$r] mod 1000000]=$_high_note2) and (%key_released[$_high_note2]=0) or (%custom_event_origin_note[%ripple_id_history[$r] mod 1000000]=$_origin_note and (%custom_event_dest_note[%ripple_id_history[$r] mod 1000000]=$_dest_note) and (%custom_event_direction[%ripple_id_history[$r] mod 1000000]=$direction) and (%custom_event_releasing[%ripple_id_history[$r] mod 1000000]=0)))
                         $_already_playing := 1
                       end if
                     end if
@@ -13025,8 +13069,8 @@ on ui_control($switch_preview19)
                     %custom_event_note[$_note_id3 mod 1000000] := $_note21
                     %custom_event_low_note[$_note_id3 mod 1000000] := $_low_note2
                     %custom_event_high_note[$_note_id3 mod 1000000] := $_high_note2
-                    %custom_event_origin_note[$_note_id3 mod 1000000] := %__notes[$_ripple_i]
-                    %custom_event_dest_note[$_note_id3 mod 1000000] := %__notes[$_ripple_i]+%__intervals[$_ripple_i]
+                    %custom_event_origin_note[$_note_id3 mod 1000000] := $_origin_note
+                    %custom_event_dest_note[$_note_id3 mod 1000000] := $_dest_note
                     %custom_event_first_note[$_note_id3 mod 1000000] := %_played_notes[$_ripple_i]
                     %custom_event_second_note[$_note_id3 mod 1000000] := %_played_notes[$_ripple_i]+%_played_intervals[$_ripple_i]
                     %custom_event_velocity[$_note_id3 mod 1000000] := $_velocity20
@@ -13442,11 +13486,13 @@ on ui_control($switch_preview20)
                   else
                     $direction := $DOWN
                   end if
+                  $_origin_note := %__notes[$_ripple_i]
+                  $_dest_note := %__notes[$_ripple_i]+%__intervals[$_ripple_i]
                   $_already_playing := 0
                   $r := 0
                   while ($r<100)
                     if (%ripple_id_history[$r] # 0)
-                      if (%custom_event_low_note[%ripple_id_history[$r] mod 1000000]=$_low_note2 and (%key_released[$_low_note2]=0) and (%custom_event_high_note[%ripple_id_history[$r] mod 1000000]=$_high_note2) and (%key_released[$_high_note2]=0) and (%custom_event_high_note[%ripple_id_history[$r] mod 1000000]=$_high_note2) and (%custom_event_direction[%ripple_id_history[$r] mod 1000000]=$direction) and (%custom_event_releasing[%ripple_id_history[$r] mod 1000000]=0))
+                      if (%custom_event_low_note[%ripple_id_history[$r] mod 1000000]=$_low_note2 and (%key_released[$_low_note2]=0) and (%custom_event_high_note[%ripple_id_history[$r] mod 1000000]=$_high_note2) and (%key_released[$_high_note2]=0) or (%custom_event_origin_note[%ripple_id_history[$r] mod 1000000]=$_origin_note and (%custom_event_dest_note[%ripple_id_history[$r] mod 1000000]=$_dest_note) and (%custom_event_direction[%ripple_id_history[$r] mod 1000000]=$direction) and (%custom_event_releasing[%ripple_id_history[$r] mod 1000000]=0)))
                         $_already_playing := 1
                       end if
                     end if
@@ -13496,8 +13542,8 @@ on ui_control($switch_preview20)
                     %custom_event_note[$_note_id3 mod 1000000] := $_note22
                     %custom_event_low_note[$_note_id3 mod 1000000] := $_low_note2
                     %custom_event_high_note[$_note_id3 mod 1000000] := $_high_note2
-                    %custom_event_origin_note[$_note_id3 mod 1000000] := %__notes[$_ripple_i]
-                    %custom_event_dest_note[$_note_id3 mod 1000000] := %__notes[$_ripple_i]+%__intervals[$_ripple_i]
+                    %custom_event_origin_note[$_note_id3 mod 1000000] := $_origin_note
+                    %custom_event_dest_note[$_note_id3 mod 1000000] := $_dest_note
                     %custom_event_first_note[$_note_id3 mod 1000000] := %_played_notes[$_ripple_i]
                     %custom_event_second_note[$_note_id3 mod 1000000] := %_played_notes[$_ripple_i]+%_played_intervals[$_ripple_i]
                     %custom_event_velocity[$_note_id3 mod 1000000] := $_velocity21
@@ -13913,11 +13959,13 @@ on ui_control($switch_preview21)
                   else
                     $direction := $DOWN
                   end if
+                  $_origin_note := %__notes[$_ripple_i]
+                  $_dest_note := %__notes[$_ripple_i]+%__intervals[$_ripple_i]
                   $_already_playing := 0
                   $r := 0
                   while ($r<100)
                     if (%ripple_id_history[$r] # 0)
-                      if (%custom_event_low_note[%ripple_id_history[$r] mod 1000000]=$_low_note2 and (%key_released[$_low_note2]=0) and (%custom_event_high_note[%ripple_id_history[$r] mod 1000000]=$_high_note2) and (%key_released[$_high_note2]=0) and (%custom_event_high_note[%ripple_id_history[$r] mod 1000000]=$_high_note2) and (%custom_event_direction[%ripple_id_history[$r] mod 1000000]=$direction) and (%custom_event_releasing[%ripple_id_history[$r] mod 1000000]=0))
+                      if (%custom_event_low_note[%ripple_id_history[$r] mod 1000000]=$_low_note2 and (%key_released[$_low_note2]=0) and (%custom_event_high_note[%ripple_id_history[$r] mod 1000000]=$_high_note2) and (%key_released[$_high_note2]=0) or (%custom_event_origin_note[%ripple_id_history[$r] mod 1000000]=$_origin_note and (%custom_event_dest_note[%ripple_id_history[$r] mod 1000000]=$_dest_note) and (%custom_event_direction[%ripple_id_history[$r] mod 1000000]=$direction) and (%custom_event_releasing[%ripple_id_history[$r] mod 1000000]=0)))
                         $_already_playing := 1
                       end if
                     end if
@@ -13967,8 +14015,8 @@ on ui_control($switch_preview21)
                     %custom_event_note[$_note_id3 mod 1000000] := $_note23
                     %custom_event_low_note[$_note_id3 mod 1000000] := $_low_note2
                     %custom_event_high_note[$_note_id3 mod 1000000] := $_high_note2
-                    %custom_event_origin_note[$_note_id3 mod 1000000] := %__notes[$_ripple_i]
-                    %custom_event_dest_note[$_note_id3 mod 1000000] := %__notes[$_ripple_i]+%__intervals[$_ripple_i]
+                    %custom_event_origin_note[$_note_id3 mod 1000000] := $_origin_note
+                    %custom_event_dest_note[$_note_id3 mod 1000000] := $_dest_note
                     %custom_event_first_note[$_note_id3 mod 1000000] := %_played_notes[$_ripple_i]
                     %custom_event_second_note[$_note_id3 mod 1000000] := %_played_notes[$_ripple_i]+%_played_intervals[$_ripple_i]
                     %custom_event_velocity[$_note_id3 mod 1000000] := $_velocity22
@@ -14384,11 +14432,13 @@ on ui_control($switch_preview22)
                   else
                     $direction := $DOWN
                   end if
+                  $_origin_note := %__notes[$_ripple_i]
+                  $_dest_note := %__notes[$_ripple_i]+%__intervals[$_ripple_i]
                   $_already_playing := 0
                   $r := 0
                   while ($r<100)
                     if (%ripple_id_history[$r] # 0)
-                      if (%custom_event_low_note[%ripple_id_history[$r] mod 1000000]=$_low_note2 and (%key_released[$_low_note2]=0) and (%custom_event_high_note[%ripple_id_history[$r] mod 1000000]=$_high_note2) and (%key_released[$_high_note2]=0) and (%custom_event_high_note[%ripple_id_history[$r] mod 1000000]=$_high_note2) and (%custom_event_direction[%ripple_id_history[$r] mod 1000000]=$direction) and (%custom_event_releasing[%ripple_id_history[$r] mod 1000000]=0))
+                      if (%custom_event_low_note[%ripple_id_history[$r] mod 1000000]=$_low_note2 and (%key_released[$_low_note2]=0) and (%custom_event_high_note[%ripple_id_history[$r] mod 1000000]=$_high_note2) and (%key_released[$_high_note2]=0) or (%custom_event_origin_note[%ripple_id_history[$r] mod 1000000]=$_origin_note and (%custom_event_dest_note[%ripple_id_history[$r] mod 1000000]=$_dest_note) and (%custom_event_direction[%ripple_id_history[$r] mod 1000000]=$direction) and (%custom_event_releasing[%ripple_id_history[$r] mod 1000000]=0)))
                         $_already_playing := 1
                       end if
                     end if
@@ -14438,8 +14488,8 @@ on ui_control($switch_preview22)
                     %custom_event_note[$_note_id3 mod 1000000] := $_note24
                     %custom_event_low_note[$_note_id3 mod 1000000] := $_low_note2
                     %custom_event_high_note[$_note_id3 mod 1000000] := $_high_note2
-                    %custom_event_origin_note[$_note_id3 mod 1000000] := %__notes[$_ripple_i]
-                    %custom_event_dest_note[$_note_id3 mod 1000000] := %__notes[$_ripple_i]+%__intervals[$_ripple_i]
+                    %custom_event_origin_note[$_note_id3 mod 1000000] := $_origin_note
+                    %custom_event_dest_note[$_note_id3 mod 1000000] := $_dest_note
                     %custom_event_first_note[$_note_id3 mod 1000000] := %_played_notes[$_ripple_i]
                     %custom_event_second_note[$_note_id3 mod 1000000] := %_played_notes[$_ripple_i]+%_played_intervals[$_ripple_i]
                     %custom_event_velocity[$_note_id3 mod 1000000] := $_velocity23
@@ -14855,11 +14905,13 @@ on ui_control($switch_preview23)
                   else
                     $direction := $DOWN
                   end if
+                  $_origin_note := %__notes[$_ripple_i]
+                  $_dest_note := %__notes[$_ripple_i]+%__intervals[$_ripple_i]
                   $_already_playing := 0
                   $r := 0
                   while ($r<100)
                     if (%ripple_id_history[$r] # 0)
-                      if (%custom_event_low_note[%ripple_id_history[$r] mod 1000000]=$_low_note2 and (%key_released[$_low_note2]=0) and (%custom_event_high_note[%ripple_id_history[$r] mod 1000000]=$_high_note2) and (%key_released[$_high_note2]=0) and (%custom_event_high_note[%ripple_id_history[$r] mod 1000000]=$_high_note2) and (%custom_event_direction[%ripple_id_history[$r] mod 1000000]=$direction) and (%custom_event_releasing[%ripple_id_history[$r] mod 1000000]=0))
+                      if (%custom_event_low_note[%ripple_id_history[$r] mod 1000000]=$_low_note2 and (%key_released[$_low_note2]=0) and (%custom_event_high_note[%ripple_id_history[$r] mod 1000000]=$_high_note2) and (%key_released[$_high_note2]=0) or (%custom_event_origin_note[%ripple_id_history[$r] mod 1000000]=$_origin_note and (%custom_event_dest_note[%ripple_id_history[$r] mod 1000000]=$_dest_note) and (%custom_event_direction[%ripple_id_history[$r] mod 1000000]=$direction) and (%custom_event_releasing[%ripple_id_history[$r] mod 1000000]=0)))
                         $_already_playing := 1
                       end if
                     end if
@@ -14909,8 +14961,8 @@ on ui_control($switch_preview23)
                     %custom_event_note[$_note_id3 mod 1000000] := $_note25
                     %custom_event_low_note[$_note_id3 mod 1000000] := $_low_note2
                     %custom_event_high_note[$_note_id3 mod 1000000] := $_high_note2
-                    %custom_event_origin_note[$_note_id3 mod 1000000] := %__notes[$_ripple_i]
-                    %custom_event_dest_note[$_note_id3 mod 1000000] := %__notes[$_ripple_i]+%__intervals[$_ripple_i]
+                    %custom_event_origin_note[$_note_id3 mod 1000000] := $_origin_note
+                    %custom_event_dest_note[$_note_id3 mod 1000000] := $_dest_note
                     %custom_event_first_note[$_note_id3 mod 1000000] := %_played_notes[$_ripple_i]
                     %custom_event_second_note[$_note_id3 mod 1000000] := %_played_notes[$_ripple_i]+%_played_intervals[$_ripple_i]
                     %custom_event_velocity[$_note_id3 mod 1000000] := $_velocity24

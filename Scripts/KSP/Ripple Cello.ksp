@@ -927,13 +927,17 @@ function note_callback(note, velocity, event_id)
 					direction := DOWN
 				end if
 
+				// Origin, Destination (for Up and Down modes)
+				declare origin_note := notes[ripple_i]
+				declare dest_note := notes[ripple_i] + intervals[ripple_i]
+
 				// Make sure this particular interval and direction isn't already being played
 				declare already_playing := 0
 				for r := 0 to MAX_RIPPLE_HISTORY - 1
 					if ripple_id_history[r] # 0
-						if event[ripple_id_history[r]].low_note = low_note    and key_released[low_note]  = 0 ...
-						and event[ripple_id_history[r]].high_note = high_note and key_released[high_note] = 0 ...
-						and event[ripple_id_history[r]].high_note = high_note ...
+						if (event[ripple_id_history[r]].low_note = low_note   and key_released[low_note] = 0 ... 
+							and event[ripple_id_history[r]].high_note = high_note and key_released[high_note] = 0) ...
+						or (event[ripple_id_history[r]].origin_note = origin_note and event[ripple_id_history[r]].dest_note = dest_note) ...
 						and event[ripple_id_history[r]].direction = direction ...
 						and event[ripple_id_history[r]].releasing = 0
 							already_playing := 1
@@ -941,6 +945,7 @@ function note_callback(note, velocity, event_id)
 					end if
 				end for
 
+				// You need key released because otherwise  
 				key_released[low_note] := 0
 				key_released[high_note] := 0
 
@@ -992,8 +997,8 @@ function note_callback(note, velocity, event_id)
 					event[note_id].note := note
 					event[note_id].low_note := low_note
 					event[note_id].high_note := high_note
-					event[note_id].origin_note := notes[ripple_i]
-					event[note_id].dest_note := notes[ripple_i] + intervals[ripple_i]
+					event[note_id].origin_note := origin_note
+					event[note_id].dest_note := dest_note
 					event[note_id].first_note := played_notes[ripple_i]
 					event[note_id].second_note := played_notes[ripple_i] + played_intervals[ripple_i]
 					event[note_id].velocity := velocity
