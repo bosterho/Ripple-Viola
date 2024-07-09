@@ -115,9 +115,9 @@ on init
 	declare ?speeds[NUM_speedModes]
 	START_INC(N, 0, 1)
 		speeds[N] := 2.0
-		speeds[N] := 1.5
+		speeds[N] := 1.333
 		speeds[N] := 1.0
-		speeds[N] := 0.75
+		speeds[N] := 0.666
 		speeds[N] := 0.5
 	END_INC
 
@@ -178,9 +178,9 @@ on init
 	copy_array(_option_texts, _option_texts_shortened)
 	START_INC(N, 0, 1)
 		option_texts_shortened[control.legato, N] := "Off"
-		option_texts_shortened[control.legato, N] := "Pitch"
-		option_texts_shortened[control.legato, N] := "Ripple"
-		option_texts_shortened[control.legato, N] := "Swell"
+		option_texts_shortened[control.legato, N] := "Pitches"
+		option_texts_shortened[control.legato, N] := "Ripples"
+		option_texts_shortened[control.legato, N] := "Swells"
 	END_INC
 
 	//
@@ -945,7 +945,7 @@ function note_callback(note, velocity, event_id)
 					end if
 				end for
 
-				// You need key released because otherwise  
+				// You need key released because there is a room for gaps with legato, but we don't want to include that when deciding whether you can retrigger ripples
 				key_released[low_note] := 0
 				key_released[high_note] := 0
 

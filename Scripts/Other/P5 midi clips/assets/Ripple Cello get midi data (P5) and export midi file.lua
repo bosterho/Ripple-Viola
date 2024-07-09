@@ -1,7 +1,7 @@
 reaper.ClearConsole()
 
 -- Set selections
-reaper.GetSet_LoopTimeRange(true, false, 0, 50, true)
+reaper.GetSet_LoopTimeRange(true, false, 0, 90, true)
 reaper.Main_OnCommand(40717, 0) -- Item: Select all items in current time selection
 
 -- Constants from KSP

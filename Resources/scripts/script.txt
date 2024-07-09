@@ -1,4 +1,4 @@
-{ Compiled on Mon Jul  8 11:57:40 2024 }
+{ Compiled on Tue Jul  9 10:50:14 2024 }
 on init
   declare $sksp_dummy
   declare $concat_it
@@ -225,6 +225,7 @@ on init
   declare %custom_event_type[1000000]
   declare const $RECORDED_DURATION_QUARTER := 545455
   declare const $RECORDED_DURATION_EIGHTH := 272727
+  declare const $MAX_LATENCY := $RECORDED_DURATION_EIGHTH/2
   declare const $MAX_INTERVAL := 5
   declare const $MIN_BRIGHTNESS := 24
   declare !speed_texts[5]
@@ -241,9 +242,9 @@ on init
   declare const $speedMode__doubleSpeed := 4
   declare ?speeds[5]
   ?speeds[0] := 2.0
-  ?speeds[1] := 1.5
+  ?speeds[1] := 1.333
   ?speeds[2] := 1.0
-  ?speeds[3] := 0.75
+  ?speeds[3] := 0.666
   ?speeds[4] := 0.5
   declare !articulation_texts[3]
   !articulation_texts[0] := "Quarters"
@@ -311,9 +312,9 @@ on init
     inc($array_i)
   end while
   !_option_texts_shortened[10*$control__legato+0] := "Off"
-  !_option_texts_shortened[10*$control__legato+1] := "Pitch"
-  !_option_texts_shortened[10*$control__legato+2] := "Ripple"
-  !_option_texts_shortened[10*$control__legato+3] := "Swell"
+  !_option_texts_shortened[10*$control__legato+1] := "Pitches"
+  !_option_texts_shortened[10*$control__legato+2] := "Ripples"
+  !_option_texts_shortened[10*$control__legato+3] := "Swells"
   declare %release_group[3]
   %release_group[$artic__quarters] := find_group("quarters releases")
   %release_group[$artic__eighths] := find_group("eighths releases")
@@ -792,9 +793,9 @@ on init
   set_control_par_str($INST_WALLPAPER_ID,$CONTROL_PAR_PICTURE,"ui_background")
   declare $figma_counter
   declare $figma_counter_multi_line_labels
-  declare %UI_x[223] := (0, 2, 723, 538, 359, 120, 607, 168, 48, 2, 26, 0, 2, 422, 11, 740, 592, 444, 296, 148, 0, 740, 592, 444, 296, 148, 0, 11, 740, 592, 444, 296, 148, 0, 740, 592, 444, 296, 148, 0, 95, ...
-  47, 9, 128, 84, 45, 10, 129, 56, 7, 183, 137, 86, 41, 5, 9, 467, 339, 211, 716, -1, 31, 117, 117, 117, 117, 117, 117, 117, 117, 117, 117, 117, 117, 117, 117, 117, 117, 117, 117, 117, ...
-  117, 117, 117, 117, 117, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 704, 4, 20, 48, 88, 27, 4, 6, 18, 57, 3, 236, 829, 806, 760, 714, 668, 645, 599, 553, 783, ...
+  declare %UI_x[223] := (0, 2, 723, 531, 359, 120, 607, 168, 48, 2, 26, 0, 2, 422, 11, 740, 592, 444, 296, 148, 0, 740, 592, 444, 296, 148, 0, 11, 740, 592, 444, 296, 148, 0, 740, 592, 444, 296, 148, 0, 95, ...
+  47, 9, 139, 93, 44, 13, 129, 56, 7, 183, 137, 86, 41, 5, 9, 435, 316, 197, 716, -1, 31, 117, 117, 117, 117, 117, 117, 117, 117, 117, 117, 117, 117, 117, 117, 117, 117, 117, 117, 117, ...
+  117, 117, 117, 117, 117, -1, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 5, 704, 4, 24, 48, 88, 27, 4, 6, 18, 57, 3, 236, 829, 806, 760, 714, 668, 645, 599, 553, 783, ...
   737, 691, 622, 576, 530, 484, 438, 392, 369, 323, 277, 507, 461, 415, 346, 300, 254, 208, 162, 116, 93, 47, 1, 231, 185, 139, 70, 24, 865, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, ...
   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, ...
   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
@@ -804,14 +805,14 @@ on init
   1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 49, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, ...
   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, ...
   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
-  declare %UI_width[223] := (900, 896, 158, 171, 165, 231, 291, 74, 83, 604, 852, 898, 896, 54, 876, 136, 136, 136, 136, 136, 136, 136, 136, 136, 136, 136, 136, 876, 136, 136, 136, 136, 136, 136, 136, 136, 136, 136, 136, 136, 40, ...
-  42, 34, 43, 50, 42, 35, 26, 61, 43, 48, 45, 52, 45, 35, 54, 91, 91, 91, 170, 23, 23, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18, ...
-  18, 18, 18, 18, 18, 901, 899, 899, 899, 899, 899, 899, 899, 136, 171, 165, 225, 74, 74, 193, 133, 131, 73, 48, 74, 174, 30, 33, 18, 77, 430, 22, 22, 22, 22, 22, 22, 22, 22, 22, ...
+  declare %UI_width[223] := (900, 896, 158, 175, 165, 231, 291, 74, 83, 604, 852, 898, 896, 54, 876, 136, 136, 136, 136, 136, 136, 136, 136, 136, 136, 136, 136, 876, 136, 136, 136, 136, 136, 136, 136, 136, 136, 136, 136, 136, 40, ...
+  42, 34, 48, 55, 53, 35, 26, 61, 43, 48, 45, 52, 45, 35, 54, 133, 91, 91, 170, 23, 23, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18, ...
+  18, 18, 18, 18, 18, 901, 899, 899, 899, 899, 899, 899, 899, 136, 182, 165, 225, 74, 74, 193, 133, 131, 73, 48, 74, 174, 30, 33, 18, 77, 430, 22, 22, 22, 22, 22, 22, 22, 22, 22, ...
   22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 38, 896, 136, 109, 136, 136, 109, 136, 136, 109, 136, 136, ...
   109, 136, 136, 109, 136, 136, 109, 136, 136, 109, 136, 136, 109, 136, 136, 109, 136, 136, 109, 136, 136, 109, 136, 136, 109, 136, 136, 109, 136, 136, 109, 136, 136, 109, 136, 136, 109, 136, 136, 109, ...
   136, 136, 109, 136, 136, 109, 136, 136, 109, 136, 136, 109, 136, 136, 109, 136, 136, 109, 136, 136, 109, 136)
   declare %UI_height[223] := (427, 95, 64, 64, 64, 64, 95, 85, 88, 95, 38, 427, 424, 24, 182, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 182, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 15, ...
-  19, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 19, 43, 43, 43, 50, 23, 23, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, ...
+  19, 15, 19, 19, 19, 15, 15, 15, 15, 15, 15, 15, 15, 15, 19, 43, 43, 43, 50, 23, 23, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, ...
   16, 16, 16, 16, 16, 147, 423, 423, 423, 423, 423, 423, 423, 33, 33, 33, 33, 74, 74, 70, 21, 21, 21, 21, 45, 45, 30, 35, 13, 18, 49, 36, 36, 36, 36, 36, 36, 36, 36, 36, ...
   36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 18, 424, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, ...
   80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, ...
@@ -2717,7 +2718,7 @@ function trigger_release_samples_for_all_ripples
         if (%ripple_id_history[$_r3] # 0)
           if ($voice_i=%custom_event_voice[%ripple_id_history[$_r3] mod 1000000])
             $_artic4 := %custom_event_artic[%ripple_id_history[$_r3] mod 1000000]
-            $_rec_time_pos_in_ripple2 := get_event_par(%ripple_id_history[$_r3],$EVENT_PAR_PLAY_POS) mod %rec_time_ripple_lengths[$_artic4]
+            $_rec_time_pos_in_ripple2 := (get_event_par(%ripple_id_history[$_r3],$EVENT_PAR_PLAY_POS)-0+%rec_time_ripple_lengths[$_artic4]) mod %rec_time_ripple_lengths[$_artic4]
             $_real_time_pos_in_pulse := real_to_int(int_to_real(0)+((int_to_real($_rec_time_pos_in_ripple2)-int_to_real(0))/(int_to_real(%rec_time_ripple_lengths[$_artic4])-int_to_real(0))*(int_to_real(ticks_to_ms(%ripple_length_ticks[$_artic4]))-int_to_real(0))))
             $_real_time_pos_in_pulse := real_to_int(int_to_real($_real_time_pos_in_pulse)*?speeds[$slider_speed])
             $_real_time_ripple_length := ticks_to_ms(real_to_int(int_to_real(%ripple_length_ticks[$_artic4])*?speeds[$slider_speed]))
@@ -3249,7 +3250,7 @@ on release
           if (%ripple_id_history[$_r3] # 0)
             if (0=%custom_event_voice[%ripple_id_history[$_r3] mod 1000000])
               $_artic4 := %custom_event_artic[%ripple_id_history[$_r3] mod 1000000]
-              $_rec_time_pos_in_ripple2 := get_event_par(%ripple_id_history[$_r3],$EVENT_PAR_PLAY_POS) mod %rec_time_ripple_lengths[$_artic4]
+              $_rec_time_pos_in_ripple2 := (get_event_par(%ripple_id_history[$_r3],$EVENT_PAR_PLAY_POS)-0+%rec_time_ripple_lengths[$_artic4]) mod %rec_time_ripple_lengths[$_artic4]
               $_real_time_pos_in_pulse := real_to_int(int_to_real(0)+((int_to_real($_rec_time_pos_in_ripple2)-int_to_real(0))/(int_to_real(%rec_time_ripple_lengths[$_artic4])-int_to_real(0))*(int_to_real(ticks_to_ms(%ripple_length_ticks[$_artic4]))-int_to_real(0))))
               $_real_time_pos_in_pulse := real_to_int(int_to_real($_real_time_pos_in_pulse)*?speeds[$slider_speed])
               $_real_time_ripple_length := ticks_to_ms(real_to_int(int_to_real(%ripple_length_ticks[$_artic4])*?speeds[$slider_speed]))
@@ -3304,7 +3305,7 @@ on release
             if (%ripple_id_history[$_r3] # 0)
               if ($voice_i=%custom_event_voice[%ripple_id_history[$_r3] mod 1000000])
                 $_artic4 := %custom_event_artic[%ripple_id_history[$_r3] mod 1000000]
-                $_rec_time_pos_in_ripple2 := get_event_par(%ripple_id_history[$_r3],$EVENT_PAR_PLAY_POS) mod %rec_time_ripple_lengths[$_artic4]
+                $_rec_time_pos_in_ripple2 := (get_event_par(%ripple_id_history[$_r3],$EVENT_PAR_PLAY_POS)-0+%rec_time_ripple_lengths[$_artic4]) mod %rec_time_ripple_lengths[$_artic4]
                 $_real_time_pos_in_pulse := real_to_int(int_to_real(0)+((int_to_real($_rec_time_pos_in_ripple2)-int_to_real(0))/(int_to_real(%rec_time_ripple_lengths[$_artic4])-int_to_real(0))*(int_to_real(ticks_to_ms(%ripple_length_ticks[$_artic4]))-int_to_real(0))))
                 $_real_time_pos_in_pulse := real_to_int(int_to_real($_real_time_pos_in_pulse)*?speeds[$slider_speed])
                 $_real_time_ripple_length := ticks_to_ms(real_to_int(int_to_real(%ripple_length_ticks[$_artic4])*?speeds[$slider_speed]))
@@ -3374,7 +3375,7 @@ on controller
           if (%ripple_id_history[$_r3] # 0)
             if (%voices_to_release[$_i2]=%custom_event_voice[%ripple_id_history[$_r3] mod 1000000])
               $_artic4 := %custom_event_artic[%ripple_id_history[$_r3] mod 1000000]
-              $_rec_time_pos_in_ripple2 := get_event_par(%ripple_id_history[$_r3],$EVENT_PAR_PLAY_POS) mod %rec_time_ripple_lengths[$_artic4]
+              $_rec_time_pos_in_ripple2 := (get_event_par(%ripple_id_history[$_r3],$EVENT_PAR_PLAY_POS)-0+%rec_time_ripple_lengths[$_artic4]) mod %rec_time_ripple_lengths[$_artic4]
               $_real_time_pos_in_pulse := real_to_int(int_to_real(0)+((int_to_real($_rec_time_pos_in_ripple2)-int_to_real(0))/(int_to_real(%rec_time_ripple_lengths[$_artic4])-int_to_real(0))*(int_to_real(ticks_to_ms(%ripple_length_ticks[$_artic4]))-int_to_real(0))))
               $_real_time_pos_in_pulse := real_to_int(int_to_real($_real_time_pos_in_pulse)*?speeds[$slider_speed])
               $_real_time_ripple_length := ticks_to_ms(real_to_int(int_to_real(%ripple_length_ticks[$_artic4])*?speeds[$slider_speed]))
@@ -4132,7 +4133,7 @@ on ui_control($switch_preview0)
                     if (%ripple_id_history[$_r3] # 0)
                       if (%voices_to_release[$_i2]=%custom_event_voice[%ripple_id_history[$_r3] mod 1000000])
                         $_artic4 := %custom_event_artic[%ripple_id_history[$_r3] mod 1000000]
-                        $_rec_time_pos_in_ripple2 := get_event_par(%ripple_id_history[$_r3],$EVENT_PAR_PLAY_POS) mod %rec_time_ripple_lengths[$_artic4]
+                        $_rec_time_pos_in_ripple2 := (get_event_par(%ripple_id_history[$_r3],$EVENT_PAR_PLAY_POS)-0+%rec_time_ripple_lengths[$_artic4]) mod %rec_time_ripple_lengths[$_artic4]
                         $_real_time_pos_in_pulse := real_to_int(int_to_real(0)+((int_to_real($_rec_time_pos_in_ripple2)-int_to_real(0))/(int_to_real(%rec_time_ripple_lengths[$_artic4])-int_to_real(0))*(int_to_real(ticks_to_ms(%ripple_length_ticks[$_artic4]))-int_to_real(0))))
                         $_real_time_pos_in_pulse := real_to_int(int_to_real($_real_time_pos_in_pulse)*?speeds[$slider_speed])
                         $_real_time_ripple_length := ticks_to_ms(real_to_int(int_to_real(%ripple_length_ticks[$_artic4])*?speeds[$slider_speed]))
@@ -4605,7 +4606,7 @@ on ui_control($switch_preview1)
                     if (%ripple_id_history[$_r3] # 0)
                       if (%voices_to_release[$_i2]=%custom_event_voice[%ripple_id_history[$_r3] mod 1000000])
                         $_artic4 := %custom_event_artic[%ripple_id_history[$_r3] mod 1000000]
-                        $_rec_time_pos_in_ripple2 := get_event_par(%ripple_id_history[$_r3],$EVENT_PAR_PLAY_POS) mod %rec_time_ripple_lengths[$_artic4]
+                        $_rec_time_pos_in_ripple2 := (get_event_par(%ripple_id_history[$_r3],$EVENT_PAR_PLAY_POS)-0+%rec_time_ripple_lengths[$_artic4]) mod %rec_time_ripple_lengths[$_artic4]
                         $_real_time_pos_in_pulse := real_to_int(int_to_real(0)+((int_to_real($_rec_time_pos_in_ripple2)-int_to_real(0))/(int_to_real(%rec_time_ripple_lengths[$_artic4])-int_to_real(0))*(int_to_real(ticks_to_ms(%ripple_length_ticks[$_artic4]))-int_to_real(0))))
                         $_real_time_pos_in_pulse := real_to_int(int_to_real($_real_time_pos_in_pulse)*?speeds[$slider_speed])
                         $_real_time_ripple_length := ticks_to_ms(real_to_int(int_to_real(%ripple_length_ticks[$_artic4])*?speeds[$slider_speed]))
@@ -5078,7 +5079,7 @@ on ui_control($switch_preview2)
                     if (%ripple_id_history[$_r3] # 0)
                       if (%voices_to_release[$_i2]=%custom_event_voice[%ripple_id_history[$_r3] mod 1000000])
                         $_artic4 := %custom_event_artic[%ripple_id_history[$_r3] mod 1000000]
-                        $_rec_time_pos_in_ripple2 := get_event_par(%ripple_id_history[$_r3],$EVENT_PAR_PLAY_POS) mod %rec_time_ripple_lengths[$_artic4]
+                        $_rec_time_pos_in_ripple2 := (get_event_par(%ripple_id_history[$_r3],$EVENT_PAR_PLAY_POS)-0+%rec_time_ripple_lengths[$_artic4]) mod %rec_time_ripple_lengths[$_artic4]
                         $_real_time_pos_in_pulse := real_to_int(int_to_real(0)+((int_to_real($_rec_time_pos_in_ripple2)-int_to_real(0))/(int_to_real(%rec_time_ripple_lengths[$_artic4])-int_to_real(0))*(int_to_real(ticks_to_ms(%ripple_length_ticks[$_artic4]))-int_to_real(0))))
                         $_real_time_pos_in_pulse := real_to_int(int_to_real($_real_time_pos_in_pulse)*?speeds[$slider_speed])
                         $_real_time_ripple_length := ticks_to_ms(real_to_int(int_to_real(%ripple_length_ticks[$_artic4])*?speeds[$slider_speed]))
@@ -5551,7 +5552,7 @@ on ui_control($switch_preview3)
                     if (%ripple_id_history[$_r3] # 0)
                       if (%voices_to_release[$_i2]=%custom_event_voice[%ripple_id_history[$_r3] mod 1000000])
                         $_artic4 := %custom_event_artic[%ripple_id_history[$_r3] mod 1000000]
-                        $_rec_time_pos_in_ripple2 := get_event_par(%ripple_id_history[$_r3],$EVENT_PAR_PLAY_POS) mod %rec_time_ripple_lengths[$_artic4]
+                        $_rec_time_pos_in_ripple2 := (get_event_par(%ripple_id_history[$_r3],$EVENT_PAR_PLAY_POS)-0+%rec_time_ripple_lengths[$_artic4]) mod %rec_time_ripple_lengths[$_artic4]
                         $_real_time_pos_in_pulse := real_to_int(int_to_real(0)+((int_to_real($_rec_time_pos_in_ripple2)-int_to_real(0))/(int_to_real(%rec_time_ripple_lengths[$_artic4])-int_to_real(0))*(int_to_real(ticks_to_ms(%ripple_length_ticks[$_artic4]))-int_to_real(0))))
                         $_real_time_pos_in_pulse := real_to_int(int_to_real($_real_time_pos_in_pulse)*?speeds[$slider_speed])
                         $_real_time_ripple_length := ticks_to_ms(real_to_int(int_to_real(%ripple_length_ticks[$_artic4])*?speeds[$slider_speed]))
@@ -6024,7 +6025,7 @@ on ui_control($switch_preview4)
                     if (%ripple_id_history[$_r3] # 0)
                       if (%voices_to_release[$_i2]=%custom_event_voice[%ripple_id_history[$_r3] mod 1000000])
                         $_artic4 := %custom_event_artic[%ripple_id_history[$_r3] mod 1000000]
-                        $_rec_time_pos_in_ripple2 := get_event_par(%ripple_id_history[$_r3],$EVENT_PAR_PLAY_POS) mod %rec_time_ripple_lengths[$_artic4]
+                        $_rec_time_pos_in_ripple2 := (get_event_par(%ripple_id_history[$_r3],$EVENT_PAR_PLAY_POS)-0+%rec_time_ripple_lengths[$_artic4]) mod %rec_time_ripple_lengths[$_artic4]
                         $_real_time_pos_in_pulse := real_to_int(int_to_real(0)+((int_to_real($_rec_time_pos_in_ripple2)-int_to_real(0))/(int_to_real(%rec_time_ripple_lengths[$_artic4])-int_to_real(0))*(int_to_real(ticks_to_ms(%ripple_length_ticks[$_artic4]))-int_to_real(0))))
                         $_real_time_pos_in_pulse := real_to_int(int_to_real($_real_time_pos_in_pulse)*?speeds[$slider_speed])
                         $_real_time_ripple_length := ticks_to_ms(real_to_int(int_to_real(%ripple_length_ticks[$_artic4])*?speeds[$slider_speed]))
@@ -6497,7 +6498,7 @@ on ui_control($switch_preview5)
                     if (%ripple_id_history[$_r3] # 0)
                       if (%voices_to_release[$_i2]=%custom_event_voice[%ripple_id_history[$_r3] mod 1000000])
                         $_artic4 := %custom_event_artic[%ripple_id_history[$_r3] mod 1000000]
-                        $_rec_time_pos_in_ripple2 := get_event_par(%ripple_id_history[$_r3],$EVENT_PAR_PLAY_POS) mod %rec_time_ripple_lengths[$_artic4]
+                        $_rec_time_pos_in_ripple2 := (get_event_par(%ripple_id_history[$_r3],$EVENT_PAR_PLAY_POS)-0+%rec_time_ripple_lengths[$_artic4]) mod %rec_time_ripple_lengths[$_artic4]
                         $_real_time_pos_in_pulse := real_to_int(int_to_real(0)+((int_to_real($_rec_time_pos_in_ripple2)-int_to_real(0))/(int_to_real(%rec_time_ripple_lengths[$_artic4])-int_to_real(0))*(int_to_real(ticks_to_ms(%ripple_length_ticks[$_artic4]))-int_to_real(0))))
                         $_real_time_pos_in_pulse := real_to_int(int_to_real($_real_time_pos_in_pulse)*?speeds[$slider_speed])
                         $_real_time_ripple_length := ticks_to_ms(real_to_int(int_to_real(%ripple_length_ticks[$_artic4])*?speeds[$slider_speed]))
@@ -6970,7 +6971,7 @@ on ui_control($switch_preview6)
                     if (%ripple_id_history[$_r3] # 0)
                       if (%voices_to_release[$_i2]=%custom_event_voice[%ripple_id_history[$_r3] mod 1000000])
                         $_artic4 := %custom_event_artic[%ripple_id_history[$_r3] mod 1000000]
-                        $_rec_time_pos_in_ripple2 := get_event_par(%ripple_id_history[$_r3],$EVENT_PAR_PLAY_POS) mod %rec_time_ripple_lengths[$_artic4]
+                        $_rec_time_pos_in_ripple2 := (get_event_par(%ripple_id_history[$_r3],$EVENT_PAR_PLAY_POS)-0+%rec_time_ripple_lengths[$_artic4]) mod %rec_time_ripple_lengths[$_artic4]
                         $_real_time_pos_in_pulse := real_to_int(int_to_real(0)+((int_to_real($_rec_time_pos_in_ripple2)-int_to_real(0))/(int_to_real(%rec_time_ripple_lengths[$_artic4])-int_to_real(0))*(int_to_real(ticks_to_ms(%ripple_length_ticks[$_artic4]))-int_to_real(0))))
                         $_real_time_pos_in_pulse := real_to_int(int_to_real($_real_time_pos_in_pulse)*?speeds[$slider_speed])
                         $_real_time_ripple_length := ticks_to_ms(real_to_int(int_to_real(%ripple_length_ticks[$_artic4])*?speeds[$slider_speed]))
@@ -7443,7 +7444,7 @@ on ui_control($switch_preview7)
                     if (%ripple_id_history[$_r3] # 0)
                       if (%voices_to_release[$_i2]=%custom_event_voice[%ripple_id_history[$_r3] mod 1000000])
                         $_artic4 := %custom_event_artic[%ripple_id_history[$_r3] mod 1000000]
-                        $_rec_time_pos_in_ripple2 := get_event_par(%ripple_id_history[$_r3],$EVENT_PAR_PLAY_POS) mod %rec_time_ripple_lengths[$_artic4]
+                        $_rec_time_pos_in_ripple2 := (get_event_par(%ripple_id_history[$_r3],$EVENT_PAR_PLAY_POS)-0+%rec_time_ripple_lengths[$_artic4]) mod %rec_time_ripple_lengths[$_artic4]
                         $_real_time_pos_in_pulse := real_to_int(int_to_real(0)+((int_to_real($_rec_time_pos_in_ripple2)-int_to_real(0))/(int_to_real(%rec_time_ripple_lengths[$_artic4])-int_to_real(0))*(int_to_real(ticks_to_ms(%ripple_length_ticks[$_artic4]))-int_to_real(0))))
                         $_real_time_pos_in_pulse := real_to_int(int_to_real($_real_time_pos_in_pulse)*?speeds[$slider_speed])
                         $_real_time_ripple_length := ticks_to_ms(real_to_int(int_to_real(%ripple_length_ticks[$_artic4])*?speeds[$slider_speed]))
@@ -7916,7 +7917,7 @@ on ui_control($switch_preview8)
                     if (%ripple_id_history[$_r3] # 0)
                       if (%voices_to_release[$_i2]=%custom_event_voice[%ripple_id_history[$_r3] mod 1000000])
                         $_artic4 := %custom_event_artic[%ripple_id_history[$_r3] mod 1000000]
-                        $_rec_time_pos_in_ripple2 := get_event_par(%ripple_id_history[$_r3],$EVENT_PAR_PLAY_POS) mod %rec_time_ripple_lengths[$_artic4]
+                        $_rec_time_pos_in_ripple2 := (get_event_par(%ripple_id_history[$_r3],$EVENT_PAR_PLAY_POS)-0+%rec_time_ripple_lengths[$_artic4]) mod %rec_time_ripple_lengths[$_artic4]
                         $_real_time_pos_in_pulse := real_to_int(int_to_real(0)+((int_to_real($_rec_time_pos_in_ripple2)-int_to_real(0))/(int_to_real(%rec_time_ripple_lengths[$_artic4])-int_to_real(0))*(int_to_real(ticks_to_ms(%ripple_length_ticks[$_artic4]))-int_to_real(0))))
                         $_real_time_pos_in_pulse := real_to_int(int_to_real($_real_time_pos_in_pulse)*?speeds[$slider_speed])
                         $_real_time_ripple_length := ticks_to_ms(real_to_int(int_to_real(%ripple_length_ticks[$_artic4])*?speeds[$slider_speed]))
@@ -8389,7 +8390,7 @@ on ui_control($switch_preview9)
                     if (%ripple_id_history[$_r3] # 0)
                       if (%voices_to_release[$_i2]=%custom_event_voice[%ripple_id_history[$_r3] mod 1000000])
                         $_artic4 := %custom_event_artic[%ripple_id_history[$_r3] mod 1000000]
-                        $_rec_time_pos_in_ripple2 := get_event_par(%ripple_id_history[$_r3],$EVENT_PAR_PLAY_POS) mod %rec_time_ripple_lengths[$_artic4]
+                        $_rec_time_pos_in_ripple2 := (get_event_par(%ripple_id_history[$_r3],$EVENT_PAR_PLAY_POS)-0+%rec_time_ripple_lengths[$_artic4]) mod %rec_time_ripple_lengths[$_artic4]
                         $_real_time_pos_in_pulse := real_to_int(int_to_real(0)+((int_to_real($_rec_time_pos_in_ripple2)-int_to_real(0))/(int_to_real(%rec_time_ripple_lengths[$_artic4])-int_to_real(0))*(int_to_real(ticks_to_ms(%ripple_length_ticks[$_artic4]))-int_to_real(0))))
                         $_real_time_pos_in_pulse := real_to_int(int_to_real($_real_time_pos_in_pulse)*?speeds[$slider_speed])
                         $_real_time_ripple_length := ticks_to_ms(real_to_int(int_to_real(%ripple_length_ticks[$_artic4])*?speeds[$slider_speed]))
@@ -8862,7 +8863,7 @@ on ui_control($switch_preview10)
                     if (%ripple_id_history[$_r3] # 0)
                       if (%voices_to_release[$_i2]=%custom_event_voice[%ripple_id_history[$_r3] mod 1000000])
                         $_artic4 := %custom_event_artic[%ripple_id_history[$_r3] mod 1000000]
-                        $_rec_time_pos_in_ripple2 := get_event_par(%ripple_id_history[$_r3],$EVENT_PAR_PLAY_POS) mod %rec_time_ripple_lengths[$_artic4]
+                        $_rec_time_pos_in_ripple2 := (get_event_par(%ripple_id_history[$_r3],$EVENT_PAR_PLAY_POS)-0+%rec_time_ripple_lengths[$_artic4]) mod %rec_time_ripple_lengths[$_artic4]
                         $_real_time_pos_in_pulse := real_to_int(int_to_real(0)+((int_to_real($_rec_time_pos_in_ripple2)-int_to_real(0))/(int_to_real(%rec_time_ripple_lengths[$_artic4])-int_to_real(0))*(int_to_real(ticks_to_ms(%ripple_length_ticks[$_artic4]))-int_to_real(0))))
                         $_real_time_pos_in_pulse := real_to_int(int_to_real($_real_time_pos_in_pulse)*?speeds[$slider_speed])
                         $_real_time_ripple_length := ticks_to_ms(real_to_int(int_to_real(%ripple_length_ticks[$_artic4])*?speeds[$slider_speed]))
@@ -9335,7 +9336,7 @@ on ui_control($switch_preview11)
                     if (%ripple_id_history[$_r3] # 0)
                       if (%voices_to_release[$_i2]=%custom_event_voice[%ripple_id_history[$_r3] mod 1000000])
                         $_artic4 := %custom_event_artic[%ripple_id_history[$_r3] mod 1000000]
-                        $_rec_time_pos_in_ripple2 := get_event_par(%ripple_id_history[$_r3],$EVENT_PAR_PLAY_POS) mod %rec_time_ripple_lengths[$_artic4]
+                        $_rec_time_pos_in_ripple2 := (get_event_par(%ripple_id_history[$_r3],$EVENT_PAR_PLAY_POS)-0+%rec_time_ripple_lengths[$_artic4]) mod %rec_time_ripple_lengths[$_artic4]
                         $_real_time_pos_in_pulse := real_to_int(int_to_real(0)+((int_to_real($_rec_time_pos_in_ripple2)-int_to_real(0))/(int_to_real(%rec_time_ripple_lengths[$_artic4])-int_to_real(0))*(int_to_real(ticks_to_ms(%ripple_length_ticks[$_artic4]))-int_to_real(0))))
                         $_real_time_pos_in_pulse := real_to_int(int_to_real($_real_time_pos_in_pulse)*?speeds[$slider_speed])
                         $_real_time_ripple_length := ticks_to_ms(real_to_int(int_to_real(%ripple_length_ticks[$_artic4])*?speeds[$slider_speed]))
@@ -9808,7 +9809,7 @@ on ui_control($switch_preview12)
                     if (%ripple_id_history[$_r3] # 0)
                       if (%voices_to_release[$_i2]=%custom_event_voice[%ripple_id_history[$_r3] mod 1000000])
                         $_artic4 := %custom_event_artic[%ripple_id_history[$_r3] mod 1000000]
-                        $_rec_time_pos_in_ripple2 := get_event_par(%ripple_id_history[$_r3],$EVENT_PAR_PLAY_POS) mod %rec_time_ripple_lengths[$_artic4]
+                        $_rec_time_pos_in_ripple2 := (get_event_par(%ripple_id_history[$_r3],$EVENT_PAR_PLAY_POS)-0+%rec_time_ripple_lengths[$_artic4]) mod %rec_time_ripple_lengths[$_artic4]
                         $_real_time_pos_in_pulse := real_to_int(int_to_real(0)+((int_to_real($_rec_time_pos_in_ripple2)-int_to_real(0))/(int_to_real(%rec_time_ripple_lengths[$_artic4])-int_to_real(0))*(int_to_real(ticks_to_ms(%ripple_length_ticks[$_artic4]))-int_to_real(0))))
                         $_real_time_pos_in_pulse := real_to_int(int_to_real($_real_time_pos_in_pulse)*?speeds[$slider_speed])
                         $_real_time_ripple_length := ticks_to_ms(real_to_int(int_to_real(%ripple_length_ticks[$_artic4])*?speeds[$slider_speed]))
@@ -10281,7 +10282,7 @@ on ui_control($switch_preview13)
                     if (%ripple_id_history[$_r3] # 0)
                       if (%voices_to_release[$_i2]=%custom_event_voice[%ripple_id_history[$_r3] mod 1000000])
                         $_artic4 := %custom_event_artic[%ripple_id_history[$_r3] mod 1000000]
-                        $_rec_time_pos_in_ripple2 := get_event_par(%ripple_id_history[$_r3],$EVENT_PAR_PLAY_POS) mod %rec_time_ripple_lengths[$_artic4]
+                        $_rec_time_pos_in_ripple2 := (get_event_par(%ripple_id_history[$_r3],$EVENT_PAR_PLAY_POS)-0+%rec_time_ripple_lengths[$_artic4]) mod %rec_time_ripple_lengths[$_artic4]
                         $_real_time_pos_in_pulse := real_to_int(int_to_real(0)+((int_to_real($_rec_time_pos_in_ripple2)-int_to_real(0))/(int_to_real(%rec_time_ripple_lengths[$_artic4])-int_to_real(0))*(int_to_real(ticks_to_ms(%ripple_length_ticks[$_artic4]))-int_to_real(0))))
                         $_real_time_pos_in_pulse := real_to_int(int_to_real($_real_time_pos_in_pulse)*?speeds[$slider_speed])
                         $_real_time_ripple_length := ticks_to_ms(real_to_int(int_to_real(%ripple_length_ticks[$_artic4])*?speeds[$slider_speed]))
@@ -10754,7 +10755,7 @@ on ui_control($switch_preview14)
                     if (%ripple_id_history[$_r3] # 0)
                       if (%voices_to_release[$_i2]=%custom_event_voice[%ripple_id_history[$_r3] mod 1000000])
                         $_artic4 := %custom_event_artic[%ripple_id_history[$_r3] mod 1000000]
-                        $_rec_time_pos_in_ripple2 := get_event_par(%ripple_id_history[$_r3],$EVENT_PAR_PLAY_POS) mod %rec_time_ripple_lengths[$_artic4]
+                        $_rec_time_pos_in_ripple2 := (get_event_par(%ripple_id_history[$_r3],$EVENT_PAR_PLAY_POS)-0+%rec_time_ripple_lengths[$_artic4]) mod %rec_time_ripple_lengths[$_artic4]
                         $_real_time_pos_in_pulse := real_to_int(int_to_real(0)+((int_to_real($_rec_time_pos_in_ripple2)-int_to_real(0))/(int_to_real(%rec_time_ripple_lengths[$_artic4])-int_to_real(0))*(int_to_real(ticks_to_ms(%ripple_length_ticks[$_artic4]))-int_to_real(0))))
                         $_real_time_pos_in_pulse := real_to_int(int_to_real($_real_time_pos_in_pulse)*?speeds[$slider_speed])
                         $_real_time_ripple_length := ticks_to_ms(real_to_int(int_to_real(%ripple_length_ticks[$_artic4])*?speeds[$slider_speed]))
@@ -11227,7 +11228,7 @@ on ui_control($switch_preview15)
                     if (%ripple_id_history[$_r3] # 0)
                       if (%voices_to_release[$_i2]=%custom_event_voice[%ripple_id_history[$_r3] mod 1000000])
                         $_artic4 := %custom_event_artic[%ripple_id_history[$_r3] mod 1000000]
-                        $_rec_time_pos_in_ripple2 := get_event_par(%ripple_id_history[$_r3],$EVENT_PAR_PLAY_POS) mod %rec_time_ripple_lengths[$_artic4]
+                        $_rec_time_pos_in_ripple2 := (get_event_par(%ripple_id_history[$_r3],$EVENT_PAR_PLAY_POS)-0+%rec_time_ripple_lengths[$_artic4]) mod %rec_time_ripple_lengths[$_artic4]
                         $_real_time_pos_in_pulse := real_to_int(int_to_real(0)+((int_to_real($_rec_time_pos_in_ripple2)-int_to_real(0))/(int_to_real(%rec_time_ripple_lengths[$_artic4])-int_to_real(0))*(int_to_real(ticks_to_ms(%ripple_length_ticks[$_artic4]))-int_to_real(0))))
                         $_real_time_pos_in_pulse := real_to_int(int_to_real($_real_time_pos_in_pulse)*?speeds[$slider_speed])
                         $_real_time_ripple_length := ticks_to_ms(real_to_int(int_to_real(%ripple_length_ticks[$_artic4])*?speeds[$slider_speed]))
@@ -11700,7 +11701,7 @@ on ui_control($switch_preview16)
                     if (%ripple_id_history[$_r3] # 0)
                       if (%voices_to_release[$_i2]=%custom_event_voice[%ripple_id_history[$_r3] mod 1000000])
                         $_artic4 := %custom_event_artic[%ripple_id_history[$_r3] mod 1000000]
-                        $_rec_time_pos_in_ripple2 := get_event_par(%ripple_id_history[$_r3],$EVENT_PAR_PLAY_POS) mod %rec_time_ripple_lengths[$_artic4]
+                        $_rec_time_pos_in_ripple2 := (get_event_par(%ripple_id_history[$_r3],$EVENT_PAR_PLAY_POS)-0+%rec_time_ripple_lengths[$_artic4]) mod %rec_time_ripple_lengths[$_artic4]
                         $_real_time_pos_in_pulse := real_to_int(int_to_real(0)+((int_to_real($_rec_time_pos_in_ripple2)-int_to_real(0))/(int_to_real(%rec_time_ripple_lengths[$_artic4])-int_to_real(0))*(int_to_real(ticks_to_ms(%ripple_length_ticks[$_artic4]))-int_to_real(0))))
                         $_real_time_pos_in_pulse := real_to_int(int_to_real($_real_time_pos_in_pulse)*?speeds[$slider_speed])
                         $_real_time_ripple_length := ticks_to_ms(real_to_int(int_to_real(%ripple_length_ticks[$_artic4])*?speeds[$slider_speed]))
@@ -12173,7 +12174,7 @@ on ui_control($switch_preview17)
                     if (%ripple_id_history[$_r3] # 0)
                       if (%voices_to_release[$_i2]=%custom_event_voice[%ripple_id_history[$_r3] mod 1000000])
                         $_artic4 := %custom_event_artic[%ripple_id_history[$_r3] mod 1000000]
-                        $_rec_time_pos_in_ripple2 := get_event_par(%ripple_id_history[$_r3],$EVENT_PAR_PLAY_POS) mod %rec_time_ripple_lengths[$_artic4]
+                        $_rec_time_pos_in_ripple2 := (get_event_par(%ripple_id_history[$_r3],$EVENT_PAR_PLAY_POS)-0+%rec_time_ripple_lengths[$_artic4]) mod %rec_time_ripple_lengths[$_artic4]
                         $_real_time_pos_in_pulse := real_to_int(int_to_real(0)+((int_to_real($_rec_time_pos_in_ripple2)-int_to_real(0))/(int_to_real(%rec_time_ripple_lengths[$_artic4])-int_to_real(0))*(int_to_real(ticks_to_ms(%ripple_length_ticks[$_artic4]))-int_to_real(0))))
                         $_real_time_pos_in_pulse := real_to_int(int_to_real($_real_time_pos_in_pulse)*?speeds[$slider_speed])
                         $_real_time_ripple_length := ticks_to_ms(real_to_int(int_to_real(%ripple_length_ticks[$_artic4])*?speeds[$slider_speed]))
@@ -12646,7 +12647,7 @@ on ui_control($switch_preview18)
                     if (%ripple_id_history[$_r3] # 0)
                       if (%voices_to_release[$_i2]=%custom_event_voice[%ripple_id_history[$_r3] mod 1000000])
                         $_artic4 := %custom_event_artic[%ripple_id_history[$_r3] mod 1000000]
-                        $_rec_time_pos_in_ripple2 := get_event_par(%ripple_id_history[$_r3],$EVENT_PAR_PLAY_POS) mod %rec_time_ripple_lengths[$_artic4]
+                        $_rec_time_pos_in_ripple2 := (get_event_par(%ripple_id_history[$_r3],$EVENT_PAR_PLAY_POS)-0+%rec_time_ripple_lengths[$_artic4]) mod %rec_time_ripple_lengths[$_artic4]
                         $_real_time_pos_in_pulse := real_to_int(int_to_real(0)+((int_to_real($_rec_time_pos_in_ripple2)-int_to_real(0))/(int_to_real(%rec_time_ripple_lengths[$_artic4])-int_to_real(0))*(int_to_real(ticks_to_ms(%ripple_length_ticks[$_artic4]))-int_to_real(0))))
                         $_real_time_pos_in_pulse := real_to_int(int_to_real($_real_time_pos_in_pulse)*?speeds[$slider_speed])
                         $_real_time_ripple_length := ticks_to_ms(real_to_int(int_to_real(%ripple_length_ticks[$_artic4])*?speeds[$slider_speed]))
@@ -13119,7 +13120,7 @@ on ui_control($switch_preview19)
                     if (%ripple_id_history[$_r3] # 0)
                       if (%voices_to_release[$_i2]=%custom_event_voice[%ripple_id_history[$_r3] mod 1000000])
                         $_artic4 := %custom_event_artic[%ripple_id_history[$_r3] mod 1000000]
-                        $_rec_time_pos_in_ripple2 := get_event_par(%ripple_id_history[$_r3],$EVENT_PAR_PLAY_POS) mod %rec_time_ripple_lengths[$_artic4]
+                        $_rec_time_pos_in_ripple2 := (get_event_par(%ripple_id_history[$_r3],$EVENT_PAR_PLAY_POS)-0+%rec_time_ripple_lengths[$_artic4]) mod %rec_time_ripple_lengths[$_artic4]
                         $_real_time_pos_in_pulse := real_to_int(int_to_real(0)+((int_to_real($_rec_time_pos_in_ripple2)-int_to_real(0))/(int_to_real(%rec_time_ripple_lengths[$_artic4])-int_to_real(0))*(int_to_real(ticks_to_ms(%ripple_length_ticks[$_artic4]))-int_to_real(0))))
                         $_real_time_pos_in_pulse := real_to_int(int_to_real($_real_time_pos_in_pulse)*?speeds[$slider_speed])
                         $_real_time_ripple_length := ticks_to_ms(real_to_int(int_to_real(%ripple_length_ticks[$_artic4])*?speeds[$slider_speed]))
@@ -13592,7 +13593,7 @@ on ui_control($switch_preview20)
                     if (%ripple_id_history[$_r3] # 0)
                       if (%voices_to_release[$_i2]=%custom_event_voice[%ripple_id_history[$_r3] mod 1000000])
                         $_artic4 := %custom_event_artic[%ripple_id_history[$_r3] mod 1000000]
-                        $_rec_time_pos_in_ripple2 := get_event_par(%ripple_id_history[$_r3],$EVENT_PAR_PLAY_POS) mod %rec_time_ripple_lengths[$_artic4]
+                        $_rec_time_pos_in_ripple2 := (get_event_par(%ripple_id_history[$_r3],$EVENT_PAR_PLAY_POS)-0+%rec_time_ripple_lengths[$_artic4]) mod %rec_time_ripple_lengths[$_artic4]
                         $_real_time_pos_in_pulse := real_to_int(int_to_real(0)+((int_to_real($_rec_time_pos_in_ripple2)-int_to_real(0))/(int_to_real(%rec_time_ripple_lengths[$_artic4])-int_to_real(0))*(int_to_real(ticks_to_ms(%ripple_length_ticks[$_artic4]))-int_to_real(0))))
                         $_real_time_pos_in_pulse := real_to_int(int_to_real($_real_time_pos_in_pulse)*?speeds[$slider_speed])
                         $_real_time_ripple_length := ticks_to_ms(real_to_int(int_to_real(%ripple_length_ticks[$_artic4])*?speeds[$slider_speed]))
@@ -14065,7 +14066,7 @@ on ui_control($switch_preview21)
                     if (%ripple_id_history[$_r3] # 0)
                       if (%voices_to_release[$_i2]=%custom_event_voice[%ripple_id_history[$_r3] mod 1000000])
                         $_artic4 := %custom_event_artic[%ripple_id_history[$_r3] mod 1000000]
-                        $_rec_time_pos_in_ripple2 := get_event_par(%ripple_id_history[$_r3],$EVENT_PAR_PLAY_POS) mod %rec_time_ripple_lengths[$_artic4]
+                        $_rec_time_pos_in_ripple2 := (get_event_par(%ripple_id_history[$_r3],$EVENT_PAR_PLAY_POS)-0+%rec_time_ripple_lengths[$_artic4]) mod %rec_time_ripple_lengths[$_artic4]
                         $_real_time_pos_in_pulse := real_to_int(int_to_real(0)+((int_to_real($_rec_time_pos_in_ripple2)-int_to_real(0))/(int_to_real(%rec_time_ripple_lengths[$_artic4])-int_to_real(0))*(int_to_real(ticks_to_ms(%ripple_length_ticks[$_artic4]))-int_to_real(0))))
                         $_real_time_pos_in_pulse := real_to_int(int_to_real($_real_time_pos_in_pulse)*?speeds[$slider_speed])
                         $_real_time_ripple_length := ticks_to_ms(real_to_int(int_to_real(%ripple_length_ticks[$_artic4])*?speeds[$slider_speed]))
@@ -14538,7 +14539,7 @@ on ui_control($switch_preview22)
                     if (%ripple_id_history[$_r3] # 0)
                       if (%voices_to_release[$_i2]=%custom_event_voice[%ripple_id_history[$_r3] mod 1000000])
                         $_artic4 := %custom_event_artic[%ripple_id_history[$_r3] mod 1000000]
-                        $_rec_time_pos_in_ripple2 := get_event_par(%ripple_id_history[$_r3],$EVENT_PAR_PLAY_POS) mod %rec_time_ripple_lengths[$_artic4]
+                        $_rec_time_pos_in_ripple2 := (get_event_par(%ripple_id_history[$_r3],$EVENT_PAR_PLAY_POS)-0+%rec_time_ripple_lengths[$_artic4]) mod %rec_time_ripple_lengths[$_artic4]
                         $_real_time_pos_in_pulse := real_to_int(int_to_real(0)+((int_to_real($_rec_time_pos_in_ripple2)-int_to_real(0))/(int_to_real(%rec_time_ripple_lengths[$_artic4])-int_to_real(0))*(int_to_real(ticks_to_ms(%ripple_length_ticks[$_artic4]))-int_to_real(0))))
                         $_real_time_pos_in_pulse := real_to_int(int_to_real($_real_time_pos_in_pulse)*?speeds[$slider_speed])
                         $_real_time_ripple_length := ticks_to_ms(real_to_int(int_to_real(%ripple_length_ticks[$_artic4])*?speeds[$slider_speed]))
@@ -15011,7 +15012,7 @@ on ui_control($switch_preview23)
                     if (%ripple_id_history[$_r3] # 0)
                       if (%voices_to_release[$_i2]=%custom_event_voice[%ripple_id_history[$_r3] mod 1000000])
                         $_artic4 := %custom_event_artic[%ripple_id_history[$_r3] mod 1000000]
-                        $_rec_time_pos_in_ripple2 := get_event_par(%ripple_id_history[$_r3],$EVENT_PAR_PLAY_POS) mod %rec_time_ripple_lengths[$_artic4]
+                        $_rec_time_pos_in_ripple2 := (get_event_par(%ripple_id_history[$_r3],$EVENT_PAR_PLAY_POS)-0+%rec_time_ripple_lengths[$_artic4]) mod %rec_time_ripple_lengths[$_artic4]
                         $_real_time_pos_in_pulse := real_to_int(int_to_real(0)+((int_to_real($_rec_time_pos_in_ripple2)-int_to_real(0))/(int_to_real(%rec_time_ripple_lengths[$_artic4])-int_to_real(0))*(int_to_real(ticks_to_ms(%ripple_length_ticks[$_artic4]))-int_to_real(0))))
                         $_real_time_pos_in_pulse := real_to_int(int_to_real($_real_time_pos_in_pulse)*?speeds[$slider_speed])
                         $_real_time_ripple_length := ticks_to_ms(real_to_int(int_to_real(%ripple_length_ticks[$_artic4])*?speeds[$slider_speed]))
