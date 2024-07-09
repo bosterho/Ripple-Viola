@@ -1,4 +1,4 @@
-{ Compiled on Tue Jul  9 12:00:51 2024 }
+{ Compiled on Tue Jul  9 14:59:17 2024 }
 on init
   declare $sksp_dummy
   declare $concat_it
@@ -1970,7 +1970,7 @@ on init
   set_voice_limit($NI_VL_TMPRO_STANDARD,32)
   declare @siln2
   @siln2 := "START_EVENTS_INTEGERS_ENGINE"
-  set_engine_par($ENGINE_PAR_SPEED,1000000-((18*2-1)*90909),$artic__quarters,-1,-1)
+  set_engine_par($ENGINE_PAR_SPEED,1000000-((4*8+4-1)*90909),$artic__quarters,-1,-1)
   set_engine_par($ENGINE_PAR_SPEED,1000000-((18-1)*90909),$artic__eighths,-1,-1)
   set_engine_par($ENGINE_PAR_SPEED,1000000-((18-1)*90909),$artic__sixteenths,-1,-1)
   set_engine_par($ENGINE_PAR_SPEED,1000000-((12-1)*90909),find_group("quarters releases"),-1,-1)
@@ -3154,7 +3154,7 @@ on note
             $_real_legato_time := real_to_int(int_to_real($_real_legato_time)/?speeds[$slider_speed])
             select ($slider_legato)
               case $legatoMode__syncToPitch
-                $_real_legato_time := $_real_legato_time+ticks_to_ms(5)
+                $_real_legato_time := $_real_legato_time+ticks_to_ms(20)
                 $_offset_real_time := $_real_legato_time mod ticks_to_ms(%ripple_length_ticks[$cur_artic]/%pitch_fractions[$cur_artic])
               case $legatoMode__syncToRipple
                 $_offset_real_time := $_real_legato_time mod ticks_to_ms(%ripple_length_ticks[$cur_artic])
@@ -4063,7 +4063,7 @@ on ui_control($switch_preview0)
                       $_real_legato_time := real_to_int(int_to_real($_real_legato_time)/?speeds[$slider_speed])
                       select ($slider_legato)
                         case $legatoMode__syncToPitch
-                          $_real_legato_time := $_real_legato_time+ticks_to_ms(5)
+                          $_real_legato_time := $_real_legato_time+ticks_to_ms(20)
                           $_offset_real_time := $_real_legato_time mod ticks_to_ms(%ripple_length_ticks[$cur_artic]/%pitch_fractions[$cur_artic])
                         case $legatoMode__syncToRipple
                           $_offset_real_time := $_real_legato_time mod ticks_to_ms(%ripple_length_ticks[$cur_artic])
@@ -4538,7 +4538,7 @@ on ui_control($switch_preview1)
                       $_real_legato_time := real_to_int(int_to_real($_real_legato_time)/?speeds[$slider_speed])
                       select ($slider_legato)
                         case $legatoMode__syncToPitch
-                          $_real_legato_time := $_real_legato_time+ticks_to_ms(5)
+                          $_real_legato_time := $_real_legato_time+ticks_to_ms(20)
                           $_offset_real_time := $_real_legato_time mod ticks_to_ms(%ripple_length_ticks[$cur_artic]/%pitch_fractions[$cur_artic])
                         case $legatoMode__syncToRipple
                           $_offset_real_time := $_real_legato_time mod ticks_to_ms(%ripple_length_ticks[$cur_artic])
@@ -5013,7 +5013,7 @@ on ui_control($switch_preview2)
                       $_real_legato_time := real_to_int(int_to_real($_real_legato_time)/?speeds[$slider_speed])
                       select ($slider_legato)
                         case $legatoMode__syncToPitch
-                          $_real_legato_time := $_real_legato_time+ticks_to_ms(5)
+                          $_real_legato_time := $_real_legato_time+ticks_to_ms(20)
                           $_offset_real_time := $_real_legato_time mod ticks_to_ms(%ripple_length_ticks[$cur_artic]/%pitch_fractions[$cur_artic])
                         case $legatoMode__syncToRipple
                           $_offset_real_time := $_real_legato_time mod ticks_to_ms(%ripple_length_ticks[$cur_artic])
@@ -5488,7 +5488,7 @@ on ui_control($switch_preview3)
                       $_real_legato_time := real_to_int(int_to_real($_real_legato_time)/?speeds[$slider_speed])
                       select ($slider_legato)
                         case $legatoMode__syncToPitch
-                          $_real_legato_time := $_real_legato_time+ticks_to_ms(5)
+                          $_real_legato_time := $_real_legato_time+ticks_to_ms(20)
                           $_offset_real_time := $_real_legato_time mod ticks_to_ms(%ripple_length_ticks[$cur_artic]/%pitch_fractions[$cur_artic])
                         case $legatoMode__syncToRipple
                           $_offset_real_time := $_real_legato_time mod ticks_to_ms(%ripple_length_ticks[$cur_artic])
@@ -5963,7 +5963,7 @@ on ui_control($switch_preview4)
                       $_real_legato_time := real_to_int(int_to_real($_real_legato_time)/?speeds[$slider_speed])
                       select ($slider_legato)
                         case $legatoMode__syncToPitch
-                          $_real_legato_time := $_real_legato_time+ticks_to_ms(5)
+                          $_real_legato_time := $_real_legato_time+ticks_to_ms(20)
                           $_offset_real_time := $_real_legato_time mod ticks_to_ms(%ripple_length_ticks[$cur_artic]/%pitch_fractions[$cur_artic])
                         case $legatoMode__syncToRipple
                           $_offset_real_time := $_real_legato_time mod ticks_to_ms(%ripple_length_ticks[$cur_artic])
@@ -6438,7 +6438,7 @@ on ui_control($switch_preview5)
                       $_real_legato_time := real_to_int(int_to_real($_real_legato_time)/?speeds[$slider_speed])
                       select ($slider_legato)
                         case $legatoMode__syncToPitch
-                          $_real_legato_time := $_real_legato_time+ticks_to_ms(5)
+                          $_real_legato_time := $_real_legato_time+ticks_to_ms(20)
                           $_offset_real_time := $_real_legato_time mod ticks_to_ms(%ripple_length_ticks[$cur_artic]/%pitch_fractions[$cur_artic])
                         case $legatoMode__syncToRipple
                           $_offset_real_time := $_real_legato_time mod ticks_to_ms(%ripple_length_ticks[$cur_artic])
@@ -6913,7 +6913,7 @@ on ui_control($switch_preview6)
                       $_real_legato_time := real_to_int(int_to_real($_real_legato_time)/?speeds[$slider_speed])
                       select ($slider_legato)
                         case $legatoMode__syncToPitch
-                          $_real_legato_time := $_real_legato_time+ticks_to_ms(5)
+                          $_real_legato_time := $_real_legato_time+ticks_to_ms(20)
                           $_offset_real_time := $_real_legato_time mod ticks_to_ms(%ripple_length_ticks[$cur_artic]/%pitch_fractions[$cur_artic])
                         case $legatoMode__syncToRipple
                           $_offset_real_time := $_real_legato_time mod ticks_to_ms(%ripple_length_ticks[$cur_artic])
@@ -7388,7 +7388,7 @@ on ui_control($switch_preview7)
                       $_real_legato_time := real_to_int(int_to_real($_real_legato_time)/?speeds[$slider_speed])
                       select ($slider_legato)
                         case $legatoMode__syncToPitch
-                          $_real_legato_time := $_real_legato_time+ticks_to_ms(5)
+                          $_real_legato_time := $_real_legato_time+ticks_to_ms(20)
                           $_offset_real_time := $_real_legato_time mod ticks_to_ms(%ripple_length_ticks[$cur_artic]/%pitch_fractions[$cur_artic])
                         case $legatoMode__syncToRipple
                           $_offset_real_time := $_real_legato_time mod ticks_to_ms(%ripple_length_ticks[$cur_artic])
@@ -7863,7 +7863,7 @@ on ui_control($switch_preview8)
                       $_real_legato_time := real_to_int(int_to_real($_real_legato_time)/?speeds[$slider_speed])
                       select ($slider_legato)
                         case $legatoMode__syncToPitch
-                          $_real_legato_time := $_real_legato_time+ticks_to_ms(5)
+                          $_real_legato_time := $_real_legato_time+ticks_to_ms(20)
                           $_offset_real_time := $_real_legato_time mod ticks_to_ms(%ripple_length_ticks[$cur_artic]/%pitch_fractions[$cur_artic])
                         case $legatoMode__syncToRipple
                           $_offset_real_time := $_real_legato_time mod ticks_to_ms(%ripple_length_ticks[$cur_artic])
@@ -8338,7 +8338,7 @@ on ui_control($switch_preview9)
                       $_real_legato_time := real_to_int(int_to_real($_real_legato_time)/?speeds[$slider_speed])
                       select ($slider_legato)
                         case $legatoMode__syncToPitch
-                          $_real_legato_time := $_real_legato_time+ticks_to_ms(5)
+                          $_real_legato_time := $_real_legato_time+ticks_to_ms(20)
                           $_offset_real_time := $_real_legato_time mod ticks_to_ms(%ripple_length_ticks[$cur_artic]/%pitch_fractions[$cur_artic])
                         case $legatoMode__syncToRipple
                           $_offset_real_time := $_real_legato_time mod ticks_to_ms(%ripple_length_ticks[$cur_artic])
@@ -8813,7 +8813,7 @@ on ui_control($switch_preview10)
                       $_real_legato_time := real_to_int(int_to_real($_real_legato_time)/?speeds[$slider_speed])
                       select ($slider_legato)
                         case $legatoMode__syncToPitch
-                          $_real_legato_time := $_real_legato_time+ticks_to_ms(5)
+                          $_real_legato_time := $_real_legato_time+ticks_to_ms(20)
                           $_offset_real_time := $_real_legato_time mod ticks_to_ms(%ripple_length_ticks[$cur_artic]/%pitch_fractions[$cur_artic])
                         case $legatoMode__syncToRipple
                           $_offset_real_time := $_real_legato_time mod ticks_to_ms(%ripple_length_ticks[$cur_artic])
@@ -9288,7 +9288,7 @@ on ui_control($switch_preview11)
                       $_real_legato_time := real_to_int(int_to_real($_real_legato_time)/?speeds[$slider_speed])
                       select ($slider_legato)
                         case $legatoMode__syncToPitch
-                          $_real_legato_time := $_real_legato_time+ticks_to_ms(5)
+                          $_real_legato_time := $_real_legato_time+ticks_to_ms(20)
                           $_offset_real_time := $_real_legato_time mod ticks_to_ms(%ripple_length_ticks[$cur_artic]/%pitch_fractions[$cur_artic])
                         case $legatoMode__syncToRipple
                           $_offset_real_time := $_real_legato_time mod ticks_to_ms(%ripple_length_ticks[$cur_artic])
@@ -9763,7 +9763,7 @@ on ui_control($switch_preview12)
                       $_real_legato_time := real_to_int(int_to_real($_real_legato_time)/?speeds[$slider_speed])
                       select ($slider_legato)
                         case $legatoMode__syncToPitch
-                          $_real_legato_time := $_real_legato_time+ticks_to_ms(5)
+                          $_real_legato_time := $_real_legato_time+ticks_to_ms(20)
                           $_offset_real_time := $_real_legato_time mod ticks_to_ms(%ripple_length_ticks[$cur_artic]/%pitch_fractions[$cur_artic])
                         case $legatoMode__syncToRipple
                           $_offset_real_time := $_real_legato_time mod ticks_to_ms(%ripple_length_ticks[$cur_artic])
@@ -10238,7 +10238,7 @@ on ui_control($switch_preview13)
                       $_real_legato_time := real_to_int(int_to_real($_real_legato_time)/?speeds[$slider_speed])
                       select ($slider_legato)
                         case $legatoMode__syncToPitch
-                          $_real_legato_time := $_real_legato_time+ticks_to_ms(5)
+                          $_real_legato_time := $_real_legato_time+ticks_to_ms(20)
                           $_offset_real_time := $_real_legato_time mod ticks_to_ms(%ripple_length_ticks[$cur_artic]/%pitch_fractions[$cur_artic])
                         case $legatoMode__syncToRipple
                           $_offset_real_time := $_real_legato_time mod ticks_to_ms(%ripple_length_ticks[$cur_artic])
@@ -10713,7 +10713,7 @@ on ui_control($switch_preview14)
                       $_real_legato_time := real_to_int(int_to_real($_real_legato_time)/?speeds[$slider_speed])
                       select ($slider_legato)
                         case $legatoMode__syncToPitch
-                          $_real_legato_time := $_real_legato_time+ticks_to_ms(5)
+                          $_real_legato_time := $_real_legato_time+ticks_to_ms(20)
                           $_offset_real_time := $_real_legato_time mod ticks_to_ms(%ripple_length_ticks[$cur_artic]/%pitch_fractions[$cur_artic])
                         case $legatoMode__syncToRipple
                           $_offset_real_time := $_real_legato_time mod ticks_to_ms(%ripple_length_ticks[$cur_artic])
@@ -11188,7 +11188,7 @@ on ui_control($switch_preview15)
                       $_real_legato_time := real_to_int(int_to_real($_real_legato_time)/?speeds[$slider_speed])
                       select ($slider_legato)
                         case $legatoMode__syncToPitch
-                          $_real_legato_time := $_real_legato_time+ticks_to_ms(5)
+                          $_real_legato_time := $_real_legato_time+ticks_to_ms(20)
                           $_offset_real_time := $_real_legato_time mod ticks_to_ms(%ripple_length_ticks[$cur_artic]/%pitch_fractions[$cur_artic])
                         case $legatoMode__syncToRipple
                           $_offset_real_time := $_real_legato_time mod ticks_to_ms(%ripple_length_ticks[$cur_artic])
@@ -11663,7 +11663,7 @@ on ui_control($switch_preview16)
                       $_real_legato_time := real_to_int(int_to_real($_real_legato_time)/?speeds[$slider_speed])
                       select ($slider_legato)
                         case $legatoMode__syncToPitch
-                          $_real_legato_time := $_real_legato_time+ticks_to_ms(5)
+                          $_real_legato_time := $_real_legato_time+ticks_to_ms(20)
                           $_offset_real_time := $_real_legato_time mod ticks_to_ms(%ripple_length_ticks[$cur_artic]/%pitch_fractions[$cur_artic])
                         case $legatoMode__syncToRipple
                           $_offset_real_time := $_real_legato_time mod ticks_to_ms(%ripple_length_ticks[$cur_artic])
@@ -12138,7 +12138,7 @@ on ui_control($switch_preview17)
                       $_real_legato_time := real_to_int(int_to_real($_real_legato_time)/?speeds[$slider_speed])
                       select ($slider_legato)
                         case $legatoMode__syncToPitch
-                          $_real_legato_time := $_real_legato_time+ticks_to_ms(5)
+                          $_real_legato_time := $_real_legato_time+ticks_to_ms(20)
                           $_offset_real_time := $_real_legato_time mod ticks_to_ms(%ripple_length_ticks[$cur_artic]/%pitch_fractions[$cur_artic])
                         case $legatoMode__syncToRipple
                           $_offset_real_time := $_real_legato_time mod ticks_to_ms(%ripple_length_ticks[$cur_artic])
@@ -12613,7 +12613,7 @@ on ui_control($switch_preview18)
                       $_real_legato_time := real_to_int(int_to_real($_real_legato_time)/?speeds[$slider_speed])
                       select ($slider_legato)
                         case $legatoMode__syncToPitch
-                          $_real_legato_time := $_real_legato_time+ticks_to_ms(5)
+                          $_real_legato_time := $_real_legato_time+ticks_to_ms(20)
                           $_offset_real_time := $_real_legato_time mod ticks_to_ms(%ripple_length_ticks[$cur_artic]/%pitch_fractions[$cur_artic])
                         case $legatoMode__syncToRipple
                           $_offset_real_time := $_real_legato_time mod ticks_to_ms(%ripple_length_ticks[$cur_artic])
@@ -13088,7 +13088,7 @@ on ui_control($switch_preview19)
                       $_real_legato_time := real_to_int(int_to_real($_real_legato_time)/?speeds[$slider_speed])
                       select ($slider_legato)
                         case $legatoMode__syncToPitch
-                          $_real_legato_time := $_real_legato_time+ticks_to_ms(5)
+                          $_real_legato_time := $_real_legato_time+ticks_to_ms(20)
                           $_offset_real_time := $_real_legato_time mod ticks_to_ms(%ripple_length_ticks[$cur_artic]/%pitch_fractions[$cur_artic])
                         case $legatoMode__syncToRipple
                           $_offset_real_time := $_real_legato_time mod ticks_to_ms(%ripple_length_ticks[$cur_artic])
@@ -13563,7 +13563,7 @@ on ui_control($switch_preview20)
                       $_real_legato_time := real_to_int(int_to_real($_real_legato_time)/?speeds[$slider_speed])
                       select ($slider_legato)
                         case $legatoMode__syncToPitch
-                          $_real_legato_time := $_real_legato_time+ticks_to_ms(5)
+                          $_real_legato_time := $_real_legato_time+ticks_to_ms(20)
                           $_offset_real_time := $_real_legato_time mod ticks_to_ms(%ripple_length_ticks[$cur_artic]/%pitch_fractions[$cur_artic])
                         case $legatoMode__syncToRipple
                           $_offset_real_time := $_real_legato_time mod ticks_to_ms(%ripple_length_ticks[$cur_artic])
@@ -14038,7 +14038,7 @@ on ui_control($switch_preview21)
                       $_real_legato_time := real_to_int(int_to_real($_real_legato_time)/?speeds[$slider_speed])
                       select ($slider_legato)
                         case $legatoMode__syncToPitch
-                          $_real_legato_time := $_real_legato_time+ticks_to_ms(5)
+                          $_real_legato_time := $_real_legato_time+ticks_to_ms(20)
                           $_offset_real_time := $_real_legato_time mod ticks_to_ms(%ripple_length_ticks[$cur_artic]/%pitch_fractions[$cur_artic])
                         case $legatoMode__syncToRipple
                           $_offset_real_time := $_real_legato_time mod ticks_to_ms(%ripple_length_ticks[$cur_artic])
@@ -14513,7 +14513,7 @@ on ui_control($switch_preview22)
                       $_real_legato_time := real_to_int(int_to_real($_real_legato_time)/?speeds[$slider_speed])
                       select ($slider_legato)
                         case $legatoMode__syncToPitch
-                          $_real_legato_time := $_real_legato_time+ticks_to_ms(5)
+                          $_real_legato_time := $_real_legato_time+ticks_to_ms(20)
                           $_offset_real_time := $_real_legato_time mod ticks_to_ms(%ripple_length_ticks[$cur_artic]/%pitch_fractions[$cur_artic])
                         case $legatoMode__syncToRipple
                           $_offset_real_time := $_real_legato_time mod ticks_to_ms(%ripple_length_ticks[$cur_artic])
@@ -14988,7 +14988,7 @@ on ui_control($switch_preview23)
                       $_real_legato_time := real_to_int(int_to_real($_real_legato_time)/?speeds[$slider_speed])
                       select ($slider_legato)
                         case $legatoMode__syncToPitch
-                          $_real_legato_time := $_real_legato_time+ticks_to_ms(5)
+                          $_real_legato_time := $_real_legato_time+ticks_to_ms(20)
                           $_offset_real_time := $_real_legato_time mod ticks_to_ms(%ripple_length_ticks[$cur_artic]/%pitch_fractions[$cur_artic])
                         case $legatoMode__syncToRipple
                           $_offset_real_time := $_real_legato_time mod ticks_to_ms(%ripple_length_ticks[$cur_artic])

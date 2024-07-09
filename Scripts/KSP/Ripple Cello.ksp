@@ -702,7 +702,7 @@ on init
 	// Misc setting things up
 	set_voice_limit(NI_VL_TMPRO_STANDARD, 32)
 	declare @siln2 := "START_EVENTS_INTEGERS_ENGINE"
-	group[artic.quarters].speed   := V2E_speed(18*2)
+	group[artic.quarters].speed   := V2E_speed(4*8+4)
 	group[artic.eighths].speed    := V2E_speed(18)
 	group[artic.sixteenths].speed := V2E_speed(18)
 	group[find_group("quarters releases")].speed := V2E_speed(12)
@@ -975,7 +975,7 @@ function note_callback(note, velocity, event_id)
 						real_legato_time := int(float(real_legato_time) / speeds[slider_speed])
 						select slider_legato
 							case legatoMode.syncToPitch
-								real_legato_time := real_legato_time + ticks_to_ms(5) // For when you add a ripple using grid-snapped notes.
+								real_legato_time := real_legato_time + ticks_to_ms(20) // For when you add a ripple using grid-snapped notes.
 								offset_real_time := real_legato_time mod ticks_to_ms(ripple_length_ticks[cur_artic] / pitch_fractions[cur_artic])
 							case legatoMode.syncToRipple
 								offset_real_time := real_legato_time mod ticks_to_ms(ripple_length_ticks[cur_artic])
