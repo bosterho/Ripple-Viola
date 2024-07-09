@@ -1,4 +1,4 @@
-{ Compiled on Tue Jul  9 10:50:14 2024 }
+{ Compiled on Tue Jul  9 12:00:51 2024 }
 on init
   declare $sksp_dummy
   declare $concat_it
@@ -225,7 +225,6 @@ on init
   declare %custom_event_type[1000000]
   declare const $RECORDED_DURATION_QUARTER := 545455
   declare const $RECORDED_DURATION_EIGHTH := 272727
-  declare const $MAX_LATENCY := $RECORDED_DURATION_EIGHTH/2
   declare const $MAX_INTERVAL := 5
   declare const $MIN_BRIGHTNESS := 24
   declare !speed_texts[5]
@@ -2718,7 +2717,7 @@ function trigger_release_samples_for_all_ripples
         if (%ripple_id_history[$_r3] # 0)
           if ($voice_i=%custom_event_voice[%ripple_id_history[$_r3] mod 1000000])
             $_artic4 := %custom_event_artic[%ripple_id_history[$_r3] mod 1000000]
-            $_rec_time_pos_in_ripple2 := (get_event_par(%ripple_id_history[$_r3],$EVENT_PAR_PLAY_POS)-0+%rec_time_ripple_lengths[$_artic4]) mod %rec_time_ripple_lengths[$_artic4]
+            $_rec_time_pos_in_ripple2 := get_event_par(%ripple_id_history[$_r3],$EVENT_PAR_PLAY_POS) mod %rec_time_ripple_lengths[$_artic4]
             $_real_time_pos_in_pulse := real_to_int(int_to_real(0)+((int_to_real($_rec_time_pos_in_ripple2)-int_to_real(0))/(int_to_real(%rec_time_ripple_lengths[$_artic4])-int_to_real(0))*(int_to_real(ticks_to_ms(%ripple_length_ticks[$_artic4]))-int_to_real(0))))
             $_real_time_pos_in_pulse := real_to_int(int_to_real($_real_time_pos_in_pulse)*?speeds[$slider_speed])
             $_real_time_ripple_length := ticks_to_ms(real_to_int(int_to_real(%ripple_length_ticks[$_artic4])*?speeds[$slider_speed]))
@@ -3197,14 +3196,16 @@ on note
             dec($r)
           end while
           %ripple_id_history[0] := $_note_id3
-          if ($_real_legato_time>0)
-            $_real_time_pos_in_ripple := ($_real_legato_time-ticks_to_ms(2)) mod ticks_to_ms(%ripple_length_ticks[$cur_artic])
-            $_real_time_pos_in_ripple := real_to_int(int_to_real($_real_time_pos_in_ripple)/?speeds[$slider_speed])
-            $_fade_in_time := ticks_to_ms(%ripple_length_ticks[$cur_artic])-$_real_time_pos_in_ripple
-            if ($_fade_in_time<150000)
-              $_fade_in_time := 150000
+          if ($slider_legato=$legatoMode__syncToSwell)
+            if ($_real_legato_time>0)
+              $_real_time_pos_in_ripple := ($_real_legato_time-ticks_to_ms(2)) mod ticks_to_ms(%ripple_length_ticks[$cur_artic])
+              $_real_time_pos_in_ripple := real_to_int(int_to_real($_real_time_pos_in_ripple)/?speeds[$slider_speed])
+              $_fade_in_time := ticks_to_ms(%ripple_length_ticks[$cur_artic])-$_real_time_pos_in_ripple
+              if ($_fade_in_time<150000)
+                $_fade_in_time := 150000
+              end if
+              fade_in($_note_id3,$_fade_in_time)
             end if
-            fade_in($_note_id3,$_fade_in_time)
           end if
         end if
         inc($_ripple_i)
@@ -3250,7 +3251,7 @@ on release
           if (%ripple_id_history[$_r3] # 0)
             if (0=%custom_event_voice[%ripple_id_history[$_r3] mod 1000000])
               $_artic4 := %custom_event_artic[%ripple_id_history[$_r3] mod 1000000]
-              $_rec_time_pos_in_ripple2 := (get_event_par(%ripple_id_history[$_r3],$EVENT_PAR_PLAY_POS)-0+%rec_time_ripple_lengths[$_artic4]) mod %rec_time_ripple_lengths[$_artic4]
+              $_rec_time_pos_in_ripple2 := get_event_par(%ripple_id_history[$_r3],$EVENT_PAR_PLAY_POS) mod %rec_time_ripple_lengths[$_artic4]
               $_real_time_pos_in_pulse := real_to_int(int_to_real(0)+((int_to_real($_rec_time_pos_in_ripple2)-int_to_real(0))/(int_to_real(%rec_time_ripple_lengths[$_artic4])-int_to_real(0))*(int_to_real(ticks_to_ms(%ripple_length_ticks[$_artic4]))-int_to_real(0))))
               $_real_time_pos_in_pulse := real_to_int(int_to_real($_real_time_pos_in_pulse)*?speeds[$slider_speed])
               $_real_time_ripple_length := ticks_to_ms(real_to_int(int_to_real(%ripple_length_ticks[$_artic4])*?speeds[$slider_speed]))
@@ -3305,7 +3306,7 @@ on release
             if (%ripple_id_history[$_r3] # 0)
               if ($voice_i=%custom_event_voice[%ripple_id_history[$_r3] mod 1000000])
                 $_artic4 := %custom_event_artic[%ripple_id_history[$_r3] mod 1000000]
-                $_rec_time_pos_in_ripple2 := (get_event_par(%ripple_id_history[$_r3],$EVENT_PAR_PLAY_POS)-0+%rec_time_ripple_lengths[$_artic4]) mod %rec_time_ripple_lengths[$_artic4]
+                $_rec_time_pos_in_ripple2 := get_event_par(%ripple_id_history[$_r3],$EVENT_PAR_PLAY_POS) mod %rec_time_ripple_lengths[$_artic4]
                 $_real_time_pos_in_pulse := real_to_int(int_to_real(0)+((int_to_real($_rec_time_pos_in_ripple2)-int_to_real(0))/(int_to_real(%rec_time_ripple_lengths[$_artic4])-int_to_real(0))*(int_to_real(ticks_to_ms(%ripple_length_ticks[$_artic4]))-int_to_real(0))))
                 $_real_time_pos_in_pulse := real_to_int(int_to_real($_real_time_pos_in_pulse)*?speeds[$slider_speed])
                 $_real_time_ripple_length := ticks_to_ms(real_to_int(int_to_real(%ripple_length_ticks[$_artic4])*?speeds[$slider_speed]))
@@ -3375,7 +3376,7 @@ on controller
           if (%ripple_id_history[$_r3] # 0)
             if (%voices_to_release[$_i2]=%custom_event_voice[%ripple_id_history[$_r3] mod 1000000])
               $_artic4 := %custom_event_artic[%ripple_id_history[$_r3] mod 1000000]
-              $_rec_time_pos_in_ripple2 := (get_event_par(%ripple_id_history[$_r3],$EVENT_PAR_PLAY_POS)-0+%rec_time_ripple_lengths[$_artic4]) mod %rec_time_ripple_lengths[$_artic4]
+              $_rec_time_pos_in_ripple2 := get_event_par(%ripple_id_history[$_r3],$EVENT_PAR_PLAY_POS) mod %rec_time_ripple_lengths[$_artic4]
               $_real_time_pos_in_pulse := real_to_int(int_to_real(0)+((int_to_real($_rec_time_pos_in_ripple2)-int_to_real(0))/(int_to_real(%rec_time_ripple_lengths[$_artic4])-int_to_real(0))*(int_to_real(ticks_to_ms(%ripple_length_ticks[$_artic4]))-int_to_real(0))))
               $_real_time_pos_in_pulse := real_to_int(int_to_real($_real_time_pos_in_pulse)*?speeds[$slider_speed])
               $_real_time_ripple_length := ticks_to_ms(real_to_int(int_to_real(%ripple_length_ticks[$_artic4])*?speeds[$slider_speed]))
@@ -4104,14 +4105,16 @@ on ui_control($switch_preview0)
                       dec($r)
                     end while
                     %ripple_id_history[0] := $_note_id3
-                    if ($_real_legato_time>0)
-                      $_real_time_pos_in_ripple := ($_real_legato_time-ticks_to_ms(2)) mod ticks_to_ms(%ripple_length_ticks[$cur_artic])
-                      $_real_time_pos_in_ripple := real_to_int(int_to_real($_real_time_pos_in_ripple)/?speeds[$slider_speed])
-                      $_fade_in_time := ticks_to_ms(%ripple_length_ticks[$cur_artic])-$_real_time_pos_in_ripple
-                      if ($_fade_in_time<150000)
-                        $_fade_in_time := 150000
+                    if ($slider_legato=$legatoMode__syncToSwell)
+                      if ($_real_legato_time>0)
+                        $_real_time_pos_in_ripple := ($_real_legato_time-ticks_to_ms(2)) mod ticks_to_ms(%ripple_length_ticks[$cur_artic])
+                        $_real_time_pos_in_ripple := real_to_int(int_to_real($_real_time_pos_in_ripple)/?speeds[$slider_speed])
+                        $_fade_in_time := ticks_to_ms(%ripple_length_ticks[$cur_artic])-$_real_time_pos_in_ripple
+                        if ($_fade_in_time<150000)
+                          $_fade_in_time := 150000
+                        end if
+                        fade_in($_note_id3,$_fade_in_time)
                       end if
-                      fade_in($_note_id3,$_fade_in_time)
                     end if
                   end if
                   inc($_ripple_i)
@@ -4133,7 +4136,7 @@ on ui_control($switch_preview0)
                     if (%ripple_id_history[$_r3] # 0)
                       if (%voices_to_release[$_i2]=%custom_event_voice[%ripple_id_history[$_r3] mod 1000000])
                         $_artic4 := %custom_event_artic[%ripple_id_history[$_r3] mod 1000000]
-                        $_rec_time_pos_in_ripple2 := (get_event_par(%ripple_id_history[$_r3],$EVENT_PAR_PLAY_POS)-0+%rec_time_ripple_lengths[$_artic4]) mod %rec_time_ripple_lengths[$_artic4]
+                        $_rec_time_pos_in_ripple2 := get_event_par(%ripple_id_history[$_r3],$EVENT_PAR_PLAY_POS) mod %rec_time_ripple_lengths[$_artic4]
                         $_real_time_pos_in_pulse := real_to_int(int_to_real(0)+((int_to_real($_rec_time_pos_in_ripple2)-int_to_real(0))/(int_to_real(%rec_time_ripple_lengths[$_artic4])-int_to_real(0))*(int_to_real(ticks_to_ms(%ripple_length_ticks[$_artic4]))-int_to_real(0))))
                         $_real_time_pos_in_pulse := real_to_int(int_to_real($_real_time_pos_in_pulse)*?speeds[$slider_speed])
                         $_real_time_ripple_length := ticks_to_ms(real_to_int(int_to_real(%ripple_length_ticks[$_artic4])*?speeds[$slider_speed]))
@@ -4577,14 +4580,16 @@ on ui_control($switch_preview1)
                       dec($r)
                     end while
                     %ripple_id_history[0] := $_note_id3
-                    if ($_real_legato_time>0)
-                      $_real_time_pos_in_ripple := ($_real_legato_time-ticks_to_ms(2)) mod ticks_to_ms(%ripple_length_ticks[$cur_artic])
-                      $_real_time_pos_in_ripple := real_to_int(int_to_real($_real_time_pos_in_ripple)/?speeds[$slider_speed])
-                      $_fade_in_time := ticks_to_ms(%ripple_length_ticks[$cur_artic])-$_real_time_pos_in_ripple
-                      if ($_fade_in_time<150000)
-                        $_fade_in_time := 150000
+                    if ($slider_legato=$legatoMode__syncToSwell)
+                      if ($_real_legato_time>0)
+                        $_real_time_pos_in_ripple := ($_real_legato_time-ticks_to_ms(2)) mod ticks_to_ms(%ripple_length_ticks[$cur_artic])
+                        $_real_time_pos_in_ripple := real_to_int(int_to_real($_real_time_pos_in_ripple)/?speeds[$slider_speed])
+                        $_fade_in_time := ticks_to_ms(%ripple_length_ticks[$cur_artic])-$_real_time_pos_in_ripple
+                        if ($_fade_in_time<150000)
+                          $_fade_in_time := 150000
+                        end if
+                        fade_in($_note_id3,$_fade_in_time)
                       end if
-                      fade_in($_note_id3,$_fade_in_time)
                     end if
                   end if
                   inc($_ripple_i)
@@ -4606,7 +4611,7 @@ on ui_control($switch_preview1)
                     if (%ripple_id_history[$_r3] # 0)
                       if (%voices_to_release[$_i2]=%custom_event_voice[%ripple_id_history[$_r3] mod 1000000])
                         $_artic4 := %custom_event_artic[%ripple_id_history[$_r3] mod 1000000]
-                        $_rec_time_pos_in_ripple2 := (get_event_par(%ripple_id_history[$_r3],$EVENT_PAR_PLAY_POS)-0+%rec_time_ripple_lengths[$_artic4]) mod %rec_time_ripple_lengths[$_artic4]
+                        $_rec_time_pos_in_ripple2 := get_event_par(%ripple_id_history[$_r3],$EVENT_PAR_PLAY_POS) mod %rec_time_ripple_lengths[$_artic4]
                         $_real_time_pos_in_pulse := real_to_int(int_to_real(0)+((int_to_real($_rec_time_pos_in_ripple2)-int_to_real(0))/(int_to_real(%rec_time_ripple_lengths[$_artic4])-int_to_real(0))*(int_to_real(ticks_to_ms(%ripple_length_ticks[$_artic4]))-int_to_real(0))))
                         $_real_time_pos_in_pulse := real_to_int(int_to_real($_real_time_pos_in_pulse)*?speeds[$slider_speed])
                         $_real_time_ripple_length := ticks_to_ms(real_to_int(int_to_real(%ripple_length_ticks[$_artic4])*?speeds[$slider_speed]))
@@ -5050,14 +5055,16 @@ on ui_control($switch_preview2)
                       dec($r)
                     end while
                     %ripple_id_history[0] := $_note_id3
-                    if ($_real_legato_time>0)
-                      $_real_time_pos_in_ripple := ($_real_legato_time-ticks_to_ms(2)) mod ticks_to_ms(%ripple_length_ticks[$cur_artic])
-                      $_real_time_pos_in_ripple := real_to_int(int_to_real($_real_time_pos_in_ripple)/?speeds[$slider_speed])
-                      $_fade_in_time := ticks_to_ms(%ripple_length_ticks[$cur_artic])-$_real_time_pos_in_ripple
-                      if ($_fade_in_time<150000)
-                        $_fade_in_time := 150000
+                    if ($slider_legato=$legatoMode__syncToSwell)
+                      if ($_real_legato_time>0)
+                        $_real_time_pos_in_ripple := ($_real_legato_time-ticks_to_ms(2)) mod ticks_to_ms(%ripple_length_ticks[$cur_artic])
+                        $_real_time_pos_in_ripple := real_to_int(int_to_real($_real_time_pos_in_ripple)/?speeds[$slider_speed])
+                        $_fade_in_time := ticks_to_ms(%ripple_length_ticks[$cur_artic])-$_real_time_pos_in_ripple
+                        if ($_fade_in_time<150000)
+                          $_fade_in_time := 150000
+                        end if
+                        fade_in($_note_id3,$_fade_in_time)
                       end if
-                      fade_in($_note_id3,$_fade_in_time)
                     end if
                   end if
                   inc($_ripple_i)
@@ -5079,7 +5086,7 @@ on ui_control($switch_preview2)
                     if (%ripple_id_history[$_r3] # 0)
                       if (%voices_to_release[$_i2]=%custom_event_voice[%ripple_id_history[$_r3] mod 1000000])
                         $_artic4 := %custom_event_artic[%ripple_id_history[$_r3] mod 1000000]
-                        $_rec_time_pos_in_ripple2 := (get_event_par(%ripple_id_history[$_r3],$EVENT_PAR_PLAY_POS)-0+%rec_time_ripple_lengths[$_artic4]) mod %rec_time_ripple_lengths[$_artic4]
+                        $_rec_time_pos_in_ripple2 := get_event_par(%ripple_id_history[$_r3],$EVENT_PAR_PLAY_POS) mod %rec_time_ripple_lengths[$_artic4]
                         $_real_time_pos_in_pulse := real_to_int(int_to_real(0)+((int_to_real($_rec_time_pos_in_ripple2)-int_to_real(0))/(int_to_real(%rec_time_ripple_lengths[$_artic4])-int_to_real(0))*(int_to_real(ticks_to_ms(%ripple_length_ticks[$_artic4]))-int_to_real(0))))
                         $_real_time_pos_in_pulse := real_to_int(int_to_real($_real_time_pos_in_pulse)*?speeds[$slider_speed])
                         $_real_time_ripple_length := ticks_to_ms(real_to_int(int_to_real(%ripple_length_ticks[$_artic4])*?speeds[$slider_speed]))
@@ -5523,14 +5530,16 @@ on ui_control($switch_preview3)
                       dec($r)
                     end while
                     %ripple_id_history[0] := $_note_id3
-                    if ($_real_legato_time>0)
-                      $_real_time_pos_in_ripple := ($_real_legato_time-ticks_to_ms(2)) mod ticks_to_ms(%ripple_length_ticks[$cur_artic])
-                      $_real_time_pos_in_ripple := real_to_int(int_to_real($_real_time_pos_in_ripple)/?speeds[$slider_speed])
-                      $_fade_in_time := ticks_to_ms(%ripple_length_ticks[$cur_artic])-$_real_time_pos_in_ripple
-                      if ($_fade_in_time<150000)
-                        $_fade_in_time := 150000
+                    if ($slider_legato=$legatoMode__syncToSwell)
+                      if ($_real_legato_time>0)
+                        $_real_time_pos_in_ripple := ($_real_legato_time-ticks_to_ms(2)) mod ticks_to_ms(%ripple_length_ticks[$cur_artic])
+                        $_real_time_pos_in_ripple := real_to_int(int_to_real($_real_time_pos_in_ripple)/?speeds[$slider_speed])
+                        $_fade_in_time := ticks_to_ms(%ripple_length_ticks[$cur_artic])-$_real_time_pos_in_ripple
+                        if ($_fade_in_time<150000)
+                          $_fade_in_time := 150000
+                        end if
+                        fade_in($_note_id3,$_fade_in_time)
                       end if
-                      fade_in($_note_id3,$_fade_in_time)
                     end if
                   end if
                   inc($_ripple_i)
@@ -5552,7 +5561,7 @@ on ui_control($switch_preview3)
                     if (%ripple_id_history[$_r3] # 0)
                       if (%voices_to_release[$_i2]=%custom_event_voice[%ripple_id_history[$_r3] mod 1000000])
                         $_artic4 := %custom_event_artic[%ripple_id_history[$_r3] mod 1000000]
-                        $_rec_time_pos_in_ripple2 := (get_event_par(%ripple_id_history[$_r3],$EVENT_PAR_PLAY_POS)-0+%rec_time_ripple_lengths[$_artic4]) mod %rec_time_ripple_lengths[$_artic4]
+                        $_rec_time_pos_in_ripple2 := get_event_par(%ripple_id_history[$_r3],$EVENT_PAR_PLAY_POS) mod %rec_time_ripple_lengths[$_artic4]
                         $_real_time_pos_in_pulse := real_to_int(int_to_real(0)+((int_to_real($_rec_time_pos_in_ripple2)-int_to_real(0))/(int_to_real(%rec_time_ripple_lengths[$_artic4])-int_to_real(0))*(int_to_real(ticks_to_ms(%ripple_length_ticks[$_artic4]))-int_to_real(0))))
                         $_real_time_pos_in_pulse := real_to_int(int_to_real($_real_time_pos_in_pulse)*?speeds[$slider_speed])
                         $_real_time_ripple_length := ticks_to_ms(real_to_int(int_to_real(%ripple_length_ticks[$_artic4])*?speeds[$slider_speed]))
@@ -5996,14 +6005,16 @@ on ui_control($switch_preview4)
                       dec($r)
                     end while
                     %ripple_id_history[0] := $_note_id3
-                    if ($_real_legato_time>0)
-                      $_real_time_pos_in_ripple := ($_real_legato_time-ticks_to_ms(2)) mod ticks_to_ms(%ripple_length_ticks[$cur_artic])
-                      $_real_time_pos_in_ripple := real_to_int(int_to_real($_real_time_pos_in_ripple)/?speeds[$slider_speed])
-                      $_fade_in_time := ticks_to_ms(%ripple_length_ticks[$cur_artic])-$_real_time_pos_in_ripple
-                      if ($_fade_in_time<150000)
-                        $_fade_in_time := 150000
+                    if ($slider_legato=$legatoMode__syncToSwell)
+                      if ($_real_legato_time>0)
+                        $_real_time_pos_in_ripple := ($_real_legato_time-ticks_to_ms(2)) mod ticks_to_ms(%ripple_length_ticks[$cur_artic])
+                        $_real_time_pos_in_ripple := real_to_int(int_to_real($_real_time_pos_in_ripple)/?speeds[$slider_speed])
+                        $_fade_in_time := ticks_to_ms(%ripple_length_ticks[$cur_artic])-$_real_time_pos_in_ripple
+                        if ($_fade_in_time<150000)
+                          $_fade_in_time := 150000
+                        end if
+                        fade_in($_note_id3,$_fade_in_time)
                       end if
-                      fade_in($_note_id3,$_fade_in_time)
                     end if
                   end if
                   inc($_ripple_i)
@@ -6025,7 +6036,7 @@ on ui_control($switch_preview4)
                     if (%ripple_id_history[$_r3] # 0)
                       if (%voices_to_release[$_i2]=%custom_event_voice[%ripple_id_history[$_r3] mod 1000000])
                         $_artic4 := %custom_event_artic[%ripple_id_history[$_r3] mod 1000000]
-                        $_rec_time_pos_in_ripple2 := (get_event_par(%ripple_id_history[$_r3],$EVENT_PAR_PLAY_POS)-0+%rec_time_ripple_lengths[$_artic4]) mod %rec_time_ripple_lengths[$_artic4]
+                        $_rec_time_pos_in_ripple2 := get_event_par(%ripple_id_history[$_r3],$EVENT_PAR_PLAY_POS) mod %rec_time_ripple_lengths[$_artic4]
                         $_real_time_pos_in_pulse := real_to_int(int_to_real(0)+((int_to_real($_rec_time_pos_in_ripple2)-int_to_real(0))/(int_to_real(%rec_time_ripple_lengths[$_artic4])-int_to_real(0))*(int_to_real(ticks_to_ms(%ripple_length_ticks[$_artic4]))-int_to_real(0))))
                         $_real_time_pos_in_pulse := real_to_int(int_to_real($_real_time_pos_in_pulse)*?speeds[$slider_speed])
                         $_real_time_ripple_length := ticks_to_ms(real_to_int(int_to_real(%ripple_length_ticks[$_artic4])*?speeds[$slider_speed]))
@@ -6469,14 +6480,16 @@ on ui_control($switch_preview5)
                       dec($r)
                     end while
                     %ripple_id_history[0] := $_note_id3
-                    if ($_real_legato_time>0)
-                      $_real_time_pos_in_ripple := ($_real_legato_time-ticks_to_ms(2)) mod ticks_to_ms(%ripple_length_ticks[$cur_artic])
-                      $_real_time_pos_in_ripple := real_to_int(int_to_real($_real_time_pos_in_ripple)/?speeds[$slider_speed])
-                      $_fade_in_time := ticks_to_ms(%ripple_length_ticks[$cur_artic])-$_real_time_pos_in_ripple
-                      if ($_fade_in_time<150000)
-                        $_fade_in_time := 150000
+                    if ($slider_legato=$legatoMode__syncToSwell)
+                      if ($_real_legato_time>0)
+                        $_real_time_pos_in_ripple := ($_real_legato_time-ticks_to_ms(2)) mod ticks_to_ms(%ripple_length_ticks[$cur_artic])
+                        $_real_time_pos_in_ripple := real_to_int(int_to_real($_real_time_pos_in_ripple)/?speeds[$slider_speed])
+                        $_fade_in_time := ticks_to_ms(%ripple_length_ticks[$cur_artic])-$_real_time_pos_in_ripple
+                        if ($_fade_in_time<150000)
+                          $_fade_in_time := 150000
+                        end if
+                        fade_in($_note_id3,$_fade_in_time)
                       end if
-                      fade_in($_note_id3,$_fade_in_time)
                     end if
                   end if
                   inc($_ripple_i)
@@ -6498,7 +6511,7 @@ on ui_control($switch_preview5)
                     if (%ripple_id_history[$_r3] # 0)
                       if (%voices_to_release[$_i2]=%custom_event_voice[%ripple_id_history[$_r3] mod 1000000])
                         $_artic4 := %custom_event_artic[%ripple_id_history[$_r3] mod 1000000]
-                        $_rec_time_pos_in_ripple2 := (get_event_par(%ripple_id_history[$_r3],$EVENT_PAR_PLAY_POS)-0+%rec_time_ripple_lengths[$_artic4]) mod %rec_time_ripple_lengths[$_artic4]
+                        $_rec_time_pos_in_ripple2 := get_event_par(%ripple_id_history[$_r3],$EVENT_PAR_PLAY_POS) mod %rec_time_ripple_lengths[$_artic4]
                         $_real_time_pos_in_pulse := real_to_int(int_to_real(0)+((int_to_real($_rec_time_pos_in_ripple2)-int_to_real(0))/(int_to_real(%rec_time_ripple_lengths[$_artic4])-int_to_real(0))*(int_to_real(ticks_to_ms(%ripple_length_ticks[$_artic4]))-int_to_real(0))))
                         $_real_time_pos_in_pulse := real_to_int(int_to_real($_real_time_pos_in_pulse)*?speeds[$slider_speed])
                         $_real_time_ripple_length := ticks_to_ms(real_to_int(int_to_real(%ripple_length_ticks[$_artic4])*?speeds[$slider_speed]))
@@ -6942,14 +6955,16 @@ on ui_control($switch_preview6)
                       dec($r)
                     end while
                     %ripple_id_history[0] := $_note_id3
-                    if ($_real_legato_time>0)
-                      $_real_time_pos_in_ripple := ($_real_legato_time-ticks_to_ms(2)) mod ticks_to_ms(%ripple_length_ticks[$cur_artic])
-                      $_real_time_pos_in_ripple := real_to_int(int_to_real($_real_time_pos_in_ripple)/?speeds[$slider_speed])
-                      $_fade_in_time := ticks_to_ms(%ripple_length_ticks[$cur_artic])-$_real_time_pos_in_ripple
-                      if ($_fade_in_time<150000)
-                        $_fade_in_time := 150000
+                    if ($slider_legato=$legatoMode__syncToSwell)
+                      if ($_real_legato_time>0)
+                        $_real_time_pos_in_ripple := ($_real_legato_time-ticks_to_ms(2)) mod ticks_to_ms(%ripple_length_ticks[$cur_artic])
+                        $_real_time_pos_in_ripple := real_to_int(int_to_real($_real_time_pos_in_ripple)/?speeds[$slider_speed])
+                        $_fade_in_time := ticks_to_ms(%ripple_length_ticks[$cur_artic])-$_real_time_pos_in_ripple
+                        if ($_fade_in_time<150000)
+                          $_fade_in_time := 150000
+                        end if
+                        fade_in($_note_id3,$_fade_in_time)
                       end if
-                      fade_in($_note_id3,$_fade_in_time)
                     end if
                   end if
                   inc($_ripple_i)
@@ -6971,7 +6986,7 @@ on ui_control($switch_preview6)
                     if (%ripple_id_history[$_r3] # 0)
                       if (%voices_to_release[$_i2]=%custom_event_voice[%ripple_id_history[$_r3] mod 1000000])
                         $_artic4 := %custom_event_artic[%ripple_id_history[$_r3] mod 1000000]
-                        $_rec_time_pos_in_ripple2 := (get_event_par(%ripple_id_history[$_r3],$EVENT_PAR_PLAY_POS)-0+%rec_time_ripple_lengths[$_artic4]) mod %rec_time_ripple_lengths[$_artic4]
+                        $_rec_time_pos_in_ripple2 := get_event_par(%ripple_id_history[$_r3],$EVENT_PAR_PLAY_POS) mod %rec_time_ripple_lengths[$_artic4]
                         $_real_time_pos_in_pulse := real_to_int(int_to_real(0)+((int_to_real($_rec_time_pos_in_ripple2)-int_to_real(0))/(int_to_real(%rec_time_ripple_lengths[$_artic4])-int_to_real(0))*(int_to_real(ticks_to_ms(%ripple_length_ticks[$_artic4]))-int_to_real(0))))
                         $_real_time_pos_in_pulse := real_to_int(int_to_real($_real_time_pos_in_pulse)*?speeds[$slider_speed])
                         $_real_time_ripple_length := ticks_to_ms(real_to_int(int_to_real(%ripple_length_ticks[$_artic4])*?speeds[$slider_speed]))
@@ -7415,14 +7430,16 @@ on ui_control($switch_preview7)
                       dec($r)
                     end while
                     %ripple_id_history[0] := $_note_id3
-                    if ($_real_legato_time>0)
-                      $_real_time_pos_in_ripple := ($_real_legato_time-ticks_to_ms(2)) mod ticks_to_ms(%ripple_length_ticks[$cur_artic])
-                      $_real_time_pos_in_ripple := real_to_int(int_to_real($_real_time_pos_in_ripple)/?speeds[$slider_speed])
-                      $_fade_in_time := ticks_to_ms(%ripple_length_ticks[$cur_artic])-$_real_time_pos_in_ripple
-                      if ($_fade_in_time<150000)
-                        $_fade_in_time := 150000
+                    if ($slider_legato=$legatoMode__syncToSwell)
+                      if ($_real_legato_time>0)
+                        $_real_time_pos_in_ripple := ($_real_legato_time-ticks_to_ms(2)) mod ticks_to_ms(%ripple_length_ticks[$cur_artic])
+                        $_real_time_pos_in_ripple := real_to_int(int_to_real($_real_time_pos_in_ripple)/?speeds[$slider_speed])
+                        $_fade_in_time := ticks_to_ms(%ripple_length_ticks[$cur_artic])-$_real_time_pos_in_ripple
+                        if ($_fade_in_time<150000)
+                          $_fade_in_time := 150000
+                        end if
+                        fade_in($_note_id3,$_fade_in_time)
                       end if
-                      fade_in($_note_id3,$_fade_in_time)
                     end if
                   end if
                   inc($_ripple_i)
@@ -7444,7 +7461,7 @@ on ui_control($switch_preview7)
                     if (%ripple_id_history[$_r3] # 0)
                       if (%voices_to_release[$_i2]=%custom_event_voice[%ripple_id_history[$_r3] mod 1000000])
                         $_artic4 := %custom_event_artic[%ripple_id_history[$_r3] mod 1000000]
-                        $_rec_time_pos_in_ripple2 := (get_event_par(%ripple_id_history[$_r3],$EVENT_PAR_PLAY_POS)-0+%rec_time_ripple_lengths[$_artic4]) mod %rec_time_ripple_lengths[$_artic4]
+                        $_rec_time_pos_in_ripple2 := get_event_par(%ripple_id_history[$_r3],$EVENT_PAR_PLAY_POS) mod %rec_time_ripple_lengths[$_artic4]
                         $_real_time_pos_in_pulse := real_to_int(int_to_real(0)+((int_to_real($_rec_time_pos_in_ripple2)-int_to_real(0))/(int_to_real(%rec_time_ripple_lengths[$_artic4])-int_to_real(0))*(int_to_real(ticks_to_ms(%ripple_length_ticks[$_artic4]))-int_to_real(0))))
                         $_real_time_pos_in_pulse := real_to_int(int_to_real($_real_time_pos_in_pulse)*?speeds[$slider_speed])
                         $_real_time_ripple_length := ticks_to_ms(real_to_int(int_to_real(%ripple_length_ticks[$_artic4])*?speeds[$slider_speed]))
@@ -7888,14 +7905,16 @@ on ui_control($switch_preview8)
                       dec($r)
                     end while
                     %ripple_id_history[0] := $_note_id3
-                    if ($_real_legato_time>0)
-                      $_real_time_pos_in_ripple := ($_real_legato_time-ticks_to_ms(2)) mod ticks_to_ms(%ripple_length_ticks[$cur_artic])
-                      $_real_time_pos_in_ripple := real_to_int(int_to_real($_real_time_pos_in_ripple)/?speeds[$slider_speed])
-                      $_fade_in_time := ticks_to_ms(%ripple_length_ticks[$cur_artic])-$_real_time_pos_in_ripple
-                      if ($_fade_in_time<150000)
-                        $_fade_in_time := 150000
+                    if ($slider_legato=$legatoMode__syncToSwell)
+                      if ($_real_legato_time>0)
+                        $_real_time_pos_in_ripple := ($_real_legato_time-ticks_to_ms(2)) mod ticks_to_ms(%ripple_length_ticks[$cur_artic])
+                        $_real_time_pos_in_ripple := real_to_int(int_to_real($_real_time_pos_in_ripple)/?speeds[$slider_speed])
+                        $_fade_in_time := ticks_to_ms(%ripple_length_ticks[$cur_artic])-$_real_time_pos_in_ripple
+                        if ($_fade_in_time<150000)
+                          $_fade_in_time := 150000
+                        end if
+                        fade_in($_note_id3,$_fade_in_time)
                       end if
-                      fade_in($_note_id3,$_fade_in_time)
                     end if
                   end if
                   inc($_ripple_i)
@@ -7917,7 +7936,7 @@ on ui_control($switch_preview8)
                     if (%ripple_id_history[$_r3] # 0)
                       if (%voices_to_release[$_i2]=%custom_event_voice[%ripple_id_history[$_r3] mod 1000000])
                         $_artic4 := %custom_event_artic[%ripple_id_history[$_r3] mod 1000000]
-                        $_rec_time_pos_in_ripple2 := (get_event_par(%ripple_id_history[$_r3],$EVENT_PAR_PLAY_POS)-0+%rec_time_ripple_lengths[$_artic4]) mod %rec_time_ripple_lengths[$_artic4]
+                        $_rec_time_pos_in_ripple2 := get_event_par(%ripple_id_history[$_r3],$EVENT_PAR_PLAY_POS) mod %rec_time_ripple_lengths[$_artic4]
                         $_real_time_pos_in_pulse := real_to_int(int_to_real(0)+((int_to_real($_rec_time_pos_in_ripple2)-int_to_real(0))/(int_to_real(%rec_time_ripple_lengths[$_artic4])-int_to_real(0))*(int_to_real(ticks_to_ms(%ripple_length_ticks[$_artic4]))-int_to_real(0))))
                         $_real_time_pos_in_pulse := real_to_int(int_to_real($_real_time_pos_in_pulse)*?speeds[$slider_speed])
                         $_real_time_ripple_length := ticks_to_ms(real_to_int(int_to_real(%ripple_length_ticks[$_artic4])*?speeds[$slider_speed]))
@@ -8361,14 +8380,16 @@ on ui_control($switch_preview9)
                       dec($r)
                     end while
                     %ripple_id_history[0] := $_note_id3
-                    if ($_real_legato_time>0)
-                      $_real_time_pos_in_ripple := ($_real_legato_time-ticks_to_ms(2)) mod ticks_to_ms(%ripple_length_ticks[$cur_artic])
-                      $_real_time_pos_in_ripple := real_to_int(int_to_real($_real_time_pos_in_ripple)/?speeds[$slider_speed])
-                      $_fade_in_time := ticks_to_ms(%ripple_length_ticks[$cur_artic])-$_real_time_pos_in_ripple
-                      if ($_fade_in_time<150000)
-                        $_fade_in_time := 150000
+                    if ($slider_legato=$legatoMode__syncToSwell)
+                      if ($_real_legato_time>0)
+                        $_real_time_pos_in_ripple := ($_real_legato_time-ticks_to_ms(2)) mod ticks_to_ms(%ripple_length_ticks[$cur_artic])
+                        $_real_time_pos_in_ripple := real_to_int(int_to_real($_real_time_pos_in_ripple)/?speeds[$slider_speed])
+                        $_fade_in_time := ticks_to_ms(%ripple_length_ticks[$cur_artic])-$_real_time_pos_in_ripple
+                        if ($_fade_in_time<150000)
+                          $_fade_in_time := 150000
+                        end if
+                        fade_in($_note_id3,$_fade_in_time)
                       end if
-                      fade_in($_note_id3,$_fade_in_time)
                     end if
                   end if
                   inc($_ripple_i)
@@ -8390,7 +8411,7 @@ on ui_control($switch_preview9)
                     if (%ripple_id_history[$_r3] # 0)
                       if (%voices_to_release[$_i2]=%custom_event_voice[%ripple_id_history[$_r3] mod 1000000])
                         $_artic4 := %custom_event_artic[%ripple_id_history[$_r3] mod 1000000]
-                        $_rec_time_pos_in_ripple2 := (get_event_par(%ripple_id_history[$_r3],$EVENT_PAR_PLAY_POS)-0+%rec_time_ripple_lengths[$_artic4]) mod %rec_time_ripple_lengths[$_artic4]
+                        $_rec_time_pos_in_ripple2 := get_event_par(%ripple_id_history[$_r3],$EVENT_PAR_PLAY_POS) mod %rec_time_ripple_lengths[$_artic4]
                         $_real_time_pos_in_pulse := real_to_int(int_to_real(0)+((int_to_real($_rec_time_pos_in_ripple2)-int_to_real(0))/(int_to_real(%rec_time_ripple_lengths[$_artic4])-int_to_real(0))*(int_to_real(ticks_to_ms(%ripple_length_ticks[$_artic4]))-int_to_real(0))))
                         $_real_time_pos_in_pulse := real_to_int(int_to_real($_real_time_pos_in_pulse)*?speeds[$slider_speed])
                         $_real_time_ripple_length := ticks_to_ms(real_to_int(int_to_real(%ripple_length_ticks[$_artic4])*?speeds[$slider_speed]))
@@ -8834,14 +8855,16 @@ on ui_control($switch_preview10)
                       dec($r)
                     end while
                     %ripple_id_history[0] := $_note_id3
-                    if ($_real_legato_time>0)
-                      $_real_time_pos_in_ripple := ($_real_legato_time-ticks_to_ms(2)) mod ticks_to_ms(%ripple_length_ticks[$cur_artic])
-                      $_real_time_pos_in_ripple := real_to_int(int_to_real($_real_time_pos_in_ripple)/?speeds[$slider_speed])
-                      $_fade_in_time := ticks_to_ms(%ripple_length_ticks[$cur_artic])-$_real_time_pos_in_ripple
-                      if ($_fade_in_time<150000)
-                        $_fade_in_time := 150000
+                    if ($slider_legato=$legatoMode__syncToSwell)
+                      if ($_real_legato_time>0)
+                        $_real_time_pos_in_ripple := ($_real_legato_time-ticks_to_ms(2)) mod ticks_to_ms(%ripple_length_ticks[$cur_artic])
+                        $_real_time_pos_in_ripple := real_to_int(int_to_real($_real_time_pos_in_ripple)/?speeds[$slider_speed])
+                        $_fade_in_time := ticks_to_ms(%ripple_length_ticks[$cur_artic])-$_real_time_pos_in_ripple
+                        if ($_fade_in_time<150000)
+                          $_fade_in_time := 150000
+                        end if
+                        fade_in($_note_id3,$_fade_in_time)
                       end if
-                      fade_in($_note_id3,$_fade_in_time)
                     end if
                   end if
                   inc($_ripple_i)
@@ -8863,7 +8886,7 @@ on ui_control($switch_preview10)
                     if (%ripple_id_history[$_r3] # 0)
                       if (%voices_to_release[$_i2]=%custom_event_voice[%ripple_id_history[$_r3] mod 1000000])
                         $_artic4 := %custom_event_artic[%ripple_id_history[$_r3] mod 1000000]
-                        $_rec_time_pos_in_ripple2 := (get_event_par(%ripple_id_history[$_r3],$EVENT_PAR_PLAY_POS)-0+%rec_time_ripple_lengths[$_artic4]) mod %rec_time_ripple_lengths[$_artic4]
+                        $_rec_time_pos_in_ripple2 := get_event_par(%ripple_id_history[$_r3],$EVENT_PAR_PLAY_POS) mod %rec_time_ripple_lengths[$_artic4]
                         $_real_time_pos_in_pulse := real_to_int(int_to_real(0)+((int_to_real($_rec_time_pos_in_ripple2)-int_to_real(0))/(int_to_real(%rec_time_ripple_lengths[$_artic4])-int_to_real(0))*(int_to_real(ticks_to_ms(%ripple_length_ticks[$_artic4]))-int_to_real(0))))
                         $_real_time_pos_in_pulse := real_to_int(int_to_real($_real_time_pos_in_pulse)*?speeds[$slider_speed])
                         $_real_time_ripple_length := ticks_to_ms(real_to_int(int_to_real(%ripple_length_ticks[$_artic4])*?speeds[$slider_speed]))
@@ -9307,14 +9330,16 @@ on ui_control($switch_preview11)
                       dec($r)
                     end while
                     %ripple_id_history[0] := $_note_id3
-                    if ($_real_legato_time>0)
-                      $_real_time_pos_in_ripple := ($_real_legato_time-ticks_to_ms(2)) mod ticks_to_ms(%ripple_length_ticks[$cur_artic])
-                      $_real_time_pos_in_ripple := real_to_int(int_to_real($_real_time_pos_in_ripple)/?speeds[$slider_speed])
-                      $_fade_in_time := ticks_to_ms(%ripple_length_ticks[$cur_artic])-$_real_time_pos_in_ripple
-                      if ($_fade_in_time<150000)
-                        $_fade_in_time := 150000
+                    if ($slider_legato=$legatoMode__syncToSwell)
+                      if ($_real_legato_time>0)
+                        $_real_time_pos_in_ripple := ($_real_legato_time-ticks_to_ms(2)) mod ticks_to_ms(%ripple_length_ticks[$cur_artic])
+                        $_real_time_pos_in_ripple := real_to_int(int_to_real($_real_time_pos_in_ripple)/?speeds[$slider_speed])
+                        $_fade_in_time := ticks_to_ms(%ripple_length_ticks[$cur_artic])-$_real_time_pos_in_ripple
+                        if ($_fade_in_time<150000)
+                          $_fade_in_time := 150000
+                        end if
+                        fade_in($_note_id3,$_fade_in_time)
                       end if
-                      fade_in($_note_id3,$_fade_in_time)
                     end if
                   end if
                   inc($_ripple_i)
@@ -9336,7 +9361,7 @@ on ui_control($switch_preview11)
                     if (%ripple_id_history[$_r3] # 0)
                       if (%voices_to_release[$_i2]=%custom_event_voice[%ripple_id_history[$_r3] mod 1000000])
                         $_artic4 := %custom_event_artic[%ripple_id_history[$_r3] mod 1000000]
-                        $_rec_time_pos_in_ripple2 := (get_event_par(%ripple_id_history[$_r3],$EVENT_PAR_PLAY_POS)-0+%rec_time_ripple_lengths[$_artic4]) mod %rec_time_ripple_lengths[$_artic4]
+                        $_rec_time_pos_in_ripple2 := get_event_par(%ripple_id_history[$_r3],$EVENT_PAR_PLAY_POS) mod %rec_time_ripple_lengths[$_artic4]
                         $_real_time_pos_in_pulse := real_to_int(int_to_real(0)+((int_to_real($_rec_time_pos_in_ripple2)-int_to_real(0))/(int_to_real(%rec_time_ripple_lengths[$_artic4])-int_to_real(0))*(int_to_real(ticks_to_ms(%ripple_length_ticks[$_artic4]))-int_to_real(0))))
                         $_real_time_pos_in_pulse := real_to_int(int_to_real($_real_time_pos_in_pulse)*?speeds[$slider_speed])
                         $_real_time_ripple_length := ticks_to_ms(real_to_int(int_to_real(%ripple_length_ticks[$_artic4])*?speeds[$slider_speed]))
@@ -9780,14 +9805,16 @@ on ui_control($switch_preview12)
                       dec($r)
                     end while
                     %ripple_id_history[0] := $_note_id3
-                    if ($_real_legato_time>0)
-                      $_real_time_pos_in_ripple := ($_real_legato_time-ticks_to_ms(2)) mod ticks_to_ms(%ripple_length_ticks[$cur_artic])
-                      $_real_time_pos_in_ripple := real_to_int(int_to_real($_real_time_pos_in_ripple)/?speeds[$slider_speed])
-                      $_fade_in_time := ticks_to_ms(%ripple_length_ticks[$cur_artic])-$_real_time_pos_in_ripple
-                      if ($_fade_in_time<150000)
-                        $_fade_in_time := 150000
+                    if ($slider_legato=$legatoMode__syncToSwell)
+                      if ($_real_legato_time>0)
+                        $_real_time_pos_in_ripple := ($_real_legato_time-ticks_to_ms(2)) mod ticks_to_ms(%ripple_length_ticks[$cur_artic])
+                        $_real_time_pos_in_ripple := real_to_int(int_to_real($_real_time_pos_in_ripple)/?speeds[$slider_speed])
+                        $_fade_in_time := ticks_to_ms(%ripple_length_ticks[$cur_artic])-$_real_time_pos_in_ripple
+                        if ($_fade_in_time<150000)
+                          $_fade_in_time := 150000
+                        end if
+                        fade_in($_note_id3,$_fade_in_time)
                       end if
-                      fade_in($_note_id3,$_fade_in_time)
                     end if
                   end if
                   inc($_ripple_i)
@@ -9809,7 +9836,7 @@ on ui_control($switch_preview12)
                     if (%ripple_id_history[$_r3] # 0)
                       if (%voices_to_release[$_i2]=%custom_event_voice[%ripple_id_history[$_r3] mod 1000000])
                         $_artic4 := %custom_event_artic[%ripple_id_history[$_r3] mod 1000000]
-                        $_rec_time_pos_in_ripple2 := (get_event_par(%ripple_id_history[$_r3],$EVENT_PAR_PLAY_POS)-0+%rec_time_ripple_lengths[$_artic4]) mod %rec_time_ripple_lengths[$_artic4]
+                        $_rec_time_pos_in_ripple2 := get_event_par(%ripple_id_history[$_r3],$EVENT_PAR_PLAY_POS) mod %rec_time_ripple_lengths[$_artic4]
                         $_real_time_pos_in_pulse := real_to_int(int_to_real(0)+((int_to_real($_rec_time_pos_in_ripple2)-int_to_real(0))/(int_to_real(%rec_time_ripple_lengths[$_artic4])-int_to_real(0))*(int_to_real(ticks_to_ms(%ripple_length_ticks[$_artic4]))-int_to_real(0))))
                         $_real_time_pos_in_pulse := real_to_int(int_to_real($_real_time_pos_in_pulse)*?speeds[$slider_speed])
                         $_real_time_ripple_length := ticks_to_ms(real_to_int(int_to_real(%ripple_length_ticks[$_artic4])*?speeds[$slider_speed]))
@@ -10253,14 +10280,16 @@ on ui_control($switch_preview13)
                       dec($r)
                     end while
                     %ripple_id_history[0] := $_note_id3
-                    if ($_real_legato_time>0)
-                      $_real_time_pos_in_ripple := ($_real_legato_time-ticks_to_ms(2)) mod ticks_to_ms(%ripple_length_ticks[$cur_artic])
-                      $_real_time_pos_in_ripple := real_to_int(int_to_real($_real_time_pos_in_ripple)/?speeds[$slider_speed])
-                      $_fade_in_time := ticks_to_ms(%ripple_length_ticks[$cur_artic])-$_real_time_pos_in_ripple
-                      if ($_fade_in_time<150000)
-                        $_fade_in_time := 150000
+                    if ($slider_legato=$legatoMode__syncToSwell)
+                      if ($_real_legato_time>0)
+                        $_real_time_pos_in_ripple := ($_real_legato_time-ticks_to_ms(2)) mod ticks_to_ms(%ripple_length_ticks[$cur_artic])
+                        $_real_time_pos_in_ripple := real_to_int(int_to_real($_real_time_pos_in_ripple)/?speeds[$slider_speed])
+                        $_fade_in_time := ticks_to_ms(%ripple_length_ticks[$cur_artic])-$_real_time_pos_in_ripple
+                        if ($_fade_in_time<150000)
+                          $_fade_in_time := 150000
+                        end if
+                        fade_in($_note_id3,$_fade_in_time)
                       end if
-                      fade_in($_note_id3,$_fade_in_time)
                     end if
                   end if
                   inc($_ripple_i)
@@ -10282,7 +10311,7 @@ on ui_control($switch_preview13)
                     if (%ripple_id_history[$_r3] # 0)
                       if (%voices_to_release[$_i2]=%custom_event_voice[%ripple_id_history[$_r3] mod 1000000])
                         $_artic4 := %custom_event_artic[%ripple_id_history[$_r3] mod 1000000]
-                        $_rec_time_pos_in_ripple2 := (get_event_par(%ripple_id_history[$_r3],$EVENT_PAR_PLAY_POS)-0+%rec_time_ripple_lengths[$_artic4]) mod %rec_time_ripple_lengths[$_artic4]
+                        $_rec_time_pos_in_ripple2 := get_event_par(%ripple_id_history[$_r3],$EVENT_PAR_PLAY_POS) mod %rec_time_ripple_lengths[$_artic4]
                         $_real_time_pos_in_pulse := real_to_int(int_to_real(0)+((int_to_real($_rec_time_pos_in_ripple2)-int_to_real(0))/(int_to_real(%rec_time_ripple_lengths[$_artic4])-int_to_real(0))*(int_to_real(ticks_to_ms(%ripple_length_ticks[$_artic4]))-int_to_real(0))))
                         $_real_time_pos_in_pulse := real_to_int(int_to_real($_real_time_pos_in_pulse)*?speeds[$slider_speed])
                         $_real_time_ripple_length := ticks_to_ms(real_to_int(int_to_real(%ripple_length_ticks[$_artic4])*?speeds[$slider_speed]))
@@ -10726,14 +10755,16 @@ on ui_control($switch_preview14)
                       dec($r)
                     end while
                     %ripple_id_history[0] := $_note_id3
-                    if ($_real_legato_time>0)
-                      $_real_time_pos_in_ripple := ($_real_legato_time-ticks_to_ms(2)) mod ticks_to_ms(%ripple_length_ticks[$cur_artic])
-                      $_real_time_pos_in_ripple := real_to_int(int_to_real($_real_time_pos_in_ripple)/?speeds[$slider_speed])
-                      $_fade_in_time := ticks_to_ms(%ripple_length_ticks[$cur_artic])-$_real_time_pos_in_ripple
-                      if ($_fade_in_time<150000)
-                        $_fade_in_time := 150000
+                    if ($slider_legato=$legatoMode__syncToSwell)
+                      if ($_real_legato_time>0)
+                        $_real_time_pos_in_ripple := ($_real_legato_time-ticks_to_ms(2)) mod ticks_to_ms(%ripple_length_ticks[$cur_artic])
+                        $_real_time_pos_in_ripple := real_to_int(int_to_real($_real_time_pos_in_ripple)/?speeds[$slider_speed])
+                        $_fade_in_time := ticks_to_ms(%ripple_length_ticks[$cur_artic])-$_real_time_pos_in_ripple
+                        if ($_fade_in_time<150000)
+                          $_fade_in_time := 150000
+                        end if
+                        fade_in($_note_id3,$_fade_in_time)
                       end if
-                      fade_in($_note_id3,$_fade_in_time)
                     end if
                   end if
                   inc($_ripple_i)
@@ -10755,7 +10786,7 @@ on ui_control($switch_preview14)
                     if (%ripple_id_history[$_r3] # 0)
                       if (%voices_to_release[$_i2]=%custom_event_voice[%ripple_id_history[$_r3] mod 1000000])
                         $_artic4 := %custom_event_artic[%ripple_id_history[$_r3] mod 1000000]
-                        $_rec_time_pos_in_ripple2 := (get_event_par(%ripple_id_history[$_r3],$EVENT_PAR_PLAY_POS)-0+%rec_time_ripple_lengths[$_artic4]) mod %rec_time_ripple_lengths[$_artic4]
+                        $_rec_time_pos_in_ripple2 := get_event_par(%ripple_id_history[$_r3],$EVENT_PAR_PLAY_POS) mod %rec_time_ripple_lengths[$_artic4]
                         $_real_time_pos_in_pulse := real_to_int(int_to_real(0)+((int_to_real($_rec_time_pos_in_ripple2)-int_to_real(0))/(int_to_real(%rec_time_ripple_lengths[$_artic4])-int_to_real(0))*(int_to_real(ticks_to_ms(%ripple_length_ticks[$_artic4]))-int_to_real(0))))
                         $_real_time_pos_in_pulse := real_to_int(int_to_real($_real_time_pos_in_pulse)*?speeds[$slider_speed])
                         $_real_time_ripple_length := ticks_to_ms(real_to_int(int_to_real(%ripple_length_ticks[$_artic4])*?speeds[$slider_speed]))
@@ -11199,14 +11230,16 @@ on ui_control($switch_preview15)
                       dec($r)
                     end while
                     %ripple_id_history[0] := $_note_id3
-                    if ($_real_legato_time>0)
-                      $_real_time_pos_in_ripple := ($_real_legato_time-ticks_to_ms(2)) mod ticks_to_ms(%ripple_length_ticks[$cur_artic])
-                      $_real_time_pos_in_ripple := real_to_int(int_to_real($_real_time_pos_in_ripple)/?speeds[$slider_speed])
-                      $_fade_in_time := ticks_to_ms(%ripple_length_ticks[$cur_artic])-$_real_time_pos_in_ripple
-                      if ($_fade_in_time<150000)
-                        $_fade_in_time := 150000
+                    if ($slider_legato=$legatoMode__syncToSwell)
+                      if ($_real_legato_time>0)
+                        $_real_time_pos_in_ripple := ($_real_legato_time-ticks_to_ms(2)) mod ticks_to_ms(%ripple_length_ticks[$cur_artic])
+                        $_real_time_pos_in_ripple := real_to_int(int_to_real($_real_time_pos_in_ripple)/?speeds[$slider_speed])
+                        $_fade_in_time := ticks_to_ms(%ripple_length_ticks[$cur_artic])-$_real_time_pos_in_ripple
+                        if ($_fade_in_time<150000)
+                          $_fade_in_time := 150000
+                        end if
+                        fade_in($_note_id3,$_fade_in_time)
                       end if
-                      fade_in($_note_id3,$_fade_in_time)
                     end if
                   end if
                   inc($_ripple_i)
@@ -11228,7 +11261,7 @@ on ui_control($switch_preview15)
                     if (%ripple_id_history[$_r3] # 0)
                       if (%voices_to_release[$_i2]=%custom_event_voice[%ripple_id_history[$_r3] mod 1000000])
                         $_artic4 := %custom_event_artic[%ripple_id_history[$_r3] mod 1000000]
-                        $_rec_time_pos_in_ripple2 := (get_event_par(%ripple_id_history[$_r3],$EVENT_PAR_PLAY_POS)-0+%rec_time_ripple_lengths[$_artic4]) mod %rec_time_ripple_lengths[$_artic4]
+                        $_rec_time_pos_in_ripple2 := get_event_par(%ripple_id_history[$_r3],$EVENT_PAR_PLAY_POS) mod %rec_time_ripple_lengths[$_artic4]
                         $_real_time_pos_in_pulse := real_to_int(int_to_real(0)+((int_to_real($_rec_time_pos_in_ripple2)-int_to_real(0))/(int_to_real(%rec_time_ripple_lengths[$_artic4])-int_to_real(0))*(int_to_real(ticks_to_ms(%ripple_length_ticks[$_artic4]))-int_to_real(0))))
                         $_real_time_pos_in_pulse := real_to_int(int_to_real($_real_time_pos_in_pulse)*?speeds[$slider_speed])
                         $_real_time_ripple_length := ticks_to_ms(real_to_int(int_to_real(%ripple_length_ticks[$_artic4])*?speeds[$slider_speed]))
@@ -11672,14 +11705,16 @@ on ui_control($switch_preview16)
                       dec($r)
                     end while
                     %ripple_id_history[0] := $_note_id3
-                    if ($_real_legato_time>0)
-                      $_real_time_pos_in_ripple := ($_real_legato_time-ticks_to_ms(2)) mod ticks_to_ms(%ripple_length_ticks[$cur_artic])
-                      $_real_time_pos_in_ripple := real_to_int(int_to_real($_real_time_pos_in_ripple)/?speeds[$slider_speed])
-                      $_fade_in_time := ticks_to_ms(%ripple_length_ticks[$cur_artic])-$_real_time_pos_in_ripple
-                      if ($_fade_in_time<150000)
-                        $_fade_in_time := 150000
+                    if ($slider_legato=$legatoMode__syncToSwell)
+                      if ($_real_legato_time>0)
+                        $_real_time_pos_in_ripple := ($_real_legato_time-ticks_to_ms(2)) mod ticks_to_ms(%ripple_length_ticks[$cur_artic])
+                        $_real_time_pos_in_ripple := real_to_int(int_to_real($_real_time_pos_in_ripple)/?speeds[$slider_speed])
+                        $_fade_in_time := ticks_to_ms(%ripple_length_ticks[$cur_artic])-$_real_time_pos_in_ripple
+                        if ($_fade_in_time<150000)
+                          $_fade_in_time := 150000
+                        end if
+                        fade_in($_note_id3,$_fade_in_time)
                       end if
-                      fade_in($_note_id3,$_fade_in_time)
                     end if
                   end if
                   inc($_ripple_i)
@@ -11701,7 +11736,7 @@ on ui_control($switch_preview16)
                     if (%ripple_id_history[$_r3] # 0)
                       if (%voices_to_release[$_i2]=%custom_event_voice[%ripple_id_history[$_r3] mod 1000000])
                         $_artic4 := %custom_event_artic[%ripple_id_history[$_r3] mod 1000000]
-                        $_rec_time_pos_in_ripple2 := (get_event_par(%ripple_id_history[$_r3],$EVENT_PAR_PLAY_POS)-0+%rec_time_ripple_lengths[$_artic4]) mod %rec_time_ripple_lengths[$_artic4]
+                        $_rec_time_pos_in_ripple2 := get_event_par(%ripple_id_history[$_r3],$EVENT_PAR_PLAY_POS) mod %rec_time_ripple_lengths[$_artic4]
                         $_real_time_pos_in_pulse := real_to_int(int_to_real(0)+((int_to_real($_rec_time_pos_in_ripple2)-int_to_real(0))/(int_to_real(%rec_time_ripple_lengths[$_artic4])-int_to_real(0))*(int_to_real(ticks_to_ms(%ripple_length_ticks[$_artic4]))-int_to_real(0))))
                         $_real_time_pos_in_pulse := real_to_int(int_to_real($_real_time_pos_in_pulse)*?speeds[$slider_speed])
                         $_real_time_ripple_length := ticks_to_ms(real_to_int(int_to_real(%ripple_length_ticks[$_artic4])*?speeds[$slider_speed]))
@@ -12145,14 +12180,16 @@ on ui_control($switch_preview17)
                       dec($r)
                     end while
                     %ripple_id_history[0] := $_note_id3
-                    if ($_real_legato_time>0)
-                      $_real_time_pos_in_ripple := ($_real_legato_time-ticks_to_ms(2)) mod ticks_to_ms(%ripple_length_ticks[$cur_artic])
-                      $_real_time_pos_in_ripple := real_to_int(int_to_real($_real_time_pos_in_ripple)/?speeds[$slider_speed])
-                      $_fade_in_time := ticks_to_ms(%ripple_length_ticks[$cur_artic])-$_real_time_pos_in_ripple
-                      if ($_fade_in_time<150000)
-                        $_fade_in_time := 150000
+                    if ($slider_legato=$legatoMode__syncToSwell)
+                      if ($_real_legato_time>0)
+                        $_real_time_pos_in_ripple := ($_real_legato_time-ticks_to_ms(2)) mod ticks_to_ms(%ripple_length_ticks[$cur_artic])
+                        $_real_time_pos_in_ripple := real_to_int(int_to_real($_real_time_pos_in_ripple)/?speeds[$slider_speed])
+                        $_fade_in_time := ticks_to_ms(%ripple_length_ticks[$cur_artic])-$_real_time_pos_in_ripple
+                        if ($_fade_in_time<150000)
+                          $_fade_in_time := 150000
+                        end if
+                        fade_in($_note_id3,$_fade_in_time)
                       end if
-                      fade_in($_note_id3,$_fade_in_time)
                     end if
                   end if
                   inc($_ripple_i)
@@ -12174,7 +12211,7 @@ on ui_control($switch_preview17)
                     if (%ripple_id_history[$_r3] # 0)
                       if (%voices_to_release[$_i2]=%custom_event_voice[%ripple_id_history[$_r3] mod 1000000])
                         $_artic4 := %custom_event_artic[%ripple_id_history[$_r3] mod 1000000]
-                        $_rec_time_pos_in_ripple2 := (get_event_par(%ripple_id_history[$_r3],$EVENT_PAR_PLAY_POS)-0+%rec_time_ripple_lengths[$_artic4]) mod %rec_time_ripple_lengths[$_artic4]
+                        $_rec_time_pos_in_ripple2 := get_event_par(%ripple_id_history[$_r3],$EVENT_PAR_PLAY_POS) mod %rec_time_ripple_lengths[$_artic4]
                         $_real_time_pos_in_pulse := real_to_int(int_to_real(0)+((int_to_real($_rec_time_pos_in_ripple2)-int_to_real(0))/(int_to_real(%rec_time_ripple_lengths[$_artic4])-int_to_real(0))*(int_to_real(ticks_to_ms(%ripple_length_ticks[$_artic4]))-int_to_real(0))))
                         $_real_time_pos_in_pulse := real_to_int(int_to_real($_real_time_pos_in_pulse)*?speeds[$slider_speed])
                         $_real_time_ripple_length := ticks_to_ms(real_to_int(int_to_real(%ripple_length_ticks[$_artic4])*?speeds[$slider_speed]))
@@ -12618,14 +12655,16 @@ on ui_control($switch_preview18)
                       dec($r)
                     end while
                     %ripple_id_history[0] := $_note_id3
-                    if ($_real_legato_time>0)
-                      $_real_time_pos_in_ripple := ($_real_legato_time-ticks_to_ms(2)) mod ticks_to_ms(%ripple_length_ticks[$cur_artic])
-                      $_real_time_pos_in_ripple := real_to_int(int_to_real($_real_time_pos_in_ripple)/?speeds[$slider_speed])
-                      $_fade_in_time := ticks_to_ms(%ripple_length_ticks[$cur_artic])-$_real_time_pos_in_ripple
-                      if ($_fade_in_time<150000)
-                        $_fade_in_time := 150000
+                    if ($slider_legato=$legatoMode__syncToSwell)
+                      if ($_real_legato_time>0)
+                        $_real_time_pos_in_ripple := ($_real_legato_time-ticks_to_ms(2)) mod ticks_to_ms(%ripple_length_ticks[$cur_artic])
+                        $_real_time_pos_in_ripple := real_to_int(int_to_real($_real_time_pos_in_ripple)/?speeds[$slider_speed])
+                        $_fade_in_time := ticks_to_ms(%ripple_length_ticks[$cur_artic])-$_real_time_pos_in_ripple
+                        if ($_fade_in_time<150000)
+                          $_fade_in_time := 150000
+                        end if
+                        fade_in($_note_id3,$_fade_in_time)
                       end if
-                      fade_in($_note_id3,$_fade_in_time)
                     end if
                   end if
                   inc($_ripple_i)
@@ -12647,7 +12686,7 @@ on ui_control($switch_preview18)
                     if (%ripple_id_history[$_r3] # 0)
                       if (%voices_to_release[$_i2]=%custom_event_voice[%ripple_id_history[$_r3] mod 1000000])
                         $_artic4 := %custom_event_artic[%ripple_id_history[$_r3] mod 1000000]
-                        $_rec_time_pos_in_ripple2 := (get_event_par(%ripple_id_history[$_r3],$EVENT_PAR_PLAY_POS)-0+%rec_time_ripple_lengths[$_artic4]) mod %rec_time_ripple_lengths[$_artic4]
+                        $_rec_time_pos_in_ripple2 := get_event_par(%ripple_id_history[$_r3],$EVENT_PAR_PLAY_POS) mod %rec_time_ripple_lengths[$_artic4]
                         $_real_time_pos_in_pulse := real_to_int(int_to_real(0)+((int_to_real($_rec_time_pos_in_ripple2)-int_to_real(0))/(int_to_real(%rec_time_ripple_lengths[$_artic4])-int_to_real(0))*(int_to_real(ticks_to_ms(%ripple_length_ticks[$_artic4]))-int_to_real(0))))
                         $_real_time_pos_in_pulse := real_to_int(int_to_real($_real_time_pos_in_pulse)*?speeds[$slider_speed])
                         $_real_time_ripple_length := ticks_to_ms(real_to_int(int_to_real(%ripple_length_ticks[$_artic4])*?speeds[$slider_speed]))
@@ -13091,14 +13130,16 @@ on ui_control($switch_preview19)
                       dec($r)
                     end while
                     %ripple_id_history[0] := $_note_id3
-                    if ($_real_legato_time>0)
-                      $_real_time_pos_in_ripple := ($_real_legato_time-ticks_to_ms(2)) mod ticks_to_ms(%ripple_length_ticks[$cur_artic])
-                      $_real_time_pos_in_ripple := real_to_int(int_to_real($_real_time_pos_in_ripple)/?speeds[$slider_speed])
-                      $_fade_in_time := ticks_to_ms(%ripple_length_ticks[$cur_artic])-$_real_time_pos_in_ripple
-                      if ($_fade_in_time<150000)
-                        $_fade_in_time := 150000
+                    if ($slider_legato=$legatoMode__syncToSwell)
+                      if ($_real_legato_time>0)
+                        $_real_time_pos_in_ripple := ($_real_legato_time-ticks_to_ms(2)) mod ticks_to_ms(%ripple_length_ticks[$cur_artic])
+                        $_real_time_pos_in_ripple := real_to_int(int_to_real($_real_time_pos_in_ripple)/?speeds[$slider_speed])
+                        $_fade_in_time := ticks_to_ms(%ripple_length_ticks[$cur_artic])-$_real_time_pos_in_ripple
+                        if ($_fade_in_time<150000)
+                          $_fade_in_time := 150000
+                        end if
+                        fade_in($_note_id3,$_fade_in_time)
                       end if
-                      fade_in($_note_id3,$_fade_in_time)
                     end if
                   end if
                   inc($_ripple_i)
@@ -13120,7 +13161,7 @@ on ui_control($switch_preview19)
                     if (%ripple_id_history[$_r3] # 0)
                       if (%voices_to_release[$_i2]=%custom_event_voice[%ripple_id_history[$_r3] mod 1000000])
                         $_artic4 := %custom_event_artic[%ripple_id_history[$_r3] mod 1000000]
-                        $_rec_time_pos_in_ripple2 := (get_event_par(%ripple_id_history[$_r3],$EVENT_PAR_PLAY_POS)-0+%rec_time_ripple_lengths[$_artic4]) mod %rec_time_ripple_lengths[$_artic4]
+                        $_rec_time_pos_in_ripple2 := get_event_par(%ripple_id_history[$_r3],$EVENT_PAR_PLAY_POS) mod %rec_time_ripple_lengths[$_artic4]
                         $_real_time_pos_in_pulse := real_to_int(int_to_real(0)+((int_to_real($_rec_time_pos_in_ripple2)-int_to_real(0))/(int_to_real(%rec_time_ripple_lengths[$_artic4])-int_to_real(0))*(int_to_real(ticks_to_ms(%ripple_length_ticks[$_artic4]))-int_to_real(0))))
                         $_real_time_pos_in_pulse := real_to_int(int_to_real($_real_time_pos_in_pulse)*?speeds[$slider_speed])
                         $_real_time_ripple_length := ticks_to_ms(real_to_int(int_to_real(%ripple_length_ticks[$_artic4])*?speeds[$slider_speed]))
@@ -13564,14 +13605,16 @@ on ui_control($switch_preview20)
                       dec($r)
                     end while
                     %ripple_id_history[0] := $_note_id3
-                    if ($_real_legato_time>0)
-                      $_real_time_pos_in_ripple := ($_real_legato_time-ticks_to_ms(2)) mod ticks_to_ms(%ripple_length_ticks[$cur_artic])
-                      $_real_time_pos_in_ripple := real_to_int(int_to_real($_real_time_pos_in_ripple)/?speeds[$slider_speed])
-                      $_fade_in_time := ticks_to_ms(%ripple_length_ticks[$cur_artic])-$_real_time_pos_in_ripple
-                      if ($_fade_in_time<150000)
-                        $_fade_in_time := 150000
+                    if ($slider_legato=$legatoMode__syncToSwell)
+                      if ($_real_legato_time>0)
+                        $_real_time_pos_in_ripple := ($_real_legato_time-ticks_to_ms(2)) mod ticks_to_ms(%ripple_length_ticks[$cur_artic])
+                        $_real_time_pos_in_ripple := real_to_int(int_to_real($_real_time_pos_in_ripple)/?speeds[$slider_speed])
+                        $_fade_in_time := ticks_to_ms(%ripple_length_ticks[$cur_artic])-$_real_time_pos_in_ripple
+                        if ($_fade_in_time<150000)
+                          $_fade_in_time := 150000
+                        end if
+                        fade_in($_note_id3,$_fade_in_time)
                       end if
-                      fade_in($_note_id3,$_fade_in_time)
                     end if
                   end if
                   inc($_ripple_i)
@@ -13593,7 +13636,7 @@ on ui_control($switch_preview20)
                     if (%ripple_id_history[$_r3] # 0)
                       if (%voices_to_release[$_i2]=%custom_event_voice[%ripple_id_history[$_r3] mod 1000000])
                         $_artic4 := %custom_event_artic[%ripple_id_history[$_r3] mod 1000000]
-                        $_rec_time_pos_in_ripple2 := (get_event_par(%ripple_id_history[$_r3],$EVENT_PAR_PLAY_POS)-0+%rec_time_ripple_lengths[$_artic4]) mod %rec_time_ripple_lengths[$_artic4]
+                        $_rec_time_pos_in_ripple2 := get_event_par(%ripple_id_history[$_r3],$EVENT_PAR_PLAY_POS) mod %rec_time_ripple_lengths[$_artic4]
                         $_real_time_pos_in_pulse := real_to_int(int_to_real(0)+((int_to_real($_rec_time_pos_in_ripple2)-int_to_real(0))/(int_to_real(%rec_time_ripple_lengths[$_artic4])-int_to_real(0))*(int_to_real(ticks_to_ms(%ripple_length_ticks[$_artic4]))-int_to_real(0))))
                         $_real_time_pos_in_pulse := real_to_int(int_to_real($_real_time_pos_in_pulse)*?speeds[$slider_speed])
                         $_real_time_ripple_length := ticks_to_ms(real_to_int(int_to_real(%ripple_length_ticks[$_artic4])*?speeds[$slider_speed]))
@@ -14037,14 +14080,16 @@ on ui_control($switch_preview21)
                       dec($r)
                     end while
                     %ripple_id_history[0] := $_note_id3
-                    if ($_real_legato_time>0)
-                      $_real_time_pos_in_ripple := ($_real_legato_time-ticks_to_ms(2)) mod ticks_to_ms(%ripple_length_ticks[$cur_artic])
-                      $_real_time_pos_in_ripple := real_to_int(int_to_real($_real_time_pos_in_ripple)/?speeds[$slider_speed])
-                      $_fade_in_time := ticks_to_ms(%ripple_length_ticks[$cur_artic])-$_real_time_pos_in_ripple
-                      if ($_fade_in_time<150000)
-                        $_fade_in_time := 150000
+                    if ($slider_legato=$legatoMode__syncToSwell)
+                      if ($_real_legato_time>0)
+                        $_real_time_pos_in_ripple := ($_real_legato_time-ticks_to_ms(2)) mod ticks_to_ms(%ripple_length_ticks[$cur_artic])
+                        $_real_time_pos_in_ripple := real_to_int(int_to_real($_real_time_pos_in_ripple)/?speeds[$slider_speed])
+                        $_fade_in_time := ticks_to_ms(%ripple_length_ticks[$cur_artic])-$_real_time_pos_in_ripple
+                        if ($_fade_in_time<150000)
+                          $_fade_in_time := 150000
+                        end if
+                        fade_in($_note_id3,$_fade_in_time)
                       end if
-                      fade_in($_note_id3,$_fade_in_time)
                     end if
                   end if
                   inc($_ripple_i)
@@ -14066,7 +14111,7 @@ on ui_control($switch_preview21)
                     if (%ripple_id_history[$_r3] # 0)
                       if (%voices_to_release[$_i2]=%custom_event_voice[%ripple_id_history[$_r3] mod 1000000])
                         $_artic4 := %custom_event_artic[%ripple_id_history[$_r3] mod 1000000]
-                        $_rec_time_pos_in_ripple2 := (get_event_par(%ripple_id_history[$_r3],$EVENT_PAR_PLAY_POS)-0+%rec_time_ripple_lengths[$_artic4]) mod %rec_time_ripple_lengths[$_artic4]
+                        $_rec_time_pos_in_ripple2 := get_event_par(%ripple_id_history[$_r3],$EVENT_PAR_PLAY_POS) mod %rec_time_ripple_lengths[$_artic4]
                         $_real_time_pos_in_pulse := real_to_int(int_to_real(0)+((int_to_real($_rec_time_pos_in_ripple2)-int_to_real(0))/(int_to_real(%rec_time_ripple_lengths[$_artic4])-int_to_real(0))*(int_to_real(ticks_to_ms(%ripple_length_ticks[$_artic4]))-int_to_real(0))))
                         $_real_time_pos_in_pulse := real_to_int(int_to_real($_real_time_pos_in_pulse)*?speeds[$slider_speed])
                         $_real_time_ripple_length := ticks_to_ms(real_to_int(int_to_real(%ripple_length_ticks[$_artic4])*?speeds[$slider_speed]))
@@ -14510,14 +14555,16 @@ on ui_control($switch_preview22)
                       dec($r)
                     end while
                     %ripple_id_history[0] := $_note_id3
-                    if ($_real_legato_time>0)
-                      $_real_time_pos_in_ripple := ($_real_legato_time-ticks_to_ms(2)) mod ticks_to_ms(%ripple_length_ticks[$cur_artic])
-                      $_real_time_pos_in_ripple := real_to_int(int_to_real($_real_time_pos_in_ripple)/?speeds[$slider_speed])
-                      $_fade_in_time := ticks_to_ms(%ripple_length_ticks[$cur_artic])-$_real_time_pos_in_ripple
-                      if ($_fade_in_time<150000)
-                        $_fade_in_time := 150000
+                    if ($slider_legato=$legatoMode__syncToSwell)
+                      if ($_real_legato_time>0)
+                        $_real_time_pos_in_ripple := ($_real_legato_time-ticks_to_ms(2)) mod ticks_to_ms(%ripple_length_ticks[$cur_artic])
+                        $_real_time_pos_in_ripple := real_to_int(int_to_real($_real_time_pos_in_ripple)/?speeds[$slider_speed])
+                        $_fade_in_time := ticks_to_ms(%ripple_length_ticks[$cur_artic])-$_real_time_pos_in_ripple
+                        if ($_fade_in_time<150000)
+                          $_fade_in_time := 150000
+                        end if
+                        fade_in($_note_id3,$_fade_in_time)
                       end if
-                      fade_in($_note_id3,$_fade_in_time)
                     end if
                   end if
                   inc($_ripple_i)
@@ -14539,7 +14586,7 @@ on ui_control($switch_preview22)
                     if (%ripple_id_history[$_r3] # 0)
                       if (%voices_to_release[$_i2]=%custom_event_voice[%ripple_id_history[$_r3] mod 1000000])
                         $_artic4 := %custom_event_artic[%ripple_id_history[$_r3] mod 1000000]
-                        $_rec_time_pos_in_ripple2 := (get_event_par(%ripple_id_history[$_r3],$EVENT_PAR_PLAY_POS)-0+%rec_time_ripple_lengths[$_artic4]) mod %rec_time_ripple_lengths[$_artic4]
+                        $_rec_time_pos_in_ripple2 := get_event_par(%ripple_id_history[$_r3],$EVENT_PAR_PLAY_POS) mod %rec_time_ripple_lengths[$_artic4]
                         $_real_time_pos_in_pulse := real_to_int(int_to_real(0)+((int_to_real($_rec_time_pos_in_ripple2)-int_to_real(0))/(int_to_real(%rec_time_ripple_lengths[$_artic4])-int_to_real(0))*(int_to_real(ticks_to_ms(%ripple_length_ticks[$_artic4]))-int_to_real(0))))
                         $_real_time_pos_in_pulse := real_to_int(int_to_real($_real_time_pos_in_pulse)*?speeds[$slider_speed])
                         $_real_time_ripple_length := ticks_to_ms(real_to_int(int_to_real(%ripple_length_ticks[$_artic4])*?speeds[$slider_speed]))
@@ -14983,14 +15030,16 @@ on ui_control($switch_preview23)
                       dec($r)
                     end while
                     %ripple_id_history[0] := $_note_id3
-                    if ($_real_legato_time>0)
-                      $_real_time_pos_in_ripple := ($_real_legato_time-ticks_to_ms(2)) mod ticks_to_ms(%ripple_length_ticks[$cur_artic])
-                      $_real_time_pos_in_ripple := real_to_int(int_to_real($_real_time_pos_in_ripple)/?speeds[$slider_speed])
-                      $_fade_in_time := ticks_to_ms(%ripple_length_ticks[$cur_artic])-$_real_time_pos_in_ripple
-                      if ($_fade_in_time<150000)
-                        $_fade_in_time := 150000
+                    if ($slider_legato=$legatoMode__syncToSwell)
+                      if ($_real_legato_time>0)
+                        $_real_time_pos_in_ripple := ($_real_legato_time-ticks_to_ms(2)) mod ticks_to_ms(%ripple_length_ticks[$cur_artic])
+                        $_real_time_pos_in_ripple := real_to_int(int_to_real($_real_time_pos_in_ripple)/?speeds[$slider_speed])
+                        $_fade_in_time := ticks_to_ms(%ripple_length_ticks[$cur_artic])-$_real_time_pos_in_ripple
+                        if ($_fade_in_time<150000)
+                          $_fade_in_time := 150000
+                        end if
+                        fade_in($_note_id3,$_fade_in_time)
                       end if
-                      fade_in($_note_id3,$_fade_in_time)
                     end if
                   end if
                   inc($_ripple_i)
@@ -15012,7 +15061,7 @@ on ui_control($switch_preview23)
                     if (%ripple_id_history[$_r3] # 0)
                       if (%voices_to_release[$_i2]=%custom_event_voice[%ripple_id_history[$_r3] mod 1000000])
                         $_artic4 := %custom_event_artic[%ripple_id_history[$_r3] mod 1000000]
-                        $_rec_time_pos_in_ripple2 := (get_event_par(%ripple_id_history[$_r3],$EVENT_PAR_PLAY_POS)-0+%rec_time_ripple_lengths[$_artic4]) mod %rec_time_ripple_lengths[$_artic4]
+                        $_rec_time_pos_in_ripple2 := get_event_par(%ripple_id_history[$_r3],$EVENT_PAR_PLAY_POS) mod %rec_time_ripple_lengths[$_artic4]
                         $_real_time_pos_in_pulse := real_to_int(int_to_real(0)+((int_to_real($_rec_time_pos_in_ripple2)-int_to_real(0))/(int_to_real(%rec_time_ripple_lengths[$_artic4])-int_to_real(0))*(int_to_real(ticks_to_ms(%ripple_length_ticks[$_artic4]))-int_to_real(0))))
                         $_real_time_pos_in_pulse := real_to_int(int_to_real($_real_time_pos_in_pulse)*?speeds[$slider_speed])
                         $_real_time_ripple_length := ticks_to_ms(real_to_int(int_to_real(%ripple_length_ticks[$_artic4])*?speeds[$slider_speed]))

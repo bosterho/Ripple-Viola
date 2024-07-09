@@ -1020,15 +1020,18 @@ function note_callback(note, velocity, event_id)
 					end for
 					ripple_id_history[0] := note_id
 
-					// Fade in
-					if real_legato_time > 0
-						declare real_time_pos_in_ripple := (real_legato_time - ticks_to_ms(2)) mod ticks_to_ms(ripple_length_ticks[cur_artic])
-						real_time_pos_in_ripple := int(float(real_time_pos_in_ripple) / speeds[slider_speed])
-						declare fade_in_time := ticks_to_ms(ripple_length_ticks[cur_artic]) - real_time_pos_in_ripple
-						if fade_in_time < 150000
-							fade_in_time := 150000
+					// Pitch and ripple always start from their beginning, so they don't need a fade.
+					// For swell though, it cuts into the sample, so we need to make it fade in more gently. 
+					if slider_legato = legatoMode.syncToSwell
+						if real_legato_time > 0
+							declare real_time_pos_in_ripple := (real_legato_time - ticks_to_ms(2)) mod ticks_to_ms(ripple_length_ticks[cur_artic])
+							real_time_pos_in_ripple := int(float(real_time_pos_in_ripple) / speeds[slider_speed])
+							declare fade_in_time := ticks_to_ms(ripple_length_ticks[cur_artic]) - real_time_pos_in_ripple
+							if fade_in_time < 150000
+								fade_in_time := 150000
+							end if
+							fade_in(note_id, fade_in_time)
 						end if
-						fade_in(note_id, fade_in_time)
 					end if
 
 				end if
