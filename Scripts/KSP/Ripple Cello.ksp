@@ -43,7 +43,6 @@ on init
 	define sliders := vol, reverb, options
 	define options := speed, direction, legato, releaseSamples
 
-
 	macro declare_control_constant(#ctrl#)
 		declare const control.#ctrl# := N
 	end macro
@@ -951,12 +950,7 @@ function note_callback(note, velocity, event_id)
 
 				if already_playing = 0
 					declare offset_real_time
-					declare do_legato := 0
-
-					call count_active_ripples
-					if num_active_ripples > 0
-						do_legato := 1
-					end if
+					declare do_legato
 
 					if all_keys_released = 1
 						do_legato := 0
@@ -984,12 +978,9 @@ function note_callback(note, velocity, event_id)
 						end select
 					end if
 					declare offset_rec_time := map_i_2i_2i_i(offset_real_time, 0, ticks_to_ms(sample_length_ticks[cur_artic]), 0, rec_time_sample_lengths[cur_artic])
+
 					declare note_id := play_note(notes[ripple_i], 64 + intervals[ripple_i], offset_rec_time, 0)
 					declare volume  := map_i_2i_2i_i(velocity, 1, 127, -12000, 3000)
-					if offset_rec_time = 0
-						// tmpro causes a bit of a bump sometimes. This hides that.
-						fade_in(note_id, DURATION_SIXTEENTH)
-					end if
 					change_vol(note_id, volume, CHANGE_ABSOLUTE)
 					set_event_par_arr(note_id, EVENT_PAR_ALLOW_GROUP, 0, ALL_GROUPS)
 					set_event_par_arr(note_id, EVENT_PAR_ALLOW_GROUP, 1, cur_artic)
@@ -1020,18 +1011,28 @@ function note_callback(note, velocity, event_id)
 					end for
 					ripple_id_history[0] := note_id
 
+					// Fade in
 					// Pitch and ripple always start from their beginning, so they don't need a fade.
 					// For swell though, it cuts into the sample, so we need to make it fade in more gently. 
-					if slider_legato = legatoMode.syncToSwell
-						if real_legato_time > 0
+					declare fade_in_time := 0
+					declare attack_amt := map_i_2i_2i_i(velocity, 1, 127, 1000000, 500000)
+					if offset_rec_time = 0
+						// tmpro causes a bit of a bump sometimes. This hides that.
+						fade_in_time := 50000
+					else
+						if slider_legato = legatoMode.syncToSwell
 							declare real_time_pos_in_ripple := (real_legato_time - ticks_to_ms(2)) mod ticks_to_ms(ripple_length_ticks[cur_artic])
 							real_time_pos_in_ripple := int(float(real_time_pos_in_ripple) / speeds[slider_speed])
-							declare fade_in_time := ticks_to_ms(ripple_length_ticks[cur_artic]) - real_time_pos_in_ripple
+							fade_in_time := ticks_to_ms(ripple_length_ticks[cur_artic]) - real_time_pos_in_ripple
 							if fade_in_time < 150000
 								fade_in_time := 150000
 							end if
-							fade_in(note_id, fade_in_time)
+						else if slider_legato = legatoMode.syncToRipple or slider_legato = legatoMode.syncToPitch
+							fade_in_time := DURATION_SIXTEENTH/4
 						end if
+					end if
+					if fade_in_time > 0
+						fade_in(note_id, fade_in_time)
 					end if
 
 				end if

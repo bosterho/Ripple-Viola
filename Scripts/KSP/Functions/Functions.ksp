@@ -6,7 +6,7 @@ taskfunc update_nks_label(ctrl_index)
 
 	select ctrl_index
 		case control.vol
-			ui_id -> label := insert[0].sfx_wet.disp & " dB"
+			ui_id -> label := slider_vol / 10000 & " %"
 
 		case control.reverb
 			ui_id -> label := insert[7].send_7.disp & " dB"
@@ -28,8 +28,11 @@ taskfunc update_engine_pars(ctrl_index)
 			if in_range(value, 0, 500000)
 				insert[0].sfx_wet := map_i_2i_2i_i(value, 0, 500000, V2E.volume2(-16000.0), V2E.volume2(0.0))
 			else if in_range(value, 500000, 1000000)
-				insert[0].sfx_wet := map_i_2i_2i_i(value, 500000, 1000000, V2E.volume2(0.0), V2E.volume2(9000.0))
+				insert[0].sfx_wet := map_i_2i_2i_i(value, 500000, 1000000, V2E.volume2(0.0), V2E.volume2(8000.0))
 			end if
+			main[6].seq_hf_gain := map_i_2i_2i_i(value, 0, 1000000, 550000, 650000)
+			main[7].stereo_spread := map_i_2i_2i_i(value, 0, 1000000, 400000, 600000)
+
 
 		case control.reverb
 			call update_reverb_send_levels
