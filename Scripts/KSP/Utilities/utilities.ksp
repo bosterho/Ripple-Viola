@@ -337,6 +337,13 @@ macro fill_d2(#array#, #d1#, #value#)
 	end for
 end macro
 
+macro insert(#array#, #index#, #value#)
+	for array_i := num_elements(#array#) - 1 downto #index# + 1
+		#array#[array_i] := #array#[array_i - 1]
+	end for
+	#array#[#index#] := #value#
+end macro
+
 function copy_bounds(src, dst)
 	set_bounds(dst, src -> pos_x, src -> pos_y, src -> width, src -> height)
 end function

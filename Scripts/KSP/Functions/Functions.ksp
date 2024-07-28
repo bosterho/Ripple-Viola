@@ -71,6 +71,9 @@ taskfunc update_engine_pars(ctrl_index)
 	end select
 end taskfunc
 
+define rec_time_to_real_time(#i#) := map_i_2i_2i_i(#i#, 0, RECORDED_DURATION_QUARTER, 0, DURATION_QUARTER)
+define real_time_to_rec_time(#i#) := map_i_2i_2i_i(#i#, 0, DURATION_QUARTER, 0, RECORDED_DURATION_QUARTER)
+
 function update_reverb_send_levels
 	// vol := float(slider_reverb) / 1000000.0
 	if in_range(slider_reverb, 0, 500000)
@@ -94,6 +97,11 @@ function update_reverb_slider_picture
 		slider_reverb -> picture := "knob"
 	end if
 end function
+
+function update_latency_label
+	label_latency -> text := menu_latency & "ms"
+end function
+
 
 
 function trigger_release_samples_for_all_ripples
@@ -318,12 +326,12 @@ function count_active_ripples
 	end for
 end function
 
-function count_keys_pressed()
-	num_keys_pressed := 0
+function count_keys_active()
+	num_keys_active := 0
 	declare key_i
 	for key_i := LOWEST_KEY to HIGHEST_KEY
 		if key_active[key_i] = 1
-			inc(num_keys_pressed)
+			inc(num_keys_active)
 		end if
 	end for
 end function
@@ -393,6 +401,8 @@ function remove_ripple_ids_from_history_after_they_have_faded_out
 end function
 
 function ripple_animations
+	declare r
+
 	// Hide any ripple graphics that have been removed from history and didn't get a chance to be hidden otherwise
 	for r := 0 to MAX_RIPPLE_HISTORY - 1
 		if ripple_id_history[r] = 0 //or event_status(ripple_id_history[r]) = EVENT_STATUS_INACTIVE
@@ -527,118 +537,268 @@ function info_graphics_animation
 	label_midiCover -> picture_state := map_f_2f_2i_i(smoothed_midiCover_opacity, 0.0, 1.0, 0, 127)
 end function
 
-function play_release_samples_when_its_time
-	for r := 0 to MAX_RIPPLE_HISTORY - 1
-		if event_status(ripple_id_history[r]) = EVENT_STATUS_NOTE_QUEUE
-			if event[ripple_id_history[r]].waiting_to_trigger_release_sample = 1 ...
-			and event[ripple_id_history[r]].type # RELEASE_SAMPLE_TYPE
+function play_release_samples(note)
+	declare rls_spl_playhead[128]
+	declare release_timestamp[128]
+	declare next_id
+	declare artic
+	declare release_dynamic
+	release_timestamp[note] := ENGINE_UPTIME
+	// One note being released might trigger release samples for multiple ripples. 
+	// If you're using the pedal, it's possible for one note to be keeping ripples going, which you'd started at different times.
+	// This means release samples need to be able to happen at different times.
+	// This for-loop should play all the release samples, which were put into rls_spl_ripple_ids[] in order
 
-				declare artic := event[ripple_id_history[r]].artic
-				declare release_dynamic := event[ripple_id_history[r]].release_dynamic
-				declare rec_time_pos_in_ripple := ripple_id_history[r] -> play_pos mod rec_time_ripple_lengths[artic]
-				// if release_dynamic = SHORT
-				// 	if rec_time_pos_in_ripple > rec_time_ripple_lengths[artic] / 2
-				// 		fade_out(ripple_id_history[r], ticks_to_ms(ripple_length_ticks[artic] / 2), STOP_VOICE_AFTER_FADE_OUT)
-				// 	end if
-				// else if release_dynamic = LONG
-					if artic = artic.sixteenths
-						if rec_time_pos_in_ripple > rec_time_ripple_lengths[artic] / 4 * 3
-							fade_out(ripple_id_history[r], ticks_to_ms(ripple_length_ticks[artic] / 4), STOP_VOICE_AFTER_FADE_OUT)
-						end if
-					else
-						if rec_time_pos_in_ripple > rec_time_ripple_lengths[artic] / 8 * 7
-							fade_out(ripple_id_history[r], ticks_to_ms(ripple_length_ticks[artic] / 4), STOP_VOICE_AFTER_FADE_OUT)
-						end if
-					end if
-				// end if
-				
-				if rec_time_pos_in_ripple < event[ripple_id_history[r]].prev_rec_time_pos_in_ripple // If it has wrapped
-					event[ripple_id_history[r]].waiting_to_trigger_release_sample := 0
+	for rls_spl_playhead[note] := 0 to num_rls_spl_ids[note] - 1
+		macro update_event_variables // Must do this after every wait()
+			next_id := rls_spl_ripple_ids[note, rls_spl_playhead[note]]
+	    	artic := event[next_id].artic
+			release_dynamic := event[next_id].release_dynamic
+	    end macro
+	    update_event_variables()
 
-					// Grab these values right before the ripple finishes fading out
-					declare vol := ripple_id_history[r] -> volume
-					declare offset := 50000 // Used to make it err on the side of choosing a ripple that's softer.
-					declare play_pos := ripple_id_history[r] -> play_pos
-					if play_pos - offset < rec_time_sample_lengths[artic] / 2
-						play_pos := play_pos - offset
-						if play_pos < 0
-							play_pos := 0
-						end if
-					else
-						play_pos := play_pos + offset
-					end if
-					declare cur_ripple := play_pos / rec_time_ripple_lengths[artic]
-					if cur_ripple > 3
-						cur_ripple := 4 - (cur_ripple - 3)
-					end if
-					constrain(cur_ripple, 0, 3)
-					declare vel := (cur_ripple * 32 + 1)
+		// What time is it now?
+    	declare cur_time := (ENGINE_UPTIME - release_timestamp[note]) * 1000
 
-					// Play release-sample
-					declare sample_start
-					declare fade_time
-					if release_dynamic = SHORT
-						sample_start := int(float(rec_time_ripple_lengths[artic]) / 3.5)
-						// fade_time := 100000
-						fade_time := ticks_to_ms(int(float(ripple_length_ticks[artic]) * speeds[artic] / 7.0))
-					else if release_dynamic = LONG
-						sample_start := 0
-						// fade_time := 50000
-						fade_time := ticks_to_ms(int(float(ripple_length_ticks[artic]) * speeds[artic] / 15.0))
-					end if
-					// msg(fade_time)
+    	// When's the next event?
+    	declare next_event_time := event[next_id].time_til_end_of_ripple
 
-					group[release_group[artic]].mods["ENV_AHDSR"].target["ENV_AHDSR_VOLUME"].env_atk := V2E.AtkTime(float(fade_time) / 10.0)
+    	// Wait most of the time til the next event
+    	declare wait_time := next_event_time - cur_time
+    	declare time_offset := int(float(ticks_to_ms(60)) / speeds[slider_speed])
+    	wait_time := wait_time - time_offset - SAMPLE_LATENESS * 1000
+    	if wait_time > 0
+    		wait(wait_time)
+			update_event_variables()
+    	end if
 
-					declare release_sample_length := rec_time_ripple_lengths[artic] - sample_start
-					release_sample_length := map_i_2i_2i_i(release_sample_length, 0, rec_time_ripple_lengths[artic], 0, ticks_to_ms(ripple_length_ticks[artic]))
-					release_sample_length := int(float(release_sample_length) * speeds[slider_speed])
-					event[ripple_id_history[r]].release_sample_length := release_sample_length // for animations
+    	// Fade out ripple
+    	next_id := rls_spl_ripple_ids[note, rls_spl_playhead[note]]
+    	declare artic := event[next_id].artic
+		declare release_dynamic := event[next_id].release_dynamic 
+    	fade_out(next_id, ticks_to_ms(ripple_length_ticks[artic]) / 4, STOP_VOICE_AFTER_FADE_OUT)
 
-					declare note := event[ripple_id_history[r]].origin_note
-					fade_out(rls_note_ids[note], fade_time, STOP_VOICE_AFTER_FADE_OUT) // cut off redundant release samples
-					declare note_id := play_note(note, vel, sample_start, 0)
-					rls_note_ids[note] := note_id
-					set_event_par_arr(note_id, EVENT_PAR_ALLOW_GROUP, 0, ALL_GROUPS)
-					set_event_par_arr(note_id, EVENT_PAR_ALLOW_GROUP, 1, release_group[artic])
-
-					literate_macro(copy_ripple_history_pars_to_note_id_pars) on CUSTOM_EVENT_PARS
-					ripple_id_history[r] := note_id
-
-
-					event[note_id].source := OUTSIDE_SOURCE
-					event[note_id].type := RELEASE_SAMPLE_TYPE
-					change_vol(note_id, vol, CHANGE_ABSOLUTE)
-
-					event[ripple_id_history[r]].note_off_timestamp := ENGINE_UPTIME
-					event[ripple_id_history[r]].releasing := 1
-				end if
-				event[ripple_id_history[r]].prev_rec_time_pos_in_ripple := rec_time_pos_in_ripple
+    	// Grab values from the ripple before it has a chance to fade out
+		declare latency_offset := int(float(menu_latency) * latency_offset_multipliers[slider_speed])
+		declare offset_rec_time := real_time_to_rec_time((SAMPLE_LATENESS + BASE_LATENCY + latency_offset) * 1000)
+		declare rec_play_pos := next_id -> play_pos - offset_rec_time
+		declare vol := next_id -> volume
+		declare offset := 50000 // Used to make it err on the side of choosing a ripple that's softer.
+		if rec_play_pos - offset < rec_time_sample_lengths[artic] / 2
+			rec_play_pos := rec_play_pos - offset
+			if rec_play_pos < 0
+				rec_play_pos := 0
 			end if
+		else
+			rec_play_pos := rec_play_pos + offset
 		end if
+		declare cur_ripple := rec_play_pos / rec_time_ripple_lengths[artic]
+		if cur_ripple > 3
+			cur_ripple := 4 - (cur_ripple - 3)
+		end if
+		constrain(cur_ripple, 0, 3)
+		declare vel := (cur_ripple * 32 + 1)
+
+		// Wait the rest of the time til the release sample
+		wait(time_offset)
+		update_event_variables()
+
+		// Play the release sample
+		declare sample_start
+		declare fade_time
+		if release_dynamic = SHORT
+			sample_start := int(float(rec_time_ripple_lengths[artic]) / 3.5)
+			// fade_time := 100000
+			fade_time := ticks_to_ms(int(float(ripple_length_ticks[artic]) * speeds[artic] / 7.0))
+		else if release_dynamic = LONG
+			// sample_start := real_time_to_rec_time(SAMPLE_LATENESS * 1000)
+			sample_start := BASE_LATENCY * 1000
+			// fade_time := 50000
+			fade_time := ticks_to_ms(int(float(ripple_length_ticks[artic]) * speeds[artic] / 15.0))
+		end if
+		// If you don't let latency affect sample start, 
+		// the samples' built-in latency will make it so release samples happen on time, 
+		// whether the earlier wait time has been shorted or not.
+		// sample_start := sample_start + (SAMPLE_LATENESS * 1000) // Don't let latency affect sample start
+
+		// group[release_group[artic]].mods["ENV_AHDSR"].target["ENV_AHDSR_VOLUME"].env_atk := V2E.AtkTime(float(fade_time + 100000) / 10.0)
+		// wait(1)
+
+		// For ripple animations
+		declare release_sample_length := rec_time_ripple_lengths[artic] - sample_start
+		release_sample_length := rec_time_to_real_time(release_sample_length)
+		event[next_id].release_sample_length := release_sample_length
+
+		// Play note
+		declare rls_note := event[next_id].origin_note
+		fade_out(rls_note_ids[rls_note], fade_time, STOP_VOICE_AFTER_FADE_OUT) // cut off redundant release samples
+		declare note_id := play_note(rls_note, vel, sample_start, 0)
+		rls_note_ids[rls_note] := note_id
+		set_event_par_arr(note_id, EVENT_PAR_ALLOW_GROUP, 0, ALL_GROUPS)
+		set_event_par_arr(note_id, EVENT_PAR_ALLOW_GROUP, 1, release_group[artic])
+
+		// Set event pars
+		macro copy_next_id_pars_to_note_id_pars(#par#)
+			event[note_id].#par# := event[next_id].#par#
+		end macro
+		literate_macro(copy_next_id_pars_to_note_id_pars) on CUSTOM_EVENT_PARS
+		event[note_id].source := OUTSIDE_SOURCE
+		event[note_id].type := RELEASE_SAMPLE_TYPE
+		change_vol(note_id, vol, CHANGE_ABSOLUTE)
+
+		// For ripple animations
+		event[note_id].note_off_timestamp := ENGINE_UPTIME
+		event[note_id].releasing := 1
+		ripple_id_history[event[note_id].ripple_index] := note_id
+
 	end for
+	
+end function
+
+// Deprecated
+function play_release_sample_if_its_time(r)
+	if event_status(ripple_id_history[r]) = EVENT_STATUS_NOTE_QUEUE
+		if event[ripple_id_history[r]].waiting_to_trigger_release_sample = 1 ...
+		and event[ripple_id_history[r]].type # RELEASE_SAMPLE_TYPE
+
+			//
+			declare artic := event[ripple_id_history[r]].artic
+			declare release_dynamic := event[ripple_id_history[r]].release_dynamic
+
+			//
+			declare rec_play_pos := ripple_id_history[r] -> play_pos - real_time_to_rec_time(SAMPLE_LATENESS * 1000) - 10000
+			declare rec_pos_in_ripple := rec_play_pos mod rec_time_ripple_lengths[artic]
+
+			declare rec_play_pos_for_fade_out := rec_play_pos + rec_time_ripple_lengths[artic] / 8
+			declare rec_pos_in_ripple_for_fade_out := rec_play_pos_for_fade_out mod rec_time_ripple_lengths[artic]
+
+			// Fade out ripple
+			// if rec_play_pos_for_fade_out > rec_time_ripple_lengths[artic] / 8 * 7
+			// 	fade_out(ripple_id_history[r], ticks_to_ms(ripple_length_ticks[artic] / 4), STOP_VOICE_AFTER_FADE_OUT)
+			// end if
+
+			// Sometimes this gets missed
+			if rec_pos_in_ripple_for_fade_out < event[ripple_id_history[r]].prev_rec_time_for_fade_out ...
+			or rec_pos_in_ripple > rec_time_ripple_lengths[artic] / 8 * 7
+				declare rec_time_til_ripple_end := rec_time_ripple_lengths[artic] - rec_pos_in_ripple
+				rec_time_til_ripple_end := rec_time_til_ripple_end + 100000 // Add a little time so the release sample can still get info from the fading out note
+				fade_out(ripple_id_history[r], rec_time_to_real_time(rec_time_til_ripple_end), STOP_VOICE_AFTER_FADE_OUT)
+			end if
+			event[ripple_id_history[r]].prev_rec_time_for_fade_out := rec_pos_in_ripple_for_fade_out
+
+			// Fade in release sample
+			if rec_pos_in_ripple < event[ripple_id_history[r]].prev_rec_time_pos_in_ripple // If it has wrapped
+				event[ripple_id_history[r]].waiting_to_trigger_release_sample := 0
+
+				// Fade out ripple
+				// fade_out(ripple_id_history[r], ticks_to_ms(ripple_length_ticks[artic] / 4), STOP_VOICE_AFTER_FADE_OUT)
+
+				// Grab these values right before the ripple finishes fading out
+				declare vol := ripple_id_history[r] -> volume
+				declare offset := 50000 // Used to make it err on the side of choosing a ripple that's softer.
+				if rec_play_pos - offset < rec_time_sample_lengths[artic] / 2
+					rec_play_pos := rec_play_pos - offset
+					if rec_play_pos < 0
+						rec_play_pos := 0
+					end if
+				else
+					rec_play_pos := rec_play_pos + offset
+				end if
+				declare cur_ripple := rec_play_pos / rec_time_ripple_lengths[artic]
+				if cur_ripple > 3
+					cur_ripple := 4 - (cur_ripple - 3)
+				end if
+				constrain(cur_ripple, 0, 3)
+				declare vel := (cur_ripple * 32 + 1)
+
+				// Play release-sample
+				declare sample_start
+				declare fade_time
+				if release_dynamic = SHORT
+					sample_start := int(float(rec_time_ripple_lengths[artic]) / 3.5)
+					// fade_time := 100000
+					fade_time := ticks_to_ms(int(float(ripple_length_ticks[artic]) * speeds[artic] / 7.0))
+				else if release_dynamic = LONG
+					// sample_start := real_time_to_rec_time(SAMPLE_LATENESS * 1000)
+					sample_start := 0
+					// fade_time := 50000
+					fade_time := ticks_to_ms(int(float(ripple_length_ticks[artic]) * speeds[artic] / 15.0))
+				end if
+				sample_start := sample_start + (SAMPLE_LATENESS * 1000)
+
+				// group[release_group[artic]].mods["ENV_AHDSR"].target["ENV_AHDSR_VOLUME"].env_atk := V2E.AtkTime(float(fade_time) / 10.0)
+
+				declare release_sample_length := rec_time_ripple_lengths[artic] - sample_start
+				release_sample_length := rec_time_to_real_time(release_sample_length)
+				release_sample_length := int(float(release_sample_length) * speeds[slider_speed])
+				event[ripple_id_history[r]].release_sample_length := release_sample_length // for animations
+
+				declare note := event[ripple_id_history[r]].origin_note
+				fade_out(rls_note_ids[note], fade_time, STOP_VOICE_AFTER_FADE_OUT) // cut off redundant release samples
+				declare note_id := play_note(note, vel, sample_start, 0)
+				rls_note_ids[note] := note_id
+				set_event_par_arr(note_id, EVENT_PAR_ALLOW_GROUP, 0, ALL_GROUPS)
+				set_event_par_arr(note_id, EVENT_PAR_ALLOW_GROUP, 1, release_group[artic])
+
+				literate_macro(copy_ripple_history_pars_to_note_id_pars) on CUSTOM_EVENT_PARS
+				ripple_id_history[r] := note_id
+
+
+				event[note_id].source := OUTSIDE_SOURCE
+				event[note_id].type := RELEASE_SAMPLE_TYPE
+				change_vol(note_id, vol, CHANGE_ABSOLUTE)
+
+				event[ripple_id_history[r]].note_off_timestamp := ENGINE_UPTIME
+				event[ripple_id_history[r]].releasing := 1
+			end if
+			event[ripple_id_history[r]].prev_rec_time_pos_in_ripple := rec_pos_in_ripple
+		end if
+	end if
 end function
 
 function crossfaded_looping
+	declare r
 	for r := 0 to MAX_RIPPLE_HISTORY - 1
 		if event_status(ripple_id_history[r]) = EVENT_STATUS_NOTE_QUEUE
 			declare artic := event[ripple_id_history[r]].artic
-			if event[ripple_id_history[r]].releasing = 0 ...
-			and ripple_id_history[r] -> play_pos > rec_time_sample_lengths[artic]
-				// duplicate event
-				fade_out(ripple_id_history[r], DURATION_SIXTEENTH, STOP_VOICE_AFTER_FADE_OUT)
-				declare offset := ripple_id_history[r] -> play_pos mod rec_time_sample_lengths[artic]
-				if event[ripple_id_history[r]].preview_being_stopped = 0
-					declare note_id := play_note(ripple_id_history[r] -> note, ripple_id_history[r] -> velocity, offset, 0)
-					set_event_par_arr(note_id, EVENT_PAR_ALLOW_GROUP, 0, ALL_GROUPS)
-					set_event_par_arr(note_id, EVENT_PAR_ALLOW_GROUP, 1, artic)
-					change_vol(note_id, ripple_id_history[r] -> volume, CHANGE_ABSOLUTE)
-					fade_in(note_id, DURATION_SIXTEENTH)
-					macro copy_ripple_history_pars_to_note_id_pars(#par#)
-						event[note_id].#par# := event[ripple_id_history[r]].#par#
-					end macro
-					literate_macro(copy_ripple_history_pars_to_note_id_pars) on CUSTOM_EVENT_PARS
-					ripple_id_history[r] := note_id
+			if event[ripple_id_history[r]].releasing = 0
+				if ripple_id_history[r] -> play_pos > rec_time_sample_lengths[artic]
+					// duplicate event
+					fade_out(ripple_id_history[r], DURATION_SIXTEENTH, STOP_VOICE_AFTER_FADE_OUT)
+					declare offset := ripple_id_history[r] -> play_pos mod rec_time_sample_lengths[artic]
+					if event[ripple_id_history[r]].preview_being_stopped = 0
+						declare note_id := play_note(ripple_id_history[r] -> note, ripple_id_history[r] -> velocity, offset, 0)
+						set_event_par_arr(note_id, EVENT_PAR_ALLOW_GROUP, 0, ALL_GROUPS)
+						set_event_par_arr(note_id, EVENT_PAR_ALLOW_GROUP, 1, artic)
+						change_vol(note_id, ripple_id_history[r] -> volume, CHANGE_ABSOLUTE)
+						fade_in(note_id, DURATION_SIXTEENTH)
+						macro copy_ripple_history_pars_to_note_id_pars(#par#)
+							event[note_id].#par# := event[ripple_id_history[r]].#par#
+						end macro
+						literate_macro(copy_ripple_history_pars_to_note_id_pars) on CUSTOM_EVENT_PARS
+
+						// Update rls_spl_ripple_ids just in case a release sample is waiting to be faded out, 
+						// and it needs to know the event id that was just faded_in here.
+						declare i
+						declare second_note := event[ripple_id_history[r]].second_note
+
+						// For release callback
+						for i := 0 to num_rls_spl_ids[second_note] - 1
+							// find the old id
+							if rls_spl_ripple_ids[second_note, i] = ripple_id_history[r]
+								rls_spl_ripple_ids[second_note, i] := note_id // Replace it with the new id
+							end if
+						end for
+
+						// For controller callback
+						for i := 0 to num_rls_spl_ids[0] - 1
+							if rls_spl_ripple_ids[0, i] = ripple_id_history[r]
+								rls_spl_ripple_ids[0, i] := note_id
+							end if
+						end for
+
+						ripple_id_history[r] := note_id
+					end if
 				end if
 			end if
 		end if
