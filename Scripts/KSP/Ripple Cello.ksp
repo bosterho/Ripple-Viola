@@ -1156,27 +1156,7 @@ function release_callback(note, event_id)
 
 		if CC[64] < 10
 			key_active[note] := 0
-
-			// Clear release sample ripple ids array
-			// for i := 0 to 31
-			// 	rls_spl_ripple_ids[note, i] := 0
-			// end for
-			// num_rls_spl_ids[note] := 0
-
-			// for voice_i := 0 to num_ripple_voices[note] - 1
-			// 	release(note, voice_i)
-			// end for
-			// num_ripple_voices[note] := 0
-
 			release_ripples_that_are_marked_ready()
-
-			// play_release_samples(note)
-
-		else
-			// fill up array of notes/voices to be released when pedal comes up
-			notes_to_release[num_notes_to_release] := note
-			// voices_to_release[num_notes_to_release] := num_ripple_voices[note] - 1
-			inc(num_notes_to_release)
 		end if
 	end if
 end function
@@ -1266,163 +1246,6 @@ function release_ripples_that_are_marked_ready
 	end if
 end function
 
-
-function release(note, voice)
-	// if voice = -1
-	// 	msg(voice)
-	// end if
-	declare rls_i
-	declare other_rls_i
-
-	declare r
-	for r := 0 to MAX_RIPPLE_HISTORY - 1
-		if ripple_id_history[r] # 0
-			if voice = event[ripple_id_history[r]].voice
-
-				// You need this when using rls_spl_ripple_ids[] to play release samples. 
-				// You can use it to update ripple_id_history[]
-				// ripple_id_history[] needs to be updated so that the ripple animation loop still works for release samples.
-				event[ripple_id_history[r]].ripple_index := r
-
-				declare artic := event[ripple_id_history[r]].artic
-
-				// declare rec_time_pos_in_ripple := ripple_id_history[r] -> play_pos mod rec_time_ripple_lengths[artic]
-				// declare real_pos_in_ripple := rec_time_to_real_time(rec_time_pos_in_ripple)
-				// real_pos_in_ripple := real_pos_in_ripple - rec_time_to_real_time(SAMPLE_LATENESS * 1000)
-				// declare real_time_ripple_length := ticks_to_ms(int(float(ripple_length_ticks[artic]) * speeds[slider_speed]))
-				// real_pos_in_ripple := real_pos_in_ripple mod real_time_ripple_length
-				// declare time_til_end_of_ripple := real_time_ripple_length - real_pos_in_ripple
-
-
-				// declare latency_offset := int(float(menu_latency) * latency_offset_multipliers[slider_speed])
-				// declare offset_rec_time := real_time_to_rec_time((BASE_LATENCY + SAMPLE_LATENESS + latency_offset) * 1000)
-
-				latency := int(float(menu_latency) / speeds[slider_speed])
-				declare offset_rec_time := real_time_to_rec_time((LEADING_SILENCE - latency) * 1000)
-				declare rec_time_pos_in_ripple := (ripple_id_history[r] -> play_pos - offset_rec_time) mod rec_time_ripple_lengths[artic]
-				declare time_til_end_of_ripple := rec_time_to_real_time(rec_time_ripple_lengths[artic] - rec_time_pos_in_ripple)
-
-				if note = event[ripple_id_history[r]].second_note
-
-					// Decide whether to play release sample
-					declare play_release_sample
-					if slider_releaseSamples = 0
-						play_release_sample := 0
-					else if slider_releaseSamples > 0
-						play_release_sample := 1
-						if slider_releaseSamples = releaseSampleMode.shortRelease
-							event[ripple_id_history[r]].release_dynamic := SHORT
-						else if slider_releaseSamples = releaseSampleMode.longRelease
-							event[ripple_id_history[r]].release_dynamic := LONG
-						end if
-					end if
-
-					// Always override dynamic set by slider, if triggered by keyswitch
-					if key_down[recent_release_trigger_key] = 1
-						play_release_sample := 1
-						event[ripple_id_history[r]].triggered_by_keyswitch := 1
-						if velo[recent_release_trigger_key] < 64
-							event[ripple_id_history[r]].release_dynamic := SHORT
-						else
-							event[ripple_id_history[r]].release_dynamic := LONG
-						end if
-					end if
-
-					// Either fade out, or do release sample
-					if play_release_sample = 0
-						event[ripple_id_history[r]].note_off_timestamp := ENGINE_UPTIME
-						event[ripple_id_history[r]].releasing := 1
-						declare fade_out_time := time_til_end_of_ripple //+ ticks_to_ms(ripple_length_ticks[artic])
-						if fade_out_time < 30000
-							fade_out_time := 30000
-						end if
-
-						// Used for animations when Release samples are off. It is made slightly shorter, to ensure the animation finishes before the fade_out does
-						// It's possible for the listener to be too slow so by the time it updates the animation, finally setting the ripple graphic to 0, the note is no longer active
-						event[ripple_id_history[r]].release_length := fade_out_time / 5 * 4
-
-						fade_out(ripple_id_history[r], fade_out_time, STOP_VOICE_AFTER_FADE_OUT)
-					else
-						declare rls_note := event[ripple_id_history[r]].origin_note
-						fade_out(rls_note_ids[rls_note], 1000, KEEP_VOICE_RUNNING)
- 						rls_note_ids[rls_note] := play_note(rls_note, velo[rls_note], rec_time_pos_in_ripple + offset_rec_time, 0)
-						set_event_par_arr(rls_note_ids[rls_note], EVENT_PAR_ALLOW_GROUP, 0, ALL_GROUPS)
-						set_event_par_arr(rls_note_ids[rls_note], EVENT_PAR_ALLOW_GROUP, 1, release_group[artic])
-
-						// Set event pars
-						macro copy_ripple_id_pars_to_rls_note_id_pars(#par#)
-							event[rls_note_ids[rls_note]].#par# := event[ripple_id_history[r]].#par#
-						end macro
-						literate_macro(copy_ripple_id_pars_to_rls_note_id_pars) on CUSTOM_EVENT_PARS
-						event[rls_note_ids[rls_note]].source := OUTSIDE_SOURCE
-						event[rls_note_ids[rls_note]].type := RELEASE_SAMPLE_TYPE
-						change_vol(rls_note_ids[rls_note], ripple_id_history[r] -> volume, CHANGE_ABSOLUTE)
-
-						// This allows the LCB to check play pos of each ripple's release sample, to know when to stop the ripple
-						event[ripple_id_history[r]].rls_sample_id := rls_note_ids[rls_note]
-
-						/*
-						// event[ripple_id_history[r]].waiting_to_trigger_release_sample := 1
-						select NI_CALLBACK_TYPE
-							case NI_CB_TYPE_CONTROLLER
-								declare rls_note := 0
-							case NI_CB_TYPE_RELEASE
-								rls_note := note
-						end select
-
-						if num_rls_spl_ids[rls_note] > 0
-							if time_til_end_of_ripple < event[rls_spl_ripple_ids[rls_note, 0]].time_til_end_of_ripple
-								// Insert at beginning
-								// message("inserted at beginning: " & ripple_id_history[r] & "   " & rls_note & "  r=" & r)
-								for rls_i := rls_spl_ripple_ids.SIZE_D2 - 1 downto 1
-									rls_spl_ripple_ids[rls_note, rls_i] := rls_spl_ripple_ids[rls_note, rls_i - 1]
-								end for
-								rls_spl_ripple_ids[rls_note, 0] := ripple_id_history[r]
-							else if time_til_end_of_ripple >= event[rls_spl_ripple_ids[rls_note, num_rls_spl_ids[rls_note] - 1]].time_til_end_of_ripple
-								// Insert at end
-								// message("inserted at end: " & ripple_id_history[r] & "   " & rls_note & "  r=" & r)
-								rls_spl_ripple_ids[rls_note, num_rls_spl_ids[rls_note]] := ripple_id_history[r]
-							else
-								// Insert between others. Writing to temp array to avoid feedback loop
-								copy_array(_rls_spl_ripple_ids, _temp_rls_spl_ripple_ids)
-								for rls_i := 1 to num_rls_spl_ids[rls_note] - 1
-									declare prev_time := event[rls_spl_ripple_ids[rls_note, rls_i - 1]].time_til_end_of_ripple
-									declare cur_time := event[rls_spl_ripple_ids[rls_note, rls_i]].time_til_end_of_ripple
-									if time_til_end_of_ripple >= prev_time and time_til_end_of_ripple < cur_time
-										// message("inserted between others: " & ripple_id_history[r] & "   " & rls_note & "  r=" & r)
-										for other_rls_i := rls_spl_ripple_ids.SIZE_D2 - 1 downto rls_i + 1
-											temp_rls_spl_ripple_ids[rls_note, other_rls_i] := temp_rls_spl_ripple_ids[rls_note, other_rls_i - 1]
-										end for
-										temp_rls_spl_ripple_ids[rls_note, rls_i] := ripple_id_history[r]
-									end if
-								end for
-								copy_array(_temp_rls_spl_ripple_ids, _rls_spl_ripple_ids)
-							end if
-
-						else
-							// message("first to be inserted: " & ripple_id_history[r] & "   " & rls_note & "  r=" & r)
-							rls_spl_ripple_ids[rls_note, 0] := ripple_id_history[r]
-						end if
-
-						inc(num_rls_spl_ids[rls_note])
-						event[ripple_id_history[r]].time_til_end_of_ripple := time_til_end_of_ripple
-
-						// play_release_sample_if_its_time(r)
-						*/
-					end if
-				end if
-
-			end if
-		end if
-	end for
-
-	call count_keys_active
-	if num_keys_active = 0
-		all_keys_inactive := 1
-	end if
-end function
-
-
 on controller
 	controller_callback(NI_CALLBACK_ID, CC_NUM)
 end on
@@ -1430,87 +1253,12 @@ function controller_callback(event_id, cc_num)
 	if cc_num = 64
 		declare prev_cc64
 		if CC[64] < 10 and prev_cc64 >= 10
-			// for r := 0 to MAX_RIPPLE_HISTORY - 1
-			// 	if ripple_id_history[r] # 0 and event_status(ripple_id_history[r]) = EVENT_STATUS_NOTE_QUEUE
-			// 		if key_active[event[ripple_id_history[r]].second_note] = 1 and key_pressed[event[ripple_id_history[r]].second_note] = 0
-			// 			event[ripple_id_history[r]].needs_to_be_released := 1
-			// 		end if
-			// 	end if
-			// end for
-
 			for key_i := LOWEST_KEY to HIGHEST_KEY
 				if key_active[key_i] = 1 and key_down[key_i] = 0
 					key_active[key_i] := 0
 				end if
 			end for
-
 			release_ripples_that_are_marked_ready()
-
-			// Clear release sample ripple ids array
-			// for i := 0 to 31
-			// 	rls_spl_ripple_ids[0, i] := 0
-			// end for
-			// num_rls_spl_ids[0] := 0
-
-			/*
-			declare note_i
-			for note_i := 0 to num_notes_to_release - 1
-
-				key_active[notes_to_release[note_i]] := key_down[notes_to_release[note_i]]
-				// Say Sync is set to Swells. 
-				// You play a chord 1st time with the pedal down, play the same chord 2nd time, then lift the pedal while you're still holding the 2nd time chord.
-				// The 2nd time chord was ignored (using already_played variable), 
-					// so when you lift the pedal, it ends up releasing 1st time chord, which you DO actually want to sustain.
-				// To account for this, we check whether the key is currently down for voice 0 (voices_to_release[note_i] = 0)
-
-				declare note_must_sustain := 0
-				if voice_i = 0 and key_down[notes_to_release[note_i]] = 1
-					note_must_sustain := 1
-				end if
-				msg(notes_to_release[note_i], num_ripple_voices[notes_to_release[note_i]], note_must_sustain)
-				if note_must_sustain = 0
-					release(notes_to_release[note_i], num_ripple_voices[notes_to_release[note_i]] - 1)
-					dec(num_ripple_voices[notes_to_release[note_i]])
-				end if
-
-			end for
-			fill(notes_to_release, 0)
-			// fill(voices_to_release, 0)
-			num_notes_to_release := 0
-			*/
-
-			// Note: the release function is what populates rls_spl_ripple_ids
-			// play_release_samples(0)
-
-			/* 
-			for r := 0 to MAX_RIPPLE_HISTORY - 1
-				if ripple_id_history[r] # 0
-					declare rls_note := event[ripple_id_history[r]].origin_note
-					if key_down[rls_note] = 0 and key_active[rls_note] = 1
-
-					end if
-					if voice = event[ripple_id_history[r]].voice
-					end if
-				end if
-			end for
-
-			declare key_i
-			for key_i := LOWEST_KEY to HIGHEST_KEY
-				// Release most recent voice ONLY if the key is up
-				if key_down[key_i] = 0 and key_active[key_i] = 1
-					key_active[key_i] := 0
-					release(key_i, num_ripple_voices[key_i] - 1)
-				end if
-
-				// Release all other previous voices, no matter what
-				for voice_i := 0 to num_ripple_voices[key_i] - 2
-					release(key_i, voice_i)
-				end for
-
-				// Set num_ripple_voices
-				num_ripple_voices[key_i] := key_down[key_i]
-			end for
-			*/
 		end if
 		prev_cc64 := CC[64]
 	end if
