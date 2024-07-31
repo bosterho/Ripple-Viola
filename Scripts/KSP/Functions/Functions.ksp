@@ -403,18 +403,21 @@ end function
 function ripple_animations
 	declare r
 
-	// Hide any ripple graphics that have been removed from history and didn't get a chance to be hidden otherwise
-	for r := 0 to MAX_RIPPLE_HISTORY - 1
-		if ripple_id_history[r] = 0 //or event_status(ripple_id_history[r]) = EVENT_STATUS_INACTIVE
-			ripple[r]       -> hide := HIDE_WHOLE_CONTROL
-			ripple_swell[r] -> hide := HIDE_WHOLE_CONTROL
-		end if
-	end for
+	// Hide any ripple outlines that have faded out but didn't get a chance to be hidden
+	// This is not needed when release samples are on because it's taken care of when looping through ripples_fading_out[]
+	// if slider_releaseSamples = 0
+	// 	for r := 0 to MAX_RIPPLE_HISTORY - 1
+	// 		if ripple_id_history[r] = 0 or event_status(ripple_id_history[r]) = EVENT_STATUS_INACTIVE
+	// 			// ripple[r] -> hide := HIDE_WHOLE_CONTROL
+	// 			ripple_swell[r] -> hide := HIDE_WHOLE_CONTROL
+	// 		end if
+	// 	end for
+	// end if
 
 	// Draw and animate ripples
 	for r := MAX_RIPPLE_HISTORY - 1 downto 0
-		if event[ripple_id_history[r]].releasing = 0
-			if event_status(ripple_id_history[r]) = EVENT_STATUS_NOTE_QUEUE
+		if event_status(ripple_id_history[r]) = EVENT_STATUS_NOTE_QUEUE
+			if event[ripple_id_history[r]].releasing = 0
 				// Animation Variables
 				declare low_note  := event[ripple_id_history[r]].low_note
 				declare high_note := event[ripple_id_history[r]].high_note
@@ -445,7 +448,7 @@ function ripple_animations
 				ripple[r] -> picture := "ripple " & interval
 
 				// Play Ripple animation
-				declare play_pos_in_beat := ripple_id_history[r] -> play_pos mod rec_time_ripple_lengths[artic]
+				declare play_pos_in_beat := (ripple_id_history[r] -> play_pos - LEADING_SILENCE * 1000) mod rec_time_ripple_lengths[artic]
 				ripple[r] -> value := map_i_2i_2i_i(play_pos_in_beat, 0, rec_time_ripple_lengths[artic], 0, 127)
 
 				// Ripple visiblity
@@ -464,26 +467,103 @@ function ripple_animations
 				ripple_swell[r] -> hide := ripple[r] -> hide
 				ripple_swell[r] -> hide := HIDE_PART_NOTHING
 				event[ripple_id_history[r]].brightness_when_released := ripple_swell[r] -> value
-			end if
-		else if event[ripple_id_history[r]].releasing = 1
-			ripple[r] -> hide := HIDE_WHOLE_CONTROL
-			if ripple_swell[r] -> value > 0
+			else // For Release Samples off
+				ripple[r] -> hide := HIDE_WHOLE_CONTROL
+
 				declare time_since_note_off := ENGINE_UPTIME - event[ripple_id_history[r]].note_off_timestamp
-				declare release_length := event[ripple_id_history[r]].release_sample_length / 1000
+				declare release_length := event[ripple_id_history[r]].release_length / 1000
 				declare brightness_when_released := event[ripple_id_history[r]].brightness_when_released
+
+				// If either of these was 0, the mapping function would error
+				if release_length = 0
+					release_length := 1
+				end if
+				if brightness_when_released = 0
+					brightness_when_released := 1 
+				end if
+
+				declare value := map_i_2i_2i_i(time_since_note_off, 0, release_length, brightness_when_released, 0)
+				// msg(r, value, time_since_note_off, release_length, brightness_when_released)
+				if value > 0
+					if time_since_note_off > 0 // Not sure why this is needed
+						ripple_swell[r] -> value := value
+					end if
+				// else
+				// 	msg(r)
+				// 	ripple_swell[r] -> hide := HIDE_WHOLE_CONTROL
+				end if
+			end if
+		end if
+	end for
+
+	// For Release Samples on
+	declare num_ripples_faded_out := 0
+	for r := 0 to num_ripples_fading_out - 1
+		if event_status(ripples_fading_out[r]) = EVENT_STATUS_NOTE_QUEUE
+			declare ripple_index := event[ripples_fading_out[r]].ripple_index
+			declare artic := event[ripples_fading_out[r]].artic
+			declare latency := real_time_to_rec_time(int(float(menu_latency) / speeds[slider_speed]))
+			declare offset_rec_time := (LEADING_SILENCE - latency) * 1000
+			if ripples_fading_out[r] -> play_pos - LEADING_SILENCE * 1000 > rec_time_ripple_lengths[artic] + stop_offset_rec_time[artic]
+				ripple[ripple_index] -> hide := HIDE_WHOLE_CONTROL
+
+				declare time_since_note_off := ENGINE_UPTIME - event[ripples_fading_out[r]].note_off_timestamp
+				declare release_length := event[ripples_fading_out[r]].release_sample_length / 1000
+				declare brightness_when_released := event[ripples_fading_out[r]].brightness_when_released
 				if release_length = 0
 					release_length := 1
 				end if
 				if brightness_when_released = 0
 					brightness_when_released := 1
 				end if
-				if time_since_note_off > 0
-					ripple_swell[r] -> value := map_i_2i_2i_i(time_since_note_off, 0, release_length, brightness_when_released, 0)
+				declare value := map_i_2i_2i_i(time_since_note_off, 0, release_length, brightness_when_released, 0)
+				if value > 0
+					if time_since_note_off > 0
+						ripple_swell[ripple_index] -> value := value
+					end if
+				else
+					ripple_swell[r] -> hide := HIDE_WHOLE_CONTROL
+					for i := r to num_ripples_fading_out - 2
+						ripples_fading_out[i] := ripples_fading_out[i + 1]
+					end for
+					inc(num_ripples_faded_out)
 				end if
 			end if
 		end if
-
 	end for
+	num_ripples_fading_out := num_ripples_fading_out - num_ripples_faded_out		
+
+	/*
+	declare key_i
+	for key_i := LOWEST_KEY to HIGHEST_KEY
+		if event_status(rls_note_ids[key_i]) = EVENT_STATUS_NOTE_QUEUE
+			declare ripple_index := event[rls_note_ids[key_i]].ripple_index
+			declare artic := event[ripple_index].artic
+			declare latency := real_time_to_rec_time(int(float(menu_latency) / speeds[slider_speed]))
+			declare offset_rec_time := (LEADING_SILENCE - latency) * 1000
+			if rls_note_ids[key_i] -> play_pos - LEADING_SILENCE * 1000 > rec_time_ripple_lengths[artic] + stop_offset_rec_time[artic]
+				// ripple[ripple_index] -> hide := HIDE_WHOLE_CONTROL
+
+				// msg(ripple_swell[ripple_index] -> value, ripple_index)
+				if ripple_swell[ripple_index] -> value > 0
+					declare time_since_note_off := ENGINE_UPTIME - event[rls_note_ids[key_i]].note_off_timestamp
+					declare release_length := event[rls_note_ids[key_i]].release_sample_length / 1000
+					declare brightness_when_released := event[rls_note_ids[key_i]].brightness_when_released
+					if release_length = 0
+						release_length := 1
+					end if
+					if brightness_when_released = 0
+						brightness_when_released := 1
+					end if
+					if time_since_note_off > 0
+						ripple_swell[ripple_index] -> value := map_i_2i_2i_i(time_since_note_off, 0, release_length, brightness_when_released, 0)
+					end if
+				end if
+			end if
+		end if
+	end for
+	*/
+
 end function
 
 // Probably won't do this
@@ -505,7 +585,6 @@ function update_recorded_midi
 		end if
 	end for
 end function
-
 
 function midi_clip_play_cursors
 	for clip_i := 0 to NUM_MIDI_CLIPS - 1
@@ -762,10 +841,11 @@ function crossfaded_looping
 		if event_status(ripple_id_history[r]) = EVENT_STATUS_NOTE_QUEUE
 			declare artic := event[ripple_id_history[r]].artic
 			if event[ripple_id_history[r]].releasing = 0
-				if ripple_id_history[r] -> play_pos > rec_time_sample_lengths[artic]
+				declare pos_in_swell := ripple_id_history[r] -> play_pos - LEADING_SILENCE * 1000
+				if pos_in_swell > rec_time_sample_lengths[artic]
 					// duplicate event
 					fade_out(ripple_id_history[r], DURATION_SIXTEENTH, STOP_VOICE_AFTER_FADE_OUT)
-					declare offset := ripple_id_history[r] -> play_pos mod rec_time_sample_lengths[artic]
+					declare offset := (pos_in_swell mod rec_time_sample_lengths[artic]) + LEADING_SILENCE * 1000
 					if event[ripple_id_history[r]].preview_being_stopped = 0
 						declare note_id := play_note(ripple_id_history[r] -> note, ripple_id_history[r] -> velocity, offset, 0)
 						set_event_par_arr(note_id, EVENT_PAR_ALLOW_GROUP, 0, ALL_GROUPS)
@@ -804,6 +884,45 @@ function crossfaded_looping
 		end if
 	end for
 end function
+
+function fade_out_ripples_when_release_sample_sounds
+	declare r
+	for r := 0 to MAX_RIPPLE_HISTORY - 1
+		if event_status(ripple_id_history[r]) = EVENT_STATUS_NOTE_QUEUE
+			declare artic := event[ripple_id_history[r]].artic
+			declare latency := real_time_to_rec_time(int(float(menu_latency) / speeds[slider_speed]))
+			declare offset_rec_time := (LEADING_SILENCE - latency) * 1000
+			if event[ripple_id_history[r]].rls_sample_id -> play_pos - offset_rec_time > rec_time_ripple_lengths[artic] + stop_offset_rec_time[artic]
+				if event[ripple_id_history[r]].fading_out_for_release_sample = 0
+					fade_out(ripple_id_history[r], DURATION_SIXTEENTH, STOP_VOICE_AFTER_FADE_OUT)
+					event[ripple_id_history[r]].fading_out_for_release_sample := 1
+					event[ripple_id_history[r]].releasing := 1
+
+					// Populate array of release sample ids and set variables for the animation function
+					ripples_fading_out[num_ripples_fading_out] := event[ripple_id_history[r]].rls_sample_id
+
+					// Get release sample length and note off timestamp for ripple animations
+					declare sample_start
+					declare release_dynamic := event[ripple_id_history[r]].release_dynamic
+					if release_dynamic = SHORT
+						sample_start := int(float(rec_time_ripple_lengths[artic]) / 3.5)
+					else if release_dynamic = LONG
+						sample_start := 0
+					end if
+					declare release_sample_length := rec_time_ripple_lengths[artic] - sample_start
+					release_sample_length := rec_time_to_real_time(release_sample_length)
+					declare origin_note := event[ripple_id_history[r]].origin_note
+					event[ripples_fading_out[num_ripples_fading_out]].brightness_when_released := ripple_swell[r] -> value
+					event[ripples_fading_out[num_ripples_fading_out]].release_sample_length := release_sample_length
+					event[ripples_fading_out[num_ripples_fading_out]].note_off_timestamp := ENGINE_UPTIME
+
+					inc(num_ripples_fading_out)
+				end if
+			end if
+		end if
+	end for
+end function
+
 
 function hide_version
 	if ENGINE_UPTIME - timestamp_version_shown > 1000
