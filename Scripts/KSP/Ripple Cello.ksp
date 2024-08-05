@@ -27,14 +27,15 @@ on init
 	{{ Constants }}
 	define UI_WIDTH  := 900
 	define UI_HEIGHT := 427
+	define VOICE_LIMIT := 32
 	declare const DOWN := 0
 	declare const UP := 1
 	declare const SHORT := 0
 	declare const LONG := 1
 	declare const NUM_RRS := 4
 	declare const MAX_NUM_CHORD_IDS := 1000
-	define MAX_NUM_NOTES := 64
-	define MAX_RIPPLE_HISTORY := 100
+	define MAX_NUM_NOTES := VOICE_LIMIT
+	define MAX_RIPPLE_HISTORY := (VOICE_LIMIT + 32)
 	define NUM_MIDI_PAGES := 2
 	define NUM_MIDI_CLIPS := (12 * NUM_MIDI_PAGES)
 	define NUM_OPTION_SLIDERS := 4
@@ -67,6 +68,7 @@ on init
 	end macro
 
 	define CUSTOM_EVENT_PARS := ...
+	active                            , ...
 	source                            , ...
 	note                              , ...
 	velocity                          , ...
@@ -80,7 +82,8 @@ on init
 	artic                             , ...
 	voice                             , ...
 	note_off_timestamp                , ...
-	needs_to_be_released              , ...
+	marked_for_release                , ...
+	play_release_sample               , ...
 	release_length                    , ...
 	release_sample_length             , ...
 	release_note                      , ...
@@ -174,9 +177,9 @@ on init
 
 
 	// Release samples
-	define NUM_releaseSampleModes := 3
-	define releaseSampleModes := noReleaseSample, shortRelease, longRelease
-	declare !releaseSamples_texts[] := ("Off", "Short", "Long")
+	define NUM_releaseSampleModes := 6
+	define releaseSampleModes := noReleaseSample, autoRelease, Release0, Release1, Release2, Release3
+	declare !releaseSamples_texts[] := ("Off", "Auto", "1", "2", "3", "4")
 	macro declare_release_sample_mode_constants(#name#)
 		declare const releaseSampleMode.#name# := N
 	end macro
@@ -215,7 +218,7 @@ on init
 	declare speed_keyswitches[NUM_speedModes]                  := (72+5, 72+7, 72+9, 72+11, 72+12)
 	declare direction_keyswitches[NUM_directionModes]          := (72+14, 72+16, 72+17)
 	declare legato_keyswitches[NUM_legatoModes]                := (72+19, 72+21, 72+23, 72+24)
-	declare release_sample_keyswitches[NUM_releaseSampleModes] := (72+26, 72+28, 72+29)
+	declare release_sample_keyswitches[NUM_releaseSampleModes] := (72+26, 72+28, 72+29, 72+31, 72+33, 72+35)
 	declare release_trigger_keyswitches[2]                     := (24, 108)
 		
 	// Formatted for Reascript:
@@ -282,10 +285,8 @@ on init
 
 	{{ Variables }}
 	declare latency
-	declare rls_spl_ripple_ids[128, 32]
 	declare ripples_fading_out[128]
 	declare num_ripples_fading_out
-	declare temp_rls_spl_ripple_ids[128, 32]
 	declare num_rls_spl_ids[128]
 	declare ~db
 	declare ~vol
@@ -381,6 +382,7 @@ on init
 		while mf_get_command() # 0
 			if mf_get_command() = MIDI_COMMAND_NOTE_ON
 				midi_event_id[clip_i, num_midi_events[clip_i]] := mf_get_id()
+				event[mf_get_id()].source := OUTSIDE_SOURCE
 				midi_command [clip_i, num_midi_events[clip_i]] := mf_get_command()
 				midi_pos     [clip_i, num_midi_events[clip_i]] := mf_get_pos()
 				midi_byte_1  [clip_i, num_midi_events[clip_i]] := mf_get_byte_one()
@@ -703,9 +705,9 @@ on init
 		releaseSamples_ids[i] -> font_type_on_hover    := get_font_id("Khula Bold Size 11 on hover")
 		releaseSamples_ids[i] -> text := releaseSamples_texts[i]
 	end for
-	switch_noReleaseSample  -> width := switch_noReleaseSample  -> width + 14
-	switch_shortRelease     -> width := switch_shortRelease     -> width + 14
-	switch_longRelease      -> width := switch_longRelease      -> width + 14
+	// switch_noReleaseSample  -> width := switch_noReleaseSample  -> width + 14
+	// switch_shortRelease     -> width := switch_shortRelease     -> width + 14
+	// switch_longRelease      -> width := switch_longRelease      -> width + 14
 
 	// Options
 	define OPTIONS_MOUSE_BEHAVIOR := 2000
@@ -745,11 +747,11 @@ on init
 	END_INC
 
 	// Misc setting things up
-	set_voice_limit(NI_VL_TMPRO_STANDARD, 32)
+	set_voice_limit(NI_VL_TMPRO_STANDARD, VOICE_LIMIT*2)
 	declare @siln2 := "START_EVENTS_INTEGERS_ENGINE"
 	group[artic.quarters].speed   := V2E_speed(4*8+4)
 	group[artic.eighths].speed    := V2E_speed(20)
-	group[artic.sixteenths].speed := V2E_speed(18)
+	group[artic.sixteenths].speed := V2E_speed(19)
 	group[find_group("quarters releases")].speed := V2E_speed(16)
 	group[find_group("eighths releases")].speed := V2E_speed(12)
 
@@ -768,6 +770,7 @@ function persistence_changed_callback(_)
 		update_nks_label(i)
 		update_engine_pars(i)
 	end for
+
 end function
 
 on note
@@ -848,7 +851,7 @@ function note_callback(note, velocity, event_id)
 			declare intervals[MAX_NUM_NOTES]
 			declare played_notes[MAX_NUM_NOTES]
 			declare played_intervals[MAX_NUM_NOTES]
-			define MAX_NUM_RIPPLES_PER_NOTE := 12
+			define MAX_NUM_RIPPLES_PER_NOTE := VOICE_LIMIT
 			declare notes[MAX_NUM_RIPPLES_PER_NOTE]
 			declare intervals[MAX_NUM_RIPPLES_PER_NOTE]
 			declare num_ripples := 0
@@ -942,7 +945,6 @@ function note_callback(note, velocity, event_id)
 			copy_array(notes, played_notes)
 			copy_array(intervals, played_intervals)
 			fill(note_used_by_ripple, 0)
-			declare ripple_i
 			for ripple_i := 0 to num_ripples - 1
 				// Swap notes and intervals to change directions
 				if slider_direction = directionMode.UP
@@ -981,9 +983,11 @@ function note_callback(note, velocity, event_id)
 				declare real_ripple_length := rec_time_to_real_time(rec_time_ripple_lengths[cur_artic])
 				declare real_pitch_length := real_ripple_length / pitch_fractions[cur_artic]
 				declare real_sample_length := rec_time_to_real_time(rec_time_sample_lengths[cur_artic])
-				real_ripple_length := int(float(real_ripple_length) * speeds[slider_speed])
-				real_pitch_length := int(float(real_pitch_length) * speeds[slider_speed])
-				real_sample_length := int(float(real_sample_length) * speeds[slider_speed])
+
+				// Not needed because rec_time_to_real_time accounts for speed too now
+				// real_ripple_length := int(float(real_ripple_length) * speeds[slider_speed])
+				// real_pitch_length := int(float(real_pitch_length) * speeds[slider_speed])
+				// real_sample_length := int(float(real_sample_length) * speeds[slider_speed])
 
 				declare do_legato
 				declare offset_real_time
@@ -1016,35 +1020,25 @@ function note_callback(note, velocity, event_id)
 					end select
 				end if
 				declare latency_real_time := int(float(menu_latency) / speeds[slider_speed])
-				offset_real_time := offset_real_time + (LEADING_SILENCE - latency_real_time) * 1000
+				offset_real_time := offset_real_time + (rec_time_to_real_time(LEADING_SILENCE) - latency_real_time) * 1000
 				offset_rec_time := real_time_to_rec_time(offset_real_time)
 
 				// Keep exact duplicates from happening
 				declare already_playing := 0
 				for r := 0 to MAX_RIPPLE_HISTORY - 1
-					if ripple_id_history[r] # 0
+					if ripple_id_history[r] # 0 and event_status(ripple_id_history[r]) = EVENT_STATUS_NOTE_QUEUE
 						if ((event[ripple_id_history[r]].low_note = low_note and event[ripple_id_history[r]].high_note = high_note) ...
 							or (event[ripple_id_history[r]].origin_note = origin_note and event[ripple_id_history[r]].dest_note = dest_note)) ...
 						and event[ripple_id_history[r]].direction = direction ...
 						and event[ripple_id_history[r]].releasing = 0 ...
 						and ripple_id_history[r] -> play_pos - offset_rec_time < 5000
 							already_playing := 1
+							event[ripple_id_history[r]].marked_for_release := 0
 						end if
 					end if
 				end for
-			
-				if already_playing = 0
-					/*
-					for g := 0 to 2
-						// group[g].mods["ENV_AHDSR2"].env_atk := V2E.AtkTime(float(fade_in_time / 1000) * 100.0)
-						group[g].mods["ENV_AHDSR2"].mod_amt_uni := attack_amt
-					end for
-					// set_event_par_arr(note_id, EVENT_PAR_MOD_VALUE_ID, attack_amt, ATTACK_AMT_MOD)
-					// set_event_par_arr(note_id, EVENT_PAR_MOD_VALUE_ID, attack_len, ATTACK_LEN_MOD)
-					wait(1)
-					*/
 
-					msg(offset_rec_time)
+				if already_playing = 0
 					declare note_id := play_note(notes[ripple_i], 64 + intervals[ripple_i], offset_rec_time, 0)
 					declare volume  := map_i_2i_2i_i(velocity, 1, 127, -9000, 3000)
 					change_vol(note_id, volume, CHANGE_ABSOLUTE)
@@ -1059,16 +1053,6 @@ function note_callback(note, velocity, event_id)
 					event[note_id].first_note := played_notes[ripple_i]
 					event[note_id].second_note := played_notes[ripple_i] + played_intervals[ripple_i]
 					event[note_id].velocity := velocity
-
-					// If a note triggers more than one ripple, 
-					// if note_used_by_ripple[event[note_id].second_note] = 0
-						event[note_id].voice := num_ripple_voices[event[note_id].second_note]
-						inc(num_ripple_voices[event[note_id].second_note])
-						// note_used_by_ripple[event[note_id].second_note] := 1
-					// else
-					// 	message(" a note has triggered more than one ripple")
-					// 	event[note_id].voice := num_ripple_voices[event[note_id].second_note] - 1
-					// end if
 					event[note_id].direction := direction
 					event[note_id].source := OUTSIDE_SOURCE
 					event[note_id].triggered_by_mf := event[event_id].triggered_by_mf
@@ -1085,9 +1069,8 @@ function note_callback(note, velocity, event_id)
 						fade_in_time := menu_latency * 1000
 						if fade_in_time = 0
 							// tmpro causes a bit of a bump sometimes. This hides that.
-							fade_in_time := 50000
+							fade_in_time := 0
 						end if
-
 					else
 						declare real_pos_in_ripple := (real_legato_time + real_ripple_length - ticks_to_ms(48)) mod real_ripple_length
 						declare time_til_end_of_ripple := real_ripple_length - real_pos_in_ripple
@@ -1129,6 +1112,11 @@ on release
 	release_callback(EVENT_NOTE, EVENT_ID)
 end on
 function release_callback(note, event_id)
+	// When you set a length for the last argument of play_note(), there's no way to keep from triggering the release callback, unless you block it here.
+	if event[event_id].triggered_by_mf > 0 and event[event_id].active = 0
+		exit
+	end if
+
 	key_down[note] := 0
 	if search(all_keyswitches, note) = -1
 		set_key_pressed(note, 0)
@@ -1149,24 +1137,24 @@ function release_callback(note, event_id)
 		for r := 0 to MAX_RIPPLE_HISTORY - 1
 			if ripple_id_history[r] # 0 and event_status(ripple_id_history[r]) = EVENT_STATUS_NOTE_QUEUE
 				if note = event[ripple_id_history[r]].second_note
-					event[ripple_id_history[r]].needs_to_be_released := 1
+					event[ripple_id_history[r]].marked_for_release := 1
 				end if
 			end if
 		end for
 
 		if CC[64] < 10
 			key_active[note] := 0
-			release_ripples_that_are_marked_ready()
+			call release_marked_ripples
 		end if
 	end if
 end function
 
-function release_ripples_that_are_marked_ready
+function release_marked_ripples
 	declare r
 	for r := 0 to MAX_RIPPLE_HISTORY - 1
-		if ripple_id_history[r] # 0 and event[ripple_id_history[r]].needs_to_be_released = 1
+		if ripple_id_history[r] # 0 and event[ripple_id_history[r]].marked_for_release = 1
+			event[ripple_id_history[r]].marked_for_release := 0
 
-			// You need this when using rls_spl_ripple_ids[] to play release samples. 
 			// You can use it to update ripple_id_history[]
 			// ripple_id_history[] needs to be updated so that the ripple animation loop still works for release samples.
 			event[ripple_id_history[r]].ripple_index := r
@@ -1174,10 +1162,10 @@ function release_ripples_that_are_marked_ready
 			declare artic := event[ripple_id_history[r]].artic
 
 			latency := int(float(menu_latency) / speeds[slider_speed])
-			declare offset_rec_time := real_time_to_rec_time((LEADING_SILENCE - latency) * 1000)
-			declare rec_time_pos_in_ripple := (ripple_id_history[r] -> play_pos - offset_rec_time) mod rec_time_ripple_lengths[artic]
+			declare offset_rec_time := real_time_to_rec_time((rec_time_to_real_time(LEADING_SILENCE) - latency) * 1000)
+			declare rec_time_play_pos := ripple_id_history[r] -> play_pos - offset_rec_time
+			declare rec_time_pos_in_ripple := rec_time_play_pos mod rec_time_ripple_lengths[artic]
 			declare time_til_end_of_ripple := rec_time_to_real_time(rec_time_ripple_lengths[artic] - rec_time_pos_in_ripple)
-
 
 			// Decide whether to play release sample
 			declare play_release_sample
@@ -1185,23 +1173,21 @@ function release_ripples_that_are_marked_ready
 				play_release_sample := 0
 			else if slider_releaseSamples > 0
 				play_release_sample := 1
-				if slider_releaseSamples = releaseSampleMode.shortRelease
-					event[ripple_id_history[r]].release_dynamic := SHORT
-				else if slider_releaseSamples = releaseSampleMode.longRelease
-					event[ripple_id_history[r]].release_dynamic := LONG
-				end if
+				// if slider_releaseSamples = releaseSampleMode.shortRelease
+				// 	event[ripple_id_history[r]].release_dynamic := SHORT
+				// else if slider_releaseSamples = releaseSampleMode.longRelease
+				// 	event[ripple_id_history[r]].release_dynamic := LONG
+				// end if
 			end if
 
-			// Always override dynamic set by slider, if triggered by keyswitch
+			// Always override Release samples slider, if triggered by keyswitch
+			declare triggered_by_keyswitch := 0
 			if key_down[recent_release_trigger_key] = 1
 				play_release_sample := 1
-				event[ripple_id_history[r]].triggered_by_keyswitch := 1
-				if velo[recent_release_trigger_key] < 64
-					event[ripple_id_history[r]].release_dynamic := SHORT
-				else
-					event[ripple_id_history[r]].release_dynamic := LONG
-				end if
+				triggered_by_keyswitch := 1
 			end if
+
+			event[ripple_id_history[r]].play_release_sample := play_release_sample // For animation function
 
 			// Either fade out, or do release sample
 			if play_release_sample = 0
@@ -1217,10 +1203,52 @@ function release_ripples_that_are_marked_ready
 				event[ripple_id_history[r]].release_length := fade_out_time / 5 * 4
 
 				fade_out(ripple_id_history[r], fade_out_time, STOP_VOICE_AFTER_FADE_OUT)
+				// note_off(ripple_id_history[r]) // Not sure why this was here. Definitely worth investigating...
 			else
 				declare rls_note := event[ripple_id_history[r]].origin_note
-				fade_out(rls_note_ids[rls_note], 1000, KEEP_VOICE_RUNNING)
-				rls_note_ids[rls_note] := play_note(rls_note, velo[rls_note], rec_time_pos_in_ripple + offset_rec_time, 0)
+				fade_out(rls_note_ids[rls_note], 50000, KEEP_VOICE_RUNNING) // Make release samples choke themselves. Keep running because...
+
+				// Grab this before the ripple finishes fading out
+				declare vol := ripple_id_history[r] -> volume
+
+				// Apply the offset, depending on which half of the swell the ripple is on. 
+				// This offset is used to make it err on the side of choosing a ripple that's softer.
+				declare offset := 50000
+				if rec_time_play_pos - offset < rec_time_sample_lengths[artic] / 2
+					rec_time_play_pos := rec_time_play_pos - offset
+					if rec_time_play_pos < 0
+						rec_time_play_pos := 0
+					end if
+				else
+					rec_time_play_pos := rec_time_play_pos + offset
+				end if
+
+				// Set cur_ripple
+				if slider_releaseSamples = releaseSampleMode.autoRelease
+					declare cur_ripple := rec_time_play_pos / rec_time_ripple_lengths[artic]
+
+					// Account for second half of swell
+					if cur_ripple > 3
+						cur_ripple := 4 - (cur_ripple - 3)
+					end if
+				else
+					cur_ripple := slider_releaseSamples - 2
+				end if
+
+				// Always override Release samples slider, if triggered by keyswitch
+				if triggered_by_keyswitch = 1
+					// If it went to 3 instead of 4, then the only way to ever get 3 would be to play at 127 velocity. Note the constrain() after this.
+					cur_ripple := map_i_2i_2i_i(velo[recent_release_trigger_key], 1, 127, 0, 4)
+				end if
+
+				// 
+				constrain(cur_ripple, 0, 3)
+
+				// Make ripple trigger the appropriate velocity zone
+				declare vel := (cur_ripple * 32 + 1)
+
+				// Play note
+				rls_note_ids[rls_note] := play_note(rls_note, vel, rec_time_pos_in_ripple + offset_rec_time, 0)
 				set_event_par_arr(rls_note_ids[rls_note], EVENT_PAR_ALLOW_GROUP, 0, ALL_GROUPS)
 				set_event_par_arr(rls_note_ids[rls_note], EVENT_PAR_ALLOW_GROUP, 1, release_group[artic])
 
@@ -1258,9 +1286,17 @@ function controller_callback(event_id, cc_num)
 					key_active[key_i] := 0
 				end if
 			end for
-			release_ripples_that_are_marked_ready()
+			call release_marked_ripples
 		end if
 		prev_cc64 := CC[64]
+	end if
+	if cc_num = 1
+		if switch_releaseSamplesModwheelControl = 1
+			slider_releaseSamples := map_i_2i_2i_i(CC[1], 0, 127, 2, 5)
+			call update_releaseSamples_switches
+			update_nks_label(control.releaseSamples)
+			call set_keys_pressed
+		end if
 	end if
 end function
 
@@ -1269,61 +1305,104 @@ on listener
 	listener_callback()
 end on
 function listener_callback
-	select NI_SIGNAL_TYPE
-		case NI_SIGNAL_TIMER_MS
-			call remove_ripple_ids_from_history_after_they_have_faded_out
-			call crossfaded_looping
-			call fade_out_ripples_when_release_sample_sounds
-			call ripple_animations
-			// call update_recorded_midi
-			call midi_clip_play_cursors
-			call info_graphics_animation
-			call hide_version
-		case NI_SIGNAL_TRANSP_START
-			stop_ideas_panel()
+	if NI_SIGNAL_TYPE = NI_SIGNAL_TIMER_MS
+		call crossfaded_looping
+		call fade_out_ripples_when_release_sample_sounds
+		call ripple_animations
+		// call update_recorded_midi
+		call midi_clip_play_cursors
+		call info_graphics_animation
+		call hide_version
+	end if
 
-		case NI_SIGNAL_TRANSP_STOP
-			stop_ideas_panel()
-	end select
+	if NI_SIGNAL_TYPE = NI_SIGNAL_TRANSP_START
+		// This would make it so when you started the transport right as a ripple was being triggered, it would immediately be stopped
+		// call stop_all_clips_and_ripples 
+	end if
+
+	if NI_SIGNAL_TYPE = NI_SIGNAL_TRANSP_STOP
+		// call stop_all_clips_and_ripples
+	end if
+
 end function
 
+function deactivate_mf_notes
+	declare event_ids[128]
+	declare e
+	get_event_ids(event_ids)
+	for e := 0 to num_elements(event_ids) - 1
+		if event_ids[e] # 0
+			if event[event_ids[e]].triggered_by_mf > 0
+				event[event_ids[e]].active := 0
+			end if
+		end if
+	end for
+end function
 
-macro stop_ideas_panel
+function stop_all_clips_and_ripples
 	set_controller(64, 0)
 	wait(1)
+	// for clip_i := 0 to num_elements(midi_clip_preview_id) - 1
+	// 	midi_clip_preview_id[clip_i] -> value := 0
+	// 	if playing[clip_i] = 1
+	// 		get_event_ids(event_ids)
+	// 		for e := 0 to num_elements(event_ids) - 1
+	// 			if event_ids[e] # 0
+	// 				if event[event_ids[e]].triggered_by_mf = clip_i + 1
+	// 					event[event_ids[e]].marked_for_release := 1
+	// 					event[event_ids[e]].preview_being_stopped := 1 // don't let crossfaded looping fade in a note while this event is trying to be faded out here.
+	// 					fade_out(event_ids[e], DURATION_SIXTEENTH, STOP_VOICE_AFTER_FADE_OUT)
+	// 					if in_range(event_ids[e] -> note, LOWEST_KEY, HIGHEST_KEY)
+	// 						key_ids[event_ids[e] -> note] -> picture_state := 0
+	// 						key_down[event_ids[e] -> note] := 0
+	// 						key_active[event_ids[e] -> note] := 0
+	// 					end if
+	// 				end if
+	// 			end if
+	// 		end for
+	// 		playing[clip_i] := 0
+	// 		looping[clip_i] := 0
+	// 	end if
+	// end for
+
+	// Stop ripples (only mark them for release in this step)
+	for r := 0 to MAX_RIPPLE_HISTORY - 1
+		if event_status(ripple_id_history[r]) = EVENT_STATUS_NOTE_QUEUE
+			event[ripple_id_history[r]].marked_for_release := 1
+			event[ripple_id_history[r]].preview_being_stopped := 1
+		end if
+	end for
+
+	// You also need to set key arrays, because a midi clip might be playing a note but not making a ripple with that note yet
+	for key_i := LOWEST_KEY to HIGHEST_KEY
+		key_ids[key_i] -> picture_state := 0
+		key_down[key_i] := 0
+		key_active[key_i] := 0
+	end for
+
+	// Stop clips
 	for clip_i := 0 to num_elements(midi_clip_preview_id) - 1
 		midi_clip_preview_id[clip_i] -> value := 0
 		if playing[clip_i] = 1
-			get_event_ids(event_ids)
-			for e := 0 to num_elements(event_ids) - 1
-				if event_ids[e] # 0
-					if event[event_ids[e]].triggered_by_mf = clip_i + 1
-						event[event_ids[e]].preview_being_stopped := 1 // don't let crossfaded looping fade in a note while this event is trying to be faded out here.
-						fade_out(event_ids[e], DURATION_SIXTEENTH, STOP_VOICE_AFTER_FADE_OUT)
-						if in_range(event_ids[e] -> note, LOWEST_KEY, HIGHEST_KEY)
-							key_ids[event_ids[e] -> note] -> picture_state := 0
-							key_down[event_ids[e] -> note] := 0
-							key_active[event_ids[e] -> note] := 0
-						end if
-					end if
-				end if
-			end for
 			playing[clip_i] := 0
 			looping[clip_i] := 0
 		end if
 	end for
-end macro
+
+	call deactivate_mf_notes
+	call release_marked_ripples
+end function
 
 // Show midi
 on ui_control(button_showMidi)
 	if button_showMidi = 0
-		stop_ideas_panel()
+		call stop_all_clips_and_ripples
 	end if
 	call update_midi_visibility
 end on
 on ui_control(switch_closeMidi)
 	button_showMidi := 0
-	stop_ideas_panel()
+	call stop_all_clips_and_ripples
 	call update_midi_visibility
 end on
 
@@ -1435,56 +1514,107 @@ macro midi_clip_preview_callbacks(#i#)
 	function switch_preview#i#_callback(_)
 		set_controller(64, 0)
 		wait(1)
+		cb_id[#i#] := NI_CALLBACK_ID
+
 		if midi_clip_preview_id[#i#] -> value = 0
+			// Stop clicked clip
 			playing[#i#] := 0
 			looping[#i#] := 0
 
 			// Stop clicked clip
-			get_event_ids(event_ids)
-			for e := 0 to num_elements(event_ids) - 1
-				if event_ids[e] # 0
-					if event[event_ids[e]].triggered_by_mf = #i# + 1
-						event[event_ids[e]].preview_being_stopped := 1 // don't let crossfaded looping fade in a note while this event is trying to be faded out here.
-						fade_out(event_ids[e], DURATION_SIXTEENTH, STOP_VOICE_AFTER_FADE_OUT)
-						if in_range(event_ids[e] -> note, LOWEST_KEY, HIGHEST_KEY)
-							key_ids[event_ids[e] -> note] -> picture_state := 0
-							key_down[event_ids[e] -> note] := 0
-							key_active[event_ids[e] -> note] := 0
-						end if
-					end if
+			// get_event_ids(event_ids)
+			// for e := 0 to num_elements(event_ids) - 1
+			// 	if event_ids[e] # 0
+			// 		if event[event_ids[e]].triggered_by_mf = #i# + 1
+			// 			event[event_ids[e]].preview_being_stopped := 1 // don't let crossfaded looping fade in a note while this event is trying to be faded out here.
+			// 			event[event_ids[e]].marked_for_release := 1
+			// 			// fade_out(event_ids[e], DURATION_SIXTEENTH, STOP_VOICE_AFTER_FADE_OUT)
+			// 			if in_range(event_ids[e] -> note, LOWEST_KEY, HIGHEST_KEY)
+			// 				key_ids[event_ids[e] -> note] -> picture_state := 0
+			// 				key_down[event_ids[e] -> note] := 0
+			// 				key_active[event_ids[e] -> note] := 0
+			// 			end if
+			// 		end if
+			// 	end if
+			// end for
+
+			// Mark all ripples for release
+			for r := 0 to MAX_RIPPLE_HISTORY - 1
+				if event_status(ripple_id_history[r]) = EVENT_STATUS_NOTE_QUEUE
+					event[ripple_id_history[r]].marked_for_release := 1
+					event[ripple_id_history[r]].preview_being_stopped := 1
 				end if
 			end for
 
-			cb_id[#i#] := NI_CALLBACK_ID
-		else
-			cb_id[#i#] := NI_CALLBACK_ID
+			// You also need to set key arrays, because a midi clip might be playing a note but not making a ripple with that note yet
+			for key_i := LOWEST_KEY to HIGHEST_KEY
+				key_ids[key_i] -> picture_state := 0
+				key_down[key_i] := 0
+				key_active[key_i] := 0
+			end for
+			
+			call release_marked_ripples
+			call deactivate_mf_notes
 
+		else
 			// Release any other midi notes from other clips
+			// declare other_clip_i
+			// for other_clip_i := 0 to num_elements(midi_clip_preview_id) - 1
+			// 	if #i# # other_clip_i
+			// 		midi_clip_preview_id[other_clip_i] -> value := 0
+			// 		if playing[other_clip_i] = 1
+			// 			get_event_ids(event_ids)
+			// 			for e := 0 to num_elements(event_ids) - 1
+			// 				if event_ids[e] # 0
+			// 					if event[event_ids[e]].triggered_by_mf = other_clip_i + 1
+			// 						event[event_ids[e]].preview_being_stopped := 1 // don't let crossfaded looping fade in a note while this event is trying to be faded out here.
+			// 						event[event_ids[e]].marked_for_release := 1
+			// 						// fade_out(event_ids[e], DURATION_SIXTEENTH, STOP_VOICE_AFTER_FADE_OUT)
+			// 						if in_range(event_ids[e] -> note, LOWEST_KEY, HIGHEST_KEY)
+			// 							key_ids[event_ids[e] -> note] -> picture_state := 0
+			// 							key_down[event_ids[e] -> note] := 0
+			// 							key_active[event_ids[e] -> note] := 0
+			// 						end if
+			// 					end if
+			// 				end if
+			// 			end for
+			// 			playing[other_clip_i] := 0
+			// 			looping[other_clip_i] := 0
+			// 		end if
+			// 	end if
+			// end for
+
+			// Stop all other clips
 			declare other_clip_i
 			for other_clip_i := 0 to num_elements(midi_clip_preview_id) - 1
 				if #i# # other_clip_i
 					midi_clip_preview_id[other_clip_i] -> value := 0
 					if playing[other_clip_i] = 1
-						get_event_ids(event_ids)
-						for e := 0 to num_elements(event_ids) - 1
-							if event_ids[e] # 0
-								if event[event_ids[e]].triggered_by_mf = other_clip_i + 1
-									event[event_ids[e]].preview_being_stopped := 1 // don't let crossfaded looping fade in a note while this event is trying to be faded out here.
-									fade_out(event_ids[e], DURATION_SIXTEENTH, STOP_VOICE_AFTER_FADE_OUT)
-									if in_range(event_ids[e] -> note, LOWEST_KEY, HIGHEST_KEY)
-										key_ids[event_ids[e] -> note] -> picture_state := 0
-										key_down[event_ids[e] -> note] := 0
-										key_active[event_ids[e] -> note] := 0
-									end if
-								end if
-							end if
-						end for
 						playing[other_clip_i] := 0
 						looping[other_clip_i] := 0
 					end if
 				end if
 			end for
 
+			// Mark all ripples for release
+			for r := 0 to MAX_RIPPLE_HISTORY - 1
+				if event_status(ripple_id_history[r]) = EVENT_STATUS_NOTE_QUEUE
+					event[ripple_id_history[r]].marked_for_release := 1
+					event[ripple_id_history[r]].preview_being_stopped := 1
+				end if
+			end for
+
+			// You also need to set key arrays, because a midi clip might be playing a note but not making a ripple with that note yet
+			for key_i := LOWEST_KEY to HIGHEST_KEY
+				key_ids[key_i] -> picture_state := 0
+				key_down[key_i] := 0
+				key_active[key_i] := 0
+			end for
+			
+			call release_marked_ripples
+			call deactivate_mf_notes
+
+			
 			//Play
 			looping[#i#] := 1
 			while looping[#i#] = 1 and cb_id[#i#] = NI_CALLBACK_ID
@@ -1524,11 +1654,13 @@ macro midi_clip_preview_callbacks(#i#)
 					if playing[#i#] = 1 and cb_id[#i#] = NI_CALLBACK_ID
 						midi_file_pos_ticks[#i#] := midi_file_pos_ticks[#i#] + ticks_until_next_event
 						if midi_command[#i#, cur_event[#i#]] = MIDI_COMMAND_NOTE_ON
+							// declare event_id  := midi_event_id[#i#, cur_event[#i#]]
 							declare note     := midi_byte_1[#i#, cur_event[#i#]]
 							declare velocity := midi_byte_2[#i#, cur_event[#i#]]
 							declare length   := ticks_to_ms(midi_length[#i#, cur_event[#i#]])
 							declare note_id  := play_note(note, velocity, 0, length)
 							event[note_id].triggered_by_mf := #i# + 1
+							event[note_id].active := 1 // This is used to decide whether to exit when the play_note() triggers the RCB
 							event[note_id].source := OUTSIDE_SOURCE
 							set_event_par_arr(note_id, EVENT_PAR_ALLOW_GROUP, 0, ALL_GROUPS)
 							note_callback(note, velocity, note_id)

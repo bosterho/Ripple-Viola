@@ -59,9 +59,9 @@ end function
 define E2V.VOL_BASE(ep) := (18000.0 * k6_log2(int_to_real(ep)) - 346768.2342478351)
 define V2E.VOL_BASE(ep) := real_to_int(pow(2.0, (ep + 346768.2342478351) / 18000.0))
 
-// function E2V.volume(in) -> return
-// 	return := E2V.VOL_BASE(in)
-// end function
+function E2V.volume(in) -> return
+	return := E2V.VOL_BASE(in)
+end function
 function V2E.volume(in) -> return
 	return := V2E.VOL_BASE(in)
 end function
