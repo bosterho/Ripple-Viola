@@ -23,6 +23,9 @@ function find_in_table(table, input)
   end
 end
 
+-- Clear CC103's
+cmd = reaper.NamedCommandLookup("_RSc2e075142ee9a60061bae560f3e2c0b9540cdfa0")
+reaper.Main_OnCommand(cmd, 0) -- Script: mpl (BO edit)_Remove selected takes MIDI CC103.lua
 
 -- Get strings started
 data = "midi_data = [\n"
@@ -100,12 +103,33 @@ for i = 0, reaper.CountSelectedMediaItems(0) - 1 do
       data = data .. '"chan":' .. chan .. ", "
       data = data .. '},\n'
     end
+    --[[ --You don't need to retrieve CC's. Just have this script place them, based on item length.
     if msg2 == 103 and mf_end_found == false then
       mf_end_found = true
       clip_length_data = clip_length_data .. math.floor(ppqpos) .. ", "
+      --if i == 103 then
+        --reaper.ShowConsoleMsg(i .. "    " .. math.floor(ppqpos) .. "\n")
+      --end
     end
+    ]]--
     cc = cc + 1
   end
+  
+  -- Get clip length and write it to item
+  item_len = reaper.GetMediaItemInfo_Value(item, "D_LENGTH")
+  len_ticks = math.floor(reaper.TimeMap2_timeToQN(0, item_len) * 960)
+  clip_length_data = clip_length_data .. len_ticks .. ", "
+  looped = reaper.GetMediaItemInfo_Value(item, "B_LOOPSRC")
+  
+  reaper.MIDI_InsertCC(take, 
+                        false,--boolean selected, 
+                        false,--boolean muted, 
+                        len_ticks-1,--number ppqpos, 
+                        176,--integer chanmsg, 
+                        0,--integer chan, 
+                        103,--CC num
+                        looped * 127) --CC value
+  --reaper.UpdateItemInProject(item) -- Not needed I think
   
   data = data .. '\t],\n'
   lowest_pitches = lowest_pitches .. lowest_pitch .. ', '
@@ -124,3 +148,4 @@ midi_data:write(data)
 midi_data:close()
 
 reaper.Main_OnCommand(40849, 0) -- File: Export project MIDI...
+reaper.UpdateArrange()

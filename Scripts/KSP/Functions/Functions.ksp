@@ -33,7 +33,6 @@ taskfunc update_engine_pars(ctrl_index)
 			main[6].seq_hf_gain := map_i_2i_2i_i(value, 0, 1000000, 550000, 650000)
 			main[7].stereo_spread := map_i_2i_2i_i(value, 0, 1000000, 400000, 600000)
 
-
 		case control.reverb
 			call update_reverb_send_levels
 
@@ -127,7 +126,7 @@ end function
 
 function update_midi_visibility()
 	switch_closeMidi -> hide := hide_states[button_showMidi]
-	paneL_midi -> hide := hide_states[button_showMidi]
+	panel_midi -> hide := hide_states[button_showMidi]
 	for i := 0 to NUM_MIDI_PAGES - 1
 		panel_midiPg[i] -> hide := HIDE_WHOLE_CONTROL
 	end for
@@ -152,27 +151,8 @@ end function
 
 
 function find_first_active_ripple() -> return
-	declare r
-	declare found := 0
-	for r := 0 to MAX_RIPPLE_HISTORY - 1
-		if ripple_id_history[r] # 0 ...
-		and event[ripple_id_history[r]].source = OUTSIDE_SOURCE ...
-		and event[ripple_id_history[r]].type # RELEASE_SAMPLE_TYPE ...
-		and (event[ripple_id_history[r]].releasing = 0 or slider_legato = legatoMode.syncToSwell) ...
-		and ripple_id_history[r] -> play_pos > 0 ...
-		and found = 0
-			found := 1
-			return := ripple_id_history[r]
-		end if
-	end for
-
-	found := 0
-	for r := 0 to MAX_RIPPLE_HISTORY - 1
-		if ripple_id_history[r] = 0 and found = 0
-			found := 1
-			return := r - 1
-		end if
-	end for
+	// I decided not to use previous samples' start position to do the legato, to avoid drift.
+	// It's a pain to have to calculate timings based on ENGINE_UPTIME timestamps, but oh well.
 end function
 
 function search_for_note_in_key_history(note) -> return
@@ -193,10 +173,12 @@ end function
 
 function set_key_colors_and_types_and_names
 	for key_i := 0 to 127
-		set_key_color(key_i, KEY_COLOR_BLACK)
-		if search(black_keys, key_i mod 12) # -1
-			set_key_color(key_i, KEY_COLOR_WHITE)
-		end if
+		// It's harder to distinguish what keys the keyswitches are on, if all the surrounding keys are black'd out. That's why I didn't do this.
+		// set_key_color(key_i, KEY_COLOR_BLACK)
+		// if search(black_keys, key_i mod 12) # -1
+		// 	set_key_color(key_i, KEY_COLOR_WHITE)
+		// end if
+
 		set_key_type(key_i, NI_KEY_TYPE_NONE)
 		set_key_name(key_i, "")
 
@@ -240,16 +222,20 @@ function set_key_colors_and_types_and_names
 			set_key_type(key_i, NI_KEY_TYPE_CONTROL)
 		end if
 
+		index := search(vel_to_start_keyswitches, key_i)
+		if index # -1
+			set_key_color(key_i, KEY_COLOR_BLUE)
+			set_key_name(key_i, vel_to_start_texts[index])
+			set_key_type(key_i, NI_KEY_TYPE_CONTROL)
+		end if
+
 		index := search(release_trigger_keyswitches, key_i)
 		if index # -1
-			set_key_color(key_i, KEY_COLOR_MINT)
+			set_key_color(key_i, KEY_COLOR_RED)
 			set_key_name(key_i, "Release Trigger Key")
 			set_key_type(key_i, NI_KEY_TYPE_CONTROL)
 		end if
 
-		// set_key_color(RELEASE_TRIGGER_KEY, KEY_COLOR_RED)
-		// set_key_name(RELEASE_TRIGGER_KEY, "Release Trigger Key")
-		// set_key_type(key_i, NI_KEY_TYPE_CONTROL)
 	end for
 end function
 
@@ -294,10 +280,18 @@ function set_keys_pressed
 		end if
 	end for
 
+	for i := 0 to 1
+		if i = switch_velToSampleStart
+			set_key_pressed(vel_to_start_keyswitches[i], 1)
+		else
+			set_key_pressed(vel_to_start_keyswitches[i], 0)
+		end if
+	end for
+
 end function
 
 
-function count_active_ripples
+function count_active_ripples // Not used
 	declare found := 0
 	declare r
 	num_active_ripples := 0
@@ -491,7 +485,16 @@ function ripple_animations
 
 				// Play Ripple animation
 				declare play_pos_in_beat := (ripple_id_history[r] -> play_pos - LEADING_SILENCE * 1000) mod rec_time_ripple_lengths[artic]
-				ripple[r] -> value := map_i_2i_2i_i(play_pos_in_beat, 0, rec_time_ripple_lengths[artic], 0, 127)
+				declare ~value_norm := float(play_pos_in_beat) / float(rec_time_ripple_lengths[artic])
+				if value_norm < 0.00001
+					value_norm := 0.00001
+				end if
+				if artic = artic.sixteenths
+					value_norm := pow(value_norm, 0.6)
+				else
+					value_norm := pow(value_norm, 1.4)
+				end if
+				ripple[r] -> value := int(value_norm * 127.0)
 
 				// Ripple visiblity
 				ripple[r] -> hide := HIDE_PART_NOTHING
@@ -500,7 +503,11 @@ function ripple_animations
 				ripple_swell[r] -> pos_x := ripple[r] -> pos_x
 				ripple_swell[r] -> pos_y := ripple[r] -> pos_y
 				ripple_swell[r] -> picture := "ripple swell " & interval
-				declare pos_in_swell := ripple_id_history[r] -> play_pos mod rec_time_sample_lengths[artic]
+				declare pos_in_swell := ripple_id_history[r] -> play_pos - LEADING_SILENCE*1000
+				if pos_in_swell < 0
+					pos_in_swell := 0
+				end if
+				declare pos_in_swell := pos_in_swell mod rec_time_sample_lengths[artic]
 				if in_range(pos_in_swell, 0, rec_time_sample_lengths[artic] / 2)
 					ripple_swell[r] -> value := map_i_2i_2i_i(pos_in_swell, 0, rec_time_sample_lengths[artic] / 2, 0, 64)
 				else
@@ -512,56 +519,6 @@ function ripple_animations
 			end if
 		end if
 	end for
-end function
-
-// Probably won't do this
-function insert_mf_note(time, note, vel, length)
-	declare event_id := mf_insert_event(0, time, MIDI_COMMAND_NOTE_ON, note, vel)
-	mf_set_event_par(event_id, EVENT_PAR_NOTE_LENGTH, length)
-end function
-
-function update_recorded_midi
-	for r := MAX_RIPPLE_HISTORY - 1 downto 0
-		if event[ripple_id_history[r]].releasing = 0
-			if event_status(ripple_id_history[r]) = EVENT_STATUS_NOTE_QUEUE
-				// ripple_id_history[r] -> play_pos
-			end if
-		else if event[ripple_id_history[r]].releasing = 1
-			if ripple_swell[r] -> value > 0
-				
-			end if
-		end if
-	end for
-end function
-
-function midi_clip_play_cursors
-	for clip_i := 0 to NUM_MIDI_CLIPS - 1
-		if midi_clip_preview_id[clip_i] -> value = 1
-			declare time_played := ENGINE_UPTIME - time_started[clip_i]
-			declare clip_length_ms := ticks_to_ms(clip_length[clip_i]) / 1000
-			// mf_cursor[clip_i] -> pos_x := map_i_2i_2i_i(time_played, 0, clip_length_ms, CLIP_MARGIN, midi_clip_id[clip_i] -> width - CLIP_MARGIN)
-			mf_cursor[clip_i] -> value := map_i_2i_2i_i(time_played, 0, clip_length_ms, 0, 1000)
-			mf_cursor[clip_i] -> hide := HIDE_PART_NOTHING
-		else
-			mf_cursor[clip_i] -> hide := HIDE_WHOLE_CONTROL
-		end if
-	end for
-end function
-
-function info_graphics_animation
-	if PLAYED_VOICES_INST > 0 
-		midiInstructions_opacity := 0.0
-	end if
-	smoothed_midiInstructions_opacity := smoothed_midiInstructions_opacity + (midiInstructions_opacity - smoothed_midiInstructions_opacity) / 30.0
-	if ~smoothed_midiInstructions_opacity < 0.0001
-		~smoothed_midiInstructions_opacity := 0.0
-	end if
-	label_midiInstructions -> picture_state := map_f_2f_2i_i(smoothed_midiInstructions_opacity, 0.0, 1.0, 0, 127)
-	smoothed_midiCover_opacity := smoothed_midiCover_opacity + (midiCover_opacity - smoothed_midiCover_opacity) / 4.0
-	if ~smoothed_midiCover_opacity < 0.0001
-		~smoothed_midiCover_opacity := 0.0
-	end if
-	label_midiCover -> picture_state := map_f_2f_2i_i(smoothed_midiCover_opacity, 0.0, 1.0, 0, 127)
 end function
 
 function crossfaded_looping
@@ -627,8 +584,66 @@ function fade_out_ripples_when_release_sample_sounds
 	end for
 end function
 
+function unpress_all_keys
+	declare key_i
+	for key_i := LOWEST_KEY to HIGHEST_KEY
+		set_key_pressed(key_i, 0)
+	end for
+end function
+
+
+function midi_clip_play_cursors
+	for clip_i := 0 to NUM_MIDI_CLIPS - 1
+		if midi_clip_preview_id[clip_i] -> value = 1
+			declare time_played := ENGINE_UPTIME - time_started[clip_i]
+			declare clip_length_ms := ticks_to_ms(clip_length[clip_i]) / 1000
+			// mf_cursor[clip_i] -> pos_x := map_i_2i_2i_i(time_played, 0, clip_length_ms, CLIP_MARGIN, midi_clip_id[clip_i] -> width - CLIP_MARGIN)
+			mf_cursor[clip_i] -> value := map_i_2i_2i_i(time_played, 0, clip_length_ms, 0, 1000)
+			mf_cursor[clip_i] -> hide := HIDE_PART_NOTHING
+		else
+			mf_cursor[clip_i] -> hide := HIDE_WHOLE_CONTROL
+		end if
+	end for
+end function
+
+function info_graphics_animation
+	if PLAYED_VOICES_INST > 0 
+		midiInstructions_opacity := 0.0
+	end if
+	smoothed_midiInstructions_opacity := smoothed_midiInstructions_opacity + (midiInstructions_opacity - smoothed_midiInstructions_opacity) / 30.0
+	if ~smoothed_midiInstructions_opacity < 0.0001
+		~smoothed_midiInstructions_opacity := 0.0
+	end if
+	label_midiInstructions -> picture_state := map_f_2f_2i_i(smoothed_midiInstructions_opacity, 0.0, 1.0, 0, 127)
+	smoothed_midiCover_opacity := smoothed_midiCover_opacity + (midiCover_opacity - smoothed_midiCover_opacity) / 4.0
+	if ~smoothed_midiCover_opacity < 0.0001
+		~smoothed_midiCover_opacity := 0.0
+	end if
+	label_midiCover -> picture_state := map_f_2f_2i_i(smoothed_midiCover_opacity, 0.0, 1.0, 0, 127)
+end function
+
 function hide_version
 	if ENGINE_UPTIME - timestamp_version_shown > 1000
 		label_version -> hide := HIDE_WHOLE_CONTROL
 	end if
+end function
+
+{{ Midi Recording }} // Probably won't do this
+function insert_mf_note(time, note, vel, length)
+	declare event_id := mf_insert_event(0, time, MIDI_COMMAND_NOTE_ON, note, vel)
+	mf_set_event_par(event_id, EVENT_PAR_NOTE_LENGTH, length)
+end function
+
+function update_recorded_midi
+	for r := MAX_RIPPLE_HISTORY - 1 downto 0
+		if event[ripple_id_history[r]].releasing = 0
+			if event_status(ripple_id_history[r]) = EVENT_STATUS_NOTE_QUEUE
+				// ripple_id_history[r] -> play_pos
+			end if
+		else if event[ripple_id_history[r]].releasing = 1
+			if ripple_swell[r] -> value > 0
+				
+			end if
+		end if
+	end for
 end function
