@@ -1256,7 +1256,8 @@ function release_marked_ripples
 				if event[ripple_id_history[r]].waiting_for_release_sample = 0
 					event[ripple_id_history[r]].waiting_for_release_sample := 1
 					declare rls_note := event[ripple_id_history[r]].origin_note
-					if abs(rls_note_ids[rls_note] -> play_pos - (rec_time_pos_in_ripple + offset_rec_time)) < 10000 // Only stop release samples that would be right on top of each other.
+					wait(1) // When you play_note(), you need a wait(1) after it in order to get the play_pos. Otherwise play_pos would be 0
+					if abs(rls_note_ids[rls_note] -> play_pos - (rec_time_pos_in_ripple + offset_rec_time)) < 5000 // Only stop release samples that would be right on top of each other.
 						fade_out(rls_note_ids[rls_note], 50000, KEEP_VOICE_RUNNING) // Keep running because...
 					end if
 
