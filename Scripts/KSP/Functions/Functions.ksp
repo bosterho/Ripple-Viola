@@ -101,7 +101,7 @@ function update_latency_label
 	label_latency -> text := menu_latency & "ms"
 end function
 
-function trigger_release_samples_for_all_ripples
+function trigger_release_samples_for_all_ripples()
 	for r := 0 to MAX_RIPPLE_HISTORY - 1
 		if event_status(ripple_id_history[r]) = EVENT_STATUS_NOTE_QUEUE
 			event[ripple_id_history[r]].marked_for_release := 1
@@ -321,6 +321,16 @@ function count_keys_active()
 	for key_i := LOWEST_KEY to HIGHEST_KEY
 		if key_active[key_i] = 1
 			inc(num_keys_active)
+		end if
+	end for
+end function
+
+function count_keys_down()
+	num_keys_down := 0
+	declare key_i
+	for key_i := LOWEST_KEY to HIGHEST_KEY
+		if key_down[key_i] = 1
+			inc(num_keys_down)
 		end if
 	end for
 end function

@@ -4,6 +4,7 @@ import "Utilities"
 import "Functions/Functions.ksp"
 
 on init
+	// Password: ollec elppir
 	message("")
 	utilities.icb
 	engine.ICB()
@@ -36,7 +37,7 @@ on init
 	declare const MAX_NUM_CHORD_IDS := 1000
 	define MAX_NUM_NOTES := VOICE_LIMIT
 	define MAX_RIPPLE_HISTORY := (VOICE_LIMIT + 32)
-	define NUM_MIDI_PAGES := 13
+	define NUM_MIDI_PAGES := 10
 	define NUM_MIDI_CLIPS := (8 * NUM_MIDI_PAGES)
 	define NUM_OPTION_SLIDERS := 4
 	define NUM_CTRLS := 7
@@ -284,6 +285,7 @@ on init
 	stop_offset_rec_time[artic.sixteenths] := -20000
 
 	{{ Variables }}
+	declare rls_note_timestamp[128]
 	declare latency
 	declare ripples_fading_out[128]
 	declare num_ripples_fading_out
@@ -294,6 +296,7 @@ on init
 	declare timestamp_version_shown
 	declare num_active_ripples
 	declare num_keys_active
+	declare num_keys_down
 	declare key_active[128]
 	declare key_down[128]
 	declare rls_note_ids[128]
@@ -369,7 +372,7 @@ on init
 	define MF_BUFFER_SIZE := 1000
 	mf_set_buffer_size(MF_BUFFER_SIZE)
 	mf_set_num_export_areas(NUM_MIDI_CLIPS + 1)
-	mf_insert_file(get_folder(GET_FOLDER_PATCH_DIR) & "/../Data/midi.mid", 0, 0, 0)
+	mf_insert_file(get_folder(GET_FOLDER_PATCH_DIR) & "/../Midi/midi.mid", 0, 0, 0)
 
 	// Clip names
 	declare !clip_names[NUM_MIDI_CLIPS]
@@ -848,7 +851,7 @@ function note_callback(note, velocity, event_id)
 	ks_index := search(release_trigger_keyswitches, note)
 	if ks_index # -1
 		recent_release_trigger_key := note
-		call trigger_release_samples_for_all_ripples
+		trigger_release_samples_for_all_ripples()
 	end if
 
 	if search(all_keyswitches, note) # -1
@@ -871,8 +874,8 @@ function note_callback(note, velocity, event_id)
 		key_history[0] := note
 
 		// Figure out which ripples to trigger
-		call count_keys_active
-		if num_keys_active > 1
+		call count_keys_down
+		if num_keys_down > 1
 			declare notes[MAX_NUM_NOTES]
 			declare intervals[MAX_NUM_NOTES]
 			declare played_notes[MAX_NUM_NOTES]
@@ -1256,17 +1259,19 @@ function release_marked_ripples
 				if event[ripple_id_history[r]].waiting_for_release_sample = 0
 					event[ripple_id_history[r]].waiting_for_release_sample := 1
 					declare rls_note := event[ripple_id_history[r]].origin_note
-					wait(1) // When you play_note(), you need a wait(1) after it in order to get the play_pos. Otherwise play_pos would be 0
-					if abs(rls_note_ids[rls_note] -> play_pos - (rec_time_pos_in_ripple + offset_rec_time)) < 5000 // Only stop release samples that would be right on top of each other.
-						fade_out(rls_note_ids[rls_note], 50000, KEEP_VOICE_RUNNING) // Keep running because...
+
+					// Choke release samples that'd be right on top of each other
+					// You'd think you could use rls_note_ids[rls_note] -> play_pos. However, you need to add a wait(1) in order to actually get the time, and the wait makes everything more complicated.
+					declare prev_rls_note_rec_time := rec_time_to_real_time(ENGINE_UPTIME - rls_note_timestamp[rls_note]) * 1000
+					if abs(prev_rls_note_rec_time - (rec_time_pos_in_ripple + offset_rec_time)) < 5000
+						fade_out(rls_note_ids[rls_note], 50000, KEEP_VOICE_RUNNING) // Keep running because it's play position needs to be used elsewhere.
 					end if
 
 					// Grab this before the ripple finishes fading out
 					declare vol := ripple_id_history[r] -> volume
 
 					// Apply the offset, depending on which half of the swell the ripple is on. 
-					// This offset was previously used to make it err on the side of choosing a ripple that's softer.
-					// declare offset := 50000
+					// declare offset := 50000 // This offset was previously used to make it err on the side of choosing a ripple that's softer.
 					declare offset := 0
 					if rec_time_play_pos - offset < rec_time_sample_lengths[artic] / 2
 						rec_time_play_pos := rec_time_play_pos - offset
@@ -1303,6 +1308,7 @@ function release_marked_ripples
 
 					// Play note
 					rls_note_ids[rls_note] := play_note(rls_note, vel, rec_time_pos_in_ripple + offset_rec_time, 0)
+					rls_note_timestamp[rls_note] := ENGINE_UPTIME - real_time_to_rec_time((rec_time_pos_in_ripple + offset_rec_time) / 1000)
 					set_event_par_arr(rls_note_ids[rls_note], EVENT_PAR_ALLOW_GROUP, 0, ALL_GROUPS)
 					set_event_par_arr(rls_note_ids[rls_note], EVENT_PAR_ALLOW_GROUP, 1, release_group[artic])
 
