@@ -372,7 +372,7 @@ on init
 	define MF_BUFFER_SIZE := 1000
 	mf_set_buffer_size(MF_BUFFER_SIZE)
 	mf_set_num_export_areas(NUM_MIDI_CLIPS + 1)
-	mf_insert_file(get_folder(GET_FOLDER_PATCH_DIR) & "/../Midi/midi.mid", 0, 0, 0)
+	mf_insert_file(get_folder(GET_FOLDER_PATCH_DIR) & "/Midi/midi.mid", 0, 0, 0)
 
 	// Clip names
 	declare !clip_names[NUM_MIDI_CLIPS]
@@ -767,7 +767,7 @@ on init
 		slider_direction      -> automation_id := N
 		slider_direction      -> automation_name := "Direction"
 		slider_legato         -> automation_id := N
-		slider_legato         -> automation_name := "Legato/Quantize"
+		slider_legato         -> automation_name := "Sync"
 		slider_releaseSamples -> automation_id := N
 		slider_releaseSamples -> automation_name := "Release Samples"
 	END_INC
