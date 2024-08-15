@@ -37,7 +37,7 @@ on init
 	declare const MAX_NUM_CHORD_IDS := 1000
 	define MAX_NUM_NOTES := VOICE_LIMIT
 	define MAX_RIPPLE_HISTORY := (VOICE_LIMIT + 32)
-	define NUM_MIDI_PAGES := 10
+	define NUM_MIDI_PAGES := 1
 	define NUM_MIDI_CLIPS := (8 * NUM_MIDI_PAGES)
 	define NUM_OPTION_SLIDERS := 4
 	define NUM_CTRLS := 7
@@ -172,7 +172,7 @@ on init
 
 
 	// Release samples
-	define NUM_releaseSampleModes := 6
+	define NUM_releaseSamplesModes := 6
 	define releaseSampleModes := noReleaseSample, autoRelease, Release0, Release1, Release2, Release3
 	declare !releaseSamples_texts[] := ("Off", "Auto", "1", "2", "3", "4")
 	macro declare_release_sample_mode_constants(#name#)
@@ -216,7 +216,7 @@ on init
 	declare direction_keyswitches[NUM_directionModes]          := (72+13, 72+14, 72+15)
 	declare legato_keyswitches[NUM_legatoModes]                := (72+17, 72+18, 72+19, 72+20)
 	declare vel_to_start_keyswitches[2]                        := (72+21, 72+22)
-	declare release_sample_keyswitches[NUM_releaseSampleModes] := (72+24, 72+25, 72+26, 72+27, 72+28, 72+29)
+	declare release_sample_keyswitches[NUM_releaseSamplesModes] := (72+24, 72+25, 72+26, 72+27, 72+28, 72+29)
 	declare release_trigger_keyswitches[2]                     := (24, 108)
 		
 	// Formatted for Reascript:
@@ -245,7 +245,7 @@ on init
 		all_keyswitches[total_num_keyswitches] := legato_keyswitches[i]
 		inc(total_num_keyswitches)
 	end for
-	for i := 0 to NUM_releaseSampleModes - 1
+	for i := 0 to NUM_releaseSamplesModes - 1
 		all_keyswitches[total_num_keyswitches] := release_sample_keyswitches[i]
 		inc(total_num_keyswitches)
 	end for
@@ -285,6 +285,8 @@ on init
 	stop_offset_rec_time[artic.sixteenths] := -20000
 
 	{{ Variables }}
+	declare val
+	declare cur_title_page
 	declare rls_note_timestamp[128]
 	declare latency
 	declare ripples_fading_out[128]
@@ -503,9 +505,21 @@ on init
 	end for
 
 	import "F2K/UI Code.ksp"
+	set_ui_height_px(UI_HEIGHT + dev_mode[0] * 50)
 	set_control_par_str(INST_ICON_ID, CONTROL_PAR_PICTURE, "insticon")
 
 	label_version -> hide := HIDE_WHOLE_CONTROL
+
+	// Title pages
+	define NUM_TITLE_PAGES := 4
+	declare label_titleInfoPg[NUM_TITLE_PAGES]
+	declare switch_titlePgSelector[NUM_TITLE_PAGES]
+	macro assign_titleInfoPg_id(#i#)
+		label_titleInfoPg[#i#] := get_ui_id(label_titleInfoPg#i#)
+		switch_titlePgSelector[#i#] := get_ui_id(switch_titlePgSelector#i#)
+	end macro
+	iterate_macro(assign_titleInfoPg_id) := 0 to NUM_TITLE_PAGES - 1
+	
 
 	// Midi page
 	declare panel_midiPg[NUM_MIDI_PAGES]
@@ -588,7 +602,8 @@ on init
 	// So instead, I'm just hiding all z_layer=1 controls whenever I show panel_midi
 	panel_midi -> z_layer := 0
 
-	switch_titleInfoDisp          -> hide := HIDE_WHOLE_CONTROL
+
+	panel_titleInfo               -> hide := HIDE_WHOLE_CONTROL
 	switch_generalInfoDisp        -> hide := HIDE_WHOLE_CONTROL
 	switch_articulationsInfoDisp  -> hide := HIDE_WHOLE_CONTROL
 	switch_optionsInfoDisp        -> hide := HIDE_WHOLE_CONTROL
@@ -597,7 +612,13 @@ on init
 	switch_legatoInfoDisp         -> hide := HIDE_WHOLE_CONTROL
 	switch_releaseSamplesInfoDisp -> hide := HIDE_WHOLE_CONTROL
 
-	switch_titleInfoDisp          -> z_layer := 1
+	panel_titleInfo -> z_layer := 1
+	for i := 0 to NUM_TITLE_PAGES - 1
+		label_titleInfoPg[i] -> z_layer := 1
+		switch_titlePgSelector[i] -> z_layer := 1
+	end for
+	button_prevTitlePg            -> z_layer := 1
+	button_nextTitlePg            -> z_layer := 1
 	switch_generalInfoDisp        -> z_layer := 1
 	switch_articulationsInfoDisp  -> z_layer := 1
 	switch_optionsInfoDisp        -> z_layer := 1
@@ -660,7 +681,41 @@ on init
 		articulation_ids[i] -> allow_automation := 0
 	end for
 
+	i := 0 
+	macro set_up_option_defines(#option#)
+		xypad_#option# -> mouse_mode := 2
+		set_control_par_str_arr(get_ui_id(xypad_#option#), CONTROL_PAR_CURSOR_PICTURE, "label_transparent", 0)
+		declare read ui_slider #option#_nks(0, NUM_#option#Modes-1)
+		set_bounds(#option#_nks, i * 100, UI_HEIGHT)
+		inc(i)
+		property #option#_int
+			function get -> result
+				result := int(xypad_#option#[0] * 0.999 * float(NUM_#option#Modes))
+			end function
+		
+			function set(value)
+				xypad_#option#[0] := float(value) / float(NUM_#option#Modes)
+				xypad_#option# -> picture_state := value
+				#option#_nks := value
+			end function
+		end property
+	end macro
+	literate_macro(set_up_option_defines) on options
+
 	// Speed
+	// declare read ui_slider speed_nks(0, NUM_speedModes-1)
+	// set_bounds(speed_nks, 0, UI_HEIGHT)
+	// property speed_int
+	// 	function get -> result
+	// 		result := int(xypad_speed[0] * float(NUM_speedModes))
+	// 	end function
+	
+	// 	function set(value)
+	// 		xypad_speed[0] := float(value) / float(NUM_speedModes)
+	// 		// xypad_speed -> picture_state := value
+	// 		// speed_nks := value
+	// 	end function
+	// end property
 	declare speed_ids[NUM_speedModes]
 	macro assign_speed_mode_id(#mode#)
 		speed_ids[speedMode.#mode#] := get_ui_id(switch_#mode#)
@@ -678,6 +733,19 @@ on init
 	end for
 
 	// Direction
+	// declare read ui_slider direction_nks(0, NUM_directionModes-1)
+	// set_bounds(direction_nks, 100, UI_HEIGHT)
+	// property direction_int
+	// 	function get -> result
+	// 		result := int(xypad_direction[0] * float(NUM_directionModes))
+	// 	end function
+	
+	// 	function set(value)
+	// 		xypad_direction[0] := float(value) / float(NUM_directionModes)
+	// 		// xypad_direction -> picture_state := value
+	// 		// direction_nks := value
+	// 	end function
+	// end property
 	declare direction_ids[NUM_directionModes]
 	macro assign_direction_mode_ids(#mode#)
 		direction_ids[directionMode.#mode#] := get_ui_id(switch_#mode#)
@@ -697,6 +765,19 @@ on init
 	switch_up       -> width := switch_up       -> width + 7
 
 	// Legato/Quantize
+	// declare read ui_slider legato_nks(0, NUM_legatoModes-1)
+	// set_bounds(legato_nks, 200, UI_HEIGHT)
+	// property legato_int
+	// 	function get -> result
+	// 		result := int(xypad_legato[0] * float(NUM_legatoModes))
+	// 	end function
+	
+	// 	function set(value)
+	// 		xypad_legato[0] := float(value) / float(NUM_legatoModes)
+	// 		// xypad_legato -> picture_state := value
+	// 		// legato_nks := value
+	// 	end function
+	// end property
 	declare legato_ids[NUM_legatoModes]
 	macro assign_legato_mode_ids(#mode#)
 		legato_ids[legatoMode.#mode#] := get_ui_id(switch_#mode#)
@@ -713,7 +794,9 @@ on init
 	end for
 
 	// Release Mode
-	declare releaseSamples_ids[NUM_releaseSampleModes]
+	
+
+	declare releaseSamples_ids[NUM_releaseSamplesModes]
 	macro assign_releaseSample_mode_ids(#mode#)
 		releaseSamples_ids[releaseSampleMode.#mode#] := get_ui_id(switch_#mode#)
 	end macro
@@ -735,21 +818,12 @@ on init
 	switch_Release2        -> pos_x := switch_Release2        -> pos_x + 16
 	switch_Release3        -> pos_x := switch_Release3        -> pos_x + 16
 
-	// Options
-	define OPTIONS_MOUSE_BEHAVIOR := 2000
-	slider_speed          -> mouse_behaviour := OPTIONS_MOUSE_BEHAVIOR
-	slider_direction      -> mouse_behaviour := OPTIONS_MOUSE_BEHAVIOR
-	slider_legato         -> mouse_behaviour := OPTIONS_MOUSE_BEHAVIOR
-	slider_releaseSamples -> mouse_behaviour := OPTIONS_MOUSE_BEHAVIOR
-
-	macro assign_ctrl_ids(#ctrl#)
-		ctrl_ids[control.#ctrl#] := get_ui_id(slider_#ctrl#)
-	end macro
-	literate_macro(assign_ctrl_ids) on sliders
-
-	slider_speed     -> default := 2
-	slider_direction -> default := 1
-	slider_legato    -> default := 0
+	ctrl_ids[control.vol]            := get_ui_id(slider_vol)
+	ctrl_ids[control.reverb]         := get_ui_id(slider_reverb)
+	ctrl_ids[control.speed]          := get_ui_id(speed_nks)
+	ctrl_ids[control.direction]      := get_ui_id(direction_nks)
+	ctrl_ids[control.legato]         := get_ui_id(legato_nks)
+	ctrl_ids[control.releaseSamples] := get_ui_id(releaseSamples_nks)
 
 	slider_vol -> default := 500000
 	slider_reverb -> default := 500000
@@ -758,18 +832,18 @@ on init
 
 	{{ Automation }}
 	START_INC (N, 0, 1)
-		slider_vol            -> automation_id := N
-		slider_vol            -> automation_name := "Expression"
-		slider_reverb         -> automation_id := N
-		slider_reverb         -> automation_name := "Reverb"
-		slider_speed          -> automation_id := N
-		slider_speed          -> automation_name := "Speed"
-		slider_direction      -> automation_id := N
-		slider_direction      -> automation_name := "Direction"
-		slider_legato         -> automation_id := N
-		slider_legato         -> automation_name := "Sync"
-		slider_releaseSamples -> automation_id := N
-		slider_releaseSamples -> automation_name := "Release Samples"
+		slider_vol         -> automation_id := N
+		slider_vol         -> automation_name := "Expression"
+		slider_reverb      -> automation_id := N
+		slider_reverb      -> automation_name := "Reverb"
+		speed_nks          -> automation_id := N
+		speed_nks          -> automation_name := "Speed"
+		direction_nks      -> automation_id := N
+		direction_nks      -> automation_name := "Direction"
+		legato_nks         -> automation_id := N
+		legato_nks         -> automation_name := "Sync"
+		releaseSamples_nks -> automation_id := N
+		releaseSamples_nks -> automation_name := "Release Samples"
 	END_INC
 
 	// Misc setting things up
@@ -791,6 +865,10 @@ function persistence_changed_callback(_)
 	call set_reverb_menu_checkmark
 	call update_reverb_slider_picture
 	call update_midi_page_chooser_switches
+	macro write_option_nks_sliders_to_xypad(#option#)
+		#option#_int := #option#_nks
+	end macro
+	literate_macro(write_option_nks_sliders_to_xypad) on options
 	for i := 0 to NUM_CTRLS - 1
 		update_nks_label(i)
 		update_engine_pars(i)
@@ -816,7 +894,7 @@ function note_callback(note, velocity, event_id)
 
 	ks_index := search(speed_keyswitches, note)
 	if ks_index # -1
-		slider_speed := ks_index
+		speed_int := ks_index
 		call update_speed_switches
 		update_engine_pars(control.speed)
 		update_nks_label(control.speed)
@@ -824,21 +902,21 @@ function note_callback(note, velocity, event_id)
 
 	ks_index := search(direction_keyswitches, note)
 	if ks_index # -1
-		slider_direction := ks_index
+		direction_int := ks_index
 		call update_direction_switches
 		update_nks_label(control.direction)
 	end if
 
 	ks_index := search(legato_keyswitches, note)
 	if ks_index # -1
-		slider_legato := ks_index
+		legato_int := ks_index
 		call update_legato_switches
 		update_nks_label(control.legato)
 	end if
 
 	ks_index := search(release_sample_keyswitches, note)
 	if ks_index # -1
-		slider_releaseSamples := ks_index
+		releaseSamples_int := ks_index
 		call update_releaseSamples_switches
 		update_nks_label(control.releaseSamples)
 	end if
@@ -928,7 +1006,7 @@ function note_callback(note, velocity, event_id)
 				else
 					make_ripples_to_both_adjacent_neighbors := 0
 				end if
-				if slider_direction = directionMode.UP or slider_direction = directionMode.DOWN
+				if direction_int = directionMode.UP or direction_int = directionMode.DOWN
 					make_ripples_to_both_adjacent_neighbors := 1
 				end if
 
@@ -976,12 +1054,12 @@ function note_callback(note, velocity, event_id)
 			copy_array(intervals, played_intervals)
 			for ripple_i := 0 to num_ripples - 1
 				// Swap notes and intervals to change directions
-				if slider_direction = directionMode.UP
+				if direction_int = directionMode.UP
 					if intervals[ripple_i] < 0
 						notes[ripple_i]     := notes[ripple_i] + intervals[ripple_i]
 						intervals[ripple_i] := -intervals[ripple_i]
 					end if
-				else if slider_direction = directionMode.DOWN
+				else if direction_int = directionMode.DOWN
 					if intervals[ripple_i] > 0
 						notes[ripple_i]     := notes[ripple_i] + intervals[ripple_i]
 						intervals[ripple_i] := -intervals[ripple_i]
@@ -999,9 +1077,9 @@ function note_callback(note, velocity, event_id)
 
 				// Direction
 				if intervals[ripple_i] > 0
-					direction := UP
+					direction_int := UP
 				else
-					direction := DOWN
+					direction_int := DOWN
 				end if
 
 				// Origin, Destination (for Up and Down modes)
@@ -1026,7 +1104,7 @@ function note_callback(note, velocity, event_id)
 				end if
 				all_keys_inactive := 0
 
-				if slider_legato = 0
+				if legato_int = 0
 					do_legato := 0
 				end if
 
@@ -1042,7 +1120,7 @@ function note_callback(note, velocity, event_id)
 					// offset_real_time := ticks_to_ms(30) // For when you add a ripple using grid-snapped notes.
 				else
 					real_legato_time := (ENGINE_UPTIME - first_ripple_timestamp) * 1000
-					select slider_legato
+					select legato_int
 						case legatoMode.syncToPitch
 							real_legato_time := real_legato_time + ticks_to_ms(30) // For when you add a ripple using grid-snapped notes. Make it wrap a tiny bit earlier.
 							offset_real_time := real_legato_time mod real_pitch_length
@@ -1062,7 +1140,7 @@ function note_callback(note, velocity, event_id)
 				end if
 
 				// Compensate for latency
-				latency_real_time := int(float(menu_latency) / speeds[slider_speed])
+				latency_real_time := int(float(menu_latency) / speeds[speed_int])
 				offset_real_time := offset_real_time + (rec_time_to_real_time(LEADING_SILENCE) - latency_real_time) * 1000
 
 				// Convert to recorded time
@@ -1086,7 +1164,7 @@ function note_callback(note, velocity, event_id)
 					if event_status(ripple_id_history[r]) = EVENT_STATUS_NOTE_QUEUE
 						if ((event[ripple_id_history[r]].low_note = low_note and event[ripple_id_history[r]].high_note = high_note) ...
 							or (event[ripple_id_history[r]].origin_note = origin_note and event[ripple_id_history[r]].dest_note = dest_note)) ...
-						and event[ripple_id_history[r]].direction = direction ...
+						and event[ripple_id_history[r]].direction = direction_int ...
 						and event[ripple_id_history[r]].releasing = 0 ...
 						and ripple_id_history[r] -> play_pos - offset_rec_time < 5000
 							already_playing := 1
@@ -1113,7 +1191,7 @@ function note_callback(note, velocity, event_id)
 					event[note_id].first_note  := first_note
 					event[note_id].second_note := second_note
 					event[note_id].velocity    := velocity
-					event[note_id].direction   := direction
+					event[note_id].direction   := direction_int
 					event[note_id].source      := OUTSIDE_SOURCE
 					event[note_id].triggered_by_mf := event[event_id].triggered_by_mf
 
@@ -1217,7 +1295,7 @@ function release_marked_ripples
 
 			declare artic := event[ripple_id_history[r]].artic
 
-			latency := int(float(menu_latency) / speeds[slider_speed])
+			latency := int(float(menu_latency) / speeds[speed_int])
 			declare offset_rec_time := real_time_to_rec_time((rec_time_to_real_time(LEADING_SILENCE) - latency) * 1000)
 			declare rec_time_play_pos := ripple_id_history[r] -> play_pos - offset_rec_time
 			declare rec_time_pos_in_ripple := rec_time_play_pos mod rec_time_ripple_lengths[artic]
@@ -1225,9 +1303,9 @@ function release_marked_ripples
 
 			// Decide whether to play release sample
 			declare play_release_sample
-			if slider_releaseSamples = 0
+			if releaseSamples_int = 0
 				play_release_sample := 0
-			else if slider_releaseSamples > 0
+			else if releaseSamples_int > 0
 				play_release_sample := 1
 			end if
 
@@ -1283,7 +1361,7 @@ function release_marked_ripples
 					end if
 
 					// Set cur_ripple
-					if slider_releaseSamples = releaseSampleMode.autoRelease
+					if releaseSamples_int = releaseSampleMode.autoRelease
 						declare cur_ripple := rec_time_play_pos / rec_time_ripple_lengths[artic]
 
 						// Account for second half of swell
@@ -1291,7 +1369,7 @@ function release_marked_ripples
 							cur_ripple := 4 - (cur_ripple - 3)
 						end if
 					else
-						cur_ripple := slider_releaseSamples - 2
+						cur_ripple := releaseSamples_int - 2
 					end if
 
 					// Always override Release samples slider, if triggered by keyswitch
@@ -1351,7 +1429,7 @@ function controller_callback(event_id, cc_num)
 	end if
 	if cc_num = 1
 		if switch_releaseSamplesModwheelControl = 1
-			slider_releaseSamples := map_i_2i_2i_i(CC[cc_num], 0, 127, 2, 5)
+			releaseSamples_int := map_i_2i_2i_i(CC[cc_num], 0, 127, 2, 5)
 			call update_releaseSamples_switches
 			update_nks_label(control.releaseSamples)
 			call set_keys_pressed
@@ -1457,19 +1535,66 @@ on ui_control (menu_latency)
 end on
 
 // Title info
-on ui_control(switch_title)
+on ui_control(switch_openTitleInfo)
 	button_showMidi := 0
 	call update_midi_visibility
-	if switch_titleInfoDisp -> hide = HIDE_WHOLE_CONTROL
-		switch_titleInfoDisp -> hide := HIDE_PART_NOTHING
+	if panel_titleInfo -> hide = HIDE_WHOLE_CONTROL
+		panel_titleInfo -> hide := HIDE_PART_NOTHING
 	else
-		switch_titleInfoDisp -> hide := HIDE_WHOLE_CONTROL
+		panel_titleInfo -> hide := HIDE_WHOLE_CONTROL
 	end if
+	call update_title_page
 end on
 
-on ui_control(switch_titleInfoDisp)
-	switch_titleInfoDisp -> hide := HIDE_WHOLE_CONTROL
+on ui_control(switch_closeTitleInfo)
+	panel_titleInfo -> hide := HIDE_WHOLE_CONTROL
+	cur_title_page := 0
 end on
+
+function update_title_page
+	if cur_title_page = 0
+		button_prevTitlePg -> hide := HIDE_WHOLE_CONTROL
+	else
+		button_prevTitlePg -> hide := HIDE_PART_NOTHING
+	end if
+	if cur_title_page = NUM_TITLE_PAGES - 1
+		button_nextTitlePg -> hide := HIDE_WHOLE_CONTROL
+	else
+		button_nextTitlePg -> hide := HIDE_PART_NOTHING
+	end if
+	for i := 0 to NUM_TITLE_PAGES - 1
+		if i = cur_title_page
+			label_titleInfoPg[i] -> hide := HIDE_PART_NOTHING
+			switch_titlePgSelector[i] -> value := 1
+		else
+			label_titleInfoPg[i] -> hide := HIDE_WHOLE_CONTROL
+			switch_titlePgSelector[i] -> value := 0
+		end if
+	end for
+end function
+
+function change_title_page(amount)
+	cur_title_page := cur_title_page + amount
+	constrain(cur_title_page, 0, NUM_TITLE_PAGES - 1)
+	call update_title_page
+end function
+
+on ui_control (button_nextTitlePg)
+	change_title_page(1)	
+end on
+on ui_control (button_prevTitlePg)
+	change_title_page(-1)	
+end on
+
+macro titlePgSelector_callbacks(#i#)
+	on ui_control (switch_titlePgSelector#i#)
+		cur_title_page := #i#
+		call update_title_page
+	end on
+end macro
+iterate_macro(titlePgSelector_callbacks) := 0 to NUM_TITLE_PAGES - 1
+
+
 
 // General info
 on ui_control(button_generalInfo)
@@ -1777,54 +1902,83 @@ function slider_reverb_callback
 end function
 
 // Speed
-on ui_control(slider_speed)
-	call update_speed_switches
+function set_speed
+	update_speed_switches()
 	update_engine_pars(control.speed)
 	update_nks_label(control.speed)
 	call set_keys_pressed
+end function
+
+on ui_control(xypad_speed)
+	val := int(xypad_speed[0] * 0.999 * float(NUM_speedModes))
+	xypad_speed -> picture_state := val
+	speed_nks := val
+	call set_speed
+end on
+
+on ui_control (speed_nks)
+	speed_int := speed_nks
+	call set_speed
 end on
 
 macro speed_switch_callbacks(#mode#)
 	on ui_control (switch_#mode#)
-		slider_speed := speedMode.#mode#
-		call update_speed_switches
-		update_engine_pars(control.speed)
-		update_nks_label(control.speed)
-		call set_keys_pressed
+		speed_int := speedMode.#mode#
+		call set_speed
 	end on
 end macro
 literate_macro(speed_switch_callbacks) on speedModes
 
 // Direction
-on ui_control(slider_direction)
+function set_direction
 	call update_direction_switches
 	update_nks_label(control.direction)
 	call set_keys_pressed
+end function
+
+on ui_control(xypad_direction)
+	val := int(xypad_direction[0] * 0.999 * float(NUM_directionModes))
+	xypad_direction -> picture_state := val
+	direction_nks := val
+	call set_direction
+end on
+
+on ui_control (direction_nks)
+	direction_int := direction_nks
+	call set_direction
 end on
 
 macro direction_switch_callbacks(#mode#)
 	on ui_control (switch_#mode#)
-		slider_direction := directionMode.#mode#
-		call update_direction_switches
-		update_nks_label(control.direction)
-		call set_keys_pressed
+		direction_int := directionMode.#mode#
+		call set_direction
 	end on
 end macro
 literate_macro(direction_switch_callbacks) on directionModes
 
 // Legato/Quantize
-on ui_control(slider_legato)
+function set_legato
 	call update_legato_switches
 	update_nks_label(control.legato)
 	call set_keys_pressed
+end function
+
+on ui_control(xypad_legato)
+	val := int(xypad_legato[0] * 0.999 * float(NUM_legatoModes))
+	xypad_legato -> picture_state := val
+	legato_nks := val
+	call set_legato
+end on
+
+on ui_control(legato_nks)
+	legato_int := legato_nks
+	call set_legato
 end on
 
 macro legato_switch_callbacks(#mode#)
 	on ui_control (switch_#mode#)
-		slider_legato := legatoMode.#mode#
-		call update_legato_switches
-		update_nks_label(control.legato)
-		call set_keys_pressed
+		legato_int := legatoMode.#mode#
+		call set_legato
 	end on
 end macro
 literate_macro(legato_switch_callbacks) on legatoModes
@@ -1835,18 +1989,28 @@ end on
 
 
 // Release Samples
-on ui_control(slider_releaseSamples)
+function set_releaseSamples
 	call update_releaseSamples_switches
 	update_nks_label(control.releaseSamples)
 	call set_keys_pressed
+end function
+
+on ui_control(xypad_releaseSamples)
+	val := int(xypad_releaseSamples[0] * 0.999 * float(NUM_releaseSamplesModes))
+	xypad_releaseSamples -> picture_state := val
+	releaseSamples_nks := val
+	call set_releaseSamples
+end on
+
+on ui_control(releaseSamples_nks)
+	releaseSamples_int := releaseSamples_nks
+	call set_releaseSamples
 end on
 
 macro releaseSamples_switch_callbacks(#mode#)
 	on ui_control (switch_#mode#)
-		slider_releaseSamples := releaseSampleMode.#mode#
-		call update_releaseSamples_switches
-		update_nks_label(control.releaseSamples)
-		call set_keys_pressed
+		releaseSamples_int := releaseSampleMode.#mode#
+		call set_releaseSamples
 	end on
 end macro
 literate_macro(releaseSamples_switch_callbacks) on releaseSampleModes

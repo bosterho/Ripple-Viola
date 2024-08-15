@@ -1,0 +1,36 @@
+import "Utilities"
+
+on init
+	utilities.icb
+
+	set_ui_height_px(200)
+	declare ui_xy ?xy[2]
+	xy -> picture := "4 step slider"
+	xy -> mouse_mode := 2
+	set_bounds(xy, 100, 10, 182, 132/6)
+	set_control_par_str_arr(get_ui_id(xy), CONTROL_PAR_CURSOR_PICTURE, "label_transparent", 0)
+
+	property speed_int
+		function get -> result
+			result := int(xy[0] * float(4))
+		end function
+	
+		function set(value)
+			xy[0] := float(value) / float(4)
+		end function
+	end property
+
+	speed_int := 1
+	declare i
+	i := speed_int
+end on
+
+on persistence_changed
+	speed_int := speed_int
+end on
+
+
+on ui_control (xy)
+	xy -> picture_state := real_to_int(xy[0] * 4.0)
+end on
+
