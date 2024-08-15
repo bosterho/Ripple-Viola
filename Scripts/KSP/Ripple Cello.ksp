@@ -37,8 +37,9 @@ on init
 	declare const MAX_NUM_CHORD_IDS := 1000
 	define MAX_NUM_NOTES := VOICE_LIMIT
 	define MAX_RIPPLE_HISTORY := (VOICE_LIMIT + 32)
-	define NUM_MIDI_PAGES := 1
-	define NUM_MIDI_CLIPS := (8 * NUM_MIDI_PAGES)
+	define NUM_MIDI_PAGES := 10
+	define NUM_CLIPS_PER_PAGE := 8
+	define NUM_MIDI_CLIPS := (NUM_CLIPS_PER_PAGE * NUM_MIDI_PAGES)
 	define NUM_OPTION_SLIDERS := 4
 	define NUM_CTRLS := 7
 	define controls := sliders, reverb_type
@@ -522,10 +523,8 @@ on init
 	
 
 	// Midi page
-	declare panel_midiPg[NUM_MIDI_PAGES]
 	declare switch_midiPgChooser[NUM_MIDI_PAGES]
 	macro write_midiPg_ui_id_to_array(#i#)
-		panel_midiPg[#i#] := get_ui_id(panel_midiPg#i#)
 		switch_midiPgChooser[#i#] := get_ui_id(switch_midiPgChooser#i#)
 	end macro
 	iterate_macro(write_midiPg_ui_id_to_array) := 0 to NUM_MIDI_PAGES - 1
@@ -536,49 +535,45 @@ on init
 	end for
 	switch_midiPgChooser[0] -> value := 1
 
-	declare ui_slider mf_cursor[NUM_MIDI_CLIPS](0, 1000)
-	declare midi_clip_panel_id[NUM_MIDI_CLIPS]
-	declare midi_clip_id[NUM_MIDI_CLIPS]
-	declare midi_clip_dnd_id[NUM_MIDI_CLIPS]
-	declare midi_clip_preview_id[NUM_MIDI_CLIPS]
-	declare midi_clip_title_id[NUM_MIDI_CLIPS]
+	declare ui_slider mf_cursor[NUM_CLIPS_PER_PAGE](0, 1000)
+	declare midi_clip_panel_id[NUM_CLIPS_PER_PAGE]
+	declare label_clip[NUM_CLIPS_PER_PAGE]
+	declare switch_preview[NUM_CLIPS_PER_PAGE]
+	declare midi_clip_title_id[NUM_CLIPS_PER_PAGE]
+	declare midi_clip_dnd_id[NUM_CLIPS_PER_PAGE]
 	macro put_midi_clip_ui_controls_into_arrays(#i#)
-		midi_clip_panel_id[#i#]   := get_ui_id(panel_clip#i#)
-		midi_clip_id[#i#]         := get_ui_id(label_clip#i#)
-		midi_clip_dnd_id[#i#]     := get_ui_id(label_clip_dnd#i#)
-		midi_clip_preview_id[#i#] := get_ui_id(switch_preview#i#)
-		midi_clip_title_id[#i#]   := get_ui_id(xypad_clipTitle#i#)
+		midi_clip_panel_id[#i#] := get_ui_id(panel_clip#i#)
+		label_clip[#i#]         := get_ui_id(label_clip#i#)
+		switch_preview[#i#]     := get_ui_id(switch_preview#i#)
+		midi_clip_dnd_id[#i#] := get_ui_id(label_clip_dnd#i#)
 	end macro
-	iterate_macro(put_midi_clip_ui_controls_into_arrays) := 0 to NUM_MIDI_CLIPS - 1
+	iterate_macro(put_midi_clip_ui_controls_into_arrays) := 0 to NUM_CLIPS_PER_PAGE - 1
 
-	declare midi_page_panel_id[NUM_MIDI_PAGES]
-	macro put_midi_page_panel_into_array(#i#)
-		midi_page_panel_id[#i#] := get_ui_id(panel_midiPg#i#)
-	end macro
-	iterate_macro(put_midi_page_panel_into_array) := 0 to NUM_MIDI_PAGES - 1
-
-	declare clip_info_cursor[NUM_MIDI_CLIPS]
 	for i := 0 to NUM_MIDI_CLIPS - 1
 		mf_set_export_area(clip_names[i], -1, -1, i, i)
 		mf_copy_export_area(i + 1)
-		midi_clip_dnd_id[i] -> midi_export_area_idx := i + 1
+	end for
+
+	declare clip_info_cursor[NUM_CLIPS_PER_PAGE]
+	for i := 0 to NUM_CLIPS_PER_PAGE - 1
 		midi_clip_dnd_id[i] -> dnd_behaviour := 1
-		midi_clip_preview_id[i] -> z_layer := 1
-		midi_clip_preview_id[i] -> value := 0
+		midi_clip_dnd_id[i] -> dnd_behaviour := 1
+		switch_preview[i] -> z_layer := 1
+		switch_preview[i] -> value := 0
 		mf_cursor[i] -> picture := "mf_cursor"
 		mf_cursor[i] -> hide := HIDE_WHOLE_CONTROL
 		mf_cursor[i] -> parent_panel := midi_clip_panel_id[i]
-		// set_bounds(mf_cursor[i], 5, 0, 1, midi_clip_id[i] -> height)
+		// set_bounds(mf_cursor[i], 5, 0, 1, label_clip[i] -> height)
 		set_bounds(mf_cursor[i], 0, 0)
 
 		// Clip info xy's
-		midi_clip_title_id[i] -> picture := "blank"
-		for c := 0 to 15
-			set_control_par_str_arr(midi_clip_title_id[i], CONTROL_PAR_CURSOR_PICTURE, "blank", c * 2)
-		end for
-		set_control_par_str_arr(midi_clip_title_id[i], CONTROL_PAR_CURSOR_PICTURE, "clip title " & i, 0)
-		midi_clip_title_id[i] -> parent_panel := midi_clip_panel_id[i]
-		copy_bounds(midi_clip_id[i], midi_clip_title_id[i])
+		// midi_clip_title_id[i] -> picture := "blank"
+		// for c := 0 to 15
+		// 	set_control_par_str_arr(midi_clip_title_id[i], CONTROL_PAR_CURSOR_PICTURE, "blank", c * 2)
+		// end for
+		// set_control_par_str_arr(midi_clip_title_id[i], CONTROL_PAR_CURSOR_PICTURE, "clip title " & i, 0)
+		// midi_clip_title_id[i] -> parent_panel := midi_clip_panel_id[i]
+		// copy_bounds(label_clip[i], midi_clip_title_id[i])
 	end for
 
 	button_showMidi := 0
@@ -626,6 +621,7 @@ on init
 	switch_directionInfoDisp      -> z_layer := 1
 	switch_legatoInfoDisp         -> z_layer := 1
 	switch_releaseSamplesInfoDisp -> z_layer := 1
+
 
 	panel_midiPgChooser   -> z_layer := 1
 	switch_midiPgChooser0 -> z_layer := 1
@@ -690,7 +686,7 @@ on init
 		inc(i)
 		property #option#_int
 			function get -> result
-				result := int(xypad_#option#[0] * 0.999 * float(NUM_#option#Modes))
+				result := int(xypad_#option#[0] * float(NUM_#option#Modes))
 			end function
 		
 			function set(value)
@@ -703,19 +699,6 @@ on init
 	literate_macro(set_up_option_defines) on options
 
 	// Speed
-	// declare read ui_slider speed_nks(0, NUM_speedModes-1)
-	// set_bounds(speed_nks, 0, UI_HEIGHT)
-	// property speed_int
-	// 	function get -> result
-	// 		result := int(xypad_speed[0] * float(NUM_speedModes))
-	// 	end function
-	
-	// 	function set(value)
-	// 		xypad_speed[0] := float(value) / float(NUM_speedModes)
-	// 		// xypad_speed -> picture_state := value
-	// 		// speed_nks := value
-	// 	end function
-	// end property
 	declare speed_ids[NUM_speedModes]
 	macro assign_speed_mode_id(#mode#)
 		speed_ids[speedMode.#mode#] := get_ui_id(switch_#mode#)
@@ -733,19 +716,6 @@ on init
 	end for
 
 	// Direction
-	// declare read ui_slider direction_nks(0, NUM_directionModes-1)
-	// set_bounds(direction_nks, 100, UI_HEIGHT)
-	// property direction_int
-	// 	function get -> result
-	// 		result := int(xypad_direction[0] * float(NUM_directionModes))
-	// 	end function
-	
-	// 	function set(value)
-	// 		xypad_direction[0] := float(value) / float(NUM_directionModes)
-	// 		// xypad_direction -> picture_state := value
-	// 		// direction_nks := value
-	// 	end function
-	// end property
 	declare direction_ids[NUM_directionModes]
 	macro assign_direction_mode_ids(#mode#)
 		direction_ids[directionMode.#mode#] := get_ui_id(switch_#mode#)
@@ -765,19 +735,6 @@ on init
 	switch_up       -> width := switch_up       -> width + 7
 
 	// Legato/Quantize
-	// declare read ui_slider legato_nks(0, NUM_legatoModes-1)
-	// set_bounds(legato_nks, 200, UI_HEIGHT)
-	// property legato_int
-	// 	function get -> result
-	// 		result := int(xypad_legato[0] * float(NUM_legatoModes))
-	// 	end function
-	
-	// 	function set(value)
-	// 		xypad_legato[0] := float(value) / float(NUM_legatoModes)
-	// 		// xypad_legato -> picture_state := value
-	// 		// legato_nks := value
-	// 	end function
-	// end property
 	declare legato_ids[NUM_legatoModes]
 	macro assign_legato_mode_ids(#mode#)
 		legato_ids[legatoMode.#mode#] := get_ui_id(switch_#mode#)
@@ -865,6 +822,7 @@ function persistence_changed_callback(_)
 	call set_reverb_menu_checkmark
 	call update_reverb_slider_picture
 	call update_midi_page_chooser_switches
+	call update_midi_clips
 	macro write_option_nks_sliders_to_xypad(#option#)
 		#option#_int := #option#_nks
 	end macro
@@ -1319,6 +1277,7 @@ function release_marked_ripples
 			event[ripple_id_history[r]].play_release_sample := play_release_sample // For animation function
 
 			// Either fade out, or do release sample
+			val := releaseSamples_int
 			if play_release_sample = 0
 				event[ripple_id_history[r]].note_off_timestamp := ENGINE_UPTIME
 				event[ripple_id_history[r]].releasing := 1
@@ -1499,8 +1458,8 @@ function stop_all_clips_and_ripples
 	end for
 
 	// Stop clips
-	for clip_i := 0 to num_elements(midi_clip_preview_id) - 1
-		midi_clip_preview_id[clip_i] -> value := 0
+	for clip_i := 0 to num_elements(switch_preview) - 1
+		switch_preview[clip_i] -> value := 0
 		if playing[clip_i] = 1
 			playing[clip_i] := 0
 			looping[clip_i] := 0
@@ -1685,7 +1644,9 @@ end macro
 iterate_macro(midi_page_chooser_callbacks) := 0 to NUM_MIDI_PAGES - 1
 
 function change_midi_page(amount)
+	call stop_all_clips_and_ripples
 	cur_midi_page := (cur_midi_page + NUM_MIDI_PAGES + amount) mod NUM_MIDI_PAGES
+	call update_midi_clips
 	call update_midi_visibility
 	call update_midi_page_chooser_switches
 end function
@@ -1711,16 +1672,6 @@ end function
 
 
 macro midi_clip_callbacks(#i#)
-	on ui_control(xypad_clipTitle#i#)
-		set_control_par_str_arr(get_ui_id(xypad_clipTitle#i#), CONTROL_PAR_CURSOR_PICTURE, "blank", clip_info_cursor[#i#] * 2)
-		set_control_par_str_arr(get_ui_id(xypad_clipTitle#i#), CONTROL_PAR_CURSOR_PICTURE, "clip title #i#", (clip_info_cursor[#i#] + 1) * 2)
-		if NI_MOUSE_EVENT_TYPE = NI_MOUSE_EVENT_TYPE_LEFT_BUTTON_DOWN
-			if clip_info_cursor[#i#] < 15
-				inc(clip_info_cursor[#i#])
-			end if
-		end if
-	end on
-
 	on ui_control(switch_preview#i#)
 		switch_preview#i#_callback(_)
 	end on
@@ -1730,7 +1681,7 @@ macro midi_clip_callbacks(#i#)
 		call unpress_all_keys
 		cb_id[#i#] := NI_CALLBACK_ID
 
-		if midi_clip_preview_id[#i#] -> value = 0
+		if switch_preview[#i#] -> value = 0
 			// Stop clicked clip
 			playing[#i#] := 0
 			looping[#i#] := 0
@@ -1756,9 +1707,9 @@ macro midi_clip_callbacks(#i#)
 		else
 			// Stop all other clips
 			declare other_clip_i
-			for other_clip_i := 0 to num_elements(midi_clip_preview_id) - 1
+			for other_clip_i := 0 to num_elements(switch_preview) - 1
 				if #i# # other_clip_i
-					midi_clip_preview_id[other_clip_i] -> value := 0
+					switch_preview[other_clip_i] -> value := 0
 					if playing[other_clip_i] = 1
 						playing[other_clip_i] := 0
 						looping[other_clip_i] := 0
@@ -1786,6 +1737,7 @@ macro midi_clip_callbacks(#i#)
 
 			
 			//Play
+			declare clip_index := cur_midi_page * 8 + #i#
 			looping[#i#] := 1
 			while looping[#i#] = 1 and cb_id[#i#] = NI_CALLBACK_ID
 				if clip_loop_enabled[#i#] = 0
@@ -1795,7 +1747,7 @@ macro midi_clip_callbacks(#i#)
 					looping[#i#] := 0
 				end if
 
-				cur_event[#i#] := 0
+				declare cur_event := 0
 				
 				midi_file_pos_ticks[#i#] := 0
 				time_started[#i#] := ENGINE_UPTIME
@@ -1803,10 +1755,10 @@ macro midi_clip_callbacks(#i#)
 
 				playing[#i#] := 1
 				while playing[#i#] = 1 and cb_id[#i#] = NI_CALLBACK_ID
-					if cur_event[#i#] = num_midi_events[#i#]
-						declare ticks_until_next_event := clip_length[#i#] - midi_file_pos_ticks[#i#]
+					if cur_event = num_midi_events[clip_index]
+						declare ticks_until_next_event := clip_length[clip_index] - midi_file_pos_ticks[#i#]
 					else
-						ticks_until_next_event := midi_pos[#i#, cur_event[#i#]] - midi_file_pos_ticks[#i#]
+						ticks_until_next_event := midi_pos[clip_index, cur_event] - midi_file_pos_ticks[#i#]
 					end if
 
 					if ticks_until_next_event > 0
@@ -1814,7 +1766,7 @@ macro midi_clip_callbacks(#i#)
 					end if
 
 					// check_if_it_should_be_playing
-					if cur_event[#i#] > num_midi_events[#i#]
+					if cur_event > num_midi_events[clip_index]
 						playing[#i#] := 0
 					end if
 					if button_showMidi = 0
@@ -1823,29 +1775,29 @@ macro midi_clip_callbacks(#i#)
 
 					if playing[#i#] = 1 and cb_id[#i#] = NI_CALLBACK_ID
 						midi_file_pos_ticks[#i#] := midi_file_pos_ticks[#i#] + ticks_until_next_event
-						if midi_command[#i#, cur_event[#i#]] = MIDI_COMMAND_NOTE_ON
-							// declare event_id  := midi_event_id[#i#, cur_event[#i#]]
-							declare note     := midi_byte_1[#i#, cur_event[#i#]]
-							declare velocity := midi_byte_2[#i#, cur_event[#i#]]
-							declare length   := ticks_to_ms(midi_length[#i#, cur_event[#i#]])
+						if midi_command[clip_index, cur_event] = MIDI_COMMAND_NOTE_ON
+							// declare event_id  := midi_event_id[#i#, cur_event]
+							declare note     := midi_byte_1[clip_index, cur_event]
+							declare velocity := midi_byte_2[clip_index, cur_event]
+							declare length   := ticks_to_ms(midi_length[clip_index, cur_event])
 							declare note_id  := play_note(note, velocity, 0, length)
-							event[note_id].triggered_by_mf := #i# + 1
+							event[note_id].triggered_by_mf := clip_index + 1
 							event[note_id].active := 1 // This is used to decide whether to exit when the play_note() triggers the RCB
 							event[note_id].source := OUTSIDE_SOURCE
 							set_event_par_arr(note_id, EVENT_PAR_ALLOW_GROUP, 0, ALL_GROUPS)
 							note_callback(note, velocity, note_id)
 						end if
-						if midi_command[#i#, cur_event[#i#]] = MIDI_COMMAND_CC
-							declare cc_num := midi_byte_1[#i#, cur_event[#i#]]
-							set_controller(cc_num, midi_byte_2[#i#, cur_event[#i#]])
+						if midi_command[clip_index, cur_event] = MIDI_COMMAND_CC
+							declare cc_num := midi_byte_1[clip_index, cur_event]
+							set_controller(cc_num, midi_byte_2[clip_index, cur_event])
 							wait(1)
 							controller_callback(NI_CALLBACK_ID, cc_num)
 						end if
-						inc(cur_event[#i#])
+						inc(cur_event)
 					end if
 
 					// check_if_it_should_be_playing
-					if cur_event[#i#] > num_midi_events[#i#]
+					if cur_event > num_midi_events[clip_index]
 						playing[#i#] := 0
 					end if
 					if button_showMidi = 0
@@ -1856,12 +1808,12 @@ macro midi_clip_callbacks(#i#)
 
 			// only turn the button off if you'd let the clip run it's course without clicking it again
 			if cb_id[#i#] = NI_CALLBACK_ID
-				midi_clip_preview_id[#i#] -> value := 0
+				switch_preview[#i#] -> value := 0
 			end if
 		end if
 	end function
 end macro
-iterate_macro(midi_clip_callbacks) := 0 to NUM_MIDI_CLIPS - 1
+iterate_macro(midi_clip_callbacks) := 0 to NUM_CLIPS_PER_PAGE - 1
 
 	
 // Articulations
@@ -1910,7 +1862,10 @@ function set_speed
 end function
 
 on ui_control(xypad_speed)
-	val := int(xypad_speed[0] * 0.999 * float(NUM_speedModes))
+	if xypad_speed[0] = 1.0
+		xypad_speed[0] := 0.999
+	end if
+	val := int(xypad_speed[0] * float(NUM_speedModes))
 	xypad_speed -> picture_state := val
 	speed_nks := val
 	call set_speed
@@ -1937,7 +1892,10 @@ function set_direction
 end function
 
 on ui_control(xypad_direction)
-	val := int(xypad_direction[0] * 0.999 * float(NUM_directionModes))
+	if xypad_direction[0] = 1.0
+		xypad_direction[0] := 0.999
+	end if
+	val := int(xypad_direction[0] * float(NUM_directionModes))
 	xypad_direction -> picture_state := val
 	direction_nks := val
 	call set_direction
@@ -1964,7 +1922,10 @@ function set_legato
 end function
 
 on ui_control(xypad_legato)
-	val := int(xypad_legato[0] * 0.999 * float(NUM_legatoModes))
+	if xypad_legato[0] = 1.0
+		xypad_legato[0] := 0.999
+	end if
+	val := int(xypad_legato[0] * float(NUM_legatoModes))
 	xypad_legato -> picture_state := val
 	legato_nks := val
 	call set_legato
@@ -1996,7 +1957,10 @@ function set_releaseSamples
 end function
 
 on ui_control(xypad_releaseSamples)
-	val := int(xypad_releaseSamples[0] * 0.999 * float(NUM_releaseSamplesModes))
+	if xypad_releaseSamples[0] = 1.0
+		xypad_releaseSamples[0] := 0.999
+	end if
+	val := int(xypad_releaseSamples[0] * float(NUM_releaseSamplesModes))
 	xypad_releaseSamples -> picture_state := val
 	releaseSamples_nks := val
 	call set_releaseSamples

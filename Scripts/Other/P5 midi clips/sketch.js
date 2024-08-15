@@ -5,10 +5,12 @@ let marginHorizontal = 4;
 let clip_i = 0;
 
 let ks_image
+let clipOutline
 let hex_colors = []
 
 function preload() {
   ks_image = loadImage('assets/ks_image.png')
+  clipOutline = loadImage('assets/clipOutline.png')
   hex_colors = loadStrings('assets/channel colors.txt') 
 }
 
@@ -63,6 +65,7 @@ function draw() {
       if (event.command == "keyswitch") {
         // pg.image(ks_image, x-5, clipHeight-5)
 
+
         // pg.noFill()
         // pg.strokeWeight(1)
         // pg.stroke(color(255, 255, 255, 50))
@@ -87,6 +90,8 @@ function draw() {
         pg.rect(x, y, w, h, radius);
       }
     }
+
+    pg.image(clipOutline, 0, 0)
 
     saveCanvas(pg, "clip" + clip_i, 'png');
   }
