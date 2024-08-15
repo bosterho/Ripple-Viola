@@ -1,4 +1,4 @@
-{ Compiled on Thu Aug 15 13:30:22 2024 }
+{ Compiled on Thu Aug 15 14:59:16 2024 }
 on init
   declare $sksp_dummy
   declare $concat_it
@@ -1848,6 +1848,7 @@ on init
   declare $_make_ripples_to_both_adjacent_neighbors
   declare $_low_note2
   declare $_high_note2
+  declare $_ripple_dir
   declare $_origin_note2
   declare $_dest_note
   declare $_first_note
@@ -3003,13 +3004,9 @@ on note
           $_high_note2 := %__notes[$ripple_i]+%__intervals[$ripple_i]
         end if
         if (%__intervals[$ripple_i]>0)
-          ?xypad_direction[0] := int_to_real($UP)/int_to_real(3)
-          set_control_par(get_ui_id(?xypad_direction),$CONTROL_PAR_PICTURE_STATE,$UP)
-          $direction_nks := $UP
+          $_ripple_dir := $UP
         else
-          ?xypad_direction[0] := int_to_real($DOWN)/int_to_real(3)
-          set_control_par(get_ui_id(?xypad_direction),$CONTROL_PAR_PICTURE_STATE,$DOWN)
-          $direction_nks := $DOWN
+          $_ripple_dir := $DOWN
         end if
         $_origin_note2 := %__notes[$ripple_i]
         $_dest_note := %__notes[$ripple_i]+%__intervals[$ripple_i]
@@ -3062,7 +3059,7 @@ on note
         $r := 0
         while ($r<64)
           if (event_status(%ripple_id_history[$r])=$EVENT_STATUS_NOTE_QUEUE)
-            if ((%custom_event_low_note[%ripple_id_history[$r] mod 1000000]=$_low_note2 and (%custom_event_high_note[%ripple_id_history[$r] mod 1000000]=$_high_note2) or (%custom_event_origin_note[%ripple_id_history[$r] mod 1000000]=$_origin_note2 and (%custom_event_dest_note[%ripple_id_history[$r] mod 1000000]=$_dest_note))) and (%custom_event_direction[%ripple_id_history[$r] mod 1000000]=real_to_int(?xypad_direction[0]*int_to_real(3))) and (%custom_event_releasing[%ripple_id_history[$r] mod 1000000]=0) and (get_event_par(%ripple_id_history[$r],$EVENT_PAR_PLAY_POS)-$_offset_rec_time3<5000))
+            if ((%custom_event_low_note[%ripple_id_history[$r] mod 1000000]=$_low_note2 and (%custom_event_high_note[%ripple_id_history[$r] mod 1000000]=$_high_note2) or (%custom_event_origin_note[%ripple_id_history[$r] mod 1000000]=$_origin_note2 and (%custom_event_dest_note[%ripple_id_history[$r] mod 1000000]=$_dest_note))) and (%custom_event_direction[%ripple_id_history[$r] mod 1000000]=$_ripple_dir) and (%custom_event_releasing[%ripple_id_history[$r] mod 1000000]=0) and (get_event_par(%ripple_id_history[$r],$EVENT_PAR_PLAY_POS)-$_offset_rec_time3<5000))
               $_already_playing := 1
               %custom_event_marked_for_release[%ripple_id_history[$r] mod 1000000] := 0
             end if
@@ -3086,7 +3083,7 @@ on note
           %custom_event_first_note[$_note_id2 mod 1000000] := $_first_note
           %custom_event_second_note[$_note_id2 mod 1000000] := $_second_note
           %custom_event_velocity[$_note_id2 mod 1000000] := $EVENT_VELOCITY
-          %custom_event_direction[$_note_id2 mod 1000000] := real_to_int(?xypad_direction[0]*int_to_real(3))
+          %custom_event_direction[$_note_id2 mod 1000000] := $_ripple_dir
           %custom_event_source[$_note_id2 mod 1000000] := -1
           %custom_event_triggered_by_mf[$_note_id2 mod 1000000] := %custom_event_triggered_by_mf[$EVENT_ID mod 1000000]
           $r := 64-2
@@ -3865,13 +3862,9 @@ on ui_control($switch_preview0)
                     $_high_note2 := %__notes[$ripple_i]+%__intervals[$ripple_i]
                   end if
                   if (%__intervals[$ripple_i]>0)
-                    ?xypad_direction[0] := int_to_real($UP)/int_to_real(3)
-                    set_control_par(get_ui_id(?xypad_direction),$CONTROL_PAR_PICTURE_STATE,$UP)
-                    $direction_nks := $UP
+                    $_ripple_dir := $UP
                   else
-                    ?xypad_direction[0] := int_to_real($DOWN)/int_to_real(3)
-                    set_control_par(get_ui_id(?xypad_direction),$CONTROL_PAR_PICTURE_STATE,$DOWN)
-                    $direction_nks := $DOWN
+                    $_ripple_dir := $DOWN
                   end if
                   $_origin_note2 := %__notes[$ripple_i]
                   $_dest_note := %__notes[$ripple_i]+%__intervals[$ripple_i]
@@ -3924,7 +3917,7 @@ on ui_control($switch_preview0)
                   $r := 0
                   while ($r<64)
                     if (event_status(%ripple_id_history[$r])=$EVENT_STATUS_NOTE_QUEUE)
-                      if ((%custom_event_low_note[%ripple_id_history[$r] mod 1000000]=$_low_note2 and (%custom_event_high_note[%ripple_id_history[$r] mod 1000000]=$_high_note2) or (%custom_event_origin_note[%ripple_id_history[$r] mod 1000000]=$_origin_note2 and (%custom_event_dest_note[%ripple_id_history[$r] mod 1000000]=$_dest_note))) and (%custom_event_direction[%ripple_id_history[$r] mod 1000000]=real_to_int(?xypad_direction[0]*int_to_real(3))) and (%custom_event_releasing[%ripple_id_history[$r] mod 1000000]=0) and (get_event_par(%ripple_id_history[$r],$EVENT_PAR_PLAY_POS)-$_offset_rec_time3<5000))
+                      if ((%custom_event_low_note[%ripple_id_history[$r] mod 1000000]=$_low_note2 and (%custom_event_high_note[%ripple_id_history[$r] mod 1000000]=$_high_note2) or (%custom_event_origin_note[%ripple_id_history[$r] mod 1000000]=$_origin_note2 and (%custom_event_dest_note[%ripple_id_history[$r] mod 1000000]=$_dest_note))) and (%custom_event_direction[%ripple_id_history[$r] mod 1000000]=$_ripple_dir) and (%custom_event_releasing[%ripple_id_history[$r] mod 1000000]=0) and (get_event_par(%ripple_id_history[$r],$EVENT_PAR_PLAY_POS)-$_offset_rec_time3<5000))
                         $_already_playing := 1
                         %custom_event_marked_for_release[%ripple_id_history[$r] mod 1000000] := 0
                       end if
@@ -3948,7 +3941,7 @@ on ui_control($switch_preview0)
                     %custom_event_first_note[$_note_id2 mod 1000000] := $_first_note
                     %custom_event_second_note[$_note_id2 mod 1000000] := $_second_note
                     %custom_event_velocity[$_note_id2 mod 1000000] := $_velocity
-                    %custom_event_direction[$_note_id2 mod 1000000] := real_to_int(?xypad_direction[0]*int_to_real(3))
+                    %custom_event_direction[$_note_id2 mod 1000000] := $_ripple_dir
                     %custom_event_source[$_note_id2 mod 1000000] := -1
                     %custom_event_triggered_by_mf[$_note_id2 mod 1000000] := %custom_event_triggered_by_mf[$_note_id3 mod 1000000]
                     $r := 64-2
@@ -4335,13 +4328,9 @@ on ui_control($switch_preview1)
                     $_high_note2 := %__notes[$ripple_i]+%__intervals[$ripple_i]
                   end if
                   if (%__intervals[$ripple_i]>0)
-                    ?xypad_direction[0] := int_to_real($UP)/int_to_real(3)
-                    set_control_par(get_ui_id(?xypad_direction),$CONTROL_PAR_PICTURE_STATE,$UP)
-                    $direction_nks := $UP
+                    $_ripple_dir := $UP
                   else
-                    ?xypad_direction[0] := int_to_real($DOWN)/int_to_real(3)
-                    set_control_par(get_ui_id(?xypad_direction),$CONTROL_PAR_PICTURE_STATE,$DOWN)
-                    $direction_nks := $DOWN
+                    $_ripple_dir := $DOWN
                   end if
                   $_origin_note2 := %__notes[$ripple_i]
                   $_dest_note := %__notes[$ripple_i]+%__intervals[$ripple_i]
@@ -4394,7 +4383,7 @@ on ui_control($switch_preview1)
                   $r := 0
                   while ($r<64)
                     if (event_status(%ripple_id_history[$r])=$EVENT_STATUS_NOTE_QUEUE)
-                      if ((%custom_event_low_note[%ripple_id_history[$r] mod 1000000]=$_low_note2 and (%custom_event_high_note[%ripple_id_history[$r] mod 1000000]=$_high_note2) or (%custom_event_origin_note[%ripple_id_history[$r] mod 1000000]=$_origin_note2 and (%custom_event_dest_note[%ripple_id_history[$r] mod 1000000]=$_dest_note))) and (%custom_event_direction[%ripple_id_history[$r] mod 1000000]=real_to_int(?xypad_direction[0]*int_to_real(3))) and (%custom_event_releasing[%ripple_id_history[$r] mod 1000000]=0) and (get_event_par(%ripple_id_history[$r],$EVENT_PAR_PLAY_POS)-$_offset_rec_time3<5000))
+                      if ((%custom_event_low_note[%ripple_id_history[$r] mod 1000000]=$_low_note2 and (%custom_event_high_note[%ripple_id_history[$r] mod 1000000]=$_high_note2) or (%custom_event_origin_note[%ripple_id_history[$r] mod 1000000]=$_origin_note2 and (%custom_event_dest_note[%ripple_id_history[$r] mod 1000000]=$_dest_note))) and (%custom_event_direction[%ripple_id_history[$r] mod 1000000]=$_ripple_dir) and (%custom_event_releasing[%ripple_id_history[$r] mod 1000000]=0) and (get_event_par(%ripple_id_history[$r],$EVENT_PAR_PLAY_POS)-$_offset_rec_time3<5000))
                         $_already_playing := 1
                         %custom_event_marked_for_release[%ripple_id_history[$r] mod 1000000] := 0
                       end if
@@ -4418,7 +4407,7 @@ on ui_control($switch_preview1)
                     %custom_event_first_note[$_note_id2 mod 1000000] := $_first_note
                     %custom_event_second_note[$_note_id2 mod 1000000] := $_second_note
                     %custom_event_velocity[$_note_id2 mod 1000000] := $_velocity2
-                    %custom_event_direction[$_note_id2 mod 1000000] := real_to_int(?xypad_direction[0]*int_to_real(3))
+                    %custom_event_direction[$_note_id2 mod 1000000] := $_ripple_dir
                     %custom_event_source[$_note_id2 mod 1000000] := -1
                     %custom_event_triggered_by_mf[$_note_id2 mod 1000000] := %custom_event_triggered_by_mf[$_note_id4 mod 1000000]
                     $r := 64-2
@@ -4805,13 +4794,9 @@ on ui_control($switch_preview2)
                     $_high_note2 := %__notes[$ripple_i]+%__intervals[$ripple_i]
                   end if
                   if (%__intervals[$ripple_i]>0)
-                    ?xypad_direction[0] := int_to_real($UP)/int_to_real(3)
-                    set_control_par(get_ui_id(?xypad_direction),$CONTROL_PAR_PICTURE_STATE,$UP)
-                    $direction_nks := $UP
+                    $_ripple_dir := $UP
                   else
-                    ?xypad_direction[0] := int_to_real($DOWN)/int_to_real(3)
-                    set_control_par(get_ui_id(?xypad_direction),$CONTROL_PAR_PICTURE_STATE,$DOWN)
-                    $direction_nks := $DOWN
+                    $_ripple_dir := $DOWN
                   end if
                   $_origin_note2 := %__notes[$ripple_i]
                   $_dest_note := %__notes[$ripple_i]+%__intervals[$ripple_i]
@@ -4864,7 +4849,7 @@ on ui_control($switch_preview2)
                   $r := 0
                   while ($r<64)
                     if (event_status(%ripple_id_history[$r])=$EVENT_STATUS_NOTE_QUEUE)
-                      if ((%custom_event_low_note[%ripple_id_history[$r] mod 1000000]=$_low_note2 and (%custom_event_high_note[%ripple_id_history[$r] mod 1000000]=$_high_note2) or (%custom_event_origin_note[%ripple_id_history[$r] mod 1000000]=$_origin_note2 and (%custom_event_dest_note[%ripple_id_history[$r] mod 1000000]=$_dest_note))) and (%custom_event_direction[%ripple_id_history[$r] mod 1000000]=real_to_int(?xypad_direction[0]*int_to_real(3))) and (%custom_event_releasing[%ripple_id_history[$r] mod 1000000]=0) and (get_event_par(%ripple_id_history[$r],$EVENT_PAR_PLAY_POS)-$_offset_rec_time3<5000))
+                      if ((%custom_event_low_note[%ripple_id_history[$r] mod 1000000]=$_low_note2 and (%custom_event_high_note[%ripple_id_history[$r] mod 1000000]=$_high_note2) or (%custom_event_origin_note[%ripple_id_history[$r] mod 1000000]=$_origin_note2 and (%custom_event_dest_note[%ripple_id_history[$r] mod 1000000]=$_dest_note))) and (%custom_event_direction[%ripple_id_history[$r] mod 1000000]=$_ripple_dir) and (%custom_event_releasing[%ripple_id_history[$r] mod 1000000]=0) and (get_event_par(%ripple_id_history[$r],$EVENT_PAR_PLAY_POS)-$_offset_rec_time3<5000))
                         $_already_playing := 1
                         %custom_event_marked_for_release[%ripple_id_history[$r] mod 1000000] := 0
                       end if
@@ -4888,7 +4873,7 @@ on ui_control($switch_preview2)
                     %custom_event_first_note[$_note_id2 mod 1000000] := $_first_note
                     %custom_event_second_note[$_note_id2 mod 1000000] := $_second_note
                     %custom_event_velocity[$_note_id2 mod 1000000] := $_velocity3
-                    %custom_event_direction[$_note_id2 mod 1000000] := real_to_int(?xypad_direction[0]*int_to_real(3))
+                    %custom_event_direction[$_note_id2 mod 1000000] := $_ripple_dir
                     %custom_event_source[$_note_id2 mod 1000000] := -1
                     %custom_event_triggered_by_mf[$_note_id2 mod 1000000] := %custom_event_triggered_by_mf[$_note_id5 mod 1000000]
                     $r := 64-2
@@ -5275,13 +5260,9 @@ on ui_control($switch_preview3)
                     $_high_note2 := %__notes[$ripple_i]+%__intervals[$ripple_i]
                   end if
                   if (%__intervals[$ripple_i]>0)
-                    ?xypad_direction[0] := int_to_real($UP)/int_to_real(3)
-                    set_control_par(get_ui_id(?xypad_direction),$CONTROL_PAR_PICTURE_STATE,$UP)
-                    $direction_nks := $UP
+                    $_ripple_dir := $UP
                   else
-                    ?xypad_direction[0] := int_to_real($DOWN)/int_to_real(3)
-                    set_control_par(get_ui_id(?xypad_direction),$CONTROL_PAR_PICTURE_STATE,$DOWN)
-                    $direction_nks := $DOWN
+                    $_ripple_dir := $DOWN
                   end if
                   $_origin_note2 := %__notes[$ripple_i]
                   $_dest_note := %__notes[$ripple_i]+%__intervals[$ripple_i]
@@ -5334,7 +5315,7 @@ on ui_control($switch_preview3)
                   $r := 0
                   while ($r<64)
                     if (event_status(%ripple_id_history[$r])=$EVENT_STATUS_NOTE_QUEUE)
-                      if ((%custom_event_low_note[%ripple_id_history[$r] mod 1000000]=$_low_note2 and (%custom_event_high_note[%ripple_id_history[$r] mod 1000000]=$_high_note2) or (%custom_event_origin_note[%ripple_id_history[$r] mod 1000000]=$_origin_note2 and (%custom_event_dest_note[%ripple_id_history[$r] mod 1000000]=$_dest_note))) and (%custom_event_direction[%ripple_id_history[$r] mod 1000000]=real_to_int(?xypad_direction[0]*int_to_real(3))) and (%custom_event_releasing[%ripple_id_history[$r] mod 1000000]=0) and (get_event_par(%ripple_id_history[$r],$EVENT_PAR_PLAY_POS)-$_offset_rec_time3<5000))
+                      if ((%custom_event_low_note[%ripple_id_history[$r] mod 1000000]=$_low_note2 and (%custom_event_high_note[%ripple_id_history[$r] mod 1000000]=$_high_note2) or (%custom_event_origin_note[%ripple_id_history[$r] mod 1000000]=$_origin_note2 and (%custom_event_dest_note[%ripple_id_history[$r] mod 1000000]=$_dest_note))) and (%custom_event_direction[%ripple_id_history[$r] mod 1000000]=$_ripple_dir) and (%custom_event_releasing[%ripple_id_history[$r] mod 1000000]=0) and (get_event_par(%ripple_id_history[$r],$EVENT_PAR_PLAY_POS)-$_offset_rec_time3<5000))
                         $_already_playing := 1
                         %custom_event_marked_for_release[%ripple_id_history[$r] mod 1000000] := 0
                       end if
@@ -5358,7 +5339,7 @@ on ui_control($switch_preview3)
                     %custom_event_first_note[$_note_id2 mod 1000000] := $_first_note
                     %custom_event_second_note[$_note_id2 mod 1000000] := $_second_note
                     %custom_event_velocity[$_note_id2 mod 1000000] := $_velocity4
-                    %custom_event_direction[$_note_id2 mod 1000000] := real_to_int(?xypad_direction[0]*int_to_real(3))
+                    %custom_event_direction[$_note_id2 mod 1000000] := $_ripple_dir
                     %custom_event_source[$_note_id2 mod 1000000] := -1
                     %custom_event_triggered_by_mf[$_note_id2 mod 1000000] := %custom_event_triggered_by_mf[$_note_id6 mod 1000000]
                     $r := 64-2
@@ -5745,13 +5726,9 @@ on ui_control($switch_preview4)
                     $_high_note2 := %__notes[$ripple_i]+%__intervals[$ripple_i]
                   end if
                   if (%__intervals[$ripple_i]>0)
-                    ?xypad_direction[0] := int_to_real($UP)/int_to_real(3)
-                    set_control_par(get_ui_id(?xypad_direction),$CONTROL_PAR_PICTURE_STATE,$UP)
-                    $direction_nks := $UP
+                    $_ripple_dir := $UP
                   else
-                    ?xypad_direction[0] := int_to_real($DOWN)/int_to_real(3)
-                    set_control_par(get_ui_id(?xypad_direction),$CONTROL_PAR_PICTURE_STATE,$DOWN)
-                    $direction_nks := $DOWN
+                    $_ripple_dir := $DOWN
                   end if
                   $_origin_note2 := %__notes[$ripple_i]
                   $_dest_note := %__notes[$ripple_i]+%__intervals[$ripple_i]
@@ -5804,7 +5781,7 @@ on ui_control($switch_preview4)
                   $r := 0
                   while ($r<64)
                     if (event_status(%ripple_id_history[$r])=$EVENT_STATUS_NOTE_QUEUE)
-                      if ((%custom_event_low_note[%ripple_id_history[$r] mod 1000000]=$_low_note2 and (%custom_event_high_note[%ripple_id_history[$r] mod 1000000]=$_high_note2) or (%custom_event_origin_note[%ripple_id_history[$r] mod 1000000]=$_origin_note2 and (%custom_event_dest_note[%ripple_id_history[$r] mod 1000000]=$_dest_note))) and (%custom_event_direction[%ripple_id_history[$r] mod 1000000]=real_to_int(?xypad_direction[0]*int_to_real(3))) and (%custom_event_releasing[%ripple_id_history[$r] mod 1000000]=0) and (get_event_par(%ripple_id_history[$r],$EVENT_PAR_PLAY_POS)-$_offset_rec_time3<5000))
+                      if ((%custom_event_low_note[%ripple_id_history[$r] mod 1000000]=$_low_note2 and (%custom_event_high_note[%ripple_id_history[$r] mod 1000000]=$_high_note2) or (%custom_event_origin_note[%ripple_id_history[$r] mod 1000000]=$_origin_note2 and (%custom_event_dest_note[%ripple_id_history[$r] mod 1000000]=$_dest_note))) and (%custom_event_direction[%ripple_id_history[$r] mod 1000000]=$_ripple_dir) and (%custom_event_releasing[%ripple_id_history[$r] mod 1000000]=0) and (get_event_par(%ripple_id_history[$r],$EVENT_PAR_PLAY_POS)-$_offset_rec_time3<5000))
                         $_already_playing := 1
                         %custom_event_marked_for_release[%ripple_id_history[$r] mod 1000000] := 0
                       end if
@@ -5828,7 +5805,7 @@ on ui_control($switch_preview4)
                     %custom_event_first_note[$_note_id2 mod 1000000] := $_first_note
                     %custom_event_second_note[$_note_id2 mod 1000000] := $_second_note
                     %custom_event_velocity[$_note_id2 mod 1000000] := $_velocity5
-                    %custom_event_direction[$_note_id2 mod 1000000] := real_to_int(?xypad_direction[0]*int_to_real(3))
+                    %custom_event_direction[$_note_id2 mod 1000000] := $_ripple_dir
                     %custom_event_source[$_note_id2 mod 1000000] := -1
                     %custom_event_triggered_by_mf[$_note_id2 mod 1000000] := %custom_event_triggered_by_mf[$_note_id7 mod 1000000]
                     $r := 64-2
@@ -6215,13 +6192,9 @@ on ui_control($switch_preview5)
                     $_high_note2 := %__notes[$ripple_i]+%__intervals[$ripple_i]
                   end if
                   if (%__intervals[$ripple_i]>0)
-                    ?xypad_direction[0] := int_to_real($UP)/int_to_real(3)
-                    set_control_par(get_ui_id(?xypad_direction),$CONTROL_PAR_PICTURE_STATE,$UP)
-                    $direction_nks := $UP
+                    $_ripple_dir := $UP
                   else
-                    ?xypad_direction[0] := int_to_real($DOWN)/int_to_real(3)
-                    set_control_par(get_ui_id(?xypad_direction),$CONTROL_PAR_PICTURE_STATE,$DOWN)
-                    $direction_nks := $DOWN
+                    $_ripple_dir := $DOWN
                   end if
                   $_origin_note2 := %__notes[$ripple_i]
                   $_dest_note := %__notes[$ripple_i]+%__intervals[$ripple_i]
@@ -6274,7 +6247,7 @@ on ui_control($switch_preview5)
                   $r := 0
                   while ($r<64)
                     if (event_status(%ripple_id_history[$r])=$EVENT_STATUS_NOTE_QUEUE)
-                      if ((%custom_event_low_note[%ripple_id_history[$r] mod 1000000]=$_low_note2 and (%custom_event_high_note[%ripple_id_history[$r] mod 1000000]=$_high_note2) or (%custom_event_origin_note[%ripple_id_history[$r] mod 1000000]=$_origin_note2 and (%custom_event_dest_note[%ripple_id_history[$r] mod 1000000]=$_dest_note))) and (%custom_event_direction[%ripple_id_history[$r] mod 1000000]=real_to_int(?xypad_direction[0]*int_to_real(3))) and (%custom_event_releasing[%ripple_id_history[$r] mod 1000000]=0) and (get_event_par(%ripple_id_history[$r],$EVENT_PAR_PLAY_POS)-$_offset_rec_time3<5000))
+                      if ((%custom_event_low_note[%ripple_id_history[$r] mod 1000000]=$_low_note2 and (%custom_event_high_note[%ripple_id_history[$r] mod 1000000]=$_high_note2) or (%custom_event_origin_note[%ripple_id_history[$r] mod 1000000]=$_origin_note2 and (%custom_event_dest_note[%ripple_id_history[$r] mod 1000000]=$_dest_note))) and (%custom_event_direction[%ripple_id_history[$r] mod 1000000]=$_ripple_dir) and (%custom_event_releasing[%ripple_id_history[$r] mod 1000000]=0) and (get_event_par(%ripple_id_history[$r],$EVENT_PAR_PLAY_POS)-$_offset_rec_time3<5000))
                         $_already_playing := 1
                         %custom_event_marked_for_release[%ripple_id_history[$r] mod 1000000] := 0
                       end if
@@ -6298,7 +6271,7 @@ on ui_control($switch_preview5)
                     %custom_event_first_note[$_note_id2 mod 1000000] := $_first_note
                     %custom_event_second_note[$_note_id2 mod 1000000] := $_second_note
                     %custom_event_velocity[$_note_id2 mod 1000000] := $_velocity6
-                    %custom_event_direction[$_note_id2 mod 1000000] := real_to_int(?xypad_direction[0]*int_to_real(3))
+                    %custom_event_direction[$_note_id2 mod 1000000] := $_ripple_dir
                     %custom_event_source[$_note_id2 mod 1000000] := -1
                     %custom_event_triggered_by_mf[$_note_id2 mod 1000000] := %custom_event_triggered_by_mf[$_note_id8 mod 1000000]
                     $r := 64-2
@@ -6685,13 +6658,9 @@ on ui_control($switch_preview6)
                     $_high_note2 := %__notes[$ripple_i]+%__intervals[$ripple_i]
                   end if
                   if (%__intervals[$ripple_i]>0)
-                    ?xypad_direction[0] := int_to_real($UP)/int_to_real(3)
-                    set_control_par(get_ui_id(?xypad_direction),$CONTROL_PAR_PICTURE_STATE,$UP)
-                    $direction_nks := $UP
+                    $_ripple_dir := $UP
                   else
-                    ?xypad_direction[0] := int_to_real($DOWN)/int_to_real(3)
-                    set_control_par(get_ui_id(?xypad_direction),$CONTROL_PAR_PICTURE_STATE,$DOWN)
-                    $direction_nks := $DOWN
+                    $_ripple_dir := $DOWN
                   end if
                   $_origin_note2 := %__notes[$ripple_i]
                   $_dest_note := %__notes[$ripple_i]+%__intervals[$ripple_i]
@@ -6744,7 +6713,7 @@ on ui_control($switch_preview6)
                   $r := 0
                   while ($r<64)
                     if (event_status(%ripple_id_history[$r])=$EVENT_STATUS_NOTE_QUEUE)
-                      if ((%custom_event_low_note[%ripple_id_history[$r] mod 1000000]=$_low_note2 and (%custom_event_high_note[%ripple_id_history[$r] mod 1000000]=$_high_note2) or (%custom_event_origin_note[%ripple_id_history[$r] mod 1000000]=$_origin_note2 and (%custom_event_dest_note[%ripple_id_history[$r] mod 1000000]=$_dest_note))) and (%custom_event_direction[%ripple_id_history[$r] mod 1000000]=real_to_int(?xypad_direction[0]*int_to_real(3))) and (%custom_event_releasing[%ripple_id_history[$r] mod 1000000]=0) and (get_event_par(%ripple_id_history[$r],$EVENT_PAR_PLAY_POS)-$_offset_rec_time3<5000))
+                      if ((%custom_event_low_note[%ripple_id_history[$r] mod 1000000]=$_low_note2 and (%custom_event_high_note[%ripple_id_history[$r] mod 1000000]=$_high_note2) or (%custom_event_origin_note[%ripple_id_history[$r] mod 1000000]=$_origin_note2 and (%custom_event_dest_note[%ripple_id_history[$r] mod 1000000]=$_dest_note))) and (%custom_event_direction[%ripple_id_history[$r] mod 1000000]=$_ripple_dir) and (%custom_event_releasing[%ripple_id_history[$r] mod 1000000]=0) and (get_event_par(%ripple_id_history[$r],$EVENT_PAR_PLAY_POS)-$_offset_rec_time3<5000))
                         $_already_playing := 1
                         %custom_event_marked_for_release[%ripple_id_history[$r] mod 1000000] := 0
                       end if
@@ -6768,7 +6737,7 @@ on ui_control($switch_preview6)
                     %custom_event_first_note[$_note_id2 mod 1000000] := $_first_note
                     %custom_event_second_note[$_note_id2 mod 1000000] := $_second_note
                     %custom_event_velocity[$_note_id2 mod 1000000] := $_velocity7
-                    %custom_event_direction[$_note_id2 mod 1000000] := real_to_int(?xypad_direction[0]*int_to_real(3))
+                    %custom_event_direction[$_note_id2 mod 1000000] := $_ripple_dir
                     %custom_event_source[$_note_id2 mod 1000000] := -1
                     %custom_event_triggered_by_mf[$_note_id2 mod 1000000] := %custom_event_triggered_by_mf[$_note_id9 mod 1000000]
                     $r := 64-2
@@ -7155,13 +7124,9 @@ on ui_control($switch_preview7)
                     $_high_note2 := %__notes[$ripple_i]+%__intervals[$ripple_i]
                   end if
                   if (%__intervals[$ripple_i]>0)
-                    ?xypad_direction[0] := int_to_real($UP)/int_to_real(3)
-                    set_control_par(get_ui_id(?xypad_direction),$CONTROL_PAR_PICTURE_STATE,$UP)
-                    $direction_nks := $UP
+                    $_ripple_dir := $UP
                   else
-                    ?xypad_direction[0] := int_to_real($DOWN)/int_to_real(3)
-                    set_control_par(get_ui_id(?xypad_direction),$CONTROL_PAR_PICTURE_STATE,$DOWN)
-                    $direction_nks := $DOWN
+                    $_ripple_dir := $DOWN
                   end if
                   $_origin_note2 := %__notes[$ripple_i]
                   $_dest_note := %__notes[$ripple_i]+%__intervals[$ripple_i]
@@ -7214,7 +7179,7 @@ on ui_control($switch_preview7)
                   $r := 0
                   while ($r<64)
                     if (event_status(%ripple_id_history[$r])=$EVENT_STATUS_NOTE_QUEUE)
-                      if ((%custom_event_low_note[%ripple_id_history[$r] mod 1000000]=$_low_note2 and (%custom_event_high_note[%ripple_id_history[$r] mod 1000000]=$_high_note2) or (%custom_event_origin_note[%ripple_id_history[$r] mod 1000000]=$_origin_note2 and (%custom_event_dest_note[%ripple_id_history[$r] mod 1000000]=$_dest_note))) and (%custom_event_direction[%ripple_id_history[$r] mod 1000000]=real_to_int(?xypad_direction[0]*int_to_real(3))) and (%custom_event_releasing[%ripple_id_history[$r] mod 1000000]=0) and (get_event_par(%ripple_id_history[$r],$EVENT_PAR_PLAY_POS)-$_offset_rec_time3<5000))
+                      if ((%custom_event_low_note[%ripple_id_history[$r] mod 1000000]=$_low_note2 and (%custom_event_high_note[%ripple_id_history[$r] mod 1000000]=$_high_note2) or (%custom_event_origin_note[%ripple_id_history[$r] mod 1000000]=$_origin_note2 and (%custom_event_dest_note[%ripple_id_history[$r] mod 1000000]=$_dest_note))) and (%custom_event_direction[%ripple_id_history[$r] mod 1000000]=$_ripple_dir) and (%custom_event_releasing[%ripple_id_history[$r] mod 1000000]=0) and (get_event_par(%ripple_id_history[$r],$EVENT_PAR_PLAY_POS)-$_offset_rec_time3<5000))
                         $_already_playing := 1
                         %custom_event_marked_for_release[%ripple_id_history[$r] mod 1000000] := 0
                       end if
@@ -7238,7 +7203,7 @@ on ui_control($switch_preview7)
                     %custom_event_first_note[$_note_id2 mod 1000000] := $_first_note
                     %custom_event_second_note[$_note_id2 mod 1000000] := $_second_note
                     %custom_event_velocity[$_note_id2 mod 1000000] := $_velocity8
-                    %custom_event_direction[$_note_id2 mod 1000000] := real_to_int(?xypad_direction[0]*int_to_real(3))
+                    %custom_event_direction[$_note_id2 mod 1000000] := $_ripple_dir
                     %custom_event_source[$_note_id2 mod 1000000] := -1
                     %custom_event_triggered_by_mf[$_note_id2 mod 1000000] := %custom_event_triggered_by_mf[$_note_id10 mod 1000000]
                     $r := 64-2

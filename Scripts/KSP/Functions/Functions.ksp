@@ -70,8 +70,8 @@ taskfunc update_engine_pars(ctrl_index)
 	end select
 end taskfunc
 
-define rec_time_to_real_time(#i#) := map_i_2i_2i_i(#i#, 0, RECORDED_DURATION_QUARTER, 0, int(float(DURATION_QUARTER) * speeds[speed_int]))
-define real_time_to_rec_time(#i#) := map_i_2i_2i_i(#i#, 0, int(float(DURATION_QUARTER) * speeds[speed_int]), 0, RECORDED_DURATION_QUARTER)
+define rec_time_to_real_time(#i#) := map_i_2i_2i_i(#i#, 0, RECORDED_DURATION_QUARTER, 0, int(float(DURATION_QUARTER) * speeds[speed_ctrl]))
+define real_time_to_rec_time(#i#) := map_i_2i_2i_i(#i#, 0, int(float(DURATION_QUARTER) * speeds[speed_ctrl]), 0, RECORDED_DURATION_QUARTER)
 
 function update_reverb_send_levels
 	// vol := float(slider_reverb) / 1000000.0
@@ -254,7 +254,7 @@ function set_keys_pressed
 	end for
 
 	for i := 0 to NUM_speedModes - 1
-		if i = speed_int
+		if i = speed_ctrl
 			set_key_pressed(speed_keyswitches[i], 1)
 		else
 			set_key_pressed(speed_keyswitches[i], 0)
@@ -262,7 +262,7 @@ function set_keys_pressed
 	end for
 
 	for i := 0 to NUM_directionModes - 1
-		if i = direction_int
+		if i = direction_ctrl
 			set_key_pressed(direction_keyswitches[i], 1)
 		else
 			set_key_pressed(direction_keyswitches[i], 0)
@@ -270,7 +270,7 @@ function set_keys_pressed
 	end for
 
 	for i := 0 to NUM_legatoModes - 1
-		if i = legato_int
+		if i = legato_ctrl
 			set_key_pressed(legato_keyswitches[i], 1)
 		else
 			set_key_pressed(legato_keyswitches[i], 0)
@@ -278,7 +278,7 @@ function set_keys_pressed
 	end for
 
 	for i := 0 to NUM_releaseSamplesModes - 1
-		if i = releaseSamples_int
+		if i = releaseSamples_ctrl
 			set_key_pressed(release_sample_keyswitches[i], 1)
 		else
 			set_key_pressed(release_sample_keyswitches[i], 0)
@@ -435,7 +435,7 @@ function ripple_animations
 		else if event[ripple_id_history[r]].play_release_sample = 1 
 			if event_status(ripple_id_history[r]) = EVENT_STATUS_NOTE_QUEUE or event_status(event[ripple_id_history[r]].rls_sample_id) = EVENT_STATUS_NOTE_QUEUE
 				declare artic := event[ripple_id_history[r]].artic
-				declare latency := real_time_to_rec_time(int(float(menu_latency) / speeds[speed_int]))
+				declare latency := real_time_to_rec_time(int(float(menu_latency) / speeds[speed_ctrl]))
 				declare offset_rec_time := (LEADING_SILENCE - latency) * 1000
 				if event[ripple_id_history[r]].rls_sample_id -> play_pos - offset_rec_time > rec_time_ripple_lengths[artic] + stop_offset_rec_time[artic]
 					ripple[r] -> hide := HIDE_WHOLE_CONTROL
@@ -570,7 +570,7 @@ function fade_out_ripples_when_release_sample_sounds
 	for r := 0 to MAX_RIPPLE_HISTORY - 1
 		if event_status(ripple_id_history[r]) = EVENT_STATUS_NOTE_QUEUE
 			declare artic := event[ripple_id_history[r]].artic
-			declare latency := real_time_to_rec_time(int(float(menu_latency) / speeds[speed_int]))
+			declare latency := real_time_to_rec_time(int(float(menu_latency) / speeds[speed_ctrl]))
 			declare offset_rec_time := (LEADING_SILENCE - latency) * 1000
 			if event[ripple_id_history[r]].rls_sample_id -> play_pos - offset_rec_time > rec_time_ripple_lengths[artic] + stop_offset_rec_time[artic]
 				if event[ripple_id_history[r]].fading_out_for_release_sample = 0
