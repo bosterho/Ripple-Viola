@@ -126,17 +126,16 @@ end function
 
 function update_midi_clips
 	for i := 0 to 7
-		midi_clip_dnd_id[i] -> midi_export_area_idx := cur_midi_page * 8 + i + 1
+		midi_clip_dnd_id[i] -> midi_export_area_idx := cur_midi_page * NUM_CLIPS_PER_PAGE + i + 1
 		label_clip[i] -> picture := "clip" & cur_midi_page * 8 + i
-		label_midiPgDescription -> picture := "label_midiPg" & cur_midi_page & "Description"
-		switch_preview[i] -> picture := "clip title " & cur_midi_page * 8 + i
+		label_midiPgDescription -> picture_state := cur_midi_page
+		switch_preview[i] -> picture := "clip title " & cur_midi_page * NUM_CLIPS_PER_PAGE + i
 	end for
 end function
 
 function update_midi_visibility()
 	switch_closeMidi -> hide := hide_states[button_showMidi]
 	panel_midi -> hide := hide_states[button_showMidi]
-	panel_midiPg -> hide := hide_states[button_showMidi]
 	label_midiInstructions      -> hide := hide_states[button_showMidi]
 	midiInstructions_opacity := float(button_showMidi)
 	midiCover_opacity := float(button_showMidi)
@@ -608,18 +607,27 @@ function unpress_all_keys
 end function
 
 
-function midi_clip_play_cursors
+function midi_clip_play_cursor
+	declare previewing := 0
 	for clip_i := 0 to NUM_CLIPS_PER_PAGE - 1
 		if switch_preview[clip_i] -> value = 1
 			declare time_played := ENGINE_UPTIME - time_started[clip_i]
-			declare clip_length_ms := ticks_to_ms(clip_length[clip_i]) / 1000
-			// mf_cursor[clip_i] -> pos_x := map_i_2i_2i_i(time_played, 0, clip_length_ms, CLIP_MARGIN, label_clip[clip_i] -> width - CLIP_MARGIN)
-			mf_cursor[clip_i] -> value := map_i_2i_2i_i(time_played, 0, clip_length_ms, 0, 1000)
-			mf_cursor[clip_i] -> hide := HIDE_PART_NOTHING
-		else
-			mf_cursor[clip_i] -> hide := HIDE_WHOLE_CONTROL
+			declare clip_index := cur_midi_page * NUM_CLIPS_PER_PAGE + clip_i
+			declare clip_length_ms := ticks_to_ms(clip_length[clip_index]) / 1000
+			copy_bounds(switch_preview[clip_i], mf_cursor)
+			mf_cursor -> pos_x := mf_cursor -> pos_x + 1
+			mf_cursor -> pos_y := mf_cursor -> pos_y + 1
+			mf_cursor -> width := mf_cursor -> width - 2
+			mf_cursor -> height := mf_cursor -> height - 2
+			mf_cursor -> picture_state := map_i_2i_2i_i(time_played, 0, clip_length_ms, 0, 127)
+			previewing := 1
 		end if
 	end for
+	if previewing = 1
+		mf_cursor -> hide := HIDE_PART_NOTHING
+	else
+		mf_cursor -> hide := HIDE_WHOLE_CONTROL
+	end if
 end function
 
 function info_graphics_animation

@@ -39,7 +39,7 @@ on init
 	define MAX_RIPPLE_HISTORY := (VOICE_LIMIT + 32)
 	define NUM_MIDI_PAGES := 10
 	define NUM_CLIPS_PER_PAGE := 8
-	define NUM_MIDI_CLIPS := (NUM_CLIPS_PER_PAGE * NUM_MIDI_PAGES)
+	define TOTAL_NUM_MIDI_CLIPS := (NUM_CLIPS_PER_PAGE * NUM_MIDI_PAGES)
 	define NUM_OPTION_SLIDERS := 4
 	define NUM_CTRLS := 7
 	define controls := sliders, reverb_type
@@ -332,23 +332,23 @@ on init
 	declare ~smoothed_midiCover_opacity
 
 	// Midi
-	declare midi_event_id[NUM_MIDI_CLIPS, MF_BUFFER_SIZE]
-	declare midi_command [NUM_MIDI_CLIPS, MF_BUFFER_SIZE]
-	declare midi_pos     [NUM_MIDI_CLIPS, MF_BUFFER_SIZE]
-	declare midi_byte_1  [NUM_MIDI_CLIPS, MF_BUFFER_SIZE]
-	declare midi_byte_2  [NUM_MIDI_CLIPS, MF_BUFFER_SIZE]
-	declare midi_length  [NUM_MIDI_CLIPS, MF_BUFFER_SIZE]
-	declare clip_length  [NUM_MIDI_CLIPS]
-	declare clip_loop_enabled  [NUM_MIDI_CLIPS]
-	declare num_midi_events[NUM_MIDI_CLIPS]
-	declare num_midi_notes[NUM_MIDI_CLIPS]
-	declare num_midi_ccs[NUM_MIDI_CLIPS]
-	declare time_started[NUM_MIDI_CLIPS]
-	declare cur_event[NUM_MIDI_CLIPS]
-    declare playing[NUM_MIDI_CLIPS]
-    declare looping[NUM_MIDI_CLIPS]
-    declare midi_file_pos_ticks[NUM_MIDI_CLIPS]
-	declare cb_id[NUM_MIDI_CLIPS]
+	declare midi_event_id[TOTAL_NUM_MIDI_CLIPS, MF_BUFFER_SIZE]
+	declare midi_command [TOTAL_NUM_MIDI_CLIPS, MF_BUFFER_SIZE]
+	declare midi_pos     [TOTAL_NUM_MIDI_CLIPS, MF_BUFFER_SIZE]
+	declare midi_byte_1  [TOTAL_NUM_MIDI_CLIPS, MF_BUFFER_SIZE]
+	declare midi_byte_2  [TOTAL_NUM_MIDI_CLIPS, MF_BUFFER_SIZE]
+	declare midi_length  [TOTAL_NUM_MIDI_CLIPS, MF_BUFFER_SIZE]
+	declare clip_length  [TOTAL_NUM_MIDI_CLIPS]
+	declare clip_loop_enabled  [TOTAL_NUM_MIDI_CLIPS]
+	declare num_midi_events[TOTAL_NUM_MIDI_CLIPS]
+	declare num_midi_notes[TOTAL_NUM_MIDI_CLIPS]
+	declare num_midi_ccs[TOTAL_NUM_MIDI_CLIPS]
+	declare time_started[TOTAL_NUM_MIDI_CLIPS]
+	declare cur_event[TOTAL_NUM_MIDI_CLIPS]
+    declare playing[TOTAL_NUM_MIDI_CLIPS]
+    declare looping[TOTAL_NUM_MIDI_CLIPS]
+    declare midi_file_pos_ticks[TOTAL_NUM_MIDI_CLIPS]
+	declare cb_id[TOTAL_NUM_MIDI_CLIPS]
 
 	{{ Iterators }}
 	declare hist_i
@@ -374,15 +374,15 @@ on init
 	mf_reset()
 	define MF_BUFFER_SIZE := 1000
 	mf_set_buffer_size(MF_BUFFER_SIZE)
-	mf_set_num_export_areas(NUM_MIDI_CLIPS + 1)
+	mf_set_num_export_areas(TOTAL_NUM_MIDI_CLIPS + 1)
 	mf_insert_file(get_folder(GET_FOLDER_PATCH_DIR) & "/Midi/midi.mid", 0, 0, 0)
 
 	// Clip names
-	declare !clip_names[NUM_MIDI_CLIPS]
+	declare !clip_names[TOTAL_NUM_MIDI_CLIPS]
 	load_array(clip_names, 2)
 
 	// Insert midi data into arrays to be played back
-	for clip_i := 0 to NUM_MIDI_CLIPS - 1
+	for clip_i := 0 to TOTAL_NUM_MIDI_CLIPS - 1
 		// Notes
 		mf_get_first(clip_i) 
 		while mf_get_command() # 0
@@ -470,7 +470,7 @@ on init
 	end for
 
 	// Find clip lengths
-	for clip_i := 0 to NUM_MIDI_CLIPS - 1
+	for clip_i := 0 to TOTAL_NUM_MIDI_CLIPS - 1
 		mf_get_first(clip_i) 
 		while mf_get_command() # 0
 			if mf_get_command() = MIDI_COMMAND_CC
@@ -503,7 +503,7 @@ on init
 	for i := 0 to num_elements(ripple_swell) - 1
 		ripple_swell[i] -> parent_panel := get_ui_id(ripples_panel)
 		ripple_swell[i] -> hide := HIDE_WHOLE_CONTROL
-	end for
+	end for	
 
 	import "F2K/UI Code.ksp"
 	set_ui_height_px(UI_HEIGHT + dev_mode[0] * 50)
@@ -513,10 +513,8 @@ on init
 
 	// Title pages
 	define NUM_TITLE_PAGES := 4
-	declare label_titleInfoPg[NUM_TITLE_PAGES]
 	declare switch_titlePgSelector[NUM_TITLE_PAGES]
 	macro assign_titleInfoPg_id(#i#)
-		label_titleInfoPg[#i#] := get_ui_id(label_titleInfoPg#i#)
 		switch_titlePgSelector[#i#] := get_ui_id(switch_titlePgSelector#i#)
 	end macro
 	iterate_macro(assign_titleInfoPg_id) := 0 to NUM_TITLE_PAGES - 1
@@ -535,45 +533,33 @@ on init
 	end for
 	switch_midiPgChooser[0] -> value := 1
 
-	declare ui_slider mf_cursor[NUM_CLIPS_PER_PAGE](0, 1000)
-	declare midi_clip_panel_id[NUM_CLIPS_PER_PAGE]
+	declare ui_label mf_cursor(2, 2)
+	mf_cursor -> picture := "mf_cursor"
+	mf_cursor -> text := ""
+	mf_cursor -> hide := HIDE_WHOLE_CONTROL
+	mf_cursor -> parent_panel := get_ui_id(panel_midi)
+	mf_cursor -> z_layer := -1
+	set_bounds(mf_cursor, 0, 0)
+
 	declare label_clip[NUM_CLIPS_PER_PAGE]
 	declare switch_preview[NUM_CLIPS_PER_PAGE]
 	declare midi_clip_title_id[NUM_CLIPS_PER_PAGE]
 	declare midi_clip_dnd_id[NUM_CLIPS_PER_PAGE]
 	macro put_midi_clip_ui_controls_into_arrays(#i#)
-		midi_clip_panel_id[#i#] := get_ui_id(panel_clip#i#)
-		label_clip[#i#]         := get_ui_id(label_clip#i#)
-		switch_preview[#i#]     := get_ui_id(switch_preview#i#)
+		label_clip[#i#]       := get_ui_id(label_clip#i#)
+		switch_preview[#i#]   := get_ui_id(switch_preview#i#)
 		midi_clip_dnd_id[#i#] := get_ui_id(label_clip_dnd#i#)
 	end macro
 	iterate_macro(put_midi_clip_ui_controls_into_arrays) := 0 to NUM_CLIPS_PER_PAGE - 1
 
-	for i := 0 to NUM_MIDI_CLIPS - 1
+	for i := 0 to TOTAL_NUM_MIDI_CLIPS - 1
 		mf_set_export_area(clip_names[i], -1, -1, i, i)
 		mf_copy_export_area(i + 1)
 	end for
 
-	declare clip_info_cursor[NUM_CLIPS_PER_PAGE]
 	for i := 0 to NUM_CLIPS_PER_PAGE - 1
 		midi_clip_dnd_id[i] -> dnd_behaviour := 1
-		midi_clip_dnd_id[i] -> dnd_behaviour := 1
-		switch_preview[i] -> z_layer := 1
 		switch_preview[i] -> value := 0
-		mf_cursor[i] -> picture := "mf_cursor"
-		mf_cursor[i] -> hide := HIDE_WHOLE_CONTROL
-		mf_cursor[i] -> parent_panel := midi_clip_panel_id[i]
-		// set_bounds(mf_cursor[i], 5, 0, 1, label_clip[i] -> height)
-		set_bounds(mf_cursor[i], 0, 0)
-
-		// Clip info xy's
-		// midi_clip_title_id[i] -> picture := "blank"
-		// for c := 0 to 15
-		// 	set_control_par_str_arr(midi_clip_title_id[i], CONTROL_PAR_CURSOR_PICTURE, "blank", c * 2)
-		// end for
-		// set_control_par_str_arr(midi_clip_title_id[i], CONTROL_PAR_CURSOR_PICTURE, "clip title " & i, 0)
-		// midi_clip_title_id[i] -> parent_panel := midi_clip_panel_id[i]
-		// copy_bounds(label_clip[i], midi_clip_title_id[i])
 	end for
 
 	button_showMidi := 0
@@ -608,8 +594,8 @@ on init
 	switch_releaseSamplesInfoDisp -> hide := HIDE_WHOLE_CONTROL
 
 	panel_titleInfo -> z_layer := 1
+	label_titlePg -> z_layer := 1
 	for i := 0 to NUM_TITLE_PAGES - 1
-		label_titleInfoPg[i] -> z_layer := 1
 		switch_titlePgSelector[i] -> z_layer := 1
 	end for
 	button_prevTitlePg            -> z_layer := 1
@@ -1386,14 +1372,6 @@ function controller_callback(event_id, cc_num)
 		end if
 		prev_cc64 := CC[cc_num]
 	end if
-	if cc_num = 1
-		if switch_releaseSamplesModwheelControl = 1
-			releaseSamples_int := map_i_2i_2i_i(CC[cc_num], 0, 127, 2, 5)
-			call update_releaseSamples_switches
-			update_nks_label(control.releaseSamples)
-			call set_keys_pressed
-		end if
-	end if
 end function
 
 
@@ -1407,7 +1385,7 @@ function listener_callback
 		call fade_out_ripples_when_release_sample_sounds
 		call ripple_animations
 		// call update_recorded_midi
-		call midi_clip_play_cursors
+		call midi_clip_play_cursor
 		call info_graphics_animation
 		call hide_version
 	end if
@@ -1521,12 +1499,11 @@ function update_title_page
 	else
 		button_nextTitlePg -> hide := HIDE_PART_NOTHING
 	end if
+	label_titlePg -> picture_state := cur_title_page
 	for i := 0 to NUM_TITLE_PAGES - 1
 		if i = cur_title_page
-			label_titleInfoPg[i] -> hide := HIDE_PART_NOTHING
 			switch_titlePgSelector[i] -> value := 1
 		else
-			label_titleInfoPg[i] -> hide := HIDE_WHOLE_CONTROL
 			switch_titlePgSelector[i] -> value := 0
 		end if
 	end for
@@ -1637,6 +1614,7 @@ macro midi_page_chooser_callbacks(#i#)
 	end on
 	function switch_midiPgChooser#i#_callback
 		cur_midi_page := #i#
+		call update_midi_clips
 		call update_midi_visibility
 		call update_midi_page_chooser_switches
 	end function
@@ -1645,6 +1623,7 @@ iterate_macro(midi_page_chooser_callbacks) := 0 to NUM_MIDI_PAGES - 1
 
 function change_midi_page(amount)
 	call stop_all_clips_and_ripples
+
 	cur_midi_page := (cur_midi_page + NUM_MIDI_PAGES + amount) mod NUM_MIDI_PAGES
 	call update_midi_clips
 	call update_midi_visibility
@@ -1737,7 +1716,7 @@ macro midi_clip_callbacks(#i#)
 
 			
 			//Play
-			declare clip_index := cur_midi_page * 8 + #i#
+			declare clip_index := cur_midi_page * NUM_CLIPS_PER_PAGE + #i#
 			looping[#i#] := 1
 			while looping[#i#] = 1 and cb_id[#i#] = NI_CALLBACK_ID
 				if clip_loop_enabled[#i#] = 0
@@ -1751,7 +1730,7 @@ macro midi_clip_callbacks(#i#)
 				
 				midi_file_pos_ticks[#i#] := 0
 				time_started[#i#] := ENGINE_UPTIME
-				call midi_clip_play_cursors
+				call midi_clip_play_cursor
 
 				playing[#i#] := 1
 				while playing[#i#] = 1 and cb_id[#i#] = NI_CALLBACK_ID
