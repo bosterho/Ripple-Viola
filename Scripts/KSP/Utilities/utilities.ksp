@@ -156,8 +156,8 @@ define db_to_engine_value_real(#db#) := pow(2.0, (#db# + 346768.2342478351) / 18
 
 
 function vol_to_db_safe(vol) -> result
-	if vol < 0.0000001
-		vol := 0.0000001
+	if vol < 0.00001
+		vol := 0.00001
 	end if
 	result := (20.0 * log_b(10, vol))
 end function

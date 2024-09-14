@@ -3,7 +3,6 @@ function k6_log2(value) -> return
 	return := log_b(2, value)
 end function
 
-
 // Filters
 // Fundamental equation: ep = 10^6/log2(Fmax/Fmin)*log2(F/Fmin)
 // E2V output and V2E input: f_min to f_max Hz

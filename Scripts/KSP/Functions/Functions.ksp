@@ -97,8 +97,9 @@ function update_reverb_slider_picture
 	end if
 end function
 
-function update_latency_label
+function update_latency_graphics
 	label_latency -> text := menu_latency & "ms"
+	// menu_latency -> picture := "latency " & menu_latency & "ms"
 end function
 
 function trigger_release_samples_for_all_ripples()
@@ -536,6 +537,47 @@ function ripple_animations
 	end for
 end function
 
+// function dynamics
+// 	declare r
+// 	for r := 0 to MAX_RIPPLE_HISTORY - 1
+// 		if event_status(ripple_id_history[r]) = EVENT_STATUS_NOTE_QUEUE
+// 			declare artic := event[ripple_id_history[r]].artic
+// 			latency := int(float(menu_latency) / speeds[speed_ctrl])
+// 			declare offset_rec_time := real_time_to_rec_time((rec_time_to_real_time(LEADING_SILENCE) - latency) * 1000)
+// 			declare rec_time_play_pos := (ripple_id_history[r] -> play_pos - offset_rec_time) mod rec_time_sample_lengths[artic]
+// 			declare rec_time_pos_in_ripple := rec_time_play_pos mod rec_time_ripple_lengths[artic]
+			
+// 			// Ripples
+// 			declare midpoint := rec_time_ripple_lengths[artic] - menu_latency * 1000
+// 			declare dynamic := map_i_2i_2i_i(slider_rippleDynamics, 0, 1000000, 6000, -6000)
+// 			declare ripple_db
+// 			if in_range(rec_time_pos_in_ripple, 0, midpoint)
+// 				ripple_db := map_i_2i_2i_i(rec_time_pos_in_ripple, 0, midpoint, -dynamic, dynamic)
+// 			else if in_range(rec_time_pos_in_ripple, midpoint, rec_time_ripple_lengths[artic])
+// 				ripple_db := map_i_2i_2i_i(rec_time_pos_in_ripple, midpoint, rec_time_ripple_lengths[artic], dynamic, -dynamic)
+// 			end if
+
+// 			// Swell
+// 			midpoint := rec_time_sample_lengths[artic] / 2
+// 			dynamic := map_i_2i_2i_i(slider_swellDynamics, 0, 1000000, -6000, 6000)
+// 			declare swell_db
+// 			if in_range(rec_time_play_pos, 0, midpoint)
+// 				swell_db := map_i_2i_2i_i(rec_time_play_pos, 0, midpoint, -dynamic, dynamic)
+// 			else
+// 				swell_db := map_i_2i_2i_i(rec_time_play_pos, midpoint, rec_time_sample_lengths[artic], dynamic, -dynamic)
+// 			end if
+
+// 			declare db_int := ripple_db + swell_db
+// 			// declare db_int := swell_db
+// 			// db := vol_to_db_safe(vol)
+// 			// if event[ripple_id_history[r]].crossfading = 0 ...
+// 			// and event[ripple_id_history[r]].releasing = 0 
+// 				change_vol(ripple_id_history[r], db_int, CHANGE_ABSOLUTE)
+// 			// end if
+// 		end if
+// 	end for
+// end function
+
 function crossfaded_looping
 	declare r
 	for r := 0 to MAX_RIPPLE_HISTORY - 1
@@ -547,6 +589,7 @@ function crossfaded_looping
 					fade_out(ripple_id_history[r], DURATION_SIXTEENTH, STOP_VOICE_AFTER_FADE_OUT)
 					declare sample_start := (pos_in_swell mod rec_time_sample_lengths[artic]) + LEADING_SILENCE * 1000
 					if event[ripple_id_history[r]].preview_being_stopped = 0
+						event[ripple_id_history[r]].crossfading := 1
 						declare note_id := play_note(ripple_id_history[r] -> note, ripple_id_history[r] -> velocity, sample_start, 0)
 						set_event_par_arr(note_id, EVENT_PAR_ALLOW_GROUP, 0, ALL_GROUPS)
 						set_event_par_arr(note_id, EVENT_PAR_ALLOW_GROUP, 1, artic)
@@ -574,6 +617,50 @@ function fade_out_ripples_when_release_sample_sounds
 			declare offset_rec_time := (LEADING_SILENCE - latency) * 1000
 			if event[ripple_id_history[r]].rls_sample_id -> play_pos - offset_rec_time > rec_time_ripple_lengths[artic] + stop_offset_rec_time[artic]
 				if event[ripple_id_history[r]].fading_out_for_release_sample = 0
+					if switch_midiOutputMode = 1
+						declare vel := event[ripple_id_history[r]].current_ripple * 32 + 1
+						msg(event[ripple_id_history[r]].note)
+						play_note(event[ripple_id_history[r]].note, vel, 0, DURATION_QUARTER)
+					end if
+					fade_out(ripple_id_history[r], DURATION_SIXTEENTH, STOP_VOICE_AFTER_FADE_OUT)
+					event[ripple_id_history[r]].fading_out_for_release_sample := 1
+					event[ripple_id_history[r]].releasing := 1
+
+					// Get release sample length and note off timestamp for ripple animations
+					declare sample_start
+					declare release_dynamic := event[ripple_id_history[r]].release_dynamic
+					if release_dynamic = SHORT
+						sample_start := int(float(rec_time_ripple_lengths[artic]) / 3.5)
+					else if release_dynamic = LONG
+						sample_start := 0
+					end if
+					declare release_sample_length := rec_time_ripple_lengths[artic] - sample_start
+					release_sample_length := rec_time_to_real_time(release_sample_length)
+					declare origin_note := event[ripple_id_history[r]].origin_note
+					event[ripple_id_history[r]].brightness_when_released := ripple_swell[r] -> value
+					event[ripple_id_history[r]].release_sample_length := release_sample_length
+					event[ripple_id_history[r]].note_off_timestamp := ENGINE_UPTIME
+
+				end if
+			end if
+		end if
+	end for
+end function
+
+function play_release_notes_when_its_time
+	declare r
+	for r := 0 to MAX_RIPPLE_HISTORY - 1
+		if event_status(ripple_id_history[r]) = EVENT_STATUS_NOTE_QUEUE
+			declare artic := event[ripple_id_history[r]].artic
+			declare latency := real_time_to_rec_time(int(float(menu_latency) / speeds[speed_ctrl]))
+			declare offset_rec_time := (LEADING_SILENCE - latency) * 1000
+			if event[ripple_id_history[r]].rls_sample_id -> play_pos - offset_rec_time > rec_time_ripple_lengths[artic] + stop_offset_rec_time[artic]
+				if event[ripple_id_history[r]].fading_out_for_release_sample = 0
+					if switch_midiOutputMode = 1
+						declare vel := event[ripple_id_history[r]].current_ripple * 32 + 1
+						msg(event[ripple_id_history[r]].note)
+						play_note(event[ripple_id_history[r]].note, vel, 0, DURATION_QUARTER)
+					end if
 					fade_out(ripple_id_history[r], DURATION_SIXTEENTH, STOP_VOICE_AFTER_FADE_OUT)
 					event[ripple_id_history[r]].fading_out_for_release_sample := 1
 					event[ripple_id_history[r]].releasing := 1
