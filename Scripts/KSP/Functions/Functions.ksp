@@ -617,11 +617,6 @@ function fade_out_ripples_when_release_sample_sounds
 			declare offset_rec_time := (LEADING_SILENCE - latency) * 1000
 			if event[ripple_id_history[r]].rls_sample_id -> play_pos - offset_rec_time > rec_time_ripple_lengths[artic] + stop_offset_rec_time[artic]
 				if event[ripple_id_history[r]].fading_out_for_release_sample = 0
-					if switch_midiOutputMode = 1
-						declare vel := event[ripple_id_history[r]].current_ripple * 32 + 1
-						msg(event[ripple_id_history[r]].note)
-						play_note(event[ripple_id_history[r]].note, vel, 0, DURATION_QUARTER)
-					end if
 					fade_out(ripple_id_history[r], DURATION_SIXTEENTH, STOP_VOICE_AFTER_FADE_OUT)
 					event[ripple_id_history[r]].fading_out_for_release_sample := 1
 					event[ripple_id_history[r]].releasing := 1
@@ -656,11 +651,6 @@ function play_release_notes_when_its_time
 			declare offset_rec_time := (LEADING_SILENCE - latency) * 1000
 			if event[ripple_id_history[r]].rls_sample_id -> play_pos - offset_rec_time > rec_time_ripple_lengths[artic] + stop_offset_rec_time[artic]
 				if event[ripple_id_history[r]].fading_out_for_release_sample = 0
-					if switch_midiOutputMode = 1
-						declare vel := event[ripple_id_history[r]].current_ripple * 32 + 1
-						msg(event[ripple_id_history[r]].note)
-						play_note(event[ripple_id_history[r]].note, vel, 0, DURATION_QUARTER)
-					end if
 					fade_out(ripple_id_history[r], DURATION_SIXTEENTH, STOP_VOICE_AFTER_FADE_OUT)
 					event[ripple_id_history[r]].fading_out_for_release_sample := 1
 					event[ripple_id_history[r]].releasing := 1

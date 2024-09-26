@@ -1,4 +1,4 @@
-{ Compiled on Wed Aug 21 17:21:14 2024 }
+{ Compiled on Tue Sep 24 14:27:34 2024 }
 on init
   declare $sksp_dummy
   declare $concat_it
@@ -757,67 +757,55 @@ on init
   set_control_par_str($INST_WALLPAPER_ID,$CONTROL_PAR_PICTURE,"ui_background")
   declare $figma_counter
   declare $figma_counter_multi_line_labels
-  declare %UI_x[163] := (0, 2, 692, 498, 340, 109, 607, 168, 48, 2, 26, 0, 2, 294, 1, 146, 120, 94, 68, 28, -1, 139, 93, 44, 13, 116, 129, 54, 7, 183, 137, 86, 41, 5, 9, 435, 316, 197, 716, -1, 31, ...
-  63, 95, 127, 159, 191, 223, 255, 287, 750, 602, 454, 306, 750, 602, 454, 306, 855, 707, 559, 411, 855, 707, 559, 411, 124, 181, 10, -1, 12, 345, 0, 0, 0, 0, 0, 0, 0, -1, 485, 453, ...
-  421, 389, -10, 4, 0, 0, 20, 27, 47, 88, 27, 4, 6, 18, 545, 176, 57, 152, 0, 5, 704, 3, 236, 829, 806, 760, 714, 668, 645, 599, 553, 783, 737, 691, 622, 576, 530, 484, 438, 392, ...
-  369, 323, 277, 507, 461, 415, 346, 300, 254, 208, 162, 116, 93, 47, 1, 231, 185, 139, 70, 24, 865, 0, 751, 603, 455, 307, 751, 603, 455, 307, 856, 708, 560, 412, 856, 708, 560, 412, 11, 150, ...
-  177, 2)
-  declare %UI_y[163] := (0, 330, 11, 11, 11, 11, 234, 8, 8, 234, 131, 0, 1, 201, 0, 53, 53, 53, 53, 53, 53, 53, 53, 53, 53, -1, 53, 53, 53, 53, 53, 53, 53, 53, 70, 26, 26, 26, 6, 0, 0, ...
-  0, 0, 0, 0, 0, 0, 0, 0, 333, 333, 333, 333, 241, 241, 241, 241, 333, 333, 333, 333, 241, 241, 241, 241, 241, 241, 241, -1, 196, 3, -1, -1, 2, -1, -1, -1, -1, -1, 302, 302, ...
-  302, 302, 20, 20, 20, 20, -1, -1, -1, -1, 27, 24, 72, 16, 72, 72, 71, 15, 0, 0, 2, 70, 75, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, ...
-  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 49, 0, 334, 334, 334, 334, 242, 242, 242, 242, 334, 334, 334, 334, 242, 242, 242, 242, 242, 44, ...
-  73, 68)
-  declare %UI_width[163] := (900, 896, 197, 175, 165, 231, 291, 74, 83, 604, 852, 898, 896, 310, 898, 27, 27, 27, 27, 39, 34, 48, 55, 53, 35, 76, 26, 61, 43, 48, 45, 52, 45, 35, 54, 133, 91, 91, 170, 23, 23, ...
-  23, 23, 23, 23, 23, 23, 23, 23, 137, 137, 137, 137, 137, 137, 137, 137, 32, 32, 32, 32, 32, 32, 32, 32, 58, 115, 115, 901, 26, 210, 899, 899, 899, 899, 899, 899, 899, 899, 23, 23, ...
-  23, 23, 201, 182, 165, 225, 145, 131, 100, 70, 74, 174, 30, 124, 185, 185, 18, 46, 74, 74, 193, 77, 430, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, ...
-  22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 38, 896, 136, 136, 136, 136, 136, 136, 136, 136, 31, 31, 31, 31, 31, 31, 31, 31, 285, 53, ...
-  553, 896)
-  declare %UI_height[163] := (427, 95, 71, 67, 67, 67, 95, 85, 88, 95, 38, 427, 424, 24, 425, 15, 15, 15, 15, 19, 15, 19, 19, 19, 15, 20, 15, 15, 15, 15, 15, 15, 15, 15, 19, 43, 43, 43, 50, 23, 23, ...
-  23, 23, 23, 23, 23, 23, 23, 23, 81, 81, 81, 81, 81, 81, 81, 81, 32, 32, 32, 32, 32, 32, 32, 32, 174, 174, 174, 147, 27, 63, 423, 423, 423, 423, 423, 423, 427, 426, 23, 23, ...
-  23, 23, 33, 33, 33, 33, 21, 21, 21, 21, 45, 45, 30, 37, 267, 267, 13, 35, 74, 74, 70, 18, 49, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, ...
-  36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 18, 424, 80, 80, 80, 80, 80, 80, 80, 80, 31, 31, 31, 31, 31, 31, 31, 31, 173, 18, ...
-  266, 165)
-  declare %UI_skin[163] := (-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 2, 3, 4, 5, 2, 6, 6, ...
-  6, 6, 6, 6, 6, 6, 6, 6, 7, 8, 9, 10, 11, 12, 13, 14, 2, 2, 2, 2, 2, 2, 2, 2, 0, 15, 16, 0, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 6, 6, ...
-  6, 6, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 43, 44, 0, 45, 46, 46, 46, 46, 46, 46, 46, 46, 47, 47, 47, 47, 47, 46, 46, 46, 46, ...
-  46, 46, 46, 47, 47, 47, 47, 47, 46, 46, 46, 46, 46, 46, 46, 47, 47, 47, 47, 47, 0, 48, 49, 50, 51, 52, 53, 54, 55, 56, 2, 2, 2, 2, 2, 2, 2, 2, 57, 0, ...
-  58, 59)
-  declare %UI_font[163] := (-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, ...
-  -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, ...
-  -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, ...
-  -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, ...
-  -1, -1)
-  declare %UI_label_text[163] := (-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, ...
+  declare %UI_x[161] := (0, 2, 692, 498, 340, 109, 607, 168, 48, 2, 26, 0, 2, 294, 1, 146, 120, 94, 68, 28, -1, 139, 93, 44, 13, 116, 129, 54, 7, 183, 137, 86, 41, 5, 9, 435, 316, 197, 716, -1, 31, ...
+  63, 95, 127, 159, 191, 223, 255, 287, 750, 602, 454, 306, 750, 602, 454, 306, 855, 707, 559, 411, 855, 707, 559, 411, 124, 181, 10, -1, 345, 0, 0, 0, 0, 0, 0, 0, -1, 485, 453, 421, ...
+  389, -10, 4, 0, 0, 20, 27, 47, 88, 27, 4, 6, 18, 545, 176, 57, 152, 0, 5, 704, 3, 236, 829, 806, 760, 714, 668, 645, 599, 553, 783, 737, 691, 622, 576, 530, 484, 438, 392, 369, ...
+  323, 277, 507, 461, 415, 346, 300, 254, 208, 162, 116, 93, 47, 1, 231, 185, 139, 70, 24, 865, 0, 751, 603, 455, 307, 751, 603, 455, 307, 856, 708, 560, 412, 856, 708, 560, 412, 11, 150, 177)
+  declare %UI_y[161] := (0, 330, 11, 11, 11, 11, 234, 8, 8, 234, 131, 0, 1, 201, 0, 53, 53, 53, 53, 53, 53, 53, 53, 53, 53, -1, 53, 53, 53, 53, 53, 53, 53, 53, 70, 26, 26, 26, 6, 0, 0, ...
+  0, 0, 0, 0, 0, 0, 0, 0, 333, 333, 333, 333, 241, 241, 241, 241, 333, 333, 333, 333, 241, 241, 241, 241, 241, 241, 241, -1, 3, -1, -1, 2, -1, -1, -1, -1, -1, 302, 302, 302, ...
+  302, 20, 20, 20, 20, -1, -1, -1, -1, 27, 24, 72, 16, 72, 72, 71, 15, 0, 0, 2, 70, 75, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, ...
+  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 49, 0, 334, 334, 334, 334, 242, 242, 242, 242, 334, 334, 334, 334, 242, 242, 242, 242, 242, 44, 73)
+  declare %UI_width[161] := (900, 896, 197, 175, 165, 231, 291, 74, 83, 604, 852, 898, 896, 310, 898, 27, 27, 27, 27, 39, 34, 48, 55, 53, 35, 76, 26, 61, 43, 48, 45, 52, 45, 35, 54, 133, 91, 91, 170, 23, 23, ...
+  23, 23, 23, 23, 23, 23, 23, 23, 137, 137, 137, 137, 137, 137, 137, 137, 32, 32, 32, 32, 32, 32, 32, 32, 58, 115, 115, 901, 210, 899, 899, 899, 899, 899, 899, 899, 899, 23, 23, 23, ...
+  23, 201, 182, 165, 225, 145, 131, 100, 70, 74, 174, 30, 124, 185, 185, 18, 46, 74, 74, 193, 77, 430, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, ...
+  22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 38, 896, 136, 136, 136, 136, 136, 136, 136, 136, 31, 31, 31, 31, 31, 31, 31, 31, 285, 53, 553)
+  declare %UI_height[161] := (427, 95, 71, 67, 67, 67, 95, 85, 88, 95, 38, 427, 424, 24, 425, 15, 15, 15, 15, 19, 15, 19, 19, 19, 15, 20, 15, 15, 15, 15, 15, 15, 15, 15, 19, 43, 43, 43, 50, 23, 23, ...
+  23, 23, 23, 23, 23, 23, 23, 23, 81, 81, 81, 81, 81, 81, 81, 81, 32, 32, 32, 32, 32, 32, 32, 32, 174, 174, 174, 147, 63, 423, 423, 423, 423, 423, 423, 427, 426, 23, 23, 23, ...
+  23, 33, 33, 33, 33, 21, 21, 21, 21, 45, 45, 30, 37, 267, 267, 13, 35, 74, 74, 70, 18, 49, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, ...
+  36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 18, 424, 80, 80, 80, 80, 80, 80, 80, 80, 31, 31, 31, 31, 31, 31, 31, 31, 173, 18, 266)
+  declare %UI_skin[161] := (-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 2, 3, 4, 5, 2, 6, 6, ...
+  6, 6, 6, 6, 6, 6, 6, 6, 7, 8, 9, 10, 11, 12, 13, 14, 2, 2, 2, 2, 2, 2, 2, 2, 0, 15, 16, 0, 17, 18, 19, 20, 21, 22, 23, 24, 25, 6, 6, 6, ...
+  6, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 42, 43, 0, 44, 45, 45, 45, 45, 45, 45, 45, 45, 46, 46, 46, 46, 46, 45, 45, 45, 45, 45, ...
+  45, 45, 46, 46, 46, 46, 46, 45, 45, 45, 45, 45, 45, 45, 46, 46, 46, 46, 46, 0, 47, 48, 49, 50, 51, 52, 53, 54, 55, 2, 2, 2, 2, 2, 2, 2, 2, 56, 0, 57)
+  declare %UI_font[161] := (-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, ...
   -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, ...
   -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, ...
-  -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, ...
-  -1, -1)
-  declare %UI_default_value[163] := (-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, ...
+  -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1)
+  declare %UI_label_text[161] := (-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, ...
+  -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, ...
+  -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, ...
+  -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1)
+  declare %UI_default_value[161] := (-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, ...
   -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, ...
   -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, ...
+  -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1)
+  declare %UI_mouse_behaviour[161] := (-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, ...
   -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, ...
-  -1, -1)
-  declare %UI_mouse_behaviour[163] := (-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, ...
-  -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, ...
-  -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -800, -800, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, ...
-  -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, ...
-  -1, -1)
-  declare %UI_mouse_behaviour_x[163] := (-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, ...
+  -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -800, -800, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, ...
+  -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1)
+  declare %UI_mouse_behaviour_x[161] := (-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, ...
   -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, ...
   -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, ...
-  -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, ...
-  -1, -1)
-  declare %UI_mouse_behaviour_y[163] := (-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, ...
-  -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, ...
+  -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1)
+  declare %UI_mouse_behaviour_y[161] := (-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, ...
   -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, ...
   -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, ...
-  -1, -1)
-  declare %UI_z_layer[163] := (-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0, -1, -1, -1, -1, ...
+  -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1)
+  declare %UI_z_layer[161] := (-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0, -1, -1, -1, -1, ...
   -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, ...
-  -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 1, 1, 1, 1, 1, -1, -1, -1, -1, ...
-  -1, -1, -1, 1, 1, 1, 1, 1, -1, -1, -1, -1, -1, -1, -1, 1, 1, 1, 1, 1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, ...
-  -1, -1)
-  declare !skin_picture[60]
+  -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 1, 1, 1, 1, 1, -1, -1, -1, -1, -1, ...
+  -1, -1, 1, 1, 1, 1, 1, -1, -1, -1, -1, -1, -1, -1, 1, 1, 1, 1, 1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1)
+  declare !skin_picture[58]
   !skin_picture[0] := "label_transparent"
   !skin_picture[1] := "vel to sample start"
   !skin_picture[2] := "blank"
@@ -835,49 +823,47 @@ on init
   !skin_picture[14] := "clip title 0"
   !skin_picture[15] := "next midi page"
   !skin_picture[16] := "prev midi page"
-  !skin_picture[17] := "midi output mode"
-  !skin_picture[18] := "title"
-  !skin_picture[19] := "switch_releaseSamplesInfoDisp"
-  !skin_picture[20] := "switch_legatoInfoDisp"
-  !skin_picture[21] := "switch_directionInfoDisp"
-  !skin_picture[22] := "switch_speedInfoDisp"
-  !skin_picture[23] := "switch_optionsInfoDisp"
-  !skin_picture[24] := "switch_articulationsInfoDisp"
-  !skin_picture[25] := "switch_generalInfoDisp"
-  !skin_picture[26] := "switch_closeTitleInfo"
-  !skin_picture[27] := "6 step slider"
-  !skin_picture[28] := "4 step slider"
-  !skin_picture[29] := "3 step slider"
-  !skin_picture[30] := "5 step slider"
-  !skin_picture[31] := "release samples info"
-  !skin_picture[32] := "legato info"
-  !skin_picture[33] := "direction info"
-  !skin_picture[34] := "speed info"
-  !skin_picture[35] := "options info"
-  !skin_picture[36] := "articulations info"
-  !skin_picture[37] := "general info"
-  !skin_picture[38] := "show midi"
-  !skin_picture[39] := "next title page"
-  !skin_picture[40] := "prev title page"
-  !skin_picture[41] := "reverb menu"
-  !skin_picture[42] := "latency"
-  !skin_picture[43] := "knob"
-  !skin_picture[44] := "Logo animation"
-  !skin_picture[45] := "label_midiInstructions"
-  !skin_picture[46] := "white key"
-  !skin_picture[47] := "black key"
-  !skin_picture[48] := "label_midiCover"
-  !skin_picture[49] := "clip7"
-  !skin_picture[50] := "clip6"
-  !skin_picture[51] := "clip5"
-  !skin_picture[52] := "clip4"
-  !skin_picture[53] := "clip3"
-  !skin_picture[54] := "clip2"
-  !skin_picture[55] := "clip1"
-  !skin_picture[56] := "clip0"
-  !skin_picture[57] := "midi page description"
-  !skin_picture[58] := "title page info"
-  !skin_picture[59] := "label_midiOutputModeCover"
+  !skin_picture[17] := "title"
+  !skin_picture[18] := "switch_releaseSamplesInfoDisp"
+  !skin_picture[19] := "switch_legatoInfoDisp"
+  !skin_picture[20] := "switch_directionInfoDisp"
+  !skin_picture[21] := "switch_speedInfoDisp"
+  !skin_picture[22] := "switch_optionsInfoDisp"
+  !skin_picture[23] := "switch_articulationsInfoDisp"
+  !skin_picture[24] := "switch_generalInfoDisp"
+  !skin_picture[25] := "switch_closeTitleInfo"
+  !skin_picture[26] := "6 step slider"
+  !skin_picture[27] := "4 step slider"
+  !skin_picture[28] := "3 step slider"
+  !skin_picture[29] := "5 step slider"
+  !skin_picture[30] := "release samples info"
+  !skin_picture[31] := "legato info"
+  !skin_picture[32] := "direction info"
+  !skin_picture[33] := "speed info"
+  !skin_picture[34] := "options info"
+  !skin_picture[35] := "articulations info"
+  !skin_picture[36] := "general info"
+  !skin_picture[37] := "show midi"
+  !skin_picture[38] := "next title page"
+  !skin_picture[39] := "prev title page"
+  !skin_picture[40] := "reverb menu"
+  !skin_picture[41] := "latency"
+  !skin_picture[42] := "knob"
+  !skin_picture[43] := "Logo animation"
+  !skin_picture[44] := "label_midiInstructions"
+  !skin_picture[45] := "white key"
+  !skin_picture[46] := "black key"
+  !skin_picture[47] := "label_midiCover"
+  !skin_picture[48] := "clip7"
+  !skin_picture[49] := "clip6"
+  !skin_picture[50] := "clip5"
+  !skin_picture[51] := "clip4"
+  !skin_picture[52] := "clip3"
+  !skin_picture[53] := "clip2"
+  !skin_picture[54] := "clip1"
+  !skin_picture[55] := "clip0"
+  !skin_picture[56] := "midi page description"
+  !skin_picture[57] := "title page info"
   declare !_labels_text[2*10]
   declare const $labels_text__SIZE_D1 := 2
   declare const $labels_text__SIZE_D2 := 10
@@ -1064,9 +1050,6 @@ on init
   declare ui_switch $switch_closeMidi
   make_persistent($switch_closeMidi)
   read_persistent_var($switch_closeMidi)
-  declare ui_switch $switch_midiOutputMode
-  make_persistent($switch_midiOutputMode)
-  read_persistent_var($switch_midiOutputMode)
   declare ui_switch $switch_openTitleInfo
   make_persistent($switch_openTitleInfo)
   read_persistent_var($switch_openTitleInfo)
@@ -1343,26 +1326,21 @@ on init
   declare ui_label $label_titlePg(1,1)
   make_persistent($label_titlePg)
   read_persistent_var($label_titlePg)
-  declare ui_label $label_midiOutputModeCover(1,1)
-  make_persistent($label_midiOutputModeCover)
-  read_persistent_var($label_midiOutputModeCover)
   declare %UI_ID[10000] := (0)
   %UI_ID[0] := get_ui_id($panel_UI)
   $figma_counter := 1
-  while ($figma_counter<163)
+  while ($figma_counter<161)
     %UI_ID[$figma_counter] := %UI_ID[0]+$figma_counter
     inc($figma_counter)
   end while
-  declare %panel_idx[163] := (0, 1, 1, 1, 1, 0, 6, 6, 0, 0, 0, 11, 11, 0, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 4, 4, 4, 5, 5, 5, 5, 5, 7, 9, 9, 9, 0, 13, 13, 13, ...
-  13, 13, 13, 13, 13, 13, 13, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 14, 14, 14, 14, ...
-  14, 2, 3, 4, 5, 2, 3, 4, 5, 1, 9, 0, 0, 14, 14, 7, 0, 7, 8, 0, 8, 0, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, ...
-  10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 0, 12, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 0, 14, ...
-  0)
-  declare %element_idx[163] := (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, ...
+  declare %panel_idx[161] := (0, 1, 1, 1, 1, 0, 6, 6, 0, 0, 0, 11, 11, 0, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 4, 4, 4, 5, 5, 5, 5, 5, 7, 9, 9, 9, 0, 13, 13, 13, ...
+  13, 13, 13, 13, 13, 13, 13, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 0, 0, 0, 0, 0, 0, 0, 0, 0, 14, 14, 14, 14, 14, ...
+  2, 3, 4, 5, 2, 3, 4, 5, 1, 9, 0, 0, 14, 14, 7, 0, 7, 8, 0, 8, 0, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, ...
+  10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 0, 12, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 0, 14)
+  declare %element_idx[161] := (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, ...
   42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, ...
   82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119, 120, 121, ...
-  122, 123, 124, 125, 126, 127, 128, 129, 130, 131, 132, 133, 134, 135, 136, 137, 138, 139, 140, 141, 142, 143, 144, 145, 146, 147, 148, 149, 150, 151, 152, 153, 154, 155, 156, 157, 158, 159, 160, 161, ...
-  162)
+  122, 123, 124, 125, 126, 127, 128, 129, 130, 131, 132, 133, 134, 135, 136, 137, 138, 139, 140, 141, 142, 143, 144, 145, 146, 147, 148, 149, 150, 151, 152, 153, 154, 155, 156, 157, 158, 159, 160)
   $figma_counter := 1
   while ($figma_counter<num_elements(%panel_idx))
     if (%panel_idx[$figma_counter] # -1)
@@ -1371,7 +1349,7 @@ on init
     inc($figma_counter)
   end while
   $figma_counter := 0
-  while ($figma_counter<163)
+  while ($figma_counter<161)
     set_control_par_str(%UI_ID[$figma_counter],$CONTROL_PAR_TEXT,"")
     set_control_par(%UI_ID[$figma_counter],$CONTROL_PAR_WIDTH,%UI_width[$figma_counter])
     set_control_par(%UI_ID[$figma_counter],$CONTROL_PAR_HEIGHT,%UI_height[$figma_counter])
@@ -1411,7 +1389,6 @@ on init
   set_ui_height_px(427+(%dev_mode[0]*50))
   set_control_par_str($INST_ICON_ID,$CONTROL_PAR_PICTURE,"insticon")
   set_control_par(get_ui_id($label_version),$CONTROL_PAR_HIDE,$HIDE_WHOLE_CONTROL)
-  set_control_par(get_ui_id($label_midiOutputModeCover),$CONTROL_PAR_HIDE,$HIDE_WHOLE_CONTROL)
   declare %switch_titlePgSelector[4]
   %switch_titlePgSelector[0] := get_ui_id($switch_titlePgSelector0)
   %switch_titlePgSelector[1] := get_ui_id($switch_titlePgSelector1)
@@ -1501,13 +1478,12 @@ on init
   set_control_par(get_ui_id($button_generalInfo),$CONTROL_PAR_HIDE,%hide_states[1-$button_showMidi])
   set_control_par(get_ui_id($button_optionsInfo),$CONTROL_PAR_HIDE,%hide_states[1-$button_showMidi])
   set_control_par(get_ui_id($menu_latency),$CONTROL_PAR_TEXTPOS_Y,100)
-  add_menu_item($menu_latency,"Start Time: Tightened: 0 ms delay",0)
-  add_menu_item($menu_latency,"Start Time: Middle, slight adjustment: 50 ms delay",50)
-  add_menu_item($menu_latency,"Start Time: Natural, as played: 100 ms delay",100)
+  add_menu_item($menu_latency,"Lateness: 0ms",0)
+  add_menu_item($menu_latency,"Lateness: 50ms",50)
+  add_menu_item($menu_latency,"Lateness: 100ms",100)
   set_control_par(get_ui_id($label_latency),$CONTROL_PAR_FONT_TYPE,get_font_id("Khula Bold Size 11 on"))
   set_control_par(get_ui_id($label_latency),$CONTROL_PAR_TEXT_ALIGNMENT,1)
   set_control_par_str(get_ui_id($label_latency),$CONTROL_PAR_TEXT,$menu_latency & "ms")
-  set_control_par(get_ui_id($label_midiOutputModeCover),$CONTROL_PAR_HIDE,%hide_states[$switch_midiOutputMode])
   set_control_par(get_ui_id($panel_midi),$CONTROL_PAR_Z_LAYER,0)
   set_control_par(get_ui_id($panel_titleInfo),$CONTROL_PAR_HIDE,$HIDE_WHOLE_CONTROL)
   set_control_par(get_ui_id($switch_generalInfoDisp),$CONTROL_PAR_HIDE,$HIDE_WHOLE_CONTROL)
@@ -1859,7 +1835,7 @@ on init
   declare $_vol
   declare $_offset := 0
   declare $_cur_ripple
-  declare $_vel4
+  declare $_vel
   declare $_history_index
   declare $_ks_index
   declare %_notes[32]
@@ -1908,21 +1884,6 @@ on init
   declare $_time_til_end_of_ripple
   declare $_real_pos_in_pitch
   declare $_time_til_end_of_pitch
-  declare polyphonic $_ext_first_note
-  declare polyphonic $_ext_second_note
-  declare polyphonic $_ext_low_note
-  declare polyphonic $_ext_high_note
-  declare polyphonic $_ext_artic
-  declare polyphonic $_note_chooser
-  declare polyphonic $_ext_pitch
-  declare $_ext_note
-  declare ~_vel_norm
-  declare $_len
-  declare polyphonic $_last_time
-  declare $_wait_time
-  declare polyphonic $_low_vel
-  declare polyphonic $_high_vel
-  declare $_vel3
   declare $_previewing := 0
   declare $_time_played
   declare $_clip_index
@@ -1932,7 +1893,6 @@ on init
   declare $_artic4
   declare $_latency3
   declare $_offset_rec_time3
-  declare $_vel2
   declare $_sample_start3
   declare $_release_dynamic2
   declare $_release_sample_length2
@@ -1941,7 +1901,6 @@ on init
   declare $_artic3
   declare $_latency2
   declare $_offset_rec_time2
-  declare $_vel
   declare $_sample_start2
   declare $_release_dynamic
   declare $_release_sample_length
@@ -2103,11 +2062,6 @@ function fade_out_ripples_when_release_sample_sounds
       $_offset_rec_time2 := (500-$_latency2)*1000
       if (get_event_par(%custom_event_rls_sample_id[%ripple_id_history[$_r4] mod 1000000],$EVENT_PAR_PLAY_POS)-$_offset_rec_time2>(%rec_time_ripple_lengths[$_artic3]+%stop_offset_rec_time[$_artic3]))
         if (%custom_event_fading_out_for_release_sample[%ripple_id_history[$_r4] mod 1000000]=0)
-          if ($switch_midiOutputMode=1)
-            $_vel := %custom_event_current_ripple[%ripple_id_history[$_r4] mod 1000000]*32+1
-            message("event[ripple_id_history[r]].note = " & %custom_event_note[%ripple_id_history[$_r4] mod 1000000])
-            play_note(%custom_event_note[%ripple_id_history[$_r4] mod 1000000],$_vel,0,$DURATION_QUARTER)
-          end if
           fade_out(%ripple_id_history[$_r4],$DURATION_SIXTEENTH,1)
           %custom_event_fading_out_for_release_sample[%ripple_id_history[$_r4] mod 1000000] := 1
           %custom_event_releasing[%ripple_id_history[$_r4] mod 1000000] := 1
@@ -2141,11 +2095,6 @@ function play_release_notes_when_its_time
       $_offset_rec_time3 := (500-$_latency3)*1000
       if (get_event_par(%custom_event_rls_sample_id[%ripple_id_history[$_r5] mod 1000000],$EVENT_PAR_PLAY_POS)-$_offset_rec_time3>(%rec_time_ripple_lengths[$_artic4]+%stop_offset_rec_time[$_artic4]))
         if (%custom_event_fading_out_for_release_sample[%ripple_id_history[$_r5] mod 1000000]=0)
-          if ($switch_midiOutputMode=1)
-            $_vel2 := %custom_event_current_ripple[%ripple_id_history[$_r5] mod 1000000]*32+1
-            message("event[ripple_id_history[r]].note = " & %custom_event_note[%ripple_id_history[$_r5] mod 1000000])
-            play_note(%custom_event_note[%ripple_id_history[$_r5] mod 1000000],$_vel2,0,$DURATION_QUARTER)
-          end if
           fade_out(%ripple_id_history[$_r5],$DURATION_SIXTEENTH,1)
           %custom_event_fading_out_for_release_sample[%ripple_id_history[$_r5] mod 1000000] := 1
           %custom_event_releasing[%ripple_id_history[$_r5] mod 1000000] := 1
@@ -2454,8 +2403,8 @@ function release_marked_ripples
             $_cur_ripple := 3
           end if
           %custom_event_current_ripple[%ripple_id_history[$_r6] mod 1000000] := $_cur_ripple
-          $_vel4 := $_cur_ripple*32+1
-          %rls_note_ids[$_rls_note] := play_note($_rls_note,$_vel4,$_rec_time_pos_in_ripple+$_offset_rec_time5,0)
+          $_vel := $_cur_ripple*32+1
+          %rls_note_ids[$_rls_note] := play_note($_rls_note,$_vel,$_rec_time_pos_in_ripple+$_offset_rec_time5,0)
           %rls_note_timestamp[$_rls_note] := $ENGINE_UPTIME-real_to_int(int_to_real(0)+((int_to_real(($_rec_time_pos_in_ripple+$_offset_rec_time5)/1000)-int_to_real(0))/(int_to_real(real_to_int(int_to_real($DURATION_QUARTER)*?speeds[real_to_int(?xypad_speed[0]*int_to_real(5))]))-int_to_real(0))*(int_to_real($RECORDED_DURATION_QUARTER)-int_to_real(0))))
           set_event_par_arr(%rls_note_ids[$_rls_note],$EVENT_PAR_ALLOW_GROUP,0,$ALL_GROUPS)
           set_event_par_arr(%rls_note_ids[$_rls_note],$EVENT_PAR_ALLOW_GROUP,1,%release_group[$_artic5])
@@ -3179,248 +3128,69 @@ on note
           inc($r)
         end while
         if ($_already_playing=0)
-          if ($switch_midiOutputMode=0)
-            $_note_id2 := play_note(%__notes[$ripple_i],64+%__intervals[$ripple_i],$_offset_rec_time4,0)
-            if ($switch_velToSampleStart=0)
-              $_volume := real_to_int(int_to_real(-7000)+((int_to_real($EVENT_VELOCITY)-int_to_real(1))/(int_to_real(127)-int_to_real(1))*(int_to_real(3000)-int_to_real(-7000))))
-              change_vol($_note_id2,$_volume,0)
+          $_note_id2 := play_note(%__notes[$ripple_i],64+%__intervals[$ripple_i],$_offset_rec_time4,0)
+          if ($switch_velToSampleStart=0)
+            $_volume := real_to_int(int_to_real(-7000)+((int_to_real($EVENT_VELOCITY)-int_to_real(1))/(int_to_real(127)-int_to_real(1))*(int_to_real(3000)-int_to_real(-7000))))
+            change_vol($_note_id2,$_volume,0)
+          end if
+          set_event_par_arr($_note_id2,$EVENT_PAR_ALLOW_GROUP,0,$ALL_GROUPS)
+          set_event_par_arr($_note_id2,$EVENT_PAR_ALLOW_GROUP,1,$cur_artic)
+          %custom_event_artic[$_note_id2 mod 1000000] := $cur_artic
+          %custom_event_note[$_note_id2 mod 1000000] := $EVENT_NOTE
+          %custom_event_low_note[$_note_id2 mod 1000000] := $_low_note2
+          %custom_event_high_note[$_note_id2 mod 1000000] := $_high_note2
+          %custom_event_origin_note[$_note_id2 mod 1000000] := $_origin_note3
+          %custom_event_dest_note[$_note_id2 mod 1000000] := $_dest_note
+          %custom_event_first_note[$_note_id2 mod 1000000] := $_first_note
+          %custom_event_second_note[$_note_id2 mod 1000000] := $_second_note
+          %custom_event_velocity[$_note_id2 mod 1000000] := $EVENT_VELOCITY
+          %custom_event_direction[$_note_id2 mod 1000000] := $_ripple_dir
+          %custom_event_source[$_note_id2 mod 1000000] := -1
+          %custom_event_triggered_by_mf[$_note_id2 mod 1000000] := %custom_event_triggered_by_mf[$EVENT_ID mod 1000000]
+          $r := 64-2
+          while ($r>=0)
+            %ripple_id_history[$r+1] := %ripple_id_history[$r]
+            dec($r)
+          end while
+          %ripple_id_history[0] := $_note_id2
+          $_fade_in_time := 0
+          if ($_do_legato=0)
+            $_fade_in_time := $menu_latency*1000
+            if ($_fade_in_time=0)
+              $_fade_in_time := 0
             end if
-            set_event_par_arr($_note_id2,$EVENT_PAR_ALLOW_GROUP,0,$ALL_GROUPS)
-            set_event_par_arr($_note_id2,$EVENT_PAR_ALLOW_GROUP,1,$cur_artic)
-            %custom_event_artic[$_note_id2 mod 1000000] := $cur_artic
-            %custom_event_note[$_note_id2 mod 1000000] := $EVENT_NOTE
-            %custom_event_low_note[$_note_id2 mod 1000000] := $_low_note2
-            %custom_event_high_note[$_note_id2 mod 1000000] := $_high_note2
-            %custom_event_origin_note[$_note_id2 mod 1000000] := $_origin_note3
-            %custom_event_dest_note[$_note_id2 mod 1000000] := $_dest_note
-            %custom_event_first_note[$_note_id2 mod 1000000] := $_first_note
-            %custom_event_second_note[$_note_id2 mod 1000000] := $_second_note
-            %custom_event_velocity[$_note_id2 mod 1000000] := $EVENT_VELOCITY
-            %custom_event_direction[$_note_id2 mod 1000000] := $_ripple_dir
-            %custom_event_source[$_note_id2 mod 1000000] := -1
-            %custom_event_triggered_by_mf[$_note_id2 mod 1000000] := %custom_event_triggered_by_mf[$EVENT_ID mod 1000000]
-            $r := 64-2
-            while ($r>=0)
-              %ripple_id_history[$r+1] := %ripple_id_history[$r]
-              dec($r)
-            end while
-            %ripple_id_history[0] := $_note_id2
-            $_fade_in_time := 0
-            if ($_do_legato=0)
-              $_fade_in_time := $menu_latency*1000
-              if ($_fade_in_time=0)
-                $_fade_in_time := 0
-              end if
-            else
-              $_real_pos_in_ripple := ($_real_legato_time+$_real_ripple_length-ticks_to_ms(48)) mod $_real_ripple_length
-              $_time_til_end_of_ripple := $_real_ripple_length-$_real_pos_in_ripple
-              if ($cur_artic=$artic__sixteenths)
-                if ($_real_pos_in_ripple<($_real_ripple_length/4))
-                  $_real_pitch_length := $_real_ripple_length/4
-                  $_real_pos_in_pitch := $_real_pos_in_ripple mod $_real_pitch_length
-                  $_time_til_end_of_pitch := $_real_pitch_length-$_real_pos_in_pitch
-                else
-                  $_time_til_end_of_pitch := $_real_ripple_length-$_real_pos_in_ripple
-                end if
-              else
-                $_real_pitch_length := $_real_ripple_length/2
-                $_real_pos_in_pitch := $_real_legato_time mod $_real_pitch_length
-                $_time_til_end_of_pitch := $_real_pitch_length-$_real_pos_in_pitch
-              end if
-              if (in_range($EVENT_VELOCITY,1,48))
-                $_fade_in_time := $_time_til_end_of_ripple
-              else
-                if (in_range($EVENT_VELOCITY,49,96))
-                  $_fade_in_time := $_time_til_end_of_pitch
-                else
-                  if (in_range($EVENT_VELOCITY,97,127))
-                    $_fade_in_time := $_time_til_end_of_pitch/2
-                  end if
-                end if
-              end if
-              if ($_fade_in_time<ticks_to_ms(192))
-                $_fade_in_time := ticks_to_ms(192)
-              end if
-            end if
-            fade_in($_note_id2,$_fade_in_time)
           else
-            $_ext_first_note := $_first_note
-            $_ext_second_note := $_second_note
-            $_ext_low_note := $_low_note2
-            $_ext_high_note := $_high_note2
-            $_ext_artic := $cur_artic
-            $_wait_time := $_ext_mode_real_legato_time
-            if ($_wait_time>0)
-              select (real_to_int(?xypad_legato[0]*int_to_real(4)))
-                case $legatoMode__syncToPitch
-                  $_wait_time := $_real_pitch_length-($_wait_time mod $_real_pitch_length)
-                case $legatoMode__syncToRipple
-                  if ($_wait_time mod $_real_ripple_length<=$_real_pitch_length)
-                    $_note_chooser := 1
-                  end if
-                  $_wait_time := $_real_pitch_length-($_wait_time mod $_real_pitch_length)
-                case $legatoMode__syncToSwell
-                  if ($_wait_time mod $_real_ripple_length<=$_real_pitch_length)
-                    $_note_chooser := 1
-                  end if
-                  $_ext_pitch := $_wait_time/$_real_pitch_length
-                  $_wait_time := $_real_pitch_length-($_wait_time mod $_real_pitch_length)
-              end select
-            end if
-            $_low_vel := %velo[$EVENT_NOTE]-35
-            $_high_vel := $_low_vel+35
-            if ($_high_vel>127)
-              $_high_vel := 127
-            end if
-            if ($_low_vel<1)
-              $_low_vel := 1
-            end if
-            if ($_wait_time>0)
-              wait($_wait_time)
-            end if
-            while (%key_active[$EVENT_NOTE]=1)
-              if ($_note_chooser=0)
-                $_ext_note := $_ext_first_note
+            $_real_pos_in_ripple := ($_real_legato_time+$_real_ripple_length-ticks_to_ms(48)) mod $_real_ripple_length
+            $_time_til_end_of_ripple := $_real_ripple_length-$_real_pos_in_ripple
+            if ($cur_artic=$artic__sixteenths)
+              if ($_real_pos_in_ripple<($_real_ripple_length/4))
+                $_real_pitch_length := $_real_ripple_length/4
+                $_real_pos_in_pitch := $_real_pos_in_ripple mod $_real_pitch_length
+                $_time_til_end_of_pitch := $_real_pitch_length-$_real_pos_in_pitch
               else
-                $_ext_note := $_ext_second_note
-              end if
-              ~_vel_norm := int_to_real($slider_vol)/1000000.0*(int_to_real(%velo[$EVENT_NOTE])/127.0)
-              $_vel3 := real_to_int(~_vel_norm*int_to_real(127-60))+30
-              if (in_range($_ext_pitch,0,7))
-                $_vel3 := real_to_int(int_to_real($_vel3-30)+((int_to_real($_ext_pitch)-int_to_real(0))/(int_to_real(7)-int_to_real(0))*(int_to_real($_vel3+30)-int_to_real($_vel3-30))))
-              else
-                $_vel3 := real_to_int(int_to_real($_vel3+30)+((int_to_real($_ext_pitch)-int_to_real(8))/(int_to_real(15)-int_to_real(8))*(int_to_real($_vel3-30)-int_to_real($_vel3+30))))
-              end if
-              if ($_note_chooser=1)
-                $_vel3 := $_vel3-20
-              end if
-              if ($_vel3<1)
-                $_vel3 := 1
-              end if
-              if ($_vel3>127)
-                $_vel3 := 127
-              end if
-              if ($_ext_artic=$artic__sixteenths)
-                if ($_note_chooser=0)
-                  $_len := ticks_to_ms(%ripple_length_ticks[$_ext_artic]/4)
-                else
-                  $_len := ticks_to_ms(%ripple_length_ticks[$_ext_artic]/4*3)
-                end if
-              else
-                $_len := ticks_to_ms(%ripple_length_ticks[$_ext_artic]/2)
-              end if
-              $_note_id2 := play_note($_ext_note,$_vel3,0,$_len)
-              if ($_ext_artic=$artic__sixteenths)
-                if ($_note_chooser=0)
-                  $_wait_time := ticks_to_ms(%ripple_length_ticks[$_ext_artic]/4)
-                else
-                  $_wait_time := ticks_to_ms(%ripple_length_ticks[$_ext_artic]/4*3)
-                end if
-              else
-                $_wait_time := ticks_to_ms(%ripple_length_ticks[$_ext_artic]/2)
-              end if
-              $_wait_time := real_to_int(int_to_real($_wait_time)*?speeds[real_to_int(?xypad_speed[0]*int_to_real(5))])
-              if ($_wait_time>0)
-                wait($_wait_time)
-              end if
-              $_ext_pitch := ($_ext_pitch+1) mod 16
-              $_note_chooser := 1-$_note_chooser
-            end while
-            if ($_note_chooser=0)
-              $_ext_note := $_ext_first_note
-            else
-              $_ext_note := $_ext_second_note
-            end if
-            ~_vel_norm := int_to_real($slider_vol)/1000000.0*(int_to_real(%velo[$EVENT_NOTE])/127.0)
-            $_vel3 := real_to_int(~_vel_norm*int_to_real(127-60))+30
-            if (in_range($_ext_pitch,0,7))
-              $_vel3 := real_to_int(int_to_real($_vel3-30)+((int_to_real($_ext_pitch)-int_to_real(0))/(int_to_real(7)-int_to_real(0))*(int_to_real($_vel3+30)-int_to_real($_vel3-30))))
-            else
-              $_vel3 := real_to_int(int_to_real($_vel3+30)+((int_to_real($_ext_pitch)-int_to_real(8))/(int_to_real(15)-int_to_real(8))*(int_to_real($_vel3-30)-int_to_real($_vel3+30))))
-            end if
-            if ($_note_chooser=1)
-              $_vel3 := $_vel3-20
-            end if
-            if ($_vel3<1)
-              $_vel3 := 1
-            end if
-            if ($_vel3>127)
-              $_vel3 := 127
-            end if
-            if ($_ext_artic=$artic__sixteenths)
-              if ($_note_chooser=0)
-                $_len := ticks_to_ms(%ripple_length_ticks[$_ext_artic]/4)
-              else
-                $_len := ticks_to_ms(%ripple_length_ticks[$_ext_artic]/4*3)
+                $_time_til_end_of_pitch := $_real_ripple_length-$_real_pos_in_ripple
               end if
             else
-              $_len := ticks_to_ms(%ripple_length_ticks[$_ext_artic]/2)
+              $_real_pitch_length := $_real_ripple_length/2
+              $_real_pos_in_pitch := $_real_legato_time mod $_real_pitch_length
+              $_time_til_end_of_pitch := $_real_pitch_length-$_real_pos_in_pitch
             end if
-            $_note_id2 := play_note($_ext_note,$_vel3,0,$_len)
-            if ($_ext_artic=$artic__sixteenths)
-              if ($_note_chooser=0)
-                $_wait_time := ticks_to_ms(%ripple_length_ticks[$_ext_artic]/4)
-              else
-                $_wait_time := ticks_to_ms(%ripple_length_ticks[$_ext_artic]/4*3)
-              end if
+            if (in_range($EVENT_VELOCITY,1,48))
+              $_fade_in_time := $_time_til_end_of_ripple
             else
-              $_wait_time := ticks_to_ms(%ripple_length_ticks[$_ext_artic]/2)
-            end if
-            $_wait_time := real_to_int(int_to_real($_wait_time)*?speeds[real_to_int(?xypad_speed[0]*int_to_real(5))])
-            if ($_wait_time>0)
-              wait($_wait_time)
-            end if
-            $_ext_pitch := ($_ext_pitch+1) mod 16
-            $_note_chooser := 1-$_note_chooser
-            if ($_note_chooser=0)
-              if ($_note_chooser=0)
-                $_ext_note := $_ext_first_note
+              if (in_range($EVENT_VELOCITY,49,96))
+                $_fade_in_time := $_time_til_end_of_pitch
               else
-                $_ext_note := $_ext_second_note
-              end if
-              ~_vel_norm := int_to_real($slider_vol)/1000000.0*(int_to_real(%velo[$EVENT_NOTE])/127.0)
-              $_vel3 := real_to_int(~_vel_norm*int_to_real(127-60))+30
-              if (in_range($_ext_pitch,0,7))
-                $_vel3 := real_to_int(int_to_real($_vel3-30)+((int_to_real($_ext_pitch)-int_to_real(0))/(int_to_real(7)-int_to_real(0))*(int_to_real($_vel3+30)-int_to_real($_vel3-30))))
-              else
-                $_vel3 := real_to_int(int_to_real($_vel3+30)+((int_to_real($_ext_pitch)-int_to_real(8))/(int_to_real(15)-int_to_real(8))*(int_to_real($_vel3-30)-int_to_real($_vel3+30))))
-              end if
-              if ($_note_chooser=1)
-                $_vel3 := $_vel3-20
-              end if
-              if ($_vel3<1)
-                $_vel3 := 1
-              end if
-              if ($_vel3>127)
-                $_vel3 := 127
-              end if
-              if ($_ext_artic=$artic__sixteenths)
-                if ($_note_chooser=0)
-                  $_len := ticks_to_ms(%ripple_length_ticks[$_ext_artic]/4)
-                else
-                  $_len := ticks_to_ms(%ripple_length_ticks[$_ext_artic]/4*3)
+                if (in_range($EVENT_VELOCITY,97,127))
+                  $_fade_in_time := $_time_til_end_of_pitch/2
                 end if
-              else
-                $_len := ticks_to_ms(%ripple_length_ticks[$_ext_artic]/2)
               end if
-              $_note_id2 := play_note($_ext_note,$_vel3,0,$_len)
-              if ($_ext_artic=$artic__sixteenths)
-                if ($_note_chooser=0)
-                  $_wait_time := ticks_to_ms(%ripple_length_ticks[$_ext_artic]/4)
-                else
-                  $_wait_time := ticks_to_ms(%ripple_length_ticks[$_ext_artic]/4*3)
-                end if
-              else
-                $_wait_time := ticks_to_ms(%ripple_length_ticks[$_ext_artic]/2)
-              end if
-              $_wait_time := real_to_int(int_to_real($_wait_time)*?speeds[real_to_int(?xypad_speed[0]*int_to_real(5))])
-              if ($_wait_time>0)
-                wait($_wait_time)
-              end if
-              $_ext_pitch := ($_ext_pitch+1) mod 16
-              $_note_chooser := 1-$_note_chooser
+            end if
+            if ($_fade_in_time<ticks_to_ms(192))
+              $_fade_in_time := ticks_to_ms(192)
             end if
           end if
+          fade_in($_note_id2,$_fade_in_time)
         end if
         inc($ripple_i)
       end while
@@ -3470,9 +3240,6 @@ on release
       inc($r)
     end while
     if (%CC[64]<10)
-      if ($switch_midiOutputMode=1)
-        %key_down[$EVENT_NOTE] := 0
-      end if
       %key_active[$EVENT_NOTE] := 0
       call release_marked_ripples
     end if
@@ -3528,10 +3295,6 @@ on ui_control($switch_closeMidi2)
   $button_showMidi := 0
   call stop_all_clips_and_ripples
   call update_midi_visibility
-end on
-
-on ui_control($switch_midiOutputMode)
-  set_control_par(get_ui_id($label_midiOutputModeCover),$CONTROL_PAR_HIDE,%hide_states[$switch_midiOutputMode])
 end on
 
 on ui_control($menu_latency)
@@ -4226,248 +3989,69 @@ on ui_control($switch_preview0)
                     inc($r)
                   end while
                   if ($_already_playing=0)
-                    if ($switch_midiOutputMode=0)
-                      $_note_id2 := play_note(%__notes[$ripple_i],64+%__intervals[$ripple_i],$_offset_rec_time4,0)
-                      if ($switch_velToSampleStart=0)
-                        $_volume := real_to_int(int_to_real(-7000)+((int_to_real($_velocity)-int_to_real(1))/(int_to_real(127)-int_to_real(1))*(int_to_real(3000)-int_to_real(-7000))))
-                        change_vol($_note_id2,$_volume,0)
+                    $_note_id2 := play_note(%__notes[$ripple_i],64+%__intervals[$ripple_i],$_offset_rec_time4,0)
+                    if ($switch_velToSampleStart=0)
+                      $_volume := real_to_int(int_to_real(-7000)+((int_to_real($_velocity)-int_to_real(1))/(int_to_real(127)-int_to_real(1))*(int_to_real(3000)-int_to_real(-7000))))
+                      change_vol($_note_id2,$_volume,0)
+                    end if
+                    set_event_par_arr($_note_id2,$EVENT_PAR_ALLOW_GROUP,0,$ALL_GROUPS)
+                    set_event_par_arr($_note_id2,$EVENT_PAR_ALLOW_GROUP,1,$cur_artic)
+                    %custom_event_artic[$_note_id2 mod 1000000] := $cur_artic
+                    %custom_event_note[$_note_id2 mod 1000000] := $_note
+                    %custom_event_low_note[$_note_id2 mod 1000000] := $_low_note2
+                    %custom_event_high_note[$_note_id2 mod 1000000] := $_high_note2
+                    %custom_event_origin_note[$_note_id2 mod 1000000] := $_origin_note3
+                    %custom_event_dest_note[$_note_id2 mod 1000000] := $_dest_note
+                    %custom_event_first_note[$_note_id2 mod 1000000] := $_first_note
+                    %custom_event_second_note[$_note_id2 mod 1000000] := $_second_note
+                    %custom_event_velocity[$_note_id2 mod 1000000] := $_velocity
+                    %custom_event_direction[$_note_id2 mod 1000000] := $_ripple_dir
+                    %custom_event_source[$_note_id2 mod 1000000] := -1
+                    %custom_event_triggered_by_mf[$_note_id2 mod 1000000] := %custom_event_triggered_by_mf[$_note_id3 mod 1000000]
+                    $r := 64-2
+                    while ($r>=0)
+                      %ripple_id_history[$r+1] := %ripple_id_history[$r]
+                      dec($r)
+                    end while
+                    %ripple_id_history[0] := $_note_id2
+                    $_fade_in_time := 0
+                    if ($_do_legato=0)
+                      $_fade_in_time := $menu_latency*1000
+                      if ($_fade_in_time=0)
+                        $_fade_in_time := 0
                       end if
-                      set_event_par_arr($_note_id2,$EVENT_PAR_ALLOW_GROUP,0,$ALL_GROUPS)
-                      set_event_par_arr($_note_id2,$EVENT_PAR_ALLOW_GROUP,1,$cur_artic)
-                      %custom_event_artic[$_note_id2 mod 1000000] := $cur_artic
-                      %custom_event_note[$_note_id2 mod 1000000] := $_note
-                      %custom_event_low_note[$_note_id2 mod 1000000] := $_low_note2
-                      %custom_event_high_note[$_note_id2 mod 1000000] := $_high_note2
-                      %custom_event_origin_note[$_note_id2 mod 1000000] := $_origin_note3
-                      %custom_event_dest_note[$_note_id2 mod 1000000] := $_dest_note
-                      %custom_event_first_note[$_note_id2 mod 1000000] := $_first_note
-                      %custom_event_second_note[$_note_id2 mod 1000000] := $_second_note
-                      %custom_event_velocity[$_note_id2 mod 1000000] := $_velocity
-                      %custom_event_direction[$_note_id2 mod 1000000] := $_ripple_dir
-                      %custom_event_source[$_note_id2 mod 1000000] := -1
-                      %custom_event_triggered_by_mf[$_note_id2 mod 1000000] := %custom_event_triggered_by_mf[$_note_id3 mod 1000000]
-                      $r := 64-2
-                      while ($r>=0)
-                        %ripple_id_history[$r+1] := %ripple_id_history[$r]
-                        dec($r)
-                      end while
-                      %ripple_id_history[0] := $_note_id2
-                      $_fade_in_time := 0
-                      if ($_do_legato=0)
-                        $_fade_in_time := $menu_latency*1000
-                        if ($_fade_in_time=0)
-                          $_fade_in_time := 0
-                        end if
-                      else
-                        $_real_pos_in_ripple := ($_real_legato_time+$_real_ripple_length-ticks_to_ms(48)) mod $_real_ripple_length
-                        $_time_til_end_of_ripple := $_real_ripple_length-$_real_pos_in_ripple
-                        if ($cur_artic=$artic__sixteenths)
-                          if ($_real_pos_in_ripple<($_real_ripple_length/4))
-                            $_real_pitch_length := $_real_ripple_length/4
-                            $_real_pos_in_pitch := $_real_pos_in_ripple mod $_real_pitch_length
-                            $_time_til_end_of_pitch := $_real_pitch_length-$_real_pos_in_pitch
-                          else
-                            $_time_til_end_of_pitch := $_real_ripple_length-$_real_pos_in_ripple
-                          end if
-                        else
-                          $_real_pitch_length := $_real_ripple_length/2
-                          $_real_pos_in_pitch := $_real_legato_time mod $_real_pitch_length
-                          $_time_til_end_of_pitch := $_real_pitch_length-$_real_pos_in_pitch
-                        end if
-                        if (in_range($_velocity,1,48))
-                          $_fade_in_time := $_time_til_end_of_ripple
-                        else
-                          if (in_range($_velocity,49,96))
-                            $_fade_in_time := $_time_til_end_of_pitch
-                          else
-                            if (in_range($_velocity,97,127))
-                              $_fade_in_time := $_time_til_end_of_pitch/2
-                            end if
-                          end if
-                        end if
-                        if ($_fade_in_time<ticks_to_ms(192))
-                          $_fade_in_time := ticks_to_ms(192)
-                        end if
-                      end if
-                      fade_in($_note_id2,$_fade_in_time)
                     else
-                      $_ext_first_note := $_first_note
-                      $_ext_second_note := $_second_note
-                      $_ext_low_note := $_low_note2
-                      $_ext_high_note := $_high_note2
-                      $_ext_artic := $cur_artic
-                      $_wait_time := $_ext_mode_real_legato_time
-                      if ($_wait_time>0)
-                        select (real_to_int(?xypad_legato[0]*int_to_real(4)))
-                          case $legatoMode__syncToPitch
-                            $_wait_time := $_real_pitch_length-($_wait_time mod $_real_pitch_length)
-                          case $legatoMode__syncToRipple
-                            if ($_wait_time mod $_real_ripple_length<=$_real_pitch_length)
-                              $_note_chooser := 1
-                            end if
-                            $_wait_time := $_real_pitch_length-($_wait_time mod $_real_pitch_length)
-                          case $legatoMode__syncToSwell
-                            if ($_wait_time mod $_real_ripple_length<=$_real_pitch_length)
-                              $_note_chooser := 1
-                            end if
-                            $_ext_pitch := $_wait_time/$_real_pitch_length
-                            $_wait_time := $_real_pitch_length-($_wait_time mod $_real_pitch_length)
-                        end select
-                      end if
-                      $_low_vel := %velo[$_note]-35
-                      $_high_vel := $_low_vel+35
-                      if ($_high_vel>127)
-                        $_high_vel := 127
-                      end if
-                      if ($_low_vel<1)
-                        $_low_vel := 1
-                      end if
-                      if ($_wait_time>0)
-                        wait($_wait_time)
-                      end if
-                      while (%key_active[$_note]=1)
-                        if ($_note_chooser=0)
-                          $_ext_note := $_ext_first_note
+                      $_real_pos_in_ripple := ($_real_legato_time+$_real_ripple_length-ticks_to_ms(48)) mod $_real_ripple_length
+                      $_time_til_end_of_ripple := $_real_ripple_length-$_real_pos_in_ripple
+                      if ($cur_artic=$artic__sixteenths)
+                        if ($_real_pos_in_ripple<($_real_ripple_length/4))
+                          $_real_pitch_length := $_real_ripple_length/4
+                          $_real_pos_in_pitch := $_real_pos_in_ripple mod $_real_pitch_length
+                          $_time_til_end_of_pitch := $_real_pitch_length-$_real_pos_in_pitch
                         else
-                          $_ext_note := $_ext_second_note
-                        end if
-                        ~_vel_norm := int_to_real($slider_vol)/1000000.0*(int_to_real(%velo[$_note])/127.0)
-                        $_vel3 := real_to_int(~_vel_norm*int_to_real(127-60))+30
-                        if (in_range($_ext_pitch,0,7))
-                          $_vel3 := real_to_int(int_to_real($_vel3-30)+((int_to_real($_ext_pitch)-int_to_real(0))/(int_to_real(7)-int_to_real(0))*(int_to_real($_vel3+30)-int_to_real($_vel3-30))))
-                        else
-                          $_vel3 := real_to_int(int_to_real($_vel3+30)+((int_to_real($_ext_pitch)-int_to_real(8))/(int_to_real(15)-int_to_real(8))*(int_to_real($_vel3-30)-int_to_real($_vel3+30))))
-                        end if
-                        if ($_note_chooser=1)
-                          $_vel3 := $_vel3-20
-                        end if
-                        if ($_vel3<1)
-                          $_vel3 := 1
-                        end if
-                        if ($_vel3>127)
-                          $_vel3 := 127
-                        end if
-                        if ($_ext_artic=$artic__sixteenths)
-                          if ($_note_chooser=0)
-                            $_len := ticks_to_ms(%ripple_length_ticks[$_ext_artic]/4)
-                          else
-                            $_len := ticks_to_ms(%ripple_length_ticks[$_ext_artic]/4*3)
-                          end if
-                        else
-                          $_len := ticks_to_ms(%ripple_length_ticks[$_ext_artic]/2)
-                        end if
-                        $_note_id2 := play_note($_ext_note,$_vel3,0,$_len)
-                        if ($_ext_artic=$artic__sixteenths)
-                          if ($_note_chooser=0)
-                            $_wait_time := ticks_to_ms(%ripple_length_ticks[$_ext_artic]/4)
-                          else
-                            $_wait_time := ticks_to_ms(%ripple_length_ticks[$_ext_artic]/4*3)
-                          end if
-                        else
-                          $_wait_time := ticks_to_ms(%ripple_length_ticks[$_ext_artic]/2)
-                        end if
-                        $_wait_time := real_to_int(int_to_real($_wait_time)*?speeds[real_to_int(?xypad_speed[0]*int_to_real(5))])
-                        if ($_wait_time>0)
-                          wait($_wait_time)
-                        end if
-                        $_ext_pitch := ($_ext_pitch+1) mod 16
-                        $_note_chooser := 1-$_note_chooser
-                      end while
-                      if ($_note_chooser=0)
-                        $_ext_note := $_ext_first_note
-                      else
-                        $_ext_note := $_ext_second_note
-                      end if
-                      ~_vel_norm := int_to_real($slider_vol)/1000000.0*(int_to_real(%velo[$_note])/127.0)
-                      $_vel3 := real_to_int(~_vel_norm*int_to_real(127-60))+30
-                      if (in_range($_ext_pitch,0,7))
-                        $_vel3 := real_to_int(int_to_real($_vel3-30)+((int_to_real($_ext_pitch)-int_to_real(0))/(int_to_real(7)-int_to_real(0))*(int_to_real($_vel3+30)-int_to_real($_vel3-30))))
-                      else
-                        $_vel3 := real_to_int(int_to_real($_vel3+30)+((int_to_real($_ext_pitch)-int_to_real(8))/(int_to_real(15)-int_to_real(8))*(int_to_real($_vel3-30)-int_to_real($_vel3+30))))
-                      end if
-                      if ($_note_chooser=1)
-                        $_vel3 := $_vel3-20
-                      end if
-                      if ($_vel3<1)
-                        $_vel3 := 1
-                      end if
-                      if ($_vel3>127)
-                        $_vel3 := 127
-                      end if
-                      if ($_ext_artic=$artic__sixteenths)
-                        if ($_note_chooser=0)
-                          $_len := ticks_to_ms(%ripple_length_ticks[$_ext_artic]/4)
-                        else
-                          $_len := ticks_to_ms(%ripple_length_ticks[$_ext_artic]/4*3)
+                          $_time_til_end_of_pitch := $_real_ripple_length-$_real_pos_in_ripple
                         end if
                       else
-                        $_len := ticks_to_ms(%ripple_length_ticks[$_ext_artic]/2)
+                        $_real_pitch_length := $_real_ripple_length/2
+                        $_real_pos_in_pitch := $_real_legato_time mod $_real_pitch_length
+                        $_time_til_end_of_pitch := $_real_pitch_length-$_real_pos_in_pitch
                       end if
-                      $_note_id2 := play_note($_ext_note,$_vel3,0,$_len)
-                      if ($_ext_artic=$artic__sixteenths)
-                        if ($_note_chooser=0)
-                          $_wait_time := ticks_to_ms(%ripple_length_ticks[$_ext_artic]/4)
-                        else
-                          $_wait_time := ticks_to_ms(%ripple_length_ticks[$_ext_artic]/4*3)
-                        end if
+                      if (in_range($_velocity,1,48))
+                        $_fade_in_time := $_time_til_end_of_ripple
                       else
-                        $_wait_time := ticks_to_ms(%ripple_length_ticks[$_ext_artic]/2)
-                      end if
-                      $_wait_time := real_to_int(int_to_real($_wait_time)*?speeds[real_to_int(?xypad_speed[0]*int_to_real(5))])
-                      if ($_wait_time>0)
-                        wait($_wait_time)
-                      end if
-                      $_ext_pitch := ($_ext_pitch+1) mod 16
-                      $_note_chooser := 1-$_note_chooser
-                      if ($_note_chooser=0)
-                        if ($_note_chooser=0)
-                          $_ext_note := $_ext_first_note
+                        if (in_range($_velocity,49,96))
+                          $_fade_in_time := $_time_til_end_of_pitch
                         else
-                          $_ext_note := $_ext_second_note
-                        end if
-                        ~_vel_norm := int_to_real($slider_vol)/1000000.0*(int_to_real(%velo[$_note])/127.0)
-                        $_vel3 := real_to_int(~_vel_norm*int_to_real(127-60))+30
-                        if (in_range($_ext_pitch,0,7))
-                          $_vel3 := real_to_int(int_to_real($_vel3-30)+((int_to_real($_ext_pitch)-int_to_real(0))/(int_to_real(7)-int_to_real(0))*(int_to_real($_vel3+30)-int_to_real($_vel3-30))))
-                        else
-                          $_vel3 := real_to_int(int_to_real($_vel3+30)+((int_to_real($_ext_pitch)-int_to_real(8))/(int_to_real(15)-int_to_real(8))*(int_to_real($_vel3-30)-int_to_real($_vel3+30))))
-                        end if
-                        if ($_note_chooser=1)
-                          $_vel3 := $_vel3-20
-                        end if
-                        if ($_vel3<1)
-                          $_vel3 := 1
-                        end if
-                        if ($_vel3>127)
-                          $_vel3 := 127
-                        end if
-                        if ($_ext_artic=$artic__sixteenths)
-                          if ($_note_chooser=0)
-                            $_len := ticks_to_ms(%ripple_length_ticks[$_ext_artic]/4)
-                          else
-                            $_len := ticks_to_ms(%ripple_length_ticks[$_ext_artic]/4*3)
+                          if (in_range($_velocity,97,127))
+                            $_fade_in_time := $_time_til_end_of_pitch/2
                           end if
-                        else
-                          $_len := ticks_to_ms(%ripple_length_ticks[$_ext_artic]/2)
                         end if
-                        $_note_id2 := play_note($_ext_note,$_vel3,0,$_len)
-                        if ($_ext_artic=$artic__sixteenths)
-                          if ($_note_chooser=0)
-                            $_wait_time := ticks_to_ms(%ripple_length_ticks[$_ext_artic]/4)
-                          else
-                            $_wait_time := ticks_to_ms(%ripple_length_ticks[$_ext_artic]/4*3)
-                          end if
-                        else
-                          $_wait_time := ticks_to_ms(%ripple_length_ticks[$_ext_artic]/2)
-                        end if
-                        $_wait_time := real_to_int(int_to_real($_wait_time)*?speeds[real_to_int(?xypad_speed[0]*int_to_real(5))])
-                        if ($_wait_time>0)
-                          wait($_wait_time)
-                        end if
-                        $_ext_pitch := ($_ext_pitch+1) mod 16
-                        $_note_chooser := 1-$_note_chooser
+                      end if
+                      if ($_fade_in_time<ticks_to_ms(192))
+                        $_fade_in_time := ticks_to_ms(192)
                       end if
                     end if
+                    fade_in($_note_id2,$_fade_in_time)
                   end if
                   inc($ripple_i)
                 end while
@@ -4873,248 +4457,69 @@ on ui_control($switch_preview1)
                     inc($r)
                   end while
                   if ($_already_playing=0)
-                    if ($switch_midiOutputMode=0)
-                      $_note_id2 := play_note(%__notes[$ripple_i],64+%__intervals[$ripple_i],$_offset_rec_time4,0)
-                      if ($switch_velToSampleStart=0)
-                        $_volume := real_to_int(int_to_real(-7000)+((int_to_real($_velocity2)-int_to_real(1))/(int_to_real(127)-int_to_real(1))*(int_to_real(3000)-int_to_real(-7000))))
-                        change_vol($_note_id2,$_volume,0)
+                    $_note_id2 := play_note(%__notes[$ripple_i],64+%__intervals[$ripple_i],$_offset_rec_time4,0)
+                    if ($switch_velToSampleStart=0)
+                      $_volume := real_to_int(int_to_real(-7000)+((int_to_real($_velocity2)-int_to_real(1))/(int_to_real(127)-int_to_real(1))*(int_to_real(3000)-int_to_real(-7000))))
+                      change_vol($_note_id2,$_volume,0)
+                    end if
+                    set_event_par_arr($_note_id2,$EVENT_PAR_ALLOW_GROUP,0,$ALL_GROUPS)
+                    set_event_par_arr($_note_id2,$EVENT_PAR_ALLOW_GROUP,1,$cur_artic)
+                    %custom_event_artic[$_note_id2 mod 1000000] := $cur_artic
+                    %custom_event_note[$_note_id2 mod 1000000] := $_note2
+                    %custom_event_low_note[$_note_id2 mod 1000000] := $_low_note2
+                    %custom_event_high_note[$_note_id2 mod 1000000] := $_high_note2
+                    %custom_event_origin_note[$_note_id2 mod 1000000] := $_origin_note3
+                    %custom_event_dest_note[$_note_id2 mod 1000000] := $_dest_note
+                    %custom_event_first_note[$_note_id2 mod 1000000] := $_first_note
+                    %custom_event_second_note[$_note_id2 mod 1000000] := $_second_note
+                    %custom_event_velocity[$_note_id2 mod 1000000] := $_velocity2
+                    %custom_event_direction[$_note_id2 mod 1000000] := $_ripple_dir
+                    %custom_event_source[$_note_id2 mod 1000000] := -1
+                    %custom_event_triggered_by_mf[$_note_id2 mod 1000000] := %custom_event_triggered_by_mf[$_note_id4 mod 1000000]
+                    $r := 64-2
+                    while ($r>=0)
+                      %ripple_id_history[$r+1] := %ripple_id_history[$r]
+                      dec($r)
+                    end while
+                    %ripple_id_history[0] := $_note_id2
+                    $_fade_in_time := 0
+                    if ($_do_legato=0)
+                      $_fade_in_time := $menu_latency*1000
+                      if ($_fade_in_time=0)
+                        $_fade_in_time := 0
                       end if
-                      set_event_par_arr($_note_id2,$EVENT_PAR_ALLOW_GROUP,0,$ALL_GROUPS)
-                      set_event_par_arr($_note_id2,$EVENT_PAR_ALLOW_GROUP,1,$cur_artic)
-                      %custom_event_artic[$_note_id2 mod 1000000] := $cur_artic
-                      %custom_event_note[$_note_id2 mod 1000000] := $_note2
-                      %custom_event_low_note[$_note_id2 mod 1000000] := $_low_note2
-                      %custom_event_high_note[$_note_id2 mod 1000000] := $_high_note2
-                      %custom_event_origin_note[$_note_id2 mod 1000000] := $_origin_note3
-                      %custom_event_dest_note[$_note_id2 mod 1000000] := $_dest_note
-                      %custom_event_first_note[$_note_id2 mod 1000000] := $_first_note
-                      %custom_event_second_note[$_note_id2 mod 1000000] := $_second_note
-                      %custom_event_velocity[$_note_id2 mod 1000000] := $_velocity2
-                      %custom_event_direction[$_note_id2 mod 1000000] := $_ripple_dir
-                      %custom_event_source[$_note_id2 mod 1000000] := -1
-                      %custom_event_triggered_by_mf[$_note_id2 mod 1000000] := %custom_event_triggered_by_mf[$_note_id4 mod 1000000]
-                      $r := 64-2
-                      while ($r>=0)
-                        %ripple_id_history[$r+1] := %ripple_id_history[$r]
-                        dec($r)
-                      end while
-                      %ripple_id_history[0] := $_note_id2
-                      $_fade_in_time := 0
-                      if ($_do_legato=0)
-                        $_fade_in_time := $menu_latency*1000
-                        if ($_fade_in_time=0)
-                          $_fade_in_time := 0
-                        end if
-                      else
-                        $_real_pos_in_ripple := ($_real_legato_time+$_real_ripple_length-ticks_to_ms(48)) mod $_real_ripple_length
-                        $_time_til_end_of_ripple := $_real_ripple_length-$_real_pos_in_ripple
-                        if ($cur_artic=$artic__sixteenths)
-                          if ($_real_pos_in_ripple<($_real_ripple_length/4))
-                            $_real_pitch_length := $_real_ripple_length/4
-                            $_real_pos_in_pitch := $_real_pos_in_ripple mod $_real_pitch_length
-                            $_time_til_end_of_pitch := $_real_pitch_length-$_real_pos_in_pitch
-                          else
-                            $_time_til_end_of_pitch := $_real_ripple_length-$_real_pos_in_ripple
-                          end if
-                        else
-                          $_real_pitch_length := $_real_ripple_length/2
-                          $_real_pos_in_pitch := $_real_legato_time mod $_real_pitch_length
-                          $_time_til_end_of_pitch := $_real_pitch_length-$_real_pos_in_pitch
-                        end if
-                        if (in_range($_velocity2,1,48))
-                          $_fade_in_time := $_time_til_end_of_ripple
-                        else
-                          if (in_range($_velocity2,49,96))
-                            $_fade_in_time := $_time_til_end_of_pitch
-                          else
-                            if (in_range($_velocity2,97,127))
-                              $_fade_in_time := $_time_til_end_of_pitch/2
-                            end if
-                          end if
-                        end if
-                        if ($_fade_in_time<ticks_to_ms(192))
-                          $_fade_in_time := ticks_to_ms(192)
-                        end if
-                      end if
-                      fade_in($_note_id2,$_fade_in_time)
                     else
-                      $_ext_first_note := $_first_note
-                      $_ext_second_note := $_second_note
-                      $_ext_low_note := $_low_note2
-                      $_ext_high_note := $_high_note2
-                      $_ext_artic := $cur_artic
-                      $_wait_time := $_ext_mode_real_legato_time
-                      if ($_wait_time>0)
-                        select (real_to_int(?xypad_legato[0]*int_to_real(4)))
-                          case $legatoMode__syncToPitch
-                            $_wait_time := $_real_pitch_length-($_wait_time mod $_real_pitch_length)
-                          case $legatoMode__syncToRipple
-                            if ($_wait_time mod $_real_ripple_length<=$_real_pitch_length)
-                              $_note_chooser := 1
-                            end if
-                            $_wait_time := $_real_pitch_length-($_wait_time mod $_real_pitch_length)
-                          case $legatoMode__syncToSwell
-                            if ($_wait_time mod $_real_ripple_length<=$_real_pitch_length)
-                              $_note_chooser := 1
-                            end if
-                            $_ext_pitch := $_wait_time/$_real_pitch_length
-                            $_wait_time := $_real_pitch_length-($_wait_time mod $_real_pitch_length)
-                        end select
-                      end if
-                      $_low_vel := %velo[$_note2]-35
-                      $_high_vel := $_low_vel+35
-                      if ($_high_vel>127)
-                        $_high_vel := 127
-                      end if
-                      if ($_low_vel<1)
-                        $_low_vel := 1
-                      end if
-                      if ($_wait_time>0)
-                        wait($_wait_time)
-                      end if
-                      while (%key_active[$_note2]=1)
-                        if ($_note_chooser=0)
-                          $_ext_note := $_ext_first_note
+                      $_real_pos_in_ripple := ($_real_legato_time+$_real_ripple_length-ticks_to_ms(48)) mod $_real_ripple_length
+                      $_time_til_end_of_ripple := $_real_ripple_length-$_real_pos_in_ripple
+                      if ($cur_artic=$artic__sixteenths)
+                        if ($_real_pos_in_ripple<($_real_ripple_length/4))
+                          $_real_pitch_length := $_real_ripple_length/4
+                          $_real_pos_in_pitch := $_real_pos_in_ripple mod $_real_pitch_length
+                          $_time_til_end_of_pitch := $_real_pitch_length-$_real_pos_in_pitch
                         else
-                          $_ext_note := $_ext_second_note
-                        end if
-                        ~_vel_norm := int_to_real($slider_vol)/1000000.0*(int_to_real(%velo[$_note2])/127.0)
-                        $_vel3 := real_to_int(~_vel_norm*int_to_real(127-60))+30
-                        if (in_range($_ext_pitch,0,7))
-                          $_vel3 := real_to_int(int_to_real($_vel3-30)+((int_to_real($_ext_pitch)-int_to_real(0))/(int_to_real(7)-int_to_real(0))*(int_to_real($_vel3+30)-int_to_real($_vel3-30))))
-                        else
-                          $_vel3 := real_to_int(int_to_real($_vel3+30)+((int_to_real($_ext_pitch)-int_to_real(8))/(int_to_real(15)-int_to_real(8))*(int_to_real($_vel3-30)-int_to_real($_vel3+30))))
-                        end if
-                        if ($_note_chooser=1)
-                          $_vel3 := $_vel3-20
-                        end if
-                        if ($_vel3<1)
-                          $_vel3 := 1
-                        end if
-                        if ($_vel3>127)
-                          $_vel3 := 127
-                        end if
-                        if ($_ext_artic=$artic__sixteenths)
-                          if ($_note_chooser=0)
-                            $_len := ticks_to_ms(%ripple_length_ticks[$_ext_artic]/4)
-                          else
-                            $_len := ticks_to_ms(%ripple_length_ticks[$_ext_artic]/4*3)
-                          end if
-                        else
-                          $_len := ticks_to_ms(%ripple_length_ticks[$_ext_artic]/2)
-                        end if
-                        $_note_id2 := play_note($_ext_note,$_vel3,0,$_len)
-                        if ($_ext_artic=$artic__sixteenths)
-                          if ($_note_chooser=0)
-                            $_wait_time := ticks_to_ms(%ripple_length_ticks[$_ext_artic]/4)
-                          else
-                            $_wait_time := ticks_to_ms(%ripple_length_ticks[$_ext_artic]/4*3)
-                          end if
-                        else
-                          $_wait_time := ticks_to_ms(%ripple_length_ticks[$_ext_artic]/2)
-                        end if
-                        $_wait_time := real_to_int(int_to_real($_wait_time)*?speeds[real_to_int(?xypad_speed[0]*int_to_real(5))])
-                        if ($_wait_time>0)
-                          wait($_wait_time)
-                        end if
-                        $_ext_pitch := ($_ext_pitch+1) mod 16
-                        $_note_chooser := 1-$_note_chooser
-                      end while
-                      if ($_note_chooser=0)
-                        $_ext_note := $_ext_first_note
-                      else
-                        $_ext_note := $_ext_second_note
-                      end if
-                      ~_vel_norm := int_to_real($slider_vol)/1000000.0*(int_to_real(%velo[$_note2])/127.0)
-                      $_vel3 := real_to_int(~_vel_norm*int_to_real(127-60))+30
-                      if (in_range($_ext_pitch,0,7))
-                        $_vel3 := real_to_int(int_to_real($_vel3-30)+((int_to_real($_ext_pitch)-int_to_real(0))/(int_to_real(7)-int_to_real(0))*(int_to_real($_vel3+30)-int_to_real($_vel3-30))))
-                      else
-                        $_vel3 := real_to_int(int_to_real($_vel3+30)+((int_to_real($_ext_pitch)-int_to_real(8))/(int_to_real(15)-int_to_real(8))*(int_to_real($_vel3-30)-int_to_real($_vel3+30))))
-                      end if
-                      if ($_note_chooser=1)
-                        $_vel3 := $_vel3-20
-                      end if
-                      if ($_vel3<1)
-                        $_vel3 := 1
-                      end if
-                      if ($_vel3>127)
-                        $_vel3 := 127
-                      end if
-                      if ($_ext_artic=$artic__sixteenths)
-                        if ($_note_chooser=0)
-                          $_len := ticks_to_ms(%ripple_length_ticks[$_ext_artic]/4)
-                        else
-                          $_len := ticks_to_ms(%ripple_length_ticks[$_ext_artic]/4*3)
+                          $_time_til_end_of_pitch := $_real_ripple_length-$_real_pos_in_ripple
                         end if
                       else
-                        $_len := ticks_to_ms(%ripple_length_ticks[$_ext_artic]/2)
+                        $_real_pitch_length := $_real_ripple_length/2
+                        $_real_pos_in_pitch := $_real_legato_time mod $_real_pitch_length
+                        $_time_til_end_of_pitch := $_real_pitch_length-$_real_pos_in_pitch
                       end if
-                      $_note_id2 := play_note($_ext_note,$_vel3,0,$_len)
-                      if ($_ext_artic=$artic__sixteenths)
-                        if ($_note_chooser=0)
-                          $_wait_time := ticks_to_ms(%ripple_length_ticks[$_ext_artic]/4)
-                        else
-                          $_wait_time := ticks_to_ms(%ripple_length_ticks[$_ext_artic]/4*3)
-                        end if
+                      if (in_range($_velocity2,1,48))
+                        $_fade_in_time := $_time_til_end_of_ripple
                       else
-                        $_wait_time := ticks_to_ms(%ripple_length_ticks[$_ext_artic]/2)
-                      end if
-                      $_wait_time := real_to_int(int_to_real($_wait_time)*?speeds[real_to_int(?xypad_speed[0]*int_to_real(5))])
-                      if ($_wait_time>0)
-                        wait($_wait_time)
-                      end if
-                      $_ext_pitch := ($_ext_pitch+1) mod 16
-                      $_note_chooser := 1-$_note_chooser
-                      if ($_note_chooser=0)
-                        if ($_note_chooser=0)
-                          $_ext_note := $_ext_first_note
+                        if (in_range($_velocity2,49,96))
+                          $_fade_in_time := $_time_til_end_of_pitch
                         else
-                          $_ext_note := $_ext_second_note
-                        end if
-                        ~_vel_norm := int_to_real($slider_vol)/1000000.0*(int_to_real(%velo[$_note2])/127.0)
-                        $_vel3 := real_to_int(~_vel_norm*int_to_real(127-60))+30
-                        if (in_range($_ext_pitch,0,7))
-                          $_vel3 := real_to_int(int_to_real($_vel3-30)+((int_to_real($_ext_pitch)-int_to_real(0))/(int_to_real(7)-int_to_real(0))*(int_to_real($_vel3+30)-int_to_real($_vel3-30))))
-                        else
-                          $_vel3 := real_to_int(int_to_real($_vel3+30)+((int_to_real($_ext_pitch)-int_to_real(8))/(int_to_real(15)-int_to_real(8))*(int_to_real($_vel3-30)-int_to_real($_vel3+30))))
-                        end if
-                        if ($_note_chooser=1)
-                          $_vel3 := $_vel3-20
-                        end if
-                        if ($_vel3<1)
-                          $_vel3 := 1
-                        end if
-                        if ($_vel3>127)
-                          $_vel3 := 127
-                        end if
-                        if ($_ext_artic=$artic__sixteenths)
-                          if ($_note_chooser=0)
-                            $_len := ticks_to_ms(%ripple_length_ticks[$_ext_artic]/4)
-                          else
-                            $_len := ticks_to_ms(%ripple_length_ticks[$_ext_artic]/4*3)
+                          if (in_range($_velocity2,97,127))
+                            $_fade_in_time := $_time_til_end_of_pitch/2
                           end if
-                        else
-                          $_len := ticks_to_ms(%ripple_length_ticks[$_ext_artic]/2)
                         end if
-                        $_note_id2 := play_note($_ext_note,$_vel3,0,$_len)
-                        if ($_ext_artic=$artic__sixteenths)
-                          if ($_note_chooser=0)
-                            $_wait_time := ticks_to_ms(%ripple_length_ticks[$_ext_artic]/4)
-                          else
-                            $_wait_time := ticks_to_ms(%ripple_length_ticks[$_ext_artic]/4*3)
-                          end if
-                        else
-                          $_wait_time := ticks_to_ms(%ripple_length_ticks[$_ext_artic]/2)
-                        end if
-                        $_wait_time := real_to_int(int_to_real($_wait_time)*?speeds[real_to_int(?xypad_speed[0]*int_to_real(5))])
-                        if ($_wait_time>0)
-                          wait($_wait_time)
-                        end if
-                        $_ext_pitch := ($_ext_pitch+1) mod 16
-                        $_note_chooser := 1-$_note_chooser
+                      end if
+                      if ($_fade_in_time<ticks_to_ms(192))
+                        $_fade_in_time := ticks_to_ms(192)
                       end if
                     end if
+                    fade_in($_note_id2,$_fade_in_time)
                   end if
                   inc($ripple_i)
                 end while
@@ -5520,248 +4925,69 @@ on ui_control($switch_preview2)
                     inc($r)
                   end while
                   if ($_already_playing=0)
-                    if ($switch_midiOutputMode=0)
-                      $_note_id2 := play_note(%__notes[$ripple_i],64+%__intervals[$ripple_i],$_offset_rec_time4,0)
-                      if ($switch_velToSampleStart=0)
-                        $_volume := real_to_int(int_to_real(-7000)+((int_to_real($_velocity3)-int_to_real(1))/(int_to_real(127)-int_to_real(1))*(int_to_real(3000)-int_to_real(-7000))))
-                        change_vol($_note_id2,$_volume,0)
+                    $_note_id2 := play_note(%__notes[$ripple_i],64+%__intervals[$ripple_i],$_offset_rec_time4,0)
+                    if ($switch_velToSampleStart=0)
+                      $_volume := real_to_int(int_to_real(-7000)+((int_to_real($_velocity3)-int_to_real(1))/(int_to_real(127)-int_to_real(1))*(int_to_real(3000)-int_to_real(-7000))))
+                      change_vol($_note_id2,$_volume,0)
+                    end if
+                    set_event_par_arr($_note_id2,$EVENT_PAR_ALLOW_GROUP,0,$ALL_GROUPS)
+                    set_event_par_arr($_note_id2,$EVENT_PAR_ALLOW_GROUP,1,$cur_artic)
+                    %custom_event_artic[$_note_id2 mod 1000000] := $cur_artic
+                    %custom_event_note[$_note_id2 mod 1000000] := $_note3
+                    %custom_event_low_note[$_note_id2 mod 1000000] := $_low_note2
+                    %custom_event_high_note[$_note_id2 mod 1000000] := $_high_note2
+                    %custom_event_origin_note[$_note_id2 mod 1000000] := $_origin_note3
+                    %custom_event_dest_note[$_note_id2 mod 1000000] := $_dest_note
+                    %custom_event_first_note[$_note_id2 mod 1000000] := $_first_note
+                    %custom_event_second_note[$_note_id2 mod 1000000] := $_second_note
+                    %custom_event_velocity[$_note_id2 mod 1000000] := $_velocity3
+                    %custom_event_direction[$_note_id2 mod 1000000] := $_ripple_dir
+                    %custom_event_source[$_note_id2 mod 1000000] := -1
+                    %custom_event_triggered_by_mf[$_note_id2 mod 1000000] := %custom_event_triggered_by_mf[$_note_id5 mod 1000000]
+                    $r := 64-2
+                    while ($r>=0)
+                      %ripple_id_history[$r+1] := %ripple_id_history[$r]
+                      dec($r)
+                    end while
+                    %ripple_id_history[0] := $_note_id2
+                    $_fade_in_time := 0
+                    if ($_do_legato=0)
+                      $_fade_in_time := $menu_latency*1000
+                      if ($_fade_in_time=0)
+                        $_fade_in_time := 0
                       end if
-                      set_event_par_arr($_note_id2,$EVENT_PAR_ALLOW_GROUP,0,$ALL_GROUPS)
-                      set_event_par_arr($_note_id2,$EVENT_PAR_ALLOW_GROUP,1,$cur_artic)
-                      %custom_event_artic[$_note_id2 mod 1000000] := $cur_artic
-                      %custom_event_note[$_note_id2 mod 1000000] := $_note3
-                      %custom_event_low_note[$_note_id2 mod 1000000] := $_low_note2
-                      %custom_event_high_note[$_note_id2 mod 1000000] := $_high_note2
-                      %custom_event_origin_note[$_note_id2 mod 1000000] := $_origin_note3
-                      %custom_event_dest_note[$_note_id2 mod 1000000] := $_dest_note
-                      %custom_event_first_note[$_note_id2 mod 1000000] := $_first_note
-                      %custom_event_second_note[$_note_id2 mod 1000000] := $_second_note
-                      %custom_event_velocity[$_note_id2 mod 1000000] := $_velocity3
-                      %custom_event_direction[$_note_id2 mod 1000000] := $_ripple_dir
-                      %custom_event_source[$_note_id2 mod 1000000] := -1
-                      %custom_event_triggered_by_mf[$_note_id2 mod 1000000] := %custom_event_triggered_by_mf[$_note_id5 mod 1000000]
-                      $r := 64-2
-                      while ($r>=0)
-                        %ripple_id_history[$r+1] := %ripple_id_history[$r]
-                        dec($r)
-                      end while
-                      %ripple_id_history[0] := $_note_id2
-                      $_fade_in_time := 0
-                      if ($_do_legato=0)
-                        $_fade_in_time := $menu_latency*1000
-                        if ($_fade_in_time=0)
-                          $_fade_in_time := 0
-                        end if
-                      else
-                        $_real_pos_in_ripple := ($_real_legato_time+$_real_ripple_length-ticks_to_ms(48)) mod $_real_ripple_length
-                        $_time_til_end_of_ripple := $_real_ripple_length-$_real_pos_in_ripple
-                        if ($cur_artic=$artic__sixteenths)
-                          if ($_real_pos_in_ripple<($_real_ripple_length/4))
-                            $_real_pitch_length := $_real_ripple_length/4
-                            $_real_pos_in_pitch := $_real_pos_in_ripple mod $_real_pitch_length
-                            $_time_til_end_of_pitch := $_real_pitch_length-$_real_pos_in_pitch
-                          else
-                            $_time_til_end_of_pitch := $_real_ripple_length-$_real_pos_in_ripple
-                          end if
-                        else
-                          $_real_pitch_length := $_real_ripple_length/2
-                          $_real_pos_in_pitch := $_real_legato_time mod $_real_pitch_length
-                          $_time_til_end_of_pitch := $_real_pitch_length-$_real_pos_in_pitch
-                        end if
-                        if (in_range($_velocity3,1,48))
-                          $_fade_in_time := $_time_til_end_of_ripple
-                        else
-                          if (in_range($_velocity3,49,96))
-                            $_fade_in_time := $_time_til_end_of_pitch
-                          else
-                            if (in_range($_velocity3,97,127))
-                              $_fade_in_time := $_time_til_end_of_pitch/2
-                            end if
-                          end if
-                        end if
-                        if ($_fade_in_time<ticks_to_ms(192))
-                          $_fade_in_time := ticks_to_ms(192)
-                        end if
-                      end if
-                      fade_in($_note_id2,$_fade_in_time)
                     else
-                      $_ext_first_note := $_first_note
-                      $_ext_second_note := $_second_note
-                      $_ext_low_note := $_low_note2
-                      $_ext_high_note := $_high_note2
-                      $_ext_artic := $cur_artic
-                      $_wait_time := $_ext_mode_real_legato_time
-                      if ($_wait_time>0)
-                        select (real_to_int(?xypad_legato[0]*int_to_real(4)))
-                          case $legatoMode__syncToPitch
-                            $_wait_time := $_real_pitch_length-($_wait_time mod $_real_pitch_length)
-                          case $legatoMode__syncToRipple
-                            if ($_wait_time mod $_real_ripple_length<=$_real_pitch_length)
-                              $_note_chooser := 1
-                            end if
-                            $_wait_time := $_real_pitch_length-($_wait_time mod $_real_pitch_length)
-                          case $legatoMode__syncToSwell
-                            if ($_wait_time mod $_real_ripple_length<=$_real_pitch_length)
-                              $_note_chooser := 1
-                            end if
-                            $_ext_pitch := $_wait_time/$_real_pitch_length
-                            $_wait_time := $_real_pitch_length-($_wait_time mod $_real_pitch_length)
-                        end select
-                      end if
-                      $_low_vel := %velo[$_note3]-35
-                      $_high_vel := $_low_vel+35
-                      if ($_high_vel>127)
-                        $_high_vel := 127
-                      end if
-                      if ($_low_vel<1)
-                        $_low_vel := 1
-                      end if
-                      if ($_wait_time>0)
-                        wait($_wait_time)
-                      end if
-                      while (%key_active[$_note3]=1)
-                        if ($_note_chooser=0)
-                          $_ext_note := $_ext_first_note
+                      $_real_pos_in_ripple := ($_real_legato_time+$_real_ripple_length-ticks_to_ms(48)) mod $_real_ripple_length
+                      $_time_til_end_of_ripple := $_real_ripple_length-$_real_pos_in_ripple
+                      if ($cur_artic=$artic__sixteenths)
+                        if ($_real_pos_in_ripple<($_real_ripple_length/4))
+                          $_real_pitch_length := $_real_ripple_length/4
+                          $_real_pos_in_pitch := $_real_pos_in_ripple mod $_real_pitch_length
+                          $_time_til_end_of_pitch := $_real_pitch_length-$_real_pos_in_pitch
                         else
-                          $_ext_note := $_ext_second_note
-                        end if
-                        ~_vel_norm := int_to_real($slider_vol)/1000000.0*(int_to_real(%velo[$_note3])/127.0)
-                        $_vel3 := real_to_int(~_vel_norm*int_to_real(127-60))+30
-                        if (in_range($_ext_pitch,0,7))
-                          $_vel3 := real_to_int(int_to_real($_vel3-30)+((int_to_real($_ext_pitch)-int_to_real(0))/(int_to_real(7)-int_to_real(0))*(int_to_real($_vel3+30)-int_to_real($_vel3-30))))
-                        else
-                          $_vel3 := real_to_int(int_to_real($_vel3+30)+((int_to_real($_ext_pitch)-int_to_real(8))/(int_to_real(15)-int_to_real(8))*(int_to_real($_vel3-30)-int_to_real($_vel3+30))))
-                        end if
-                        if ($_note_chooser=1)
-                          $_vel3 := $_vel3-20
-                        end if
-                        if ($_vel3<1)
-                          $_vel3 := 1
-                        end if
-                        if ($_vel3>127)
-                          $_vel3 := 127
-                        end if
-                        if ($_ext_artic=$artic__sixteenths)
-                          if ($_note_chooser=0)
-                            $_len := ticks_to_ms(%ripple_length_ticks[$_ext_artic]/4)
-                          else
-                            $_len := ticks_to_ms(%ripple_length_ticks[$_ext_artic]/4*3)
-                          end if
-                        else
-                          $_len := ticks_to_ms(%ripple_length_ticks[$_ext_artic]/2)
-                        end if
-                        $_note_id2 := play_note($_ext_note,$_vel3,0,$_len)
-                        if ($_ext_artic=$artic__sixteenths)
-                          if ($_note_chooser=0)
-                            $_wait_time := ticks_to_ms(%ripple_length_ticks[$_ext_artic]/4)
-                          else
-                            $_wait_time := ticks_to_ms(%ripple_length_ticks[$_ext_artic]/4*3)
-                          end if
-                        else
-                          $_wait_time := ticks_to_ms(%ripple_length_ticks[$_ext_artic]/2)
-                        end if
-                        $_wait_time := real_to_int(int_to_real($_wait_time)*?speeds[real_to_int(?xypad_speed[0]*int_to_real(5))])
-                        if ($_wait_time>0)
-                          wait($_wait_time)
-                        end if
-                        $_ext_pitch := ($_ext_pitch+1) mod 16
-                        $_note_chooser := 1-$_note_chooser
-                      end while
-                      if ($_note_chooser=0)
-                        $_ext_note := $_ext_first_note
-                      else
-                        $_ext_note := $_ext_second_note
-                      end if
-                      ~_vel_norm := int_to_real($slider_vol)/1000000.0*(int_to_real(%velo[$_note3])/127.0)
-                      $_vel3 := real_to_int(~_vel_norm*int_to_real(127-60))+30
-                      if (in_range($_ext_pitch,0,7))
-                        $_vel3 := real_to_int(int_to_real($_vel3-30)+((int_to_real($_ext_pitch)-int_to_real(0))/(int_to_real(7)-int_to_real(0))*(int_to_real($_vel3+30)-int_to_real($_vel3-30))))
-                      else
-                        $_vel3 := real_to_int(int_to_real($_vel3+30)+((int_to_real($_ext_pitch)-int_to_real(8))/(int_to_real(15)-int_to_real(8))*(int_to_real($_vel3-30)-int_to_real($_vel3+30))))
-                      end if
-                      if ($_note_chooser=1)
-                        $_vel3 := $_vel3-20
-                      end if
-                      if ($_vel3<1)
-                        $_vel3 := 1
-                      end if
-                      if ($_vel3>127)
-                        $_vel3 := 127
-                      end if
-                      if ($_ext_artic=$artic__sixteenths)
-                        if ($_note_chooser=0)
-                          $_len := ticks_to_ms(%ripple_length_ticks[$_ext_artic]/4)
-                        else
-                          $_len := ticks_to_ms(%ripple_length_ticks[$_ext_artic]/4*3)
+                          $_time_til_end_of_pitch := $_real_ripple_length-$_real_pos_in_ripple
                         end if
                       else
-                        $_len := ticks_to_ms(%ripple_length_ticks[$_ext_artic]/2)
+                        $_real_pitch_length := $_real_ripple_length/2
+                        $_real_pos_in_pitch := $_real_legato_time mod $_real_pitch_length
+                        $_time_til_end_of_pitch := $_real_pitch_length-$_real_pos_in_pitch
                       end if
-                      $_note_id2 := play_note($_ext_note,$_vel3,0,$_len)
-                      if ($_ext_artic=$artic__sixteenths)
-                        if ($_note_chooser=0)
-                          $_wait_time := ticks_to_ms(%ripple_length_ticks[$_ext_artic]/4)
-                        else
-                          $_wait_time := ticks_to_ms(%ripple_length_ticks[$_ext_artic]/4*3)
-                        end if
+                      if (in_range($_velocity3,1,48))
+                        $_fade_in_time := $_time_til_end_of_ripple
                       else
-                        $_wait_time := ticks_to_ms(%ripple_length_ticks[$_ext_artic]/2)
-                      end if
-                      $_wait_time := real_to_int(int_to_real($_wait_time)*?speeds[real_to_int(?xypad_speed[0]*int_to_real(5))])
-                      if ($_wait_time>0)
-                        wait($_wait_time)
-                      end if
-                      $_ext_pitch := ($_ext_pitch+1) mod 16
-                      $_note_chooser := 1-$_note_chooser
-                      if ($_note_chooser=0)
-                        if ($_note_chooser=0)
-                          $_ext_note := $_ext_first_note
+                        if (in_range($_velocity3,49,96))
+                          $_fade_in_time := $_time_til_end_of_pitch
                         else
-                          $_ext_note := $_ext_second_note
-                        end if
-                        ~_vel_norm := int_to_real($slider_vol)/1000000.0*(int_to_real(%velo[$_note3])/127.0)
-                        $_vel3 := real_to_int(~_vel_norm*int_to_real(127-60))+30
-                        if (in_range($_ext_pitch,0,7))
-                          $_vel3 := real_to_int(int_to_real($_vel3-30)+((int_to_real($_ext_pitch)-int_to_real(0))/(int_to_real(7)-int_to_real(0))*(int_to_real($_vel3+30)-int_to_real($_vel3-30))))
-                        else
-                          $_vel3 := real_to_int(int_to_real($_vel3+30)+((int_to_real($_ext_pitch)-int_to_real(8))/(int_to_real(15)-int_to_real(8))*(int_to_real($_vel3-30)-int_to_real($_vel3+30))))
-                        end if
-                        if ($_note_chooser=1)
-                          $_vel3 := $_vel3-20
-                        end if
-                        if ($_vel3<1)
-                          $_vel3 := 1
-                        end if
-                        if ($_vel3>127)
-                          $_vel3 := 127
-                        end if
-                        if ($_ext_artic=$artic__sixteenths)
-                          if ($_note_chooser=0)
-                            $_len := ticks_to_ms(%ripple_length_ticks[$_ext_artic]/4)
-                          else
-                            $_len := ticks_to_ms(%ripple_length_ticks[$_ext_artic]/4*3)
+                          if (in_range($_velocity3,97,127))
+                            $_fade_in_time := $_time_til_end_of_pitch/2
                           end if
-                        else
-                          $_len := ticks_to_ms(%ripple_length_ticks[$_ext_artic]/2)
                         end if
-                        $_note_id2 := play_note($_ext_note,$_vel3,0,$_len)
-                        if ($_ext_artic=$artic__sixteenths)
-                          if ($_note_chooser=0)
-                            $_wait_time := ticks_to_ms(%ripple_length_ticks[$_ext_artic]/4)
-                          else
-                            $_wait_time := ticks_to_ms(%ripple_length_ticks[$_ext_artic]/4*3)
-                          end if
-                        else
-                          $_wait_time := ticks_to_ms(%ripple_length_ticks[$_ext_artic]/2)
-                        end if
-                        $_wait_time := real_to_int(int_to_real($_wait_time)*?speeds[real_to_int(?xypad_speed[0]*int_to_real(5))])
-                        if ($_wait_time>0)
-                          wait($_wait_time)
-                        end if
-                        $_ext_pitch := ($_ext_pitch+1) mod 16
-                        $_note_chooser := 1-$_note_chooser
+                      end if
+                      if ($_fade_in_time<ticks_to_ms(192))
+                        $_fade_in_time := ticks_to_ms(192)
                       end if
                     end if
+                    fade_in($_note_id2,$_fade_in_time)
                   end if
                   inc($ripple_i)
                 end while
@@ -6167,248 +5393,69 @@ on ui_control($switch_preview3)
                     inc($r)
                   end while
                   if ($_already_playing=0)
-                    if ($switch_midiOutputMode=0)
-                      $_note_id2 := play_note(%__notes[$ripple_i],64+%__intervals[$ripple_i],$_offset_rec_time4,0)
-                      if ($switch_velToSampleStart=0)
-                        $_volume := real_to_int(int_to_real(-7000)+((int_to_real($_velocity4)-int_to_real(1))/(int_to_real(127)-int_to_real(1))*(int_to_real(3000)-int_to_real(-7000))))
-                        change_vol($_note_id2,$_volume,0)
+                    $_note_id2 := play_note(%__notes[$ripple_i],64+%__intervals[$ripple_i],$_offset_rec_time4,0)
+                    if ($switch_velToSampleStart=0)
+                      $_volume := real_to_int(int_to_real(-7000)+((int_to_real($_velocity4)-int_to_real(1))/(int_to_real(127)-int_to_real(1))*(int_to_real(3000)-int_to_real(-7000))))
+                      change_vol($_note_id2,$_volume,0)
+                    end if
+                    set_event_par_arr($_note_id2,$EVENT_PAR_ALLOW_GROUP,0,$ALL_GROUPS)
+                    set_event_par_arr($_note_id2,$EVENT_PAR_ALLOW_GROUP,1,$cur_artic)
+                    %custom_event_artic[$_note_id2 mod 1000000] := $cur_artic
+                    %custom_event_note[$_note_id2 mod 1000000] := $_note4
+                    %custom_event_low_note[$_note_id2 mod 1000000] := $_low_note2
+                    %custom_event_high_note[$_note_id2 mod 1000000] := $_high_note2
+                    %custom_event_origin_note[$_note_id2 mod 1000000] := $_origin_note3
+                    %custom_event_dest_note[$_note_id2 mod 1000000] := $_dest_note
+                    %custom_event_first_note[$_note_id2 mod 1000000] := $_first_note
+                    %custom_event_second_note[$_note_id2 mod 1000000] := $_second_note
+                    %custom_event_velocity[$_note_id2 mod 1000000] := $_velocity4
+                    %custom_event_direction[$_note_id2 mod 1000000] := $_ripple_dir
+                    %custom_event_source[$_note_id2 mod 1000000] := -1
+                    %custom_event_triggered_by_mf[$_note_id2 mod 1000000] := %custom_event_triggered_by_mf[$_note_id6 mod 1000000]
+                    $r := 64-2
+                    while ($r>=0)
+                      %ripple_id_history[$r+1] := %ripple_id_history[$r]
+                      dec($r)
+                    end while
+                    %ripple_id_history[0] := $_note_id2
+                    $_fade_in_time := 0
+                    if ($_do_legato=0)
+                      $_fade_in_time := $menu_latency*1000
+                      if ($_fade_in_time=0)
+                        $_fade_in_time := 0
                       end if
-                      set_event_par_arr($_note_id2,$EVENT_PAR_ALLOW_GROUP,0,$ALL_GROUPS)
-                      set_event_par_arr($_note_id2,$EVENT_PAR_ALLOW_GROUP,1,$cur_artic)
-                      %custom_event_artic[$_note_id2 mod 1000000] := $cur_artic
-                      %custom_event_note[$_note_id2 mod 1000000] := $_note4
-                      %custom_event_low_note[$_note_id2 mod 1000000] := $_low_note2
-                      %custom_event_high_note[$_note_id2 mod 1000000] := $_high_note2
-                      %custom_event_origin_note[$_note_id2 mod 1000000] := $_origin_note3
-                      %custom_event_dest_note[$_note_id2 mod 1000000] := $_dest_note
-                      %custom_event_first_note[$_note_id2 mod 1000000] := $_first_note
-                      %custom_event_second_note[$_note_id2 mod 1000000] := $_second_note
-                      %custom_event_velocity[$_note_id2 mod 1000000] := $_velocity4
-                      %custom_event_direction[$_note_id2 mod 1000000] := $_ripple_dir
-                      %custom_event_source[$_note_id2 mod 1000000] := -1
-                      %custom_event_triggered_by_mf[$_note_id2 mod 1000000] := %custom_event_triggered_by_mf[$_note_id6 mod 1000000]
-                      $r := 64-2
-                      while ($r>=0)
-                        %ripple_id_history[$r+1] := %ripple_id_history[$r]
-                        dec($r)
-                      end while
-                      %ripple_id_history[0] := $_note_id2
-                      $_fade_in_time := 0
-                      if ($_do_legato=0)
-                        $_fade_in_time := $menu_latency*1000
-                        if ($_fade_in_time=0)
-                          $_fade_in_time := 0
-                        end if
-                      else
-                        $_real_pos_in_ripple := ($_real_legato_time+$_real_ripple_length-ticks_to_ms(48)) mod $_real_ripple_length
-                        $_time_til_end_of_ripple := $_real_ripple_length-$_real_pos_in_ripple
-                        if ($cur_artic=$artic__sixteenths)
-                          if ($_real_pos_in_ripple<($_real_ripple_length/4))
-                            $_real_pitch_length := $_real_ripple_length/4
-                            $_real_pos_in_pitch := $_real_pos_in_ripple mod $_real_pitch_length
-                            $_time_til_end_of_pitch := $_real_pitch_length-$_real_pos_in_pitch
-                          else
-                            $_time_til_end_of_pitch := $_real_ripple_length-$_real_pos_in_ripple
-                          end if
-                        else
-                          $_real_pitch_length := $_real_ripple_length/2
-                          $_real_pos_in_pitch := $_real_legato_time mod $_real_pitch_length
-                          $_time_til_end_of_pitch := $_real_pitch_length-$_real_pos_in_pitch
-                        end if
-                        if (in_range($_velocity4,1,48))
-                          $_fade_in_time := $_time_til_end_of_ripple
-                        else
-                          if (in_range($_velocity4,49,96))
-                            $_fade_in_time := $_time_til_end_of_pitch
-                          else
-                            if (in_range($_velocity4,97,127))
-                              $_fade_in_time := $_time_til_end_of_pitch/2
-                            end if
-                          end if
-                        end if
-                        if ($_fade_in_time<ticks_to_ms(192))
-                          $_fade_in_time := ticks_to_ms(192)
-                        end if
-                      end if
-                      fade_in($_note_id2,$_fade_in_time)
                     else
-                      $_ext_first_note := $_first_note
-                      $_ext_second_note := $_second_note
-                      $_ext_low_note := $_low_note2
-                      $_ext_high_note := $_high_note2
-                      $_ext_artic := $cur_artic
-                      $_wait_time := $_ext_mode_real_legato_time
-                      if ($_wait_time>0)
-                        select (real_to_int(?xypad_legato[0]*int_to_real(4)))
-                          case $legatoMode__syncToPitch
-                            $_wait_time := $_real_pitch_length-($_wait_time mod $_real_pitch_length)
-                          case $legatoMode__syncToRipple
-                            if ($_wait_time mod $_real_ripple_length<=$_real_pitch_length)
-                              $_note_chooser := 1
-                            end if
-                            $_wait_time := $_real_pitch_length-($_wait_time mod $_real_pitch_length)
-                          case $legatoMode__syncToSwell
-                            if ($_wait_time mod $_real_ripple_length<=$_real_pitch_length)
-                              $_note_chooser := 1
-                            end if
-                            $_ext_pitch := $_wait_time/$_real_pitch_length
-                            $_wait_time := $_real_pitch_length-($_wait_time mod $_real_pitch_length)
-                        end select
-                      end if
-                      $_low_vel := %velo[$_note4]-35
-                      $_high_vel := $_low_vel+35
-                      if ($_high_vel>127)
-                        $_high_vel := 127
-                      end if
-                      if ($_low_vel<1)
-                        $_low_vel := 1
-                      end if
-                      if ($_wait_time>0)
-                        wait($_wait_time)
-                      end if
-                      while (%key_active[$_note4]=1)
-                        if ($_note_chooser=0)
-                          $_ext_note := $_ext_first_note
+                      $_real_pos_in_ripple := ($_real_legato_time+$_real_ripple_length-ticks_to_ms(48)) mod $_real_ripple_length
+                      $_time_til_end_of_ripple := $_real_ripple_length-$_real_pos_in_ripple
+                      if ($cur_artic=$artic__sixteenths)
+                        if ($_real_pos_in_ripple<($_real_ripple_length/4))
+                          $_real_pitch_length := $_real_ripple_length/4
+                          $_real_pos_in_pitch := $_real_pos_in_ripple mod $_real_pitch_length
+                          $_time_til_end_of_pitch := $_real_pitch_length-$_real_pos_in_pitch
                         else
-                          $_ext_note := $_ext_second_note
-                        end if
-                        ~_vel_norm := int_to_real($slider_vol)/1000000.0*(int_to_real(%velo[$_note4])/127.0)
-                        $_vel3 := real_to_int(~_vel_norm*int_to_real(127-60))+30
-                        if (in_range($_ext_pitch,0,7))
-                          $_vel3 := real_to_int(int_to_real($_vel3-30)+((int_to_real($_ext_pitch)-int_to_real(0))/(int_to_real(7)-int_to_real(0))*(int_to_real($_vel3+30)-int_to_real($_vel3-30))))
-                        else
-                          $_vel3 := real_to_int(int_to_real($_vel3+30)+((int_to_real($_ext_pitch)-int_to_real(8))/(int_to_real(15)-int_to_real(8))*(int_to_real($_vel3-30)-int_to_real($_vel3+30))))
-                        end if
-                        if ($_note_chooser=1)
-                          $_vel3 := $_vel3-20
-                        end if
-                        if ($_vel3<1)
-                          $_vel3 := 1
-                        end if
-                        if ($_vel3>127)
-                          $_vel3 := 127
-                        end if
-                        if ($_ext_artic=$artic__sixteenths)
-                          if ($_note_chooser=0)
-                            $_len := ticks_to_ms(%ripple_length_ticks[$_ext_artic]/4)
-                          else
-                            $_len := ticks_to_ms(%ripple_length_ticks[$_ext_artic]/4*3)
-                          end if
-                        else
-                          $_len := ticks_to_ms(%ripple_length_ticks[$_ext_artic]/2)
-                        end if
-                        $_note_id2 := play_note($_ext_note,$_vel3,0,$_len)
-                        if ($_ext_artic=$artic__sixteenths)
-                          if ($_note_chooser=0)
-                            $_wait_time := ticks_to_ms(%ripple_length_ticks[$_ext_artic]/4)
-                          else
-                            $_wait_time := ticks_to_ms(%ripple_length_ticks[$_ext_artic]/4*3)
-                          end if
-                        else
-                          $_wait_time := ticks_to_ms(%ripple_length_ticks[$_ext_artic]/2)
-                        end if
-                        $_wait_time := real_to_int(int_to_real($_wait_time)*?speeds[real_to_int(?xypad_speed[0]*int_to_real(5))])
-                        if ($_wait_time>0)
-                          wait($_wait_time)
-                        end if
-                        $_ext_pitch := ($_ext_pitch+1) mod 16
-                        $_note_chooser := 1-$_note_chooser
-                      end while
-                      if ($_note_chooser=0)
-                        $_ext_note := $_ext_first_note
-                      else
-                        $_ext_note := $_ext_second_note
-                      end if
-                      ~_vel_norm := int_to_real($slider_vol)/1000000.0*(int_to_real(%velo[$_note4])/127.0)
-                      $_vel3 := real_to_int(~_vel_norm*int_to_real(127-60))+30
-                      if (in_range($_ext_pitch,0,7))
-                        $_vel3 := real_to_int(int_to_real($_vel3-30)+((int_to_real($_ext_pitch)-int_to_real(0))/(int_to_real(7)-int_to_real(0))*(int_to_real($_vel3+30)-int_to_real($_vel3-30))))
-                      else
-                        $_vel3 := real_to_int(int_to_real($_vel3+30)+((int_to_real($_ext_pitch)-int_to_real(8))/(int_to_real(15)-int_to_real(8))*(int_to_real($_vel3-30)-int_to_real($_vel3+30))))
-                      end if
-                      if ($_note_chooser=1)
-                        $_vel3 := $_vel3-20
-                      end if
-                      if ($_vel3<1)
-                        $_vel3 := 1
-                      end if
-                      if ($_vel3>127)
-                        $_vel3 := 127
-                      end if
-                      if ($_ext_artic=$artic__sixteenths)
-                        if ($_note_chooser=0)
-                          $_len := ticks_to_ms(%ripple_length_ticks[$_ext_artic]/4)
-                        else
-                          $_len := ticks_to_ms(%ripple_length_ticks[$_ext_artic]/4*3)
+                          $_time_til_end_of_pitch := $_real_ripple_length-$_real_pos_in_ripple
                         end if
                       else
-                        $_len := ticks_to_ms(%ripple_length_ticks[$_ext_artic]/2)
+                        $_real_pitch_length := $_real_ripple_length/2
+                        $_real_pos_in_pitch := $_real_legato_time mod $_real_pitch_length
+                        $_time_til_end_of_pitch := $_real_pitch_length-$_real_pos_in_pitch
                       end if
-                      $_note_id2 := play_note($_ext_note,$_vel3,0,$_len)
-                      if ($_ext_artic=$artic__sixteenths)
-                        if ($_note_chooser=0)
-                          $_wait_time := ticks_to_ms(%ripple_length_ticks[$_ext_artic]/4)
-                        else
-                          $_wait_time := ticks_to_ms(%ripple_length_ticks[$_ext_artic]/4*3)
-                        end if
+                      if (in_range($_velocity4,1,48))
+                        $_fade_in_time := $_time_til_end_of_ripple
                       else
-                        $_wait_time := ticks_to_ms(%ripple_length_ticks[$_ext_artic]/2)
-                      end if
-                      $_wait_time := real_to_int(int_to_real($_wait_time)*?speeds[real_to_int(?xypad_speed[0]*int_to_real(5))])
-                      if ($_wait_time>0)
-                        wait($_wait_time)
-                      end if
-                      $_ext_pitch := ($_ext_pitch+1) mod 16
-                      $_note_chooser := 1-$_note_chooser
-                      if ($_note_chooser=0)
-                        if ($_note_chooser=0)
-                          $_ext_note := $_ext_first_note
+                        if (in_range($_velocity4,49,96))
+                          $_fade_in_time := $_time_til_end_of_pitch
                         else
-                          $_ext_note := $_ext_second_note
-                        end if
-                        ~_vel_norm := int_to_real($slider_vol)/1000000.0*(int_to_real(%velo[$_note4])/127.0)
-                        $_vel3 := real_to_int(~_vel_norm*int_to_real(127-60))+30
-                        if (in_range($_ext_pitch,0,7))
-                          $_vel3 := real_to_int(int_to_real($_vel3-30)+((int_to_real($_ext_pitch)-int_to_real(0))/(int_to_real(7)-int_to_real(0))*(int_to_real($_vel3+30)-int_to_real($_vel3-30))))
-                        else
-                          $_vel3 := real_to_int(int_to_real($_vel3+30)+((int_to_real($_ext_pitch)-int_to_real(8))/(int_to_real(15)-int_to_real(8))*(int_to_real($_vel3-30)-int_to_real($_vel3+30))))
-                        end if
-                        if ($_note_chooser=1)
-                          $_vel3 := $_vel3-20
-                        end if
-                        if ($_vel3<1)
-                          $_vel3 := 1
-                        end if
-                        if ($_vel3>127)
-                          $_vel3 := 127
-                        end if
-                        if ($_ext_artic=$artic__sixteenths)
-                          if ($_note_chooser=0)
-                            $_len := ticks_to_ms(%ripple_length_ticks[$_ext_artic]/4)
-                          else
-                            $_len := ticks_to_ms(%ripple_length_ticks[$_ext_artic]/4*3)
+                          if (in_range($_velocity4,97,127))
+                            $_fade_in_time := $_time_til_end_of_pitch/2
                           end if
-                        else
-                          $_len := ticks_to_ms(%ripple_length_ticks[$_ext_artic]/2)
                         end if
-                        $_note_id2 := play_note($_ext_note,$_vel3,0,$_len)
-                        if ($_ext_artic=$artic__sixteenths)
-                          if ($_note_chooser=0)
-                            $_wait_time := ticks_to_ms(%ripple_length_ticks[$_ext_artic]/4)
-                          else
-                            $_wait_time := ticks_to_ms(%ripple_length_ticks[$_ext_artic]/4*3)
-                          end if
-                        else
-                          $_wait_time := ticks_to_ms(%ripple_length_ticks[$_ext_artic]/2)
-                        end if
-                        $_wait_time := real_to_int(int_to_real($_wait_time)*?speeds[real_to_int(?xypad_speed[0]*int_to_real(5))])
-                        if ($_wait_time>0)
-                          wait($_wait_time)
-                        end if
-                        $_ext_pitch := ($_ext_pitch+1) mod 16
-                        $_note_chooser := 1-$_note_chooser
+                      end if
+                      if ($_fade_in_time<ticks_to_ms(192))
+                        $_fade_in_time := ticks_to_ms(192)
                       end if
                     end if
+                    fade_in($_note_id2,$_fade_in_time)
                   end if
                   inc($ripple_i)
                 end while
@@ -6814,248 +5861,69 @@ on ui_control($switch_preview4)
                     inc($r)
                   end while
                   if ($_already_playing=0)
-                    if ($switch_midiOutputMode=0)
-                      $_note_id2 := play_note(%__notes[$ripple_i],64+%__intervals[$ripple_i],$_offset_rec_time4,0)
-                      if ($switch_velToSampleStart=0)
-                        $_volume := real_to_int(int_to_real(-7000)+((int_to_real($_velocity5)-int_to_real(1))/(int_to_real(127)-int_to_real(1))*(int_to_real(3000)-int_to_real(-7000))))
-                        change_vol($_note_id2,$_volume,0)
+                    $_note_id2 := play_note(%__notes[$ripple_i],64+%__intervals[$ripple_i],$_offset_rec_time4,0)
+                    if ($switch_velToSampleStart=0)
+                      $_volume := real_to_int(int_to_real(-7000)+((int_to_real($_velocity5)-int_to_real(1))/(int_to_real(127)-int_to_real(1))*(int_to_real(3000)-int_to_real(-7000))))
+                      change_vol($_note_id2,$_volume,0)
+                    end if
+                    set_event_par_arr($_note_id2,$EVENT_PAR_ALLOW_GROUP,0,$ALL_GROUPS)
+                    set_event_par_arr($_note_id2,$EVENT_PAR_ALLOW_GROUP,1,$cur_artic)
+                    %custom_event_artic[$_note_id2 mod 1000000] := $cur_artic
+                    %custom_event_note[$_note_id2 mod 1000000] := $_note5
+                    %custom_event_low_note[$_note_id2 mod 1000000] := $_low_note2
+                    %custom_event_high_note[$_note_id2 mod 1000000] := $_high_note2
+                    %custom_event_origin_note[$_note_id2 mod 1000000] := $_origin_note3
+                    %custom_event_dest_note[$_note_id2 mod 1000000] := $_dest_note
+                    %custom_event_first_note[$_note_id2 mod 1000000] := $_first_note
+                    %custom_event_second_note[$_note_id2 mod 1000000] := $_second_note
+                    %custom_event_velocity[$_note_id2 mod 1000000] := $_velocity5
+                    %custom_event_direction[$_note_id2 mod 1000000] := $_ripple_dir
+                    %custom_event_source[$_note_id2 mod 1000000] := -1
+                    %custom_event_triggered_by_mf[$_note_id2 mod 1000000] := %custom_event_triggered_by_mf[$_note_id7 mod 1000000]
+                    $r := 64-2
+                    while ($r>=0)
+                      %ripple_id_history[$r+1] := %ripple_id_history[$r]
+                      dec($r)
+                    end while
+                    %ripple_id_history[0] := $_note_id2
+                    $_fade_in_time := 0
+                    if ($_do_legato=0)
+                      $_fade_in_time := $menu_latency*1000
+                      if ($_fade_in_time=0)
+                        $_fade_in_time := 0
                       end if
-                      set_event_par_arr($_note_id2,$EVENT_PAR_ALLOW_GROUP,0,$ALL_GROUPS)
-                      set_event_par_arr($_note_id2,$EVENT_PAR_ALLOW_GROUP,1,$cur_artic)
-                      %custom_event_artic[$_note_id2 mod 1000000] := $cur_artic
-                      %custom_event_note[$_note_id2 mod 1000000] := $_note5
-                      %custom_event_low_note[$_note_id2 mod 1000000] := $_low_note2
-                      %custom_event_high_note[$_note_id2 mod 1000000] := $_high_note2
-                      %custom_event_origin_note[$_note_id2 mod 1000000] := $_origin_note3
-                      %custom_event_dest_note[$_note_id2 mod 1000000] := $_dest_note
-                      %custom_event_first_note[$_note_id2 mod 1000000] := $_first_note
-                      %custom_event_second_note[$_note_id2 mod 1000000] := $_second_note
-                      %custom_event_velocity[$_note_id2 mod 1000000] := $_velocity5
-                      %custom_event_direction[$_note_id2 mod 1000000] := $_ripple_dir
-                      %custom_event_source[$_note_id2 mod 1000000] := -1
-                      %custom_event_triggered_by_mf[$_note_id2 mod 1000000] := %custom_event_triggered_by_mf[$_note_id7 mod 1000000]
-                      $r := 64-2
-                      while ($r>=0)
-                        %ripple_id_history[$r+1] := %ripple_id_history[$r]
-                        dec($r)
-                      end while
-                      %ripple_id_history[0] := $_note_id2
-                      $_fade_in_time := 0
-                      if ($_do_legato=0)
-                        $_fade_in_time := $menu_latency*1000
-                        if ($_fade_in_time=0)
-                          $_fade_in_time := 0
-                        end if
-                      else
-                        $_real_pos_in_ripple := ($_real_legato_time+$_real_ripple_length-ticks_to_ms(48)) mod $_real_ripple_length
-                        $_time_til_end_of_ripple := $_real_ripple_length-$_real_pos_in_ripple
-                        if ($cur_artic=$artic__sixteenths)
-                          if ($_real_pos_in_ripple<($_real_ripple_length/4))
-                            $_real_pitch_length := $_real_ripple_length/4
-                            $_real_pos_in_pitch := $_real_pos_in_ripple mod $_real_pitch_length
-                            $_time_til_end_of_pitch := $_real_pitch_length-$_real_pos_in_pitch
-                          else
-                            $_time_til_end_of_pitch := $_real_ripple_length-$_real_pos_in_ripple
-                          end if
-                        else
-                          $_real_pitch_length := $_real_ripple_length/2
-                          $_real_pos_in_pitch := $_real_legato_time mod $_real_pitch_length
-                          $_time_til_end_of_pitch := $_real_pitch_length-$_real_pos_in_pitch
-                        end if
-                        if (in_range($_velocity5,1,48))
-                          $_fade_in_time := $_time_til_end_of_ripple
-                        else
-                          if (in_range($_velocity5,49,96))
-                            $_fade_in_time := $_time_til_end_of_pitch
-                          else
-                            if (in_range($_velocity5,97,127))
-                              $_fade_in_time := $_time_til_end_of_pitch/2
-                            end if
-                          end if
-                        end if
-                        if ($_fade_in_time<ticks_to_ms(192))
-                          $_fade_in_time := ticks_to_ms(192)
-                        end if
-                      end if
-                      fade_in($_note_id2,$_fade_in_time)
                     else
-                      $_ext_first_note := $_first_note
-                      $_ext_second_note := $_second_note
-                      $_ext_low_note := $_low_note2
-                      $_ext_high_note := $_high_note2
-                      $_ext_artic := $cur_artic
-                      $_wait_time := $_ext_mode_real_legato_time
-                      if ($_wait_time>0)
-                        select (real_to_int(?xypad_legato[0]*int_to_real(4)))
-                          case $legatoMode__syncToPitch
-                            $_wait_time := $_real_pitch_length-($_wait_time mod $_real_pitch_length)
-                          case $legatoMode__syncToRipple
-                            if ($_wait_time mod $_real_ripple_length<=$_real_pitch_length)
-                              $_note_chooser := 1
-                            end if
-                            $_wait_time := $_real_pitch_length-($_wait_time mod $_real_pitch_length)
-                          case $legatoMode__syncToSwell
-                            if ($_wait_time mod $_real_ripple_length<=$_real_pitch_length)
-                              $_note_chooser := 1
-                            end if
-                            $_ext_pitch := $_wait_time/$_real_pitch_length
-                            $_wait_time := $_real_pitch_length-($_wait_time mod $_real_pitch_length)
-                        end select
-                      end if
-                      $_low_vel := %velo[$_note5]-35
-                      $_high_vel := $_low_vel+35
-                      if ($_high_vel>127)
-                        $_high_vel := 127
-                      end if
-                      if ($_low_vel<1)
-                        $_low_vel := 1
-                      end if
-                      if ($_wait_time>0)
-                        wait($_wait_time)
-                      end if
-                      while (%key_active[$_note5]=1)
-                        if ($_note_chooser=0)
-                          $_ext_note := $_ext_first_note
+                      $_real_pos_in_ripple := ($_real_legato_time+$_real_ripple_length-ticks_to_ms(48)) mod $_real_ripple_length
+                      $_time_til_end_of_ripple := $_real_ripple_length-$_real_pos_in_ripple
+                      if ($cur_artic=$artic__sixteenths)
+                        if ($_real_pos_in_ripple<($_real_ripple_length/4))
+                          $_real_pitch_length := $_real_ripple_length/4
+                          $_real_pos_in_pitch := $_real_pos_in_ripple mod $_real_pitch_length
+                          $_time_til_end_of_pitch := $_real_pitch_length-$_real_pos_in_pitch
                         else
-                          $_ext_note := $_ext_second_note
-                        end if
-                        ~_vel_norm := int_to_real($slider_vol)/1000000.0*(int_to_real(%velo[$_note5])/127.0)
-                        $_vel3 := real_to_int(~_vel_norm*int_to_real(127-60))+30
-                        if (in_range($_ext_pitch,0,7))
-                          $_vel3 := real_to_int(int_to_real($_vel3-30)+((int_to_real($_ext_pitch)-int_to_real(0))/(int_to_real(7)-int_to_real(0))*(int_to_real($_vel3+30)-int_to_real($_vel3-30))))
-                        else
-                          $_vel3 := real_to_int(int_to_real($_vel3+30)+((int_to_real($_ext_pitch)-int_to_real(8))/(int_to_real(15)-int_to_real(8))*(int_to_real($_vel3-30)-int_to_real($_vel3+30))))
-                        end if
-                        if ($_note_chooser=1)
-                          $_vel3 := $_vel3-20
-                        end if
-                        if ($_vel3<1)
-                          $_vel3 := 1
-                        end if
-                        if ($_vel3>127)
-                          $_vel3 := 127
-                        end if
-                        if ($_ext_artic=$artic__sixteenths)
-                          if ($_note_chooser=0)
-                            $_len := ticks_to_ms(%ripple_length_ticks[$_ext_artic]/4)
-                          else
-                            $_len := ticks_to_ms(%ripple_length_ticks[$_ext_artic]/4*3)
-                          end if
-                        else
-                          $_len := ticks_to_ms(%ripple_length_ticks[$_ext_artic]/2)
-                        end if
-                        $_note_id2 := play_note($_ext_note,$_vel3,0,$_len)
-                        if ($_ext_artic=$artic__sixteenths)
-                          if ($_note_chooser=0)
-                            $_wait_time := ticks_to_ms(%ripple_length_ticks[$_ext_artic]/4)
-                          else
-                            $_wait_time := ticks_to_ms(%ripple_length_ticks[$_ext_artic]/4*3)
-                          end if
-                        else
-                          $_wait_time := ticks_to_ms(%ripple_length_ticks[$_ext_artic]/2)
-                        end if
-                        $_wait_time := real_to_int(int_to_real($_wait_time)*?speeds[real_to_int(?xypad_speed[0]*int_to_real(5))])
-                        if ($_wait_time>0)
-                          wait($_wait_time)
-                        end if
-                        $_ext_pitch := ($_ext_pitch+1) mod 16
-                        $_note_chooser := 1-$_note_chooser
-                      end while
-                      if ($_note_chooser=0)
-                        $_ext_note := $_ext_first_note
-                      else
-                        $_ext_note := $_ext_second_note
-                      end if
-                      ~_vel_norm := int_to_real($slider_vol)/1000000.0*(int_to_real(%velo[$_note5])/127.0)
-                      $_vel3 := real_to_int(~_vel_norm*int_to_real(127-60))+30
-                      if (in_range($_ext_pitch,0,7))
-                        $_vel3 := real_to_int(int_to_real($_vel3-30)+((int_to_real($_ext_pitch)-int_to_real(0))/(int_to_real(7)-int_to_real(0))*(int_to_real($_vel3+30)-int_to_real($_vel3-30))))
-                      else
-                        $_vel3 := real_to_int(int_to_real($_vel3+30)+((int_to_real($_ext_pitch)-int_to_real(8))/(int_to_real(15)-int_to_real(8))*(int_to_real($_vel3-30)-int_to_real($_vel3+30))))
-                      end if
-                      if ($_note_chooser=1)
-                        $_vel3 := $_vel3-20
-                      end if
-                      if ($_vel3<1)
-                        $_vel3 := 1
-                      end if
-                      if ($_vel3>127)
-                        $_vel3 := 127
-                      end if
-                      if ($_ext_artic=$artic__sixteenths)
-                        if ($_note_chooser=0)
-                          $_len := ticks_to_ms(%ripple_length_ticks[$_ext_artic]/4)
-                        else
-                          $_len := ticks_to_ms(%ripple_length_ticks[$_ext_artic]/4*3)
+                          $_time_til_end_of_pitch := $_real_ripple_length-$_real_pos_in_ripple
                         end if
                       else
-                        $_len := ticks_to_ms(%ripple_length_ticks[$_ext_artic]/2)
+                        $_real_pitch_length := $_real_ripple_length/2
+                        $_real_pos_in_pitch := $_real_legato_time mod $_real_pitch_length
+                        $_time_til_end_of_pitch := $_real_pitch_length-$_real_pos_in_pitch
                       end if
-                      $_note_id2 := play_note($_ext_note,$_vel3,0,$_len)
-                      if ($_ext_artic=$artic__sixteenths)
-                        if ($_note_chooser=0)
-                          $_wait_time := ticks_to_ms(%ripple_length_ticks[$_ext_artic]/4)
-                        else
-                          $_wait_time := ticks_to_ms(%ripple_length_ticks[$_ext_artic]/4*3)
-                        end if
+                      if (in_range($_velocity5,1,48))
+                        $_fade_in_time := $_time_til_end_of_ripple
                       else
-                        $_wait_time := ticks_to_ms(%ripple_length_ticks[$_ext_artic]/2)
-                      end if
-                      $_wait_time := real_to_int(int_to_real($_wait_time)*?speeds[real_to_int(?xypad_speed[0]*int_to_real(5))])
-                      if ($_wait_time>0)
-                        wait($_wait_time)
-                      end if
-                      $_ext_pitch := ($_ext_pitch+1) mod 16
-                      $_note_chooser := 1-$_note_chooser
-                      if ($_note_chooser=0)
-                        if ($_note_chooser=0)
-                          $_ext_note := $_ext_first_note
+                        if (in_range($_velocity5,49,96))
+                          $_fade_in_time := $_time_til_end_of_pitch
                         else
-                          $_ext_note := $_ext_second_note
-                        end if
-                        ~_vel_norm := int_to_real($slider_vol)/1000000.0*(int_to_real(%velo[$_note5])/127.0)
-                        $_vel3 := real_to_int(~_vel_norm*int_to_real(127-60))+30
-                        if (in_range($_ext_pitch,0,7))
-                          $_vel3 := real_to_int(int_to_real($_vel3-30)+((int_to_real($_ext_pitch)-int_to_real(0))/(int_to_real(7)-int_to_real(0))*(int_to_real($_vel3+30)-int_to_real($_vel3-30))))
-                        else
-                          $_vel3 := real_to_int(int_to_real($_vel3+30)+((int_to_real($_ext_pitch)-int_to_real(8))/(int_to_real(15)-int_to_real(8))*(int_to_real($_vel3-30)-int_to_real($_vel3+30))))
-                        end if
-                        if ($_note_chooser=1)
-                          $_vel3 := $_vel3-20
-                        end if
-                        if ($_vel3<1)
-                          $_vel3 := 1
-                        end if
-                        if ($_vel3>127)
-                          $_vel3 := 127
-                        end if
-                        if ($_ext_artic=$artic__sixteenths)
-                          if ($_note_chooser=0)
-                            $_len := ticks_to_ms(%ripple_length_ticks[$_ext_artic]/4)
-                          else
-                            $_len := ticks_to_ms(%ripple_length_ticks[$_ext_artic]/4*3)
+                          if (in_range($_velocity5,97,127))
+                            $_fade_in_time := $_time_til_end_of_pitch/2
                           end if
-                        else
-                          $_len := ticks_to_ms(%ripple_length_ticks[$_ext_artic]/2)
                         end if
-                        $_note_id2 := play_note($_ext_note,$_vel3,0,$_len)
-                        if ($_ext_artic=$artic__sixteenths)
-                          if ($_note_chooser=0)
-                            $_wait_time := ticks_to_ms(%ripple_length_ticks[$_ext_artic]/4)
-                          else
-                            $_wait_time := ticks_to_ms(%ripple_length_ticks[$_ext_artic]/4*3)
-                          end if
-                        else
-                          $_wait_time := ticks_to_ms(%ripple_length_ticks[$_ext_artic]/2)
-                        end if
-                        $_wait_time := real_to_int(int_to_real($_wait_time)*?speeds[real_to_int(?xypad_speed[0]*int_to_real(5))])
-                        if ($_wait_time>0)
-                          wait($_wait_time)
-                        end if
-                        $_ext_pitch := ($_ext_pitch+1) mod 16
-                        $_note_chooser := 1-$_note_chooser
+                      end if
+                      if ($_fade_in_time<ticks_to_ms(192))
+                        $_fade_in_time := ticks_to_ms(192)
                       end if
                     end if
+                    fade_in($_note_id2,$_fade_in_time)
                   end if
                   inc($ripple_i)
                 end while
@@ -7461,248 +6329,69 @@ on ui_control($switch_preview5)
                     inc($r)
                   end while
                   if ($_already_playing=0)
-                    if ($switch_midiOutputMode=0)
-                      $_note_id2 := play_note(%__notes[$ripple_i],64+%__intervals[$ripple_i],$_offset_rec_time4,0)
-                      if ($switch_velToSampleStart=0)
-                        $_volume := real_to_int(int_to_real(-7000)+((int_to_real($_velocity6)-int_to_real(1))/(int_to_real(127)-int_to_real(1))*(int_to_real(3000)-int_to_real(-7000))))
-                        change_vol($_note_id2,$_volume,0)
+                    $_note_id2 := play_note(%__notes[$ripple_i],64+%__intervals[$ripple_i],$_offset_rec_time4,0)
+                    if ($switch_velToSampleStart=0)
+                      $_volume := real_to_int(int_to_real(-7000)+((int_to_real($_velocity6)-int_to_real(1))/(int_to_real(127)-int_to_real(1))*(int_to_real(3000)-int_to_real(-7000))))
+                      change_vol($_note_id2,$_volume,0)
+                    end if
+                    set_event_par_arr($_note_id2,$EVENT_PAR_ALLOW_GROUP,0,$ALL_GROUPS)
+                    set_event_par_arr($_note_id2,$EVENT_PAR_ALLOW_GROUP,1,$cur_artic)
+                    %custom_event_artic[$_note_id2 mod 1000000] := $cur_artic
+                    %custom_event_note[$_note_id2 mod 1000000] := $_note6
+                    %custom_event_low_note[$_note_id2 mod 1000000] := $_low_note2
+                    %custom_event_high_note[$_note_id2 mod 1000000] := $_high_note2
+                    %custom_event_origin_note[$_note_id2 mod 1000000] := $_origin_note3
+                    %custom_event_dest_note[$_note_id2 mod 1000000] := $_dest_note
+                    %custom_event_first_note[$_note_id2 mod 1000000] := $_first_note
+                    %custom_event_second_note[$_note_id2 mod 1000000] := $_second_note
+                    %custom_event_velocity[$_note_id2 mod 1000000] := $_velocity6
+                    %custom_event_direction[$_note_id2 mod 1000000] := $_ripple_dir
+                    %custom_event_source[$_note_id2 mod 1000000] := -1
+                    %custom_event_triggered_by_mf[$_note_id2 mod 1000000] := %custom_event_triggered_by_mf[$_note_id8 mod 1000000]
+                    $r := 64-2
+                    while ($r>=0)
+                      %ripple_id_history[$r+1] := %ripple_id_history[$r]
+                      dec($r)
+                    end while
+                    %ripple_id_history[0] := $_note_id2
+                    $_fade_in_time := 0
+                    if ($_do_legato=0)
+                      $_fade_in_time := $menu_latency*1000
+                      if ($_fade_in_time=0)
+                        $_fade_in_time := 0
                       end if
-                      set_event_par_arr($_note_id2,$EVENT_PAR_ALLOW_GROUP,0,$ALL_GROUPS)
-                      set_event_par_arr($_note_id2,$EVENT_PAR_ALLOW_GROUP,1,$cur_artic)
-                      %custom_event_artic[$_note_id2 mod 1000000] := $cur_artic
-                      %custom_event_note[$_note_id2 mod 1000000] := $_note6
-                      %custom_event_low_note[$_note_id2 mod 1000000] := $_low_note2
-                      %custom_event_high_note[$_note_id2 mod 1000000] := $_high_note2
-                      %custom_event_origin_note[$_note_id2 mod 1000000] := $_origin_note3
-                      %custom_event_dest_note[$_note_id2 mod 1000000] := $_dest_note
-                      %custom_event_first_note[$_note_id2 mod 1000000] := $_first_note
-                      %custom_event_second_note[$_note_id2 mod 1000000] := $_second_note
-                      %custom_event_velocity[$_note_id2 mod 1000000] := $_velocity6
-                      %custom_event_direction[$_note_id2 mod 1000000] := $_ripple_dir
-                      %custom_event_source[$_note_id2 mod 1000000] := -1
-                      %custom_event_triggered_by_mf[$_note_id2 mod 1000000] := %custom_event_triggered_by_mf[$_note_id8 mod 1000000]
-                      $r := 64-2
-                      while ($r>=0)
-                        %ripple_id_history[$r+1] := %ripple_id_history[$r]
-                        dec($r)
-                      end while
-                      %ripple_id_history[0] := $_note_id2
-                      $_fade_in_time := 0
-                      if ($_do_legato=0)
-                        $_fade_in_time := $menu_latency*1000
-                        if ($_fade_in_time=0)
-                          $_fade_in_time := 0
-                        end if
-                      else
-                        $_real_pos_in_ripple := ($_real_legato_time+$_real_ripple_length-ticks_to_ms(48)) mod $_real_ripple_length
-                        $_time_til_end_of_ripple := $_real_ripple_length-$_real_pos_in_ripple
-                        if ($cur_artic=$artic__sixteenths)
-                          if ($_real_pos_in_ripple<($_real_ripple_length/4))
-                            $_real_pitch_length := $_real_ripple_length/4
-                            $_real_pos_in_pitch := $_real_pos_in_ripple mod $_real_pitch_length
-                            $_time_til_end_of_pitch := $_real_pitch_length-$_real_pos_in_pitch
-                          else
-                            $_time_til_end_of_pitch := $_real_ripple_length-$_real_pos_in_ripple
-                          end if
-                        else
-                          $_real_pitch_length := $_real_ripple_length/2
-                          $_real_pos_in_pitch := $_real_legato_time mod $_real_pitch_length
-                          $_time_til_end_of_pitch := $_real_pitch_length-$_real_pos_in_pitch
-                        end if
-                        if (in_range($_velocity6,1,48))
-                          $_fade_in_time := $_time_til_end_of_ripple
-                        else
-                          if (in_range($_velocity6,49,96))
-                            $_fade_in_time := $_time_til_end_of_pitch
-                          else
-                            if (in_range($_velocity6,97,127))
-                              $_fade_in_time := $_time_til_end_of_pitch/2
-                            end if
-                          end if
-                        end if
-                        if ($_fade_in_time<ticks_to_ms(192))
-                          $_fade_in_time := ticks_to_ms(192)
-                        end if
-                      end if
-                      fade_in($_note_id2,$_fade_in_time)
                     else
-                      $_ext_first_note := $_first_note
-                      $_ext_second_note := $_second_note
-                      $_ext_low_note := $_low_note2
-                      $_ext_high_note := $_high_note2
-                      $_ext_artic := $cur_artic
-                      $_wait_time := $_ext_mode_real_legato_time
-                      if ($_wait_time>0)
-                        select (real_to_int(?xypad_legato[0]*int_to_real(4)))
-                          case $legatoMode__syncToPitch
-                            $_wait_time := $_real_pitch_length-($_wait_time mod $_real_pitch_length)
-                          case $legatoMode__syncToRipple
-                            if ($_wait_time mod $_real_ripple_length<=$_real_pitch_length)
-                              $_note_chooser := 1
-                            end if
-                            $_wait_time := $_real_pitch_length-($_wait_time mod $_real_pitch_length)
-                          case $legatoMode__syncToSwell
-                            if ($_wait_time mod $_real_ripple_length<=$_real_pitch_length)
-                              $_note_chooser := 1
-                            end if
-                            $_ext_pitch := $_wait_time/$_real_pitch_length
-                            $_wait_time := $_real_pitch_length-($_wait_time mod $_real_pitch_length)
-                        end select
-                      end if
-                      $_low_vel := %velo[$_note6]-35
-                      $_high_vel := $_low_vel+35
-                      if ($_high_vel>127)
-                        $_high_vel := 127
-                      end if
-                      if ($_low_vel<1)
-                        $_low_vel := 1
-                      end if
-                      if ($_wait_time>0)
-                        wait($_wait_time)
-                      end if
-                      while (%key_active[$_note6]=1)
-                        if ($_note_chooser=0)
-                          $_ext_note := $_ext_first_note
+                      $_real_pos_in_ripple := ($_real_legato_time+$_real_ripple_length-ticks_to_ms(48)) mod $_real_ripple_length
+                      $_time_til_end_of_ripple := $_real_ripple_length-$_real_pos_in_ripple
+                      if ($cur_artic=$artic__sixteenths)
+                        if ($_real_pos_in_ripple<($_real_ripple_length/4))
+                          $_real_pitch_length := $_real_ripple_length/4
+                          $_real_pos_in_pitch := $_real_pos_in_ripple mod $_real_pitch_length
+                          $_time_til_end_of_pitch := $_real_pitch_length-$_real_pos_in_pitch
                         else
-                          $_ext_note := $_ext_second_note
-                        end if
-                        ~_vel_norm := int_to_real($slider_vol)/1000000.0*(int_to_real(%velo[$_note6])/127.0)
-                        $_vel3 := real_to_int(~_vel_norm*int_to_real(127-60))+30
-                        if (in_range($_ext_pitch,0,7))
-                          $_vel3 := real_to_int(int_to_real($_vel3-30)+((int_to_real($_ext_pitch)-int_to_real(0))/(int_to_real(7)-int_to_real(0))*(int_to_real($_vel3+30)-int_to_real($_vel3-30))))
-                        else
-                          $_vel3 := real_to_int(int_to_real($_vel3+30)+((int_to_real($_ext_pitch)-int_to_real(8))/(int_to_real(15)-int_to_real(8))*(int_to_real($_vel3-30)-int_to_real($_vel3+30))))
-                        end if
-                        if ($_note_chooser=1)
-                          $_vel3 := $_vel3-20
-                        end if
-                        if ($_vel3<1)
-                          $_vel3 := 1
-                        end if
-                        if ($_vel3>127)
-                          $_vel3 := 127
-                        end if
-                        if ($_ext_artic=$artic__sixteenths)
-                          if ($_note_chooser=0)
-                            $_len := ticks_to_ms(%ripple_length_ticks[$_ext_artic]/4)
-                          else
-                            $_len := ticks_to_ms(%ripple_length_ticks[$_ext_artic]/4*3)
-                          end if
-                        else
-                          $_len := ticks_to_ms(%ripple_length_ticks[$_ext_artic]/2)
-                        end if
-                        $_note_id2 := play_note($_ext_note,$_vel3,0,$_len)
-                        if ($_ext_artic=$artic__sixteenths)
-                          if ($_note_chooser=0)
-                            $_wait_time := ticks_to_ms(%ripple_length_ticks[$_ext_artic]/4)
-                          else
-                            $_wait_time := ticks_to_ms(%ripple_length_ticks[$_ext_artic]/4*3)
-                          end if
-                        else
-                          $_wait_time := ticks_to_ms(%ripple_length_ticks[$_ext_artic]/2)
-                        end if
-                        $_wait_time := real_to_int(int_to_real($_wait_time)*?speeds[real_to_int(?xypad_speed[0]*int_to_real(5))])
-                        if ($_wait_time>0)
-                          wait($_wait_time)
-                        end if
-                        $_ext_pitch := ($_ext_pitch+1) mod 16
-                        $_note_chooser := 1-$_note_chooser
-                      end while
-                      if ($_note_chooser=0)
-                        $_ext_note := $_ext_first_note
-                      else
-                        $_ext_note := $_ext_second_note
-                      end if
-                      ~_vel_norm := int_to_real($slider_vol)/1000000.0*(int_to_real(%velo[$_note6])/127.0)
-                      $_vel3 := real_to_int(~_vel_norm*int_to_real(127-60))+30
-                      if (in_range($_ext_pitch,0,7))
-                        $_vel3 := real_to_int(int_to_real($_vel3-30)+((int_to_real($_ext_pitch)-int_to_real(0))/(int_to_real(7)-int_to_real(0))*(int_to_real($_vel3+30)-int_to_real($_vel3-30))))
-                      else
-                        $_vel3 := real_to_int(int_to_real($_vel3+30)+((int_to_real($_ext_pitch)-int_to_real(8))/(int_to_real(15)-int_to_real(8))*(int_to_real($_vel3-30)-int_to_real($_vel3+30))))
-                      end if
-                      if ($_note_chooser=1)
-                        $_vel3 := $_vel3-20
-                      end if
-                      if ($_vel3<1)
-                        $_vel3 := 1
-                      end if
-                      if ($_vel3>127)
-                        $_vel3 := 127
-                      end if
-                      if ($_ext_artic=$artic__sixteenths)
-                        if ($_note_chooser=0)
-                          $_len := ticks_to_ms(%ripple_length_ticks[$_ext_artic]/4)
-                        else
-                          $_len := ticks_to_ms(%ripple_length_ticks[$_ext_artic]/4*3)
+                          $_time_til_end_of_pitch := $_real_ripple_length-$_real_pos_in_ripple
                         end if
                       else
-                        $_len := ticks_to_ms(%ripple_length_ticks[$_ext_artic]/2)
+                        $_real_pitch_length := $_real_ripple_length/2
+                        $_real_pos_in_pitch := $_real_legato_time mod $_real_pitch_length
+                        $_time_til_end_of_pitch := $_real_pitch_length-$_real_pos_in_pitch
                       end if
-                      $_note_id2 := play_note($_ext_note,$_vel3,0,$_len)
-                      if ($_ext_artic=$artic__sixteenths)
-                        if ($_note_chooser=0)
-                          $_wait_time := ticks_to_ms(%ripple_length_ticks[$_ext_artic]/4)
-                        else
-                          $_wait_time := ticks_to_ms(%ripple_length_ticks[$_ext_artic]/4*3)
-                        end if
+                      if (in_range($_velocity6,1,48))
+                        $_fade_in_time := $_time_til_end_of_ripple
                       else
-                        $_wait_time := ticks_to_ms(%ripple_length_ticks[$_ext_artic]/2)
-                      end if
-                      $_wait_time := real_to_int(int_to_real($_wait_time)*?speeds[real_to_int(?xypad_speed[0]*int_to_real(5))])
-                      if ($_wait_time>0)
-                        wait($_wait_time)
-                      end if
-                      $_ext_pitch := ($_ext_pitch+1) mod 16
-                      $_note_chooser := 1-$_note_chooser
-                      if ($_note_chooser=0)
-                        if ($_note_chooser=0)
-                          $_ext_note := $_ext_first_note
+                        if (in_range($_velocity6,49,96))
+                          $_fade_in_time := $_time_til_end_of_pitch
                         else
-                          $_ext_note := $_ext_second_note
-                        end if
-                        ~_vel_norm := int_to_real($slider_vol)/1000000.0*(int_to_real(%velo[$_note6])/127.0)
-                        $_vel3 := real_to_int(~_vel_norm*int_to_real(127-60))+30
-                        if (in_range($_ext_pitch,0,7))
-                          $_vel3 := real_to_int(int_to_real($_vel3-30)+((int_to_real($_ext_pitch)-int_to_real(0))/(int_to_real(7)-int_to_real(0))*(int_to_real($_vel3+30)-int_to_real($_vel3-30))))
-                        else
-                          $_vel3 := real_to_int(int_to_real($_vel3+30)+((int_to_real($_ext_pitch)-int_to_real(8))/(int_to_real(15)-int_to_real(8))*(int_to_real($_vel3-30)-int_to_real($_vel3+30))))
-                        end if
-                        if ($_note_chooser=1)
-                          $_vel3 := $_vel3-20
-                        end if
-                        if ($_vel3<1)
-                          $_vel3 := 1
-                        end if
-                        if ($_vel3>127)
-                          $_vel3 := 127
-                        end if
-                        if ($_ext_artic=$artic__sixteenths)
-                          if ($_note_chooser=0)
-                            $_len := ticks_to_ms(%ripple_length_ticks[$_ext_artic]/4)
-                          else
-                            $_len := ticks_to_ms(%ripple_length_ticks[$_ext_artic]/4*3)
+                          if (in_range($_velocity6,97,127))
+                            $_fade_in_time := $_time_til_end_of_pitch/2
                           end if
-                        else
-                          $_len := ticks_to_ms(%ripple_length_ticks[$_ext_artic]/2)
                         end if
-                        $_note_id2 := play_note($_ext_note,$_vel3,0,$_len)
-                        if ($_ext_artic=$artic__sixteenths)
-                          if ($_note_chooser=0)
-                            $_wait_time := ticks_to_ms(%ripple_length_ticks[$_ext_artic]/4)
-                          else
-                            $_wait_time := ticks_to_ms(%ripple_length_ticks[$_ext_artic]/4*3)
-                          end if
-                        else
-                          $_wait_time := ticks_to_ms(%ripple_length_ticks[$_ext_artic]/2)
-                        end if
-                        $_wait_time := real_to_int(int_to_real($_wait_time)*?speeds[real_to_int(?xypad_speed[0]*int_to_real(5))])
-                        if ($_wait_time>0)
-                          wait($_wait_time)
-                        end if
-                        $_ext_pitch := ($_ext_pitch+1) mod 16
-                        $_note_chooser := 1-$_note_chooser
+                      end if
+                      if ($_fade_in_time<ticks_to_ms(192))
+                        $_fade_in_time := ticks_to_ms(192)
                       end if
                     end if
+                    fade_in($_note_id2,$_fade_in_time)
                   end if
                   inc($ripple_i)
                 end while
@@ -8108,248 +6797,69 @@ on ui_control($switch_preview6)
                     inc($r)
                   end while
                   if ($_already_playing=0)
-                    if ($switch_midiOutputMode=0)
-                      $_note_id2 := play_note(%__notes[$ripple_i],64+%__intervals[$ripple_i],$_offset_rec_time4,0)
-                      if ($switch_velToSampleStart=0)
-                        $_volume := real_to_int(int_to_real(-7000)+((int_to_real($_velocity7)-int_to_real(1))/(int_to_real(127)-int_to_real(1))*(int_to_real(3000)-int_to_real(-7000))))
-                        change_vol($_note_id2,$_volume,0)
+                    $_note_id2 := play_note(%__notes[$ripple_i],64+%__intervals[$ripple_i],$_offset_rec_time4,0)
+                    if ($switch_velToSampleStart=0)
+                      $_volume := real_to_int(int_to_real(-7000)+((int_to_real($_velocity7)-int_to_real(1))/(int_to_real(127)-int_to_real(1))*(int_to_real(3000)-int_to_real(-7000))))
+                      change_vol($_note_id2,$_volume,0)
+                    end if
+                    set_event_par_arr($_note_id2,$EVENT_PAR_ALLOW_GROUP,0,$ALL_GROUPS)
+                    set_event_par_arr($_note_id2,$EVENT_PAR_ALLOW_GROUP,1,$cur_artic)
+                    %custom_event_artic[$_note_id2 mod 1000000] := $cur_artic
+                    %custom_event_note[$_note_id2 mod 1000000] := $_note7
+                    %custom_event_low_note[$_note_id2 mod 1000000] := $_low_note2
+                    %custom_event_high_note[$_note_id2 mod 1000000] := $_high_note2
+                    %custom_event_origin_note[$_note_id2 mod 1000000] := $_origin_note3
+                    %custom_event_dest_note[$_note_id2 mod 1000000] := $_dest_note
+                    %custom_event_first_note[$_note_id2 mod 1000000] := $_first_note
+                    %custom_event_second_note[$_note_id2 mod 1000000] := $_second_note
+                    %custom_event_velocity[$_note_id2 mod 1000000] := $_velocity7
+                    %custom_event_direction[$_note_id2 mod 1000000] := $_ripple_dir
+                    %custom_event_source[$_note_id2 mod 1000000] := -1
+                    %custom_event_triggered_by_mf[$_note_id2 mod 1000000] := %custom_event_triggered_by_mf[$_note_id9 mod 1000000]
+                    $r := 64-2
+                    while ($r>=0)
+                      %ripple_id_history[$r+1] := %ripple_id_history[$r]
+                      dec($r)
+                    end while
+                    %ripple_id_history[0] := $_note_id2
+                    $_fade_in_time := 0
+                    if ($_do_legato=0)
+                      $_fade_in_time := $menu_latency*1000
+                      if ($_fade_in_time=0)
+                        $_fade_in_time := 0
                       end if
-                      set_event_par_arr($_note_id2,$EVENT_PAR_ALLOW_GROUP,0,$ALL_GROUPS)
-                      set_event_par_arr($_note_id2,$EVENT_PAR_ALLOW_GROUP,1,$cur_artic)
-                      %custom_event_artic[$_note_id2 mod 1000000] := $cur_artic
-                      %custom_event_note[$_note_id2 mod 1000000] := $_note7
-                      %custom_event_low_note[$_note_id2 mod 1000000] := $_low_note2
-                      %custom_event_high_note[$_note_id2 mod 1000000] := $_high_note2
-                      %custom_event_origin_note[$_note_id2 mod 1000000] := $_origin_note3
-                      %custom_event_dest_note[$_note_id2 mod 1000000] := $_dest_note
-                      %custom_event_first_note[$_note_id2 mod 1000000] := $_first_note
-                      %custom_event_second_note[$_note_id2 mod 1000000] := $_second_note
-                      %custom_event_velocity[$_note_id2 mod 1000000] := $_velocity7
-                      %custom_event_direction[$_note_id2 mod 1000000] := $_ripple_dir
-                      %custom_event_source[$_note_id2 mod 1000000] := -1
-                      %custom_event_triggered_by_mf[$_note_id2 mod 1000000] := %custom_event_triggered_by_mf[$_note_id9 mod 1000000]
-                      $r := 64-2
-                      while ($r>=0)
-                        %ripple_id_history[$r+1] := %ripple_id_history[$r]
-                        dec($r)
-                      end while
-                      %ripple_id_history[0] := $_note_id2
-                      $_fade_in_time := 0
-                      if ($_do_legato=0)
-                        $_fade_in_time := $menu_latency*1000
-                        if ($_fade_in_time=0)
-                          $_fade_in_time := 0
-                        end if
-                      else
-                        $_real_pos_in_ripple := ($_real_legato_time+$_real_ripple_length-ticks_to_ms(48)) mod $_real_ripple_length
-                        $_time_til_end_of_ripple := $_real_ripple_length-$_real_pos_in_ripple
-                        if ($cur_artic=$artic__sixteenths)
-                          if ($_real_pos_in_ripple<($_real_ripple_length/4))
-                            $_real_pitch_length := $_real_ripple_length/4
-                            $_real_pos_in_pitch := $_real_pos_in_ripple mod $_real_pitch_length
-                            $_time_til_end_of_pitch := $_real_pitch_length-$_real_pos_in_pitch
-                          else
-                            $_time_til_end_of_pitch := $_real_ripple_length-$_real_pos_in_ripple
-                          end if
-                        else
-                          $_real_pitch_length := $_real_ripple_length/2
-                          $_real_pos_in_pitch := $_real_legato_time mod $_real_pitch_length
-                          $_time_til_end_of_pitch := $_real_pitch_length-$_real_pos_in_pitch
-                        end if
-                        if (in_range($_velocity7,1,48))
-                          $_fade_in_time := $_time_til_end_of_ripple
-                        else
-                          if (in_range($_velocity7,49,96))
-                            $_fade_in_time := $_time_til_end_of_pitch
-                          else
-                            if (in_range($_velocity7,97,127))
-                              $_fade_in_time := $_time_til_end_of_pitch/2
-                            end if
-                          end if
-                        end if
-                        if ($_fade_in_time<ticks_to_ms(192))
-                          $_fade_in_time := ticks_to_ms(192)
-                        end if
-                      end if
-                      fade_in($_note_id2,$_fade_in_time)
                     else
-                      $_ext_first_note := $_first_note
-                      $_ext_second_note := $_second_note
-                      $_ext_low_note := $_low_note2
-                      $_ext_high_note := $_high_note2
-                      $_ext_artic := $cur_artic
-                      $_wait_time := $_ext_mode_real_legato_time
-                      if ($_wait_time>0)
-                        select (real_to_int(?xypad_legato[0]*int_to_real(4)))
-                          case $legatoMode__syncToPitch
-                            $_wait_time := $_real_pitch_length-($_wait_time mod $_real_pitch_length)
-                          case $legatoMode__syncToRipple
-                            if ($_wait_time mod $_real_ripple_length<=$_real_pitch_length)
-                              $_note_chooser := 1
-                            end if
-                            $_wait_time := $_real_pitch_length-($_wait_time mod $_real_pitch_length)
-                          case $legatoMode__syncToSwell
-                            if ($_wait_time mod $_real_ripple_length<=$_real_pitch_length)
-                              $_note_chooser := 1
-                            end if
-                            $_ext_pitch := $_wait_time/$_real_pitch_length
-                            $_wait_time := $_real_pitch_length-($_wait_time mod $_real_pitch_length)
-                        end select
-                      end if
-                      $_low_vel := %velo[$_note7]-35
-                      $_high_vel := $_low_vel+35
-                      if ($_high_vel>127)
-                        $_high_vel := 127
-                      end if
-                      if ($_low_vel<1)
-                        $_low_vel := 1
-                      end if
-                      if ($_wait_time>0)
-                        wait($_wait_time)
-                      end if
-                      while (%key_active[$_note7]=1)
-                        if ($_note_chooser=0)
-                          $_ext_note := $_ext_first_note
+                      $_real_pos_in_ripple := ($_real_legato_time+$_real_ripple_length-ticks_to_ms(48)) mod $_real_ripple_length
+                      $_time_til_end_of_ripple := $_real_ripple_length-$_real_pos_in_ripple
+                      if ($cur_artic=$artic__sixteenths)
+                        if ($_real_pos_in_ripple<($_real_ripple_length/4))
+                          $_real_pitch_length := $_real_ripple_length/4
+                          $_real_pos_in_pitch := $_real_pos_in_ripple mod $_real_pitch_length
+                          $_time_til_end_of_pitch := $_real_pitch_length-$_real_pos_in_pitch
                         else
-                          $_ext_note := $_ext_second_note
-                        end if
-                        ~_vel_norm := int_to_real($slider_vol)/1000000.0*(int_to_real(%velo[$_note7])/127.0)
-                        $_vel3 := real_to_int(~_vel_norm*int_to_real(127-60))+30
-                        if (in_range($_ext_pitch,0,7))
-                          $_vel3 := real_to_int(int_to_real($_vel3-30)+((int_to_real($_ext_pitch)-int_to_real(0))/(int_to_real(7)-int_to_real(0))*(int_to_real($_vel3+30)-int_to_real($_vel3-30))))
-                        else
-                          $_vel3 := real_to_int(int_to_real($_vel3+30)+((int_to_real($_ext_pitch)-int_to_real(8))/(int_to_real(15)-int_to_real(8))*(int_to_real($_vel3-30)-int_to_real($_vel3+30))))
-                        end if
-                        if ($_note_chooser=1)
-                          $_vel3 := $_vel3-20
-                        end if
-                        if ($_vel3<1)
-                          $_vel3 := 1
-                        end if
-                        if ($_vel3>127)
-                          $_vel3 := 127
-                        end if
-                        if ($_ext_artic=$artic__sixteenths)
-                          if ($_note_chooser=0)
-                            $_len := ticks_to_ms(%ripple_length_ticks[$_ext_artic]/4)
-                          else
-                            $_len := ticks_to_ms(%ripple_length_ticks[$_ext_artic]/4*3)
-                          end if
-                        else
-                          $_len := ticks_to_ms(%ripple_length_ticks[$_ext_artic]/2)
-                        end if
-                        $_note_id2 := play_note($_ext_note,$_vel3,0,$_len)
-                        if ($_ext_artic=$artic__sixteenths)
-                          if ($_note_chooser=0)
-                            $_wait_time := ticks_to_ms(%ripple_length_ticks[$_ext_artic]/4)
-                          else
-                            $_wait_time := ticks_to_ms(%ripple_length_ticks[$_ext_artic]/4*3)
-                          end if
-                        else
-                          $_wait_time := ticks_to_ms(%ripple_length_ticks[$_ext_artic]/2)
-                        end if
-                        $_wait_time := real_to_int(int_to_real($_wait_time)*?speeds[real_to_int(?xypad_speed[0]*int_to_real(5))])
-                        if ($_wait_time>0)
-                          wait($_wait_time)
-                        end if
-                        $_ext_pitch := ($_ext_pitch+1) mod 16
-                        $_note_chooser := 1-$_note_chooser
-                      end while
-                      if ($_note_chooser=0)
-                        $_ext_note := $_ext_first_note
-                      else
-                        $_ext_note := $_ext_second_note
-                      end if
-                      ~_vel_norm := int_to_real($slider_vol)/1000000.0*(int_to_real(%velo[$_note7])/127.0)
-                      $_vel3 := real_to_int(~_vel_norm*int_to_real(127-60))+30
-                      if (in_range($_ext_pitch,0,7))
-                        $_vel3 := real_to_int(int_to_real($_vel3-30)+((int_to_real($_ext_pitch)-int_to_real(0))/(int_to_real(7)-int_to_real(0))*(int_to_real($_vel3+30)-int_to_real($_vel3-30))))
-                      else
-                        $_vel3 := real_to_int(int_to_real($_vel3+30)+((int_to_real($_ext_pitch)-int_to_real(8))/(int_to_real(15)-int_to_real(8))*(int_to_real($_vel3-30)-int_to_real($_vel3+30))))
-                      end if
-                      if ($_note_chooser=1)
-                        $_vel3 := $_vel3-20
-                      end if
-                      if ($_vel3<1)
-                        $_vel3 := 1
-                      end if
-                      if ($_vel3>127)
-                        $_vel3 := 127
-                      end if
-                      if ($_ext_artic=$artic__sixteenths)
-                        if ($_note_chooser=0)
-                          $_len := ticks_to_ms(%ripple_length_ticks[$_ext_artic]/4)
-                        else
-                          $_len := ticks_to_ms(%ripple_length_ticks[$_ext_artic]/4*3)
+                          $_time_til_end_of_pitch := $_real_ripple_length-$_real_pos_in_ripple
                         end if
                       else
-                        $_len := ticks_to_ms(%ripple_length_ticks[$_ext_artic]/2)
+                        $_real_pitch_length := $_real_ripple_length/2
+                        $_real_pos_in_pitch := $_real_legato_time mod $_real_pitch_length
+                        $_time_til_end_of_pitch := $_real_pitch_length-$_real_pos_in_pitch
                       end if
-                      $_note_id2 := play_note($_ext_note,$_vel3,0,$_len)
-                      if ($_ext_artic=$artic__sixteenths)
-                        if ($_note_chooser=0)
-                          $_wait_time := ticks_to_ms(%ripple_length_ticks[$_ext_artic]/4)
-                        else
-                          $_wait_time := ticks_to_ms(%ripple_length_ticks[$_ext_artic]/4*3)
-                        end if
+                      if (in_range($_velocity7,1,48))
+                        $_fade_in_time := $_time_til_end_of_ripple
                       else
-                        $_wait_time := ticks_to_ms(%ripple_length_ticks[$_ext_artic]/2)
-                      end if
-                      $_wait_time := real_to_int(int_to_real($_wait_time)*?speeds[real_to_int(?xypad_speed[0]*int_to_real(5))])
-                      if ($_wait_time>0)
-                        wait($_wait_time)
-                      end if
-                      $_ext_pitch := ($_ext_pitch+1) mod 16
-                      $_note_chooser := 1-$_note_chooser
-                      if ($_note_chooser=0)
-                        if ($_note_chooser=0)
-                          $_ext_note := $_ext_first_note
+                        if (in_range($_velocity7,49,96))
+                          $_fade_in_time := $_time_til_end_of_pitch
                         else
-                          $_ext_note := $_ext_second_note
-                        end if
-                        ~_vel_norm := int_to_real($slider_vol)/1000000.0*(int_to_real(%velo[$_note7])/127.0)
-                        $_vel3 := real_to_int(~_vel_norm*int_to_real(127-60))+30
-                        if (in_range($_ext_pitch,0,7))
-                          $_vel3 := real_to_int(int_to_real($_vel3-30)+((int_to_real($_ext_pitch)-int_to_real(0))/(int_to_real(7)-int_to_real(0))*(int_to_real($_vel3+30)-int_to_real($_vel3-30))))
-                        else
-                          $_vel3 := real_to_int(int_to_real($_vel3+30)+((int_to_real($_ext_pitch)-int_to_real(8))/(int_to_real(15)-int_to_real(8))*(int_to_real($_vel3-30)-int_to_real($_vel3+30))))
-                        end if
-                        if ($_note_chooser=1)
-                          $_vel3 := $_vel3-20
-                        end if
-                        if ($_vel3<1)
-                          $_vel3 := 1
-                        end if
-                        if ($_vel3>127)
-                          $_vel3 := 127
-                        end if
-                        if ($_ext_artic=$artic__sixteenths)
-                          if ($_note_chooser=0)
-                            $_len := ticks_to_ms(%ripple_length_ticks[$_ext_artic]/4)
-                          else
-                            $_len := ticks_to_ms(%ripple_length_ticks[$_ext_artic]/4*3)
+                          if (in_range($_velocity7,97,127))
+                            $_fade_in_time := $_time_til_end_of_pitch/2
                           end if
-                        else
-                          $_len := ticks_to_ms(%ripple_length_ticks[$_ext_artic]/2)
                         end if
-                        $_note_id2 := play_note($_ext_note,$_vel3,0,$_len)
-                        if ($_ext_artic=$artic__sixteenths)
-                          if ($_note_chooser=0)
-                            $_wait_time := ticks_to_ms(%ripple_length_ticks[$_ext_artic]/4)
-                          else
-                            $_wait_time := ticks_to_ms(%ripple_length_ticks[$_ext_artic]/4*3)
-                          end if
-                        else
-                          $_wait_time := ticks_to_ms(%ripple_length_ticks[$_ext_artic]/2)
-                        end if
-                        $_wait_time := real_to_int(int_to_real($_wait_time)*?speeds[real_to_int(?xypad_speed[0]*int_to_real(5))])
-                        if ($_wait_time>0)
-                          wait($_wait_time)
-                        end if
-                        $_ext_pitch := ($_ext_pitch+1) mod 16
-                        $_note_chooser := 1-$_note_chooser
+                      end if
+                      if ($_fade_in_time<ticks_to_ms(192))
+                        $_fade_in_time := ticks_to_ms(192)
                       end if
                     end if
+                    fade_in($_note_id2,$_fade_in_time)
                   end if
                   inc($ripple_i)
                 end while
@@ -8755,248 +7265,69 @@ on ui_control($switch_preview7)
                     inc($r)
                   end while
                   if ($_already_playing=0)
-                    if ($switch_midiOutputMode=0)
-                      $_note_id2 := play_note(%__notes[$ripple_i],64+%__intervals[$ripple_i],$_offset_rec_time4,0)
-                      if ($switch_velToSampleStart=0)
-                        $_volume := real_to_int(int_to_real(-7000)+((int_to_real($_velocity8)-int_to_real(1))/(int_to_real(127)-int_to_real(1))*(int_to_real(3000)-int_to_real(-7000))))
-                        change_vol($_note_id2,$_volume,0)
+                    $_note_id2 := play_note(%__notes[$ripple_i],64+%__intervals[$ripple_i],$_offset_rec_time4,0)
+                    if ($switch_velToSampleStart=0)
+                      $_volume := real_to_int(int_to_real(-7000)+((int_to_real($_velocity8)-int_to_real(1))/(int_to_real(127)-int_to_real(1))*(int_to_real(3000)-int_to_real(-7000))))
+                      change_vol($_note_id2,$_volume,0)
+                    end if
+                    set_event_par_arr($_note_id2,$EVENT_PAR_ALLOW_GROUP,0,$ALL_GROUPS)
+                    set_event_par_arr($_note_id2,$EVENT_PAR_ALLOW_GROUP,1,$cur_artic)
+                    %custom_event_artic[$_note_id2 mod 1000000] := $cur_artic
+                    %custom_event_note[$_note_id2 mod 1000000] := $_note8
+                    %custom_event_low_note[$_note_id2 mod 1000000] := $_low_note2
+                    %custom_event_high_note[$_note_id2 mod 1000000] := $_high_note2
+                    %custom_event_origin_note[$_note_id2 mod 1000000] := $_origin_note3
+                    %custom_event_dest_note[$_note_id2 mod 1000000] := $_dest_note
+                    %custom_event_first_note[$_note_id2 mod 1000000] := $_first_note
+                    %custom_event_second_note[$_note_id2 mod 1000000] := $_second_note
+                    %custom_event_velocity[$_note_id2 mod 1000000] := $_velocity8
+                    %custom_event_direction[$_note_id2 mod 1000000] := $_ripple_dir
+                    %custom_event_source[$_note_id2 mod 1000000] := -1
+                    %custom_event_triggered_by_mf[$_note_id2 mod 1000000] := %custom_event_triggered_by_mf[$_note_id10 mod 1000000]
+                    $r := 64-2
+                    while ($r>=0)
+                      %ripple_id_history[$r+1] := %ripple_id_history[$r]
+                      dec($r)
+                    end while
+                    %ripple_id_history[0] := $_note_id2
+                    $_fade_in_time := 0
+                    if ($_do_legato=0)
+                      $_fade_in_time := $menu_latency*1000
+                      if ($_fade_in_time=0)
+                        $_fade_in_time := 0
                       end if
-                      set_event_par_arr($_note_id2,$EVENT_PAR_ALLOW_GROUP,0,$ALL_GROUPS)
-                      set_event_par_arr($_note_id2,$EVENT_PAR_ALLOW_GROUP,1,$cur_artic)
-                      %custom_event_artic[$_note_id2 mod 1000000] := $cur_artic
-                      %custom_event_note[$_note_id2 mod 1000000] := $_note8
-                      %custom_event_low_note[$_note_id2 mod 1000000] := $_low_note2
-                      %custom_event_high_note[$_note_id2 mod 1000000] := $_high_note2
-                      %custom_event_origin_note[$_note_id2 mod 1000000] := $_origin_note3
-                      %custom_event_dest_note[$_note_id2 mod 1000000] := $_dest_note
-                      %custom_event_first_note[$_note_id2 mod 1000000] := $_first_note
-                      %custom_event_second_note[$_note_id2 mod 1000000] := $_second_note
-                      %custom_event_velocity[$_note_id2 mod 1000000] := $_velocity8
-                      %custom_event_direction[$_note_id2 mod 1000000] := $_ripple_dir
-                      %custom_event_source[$_note_id2 mod 1000000] := -1
-                      %custom_event_triggered_by_mf[$_note_id2 mod 1000000] := %custom_event_triggered_by_mf[$_note_id10 mod 1000000]
-                      $r := 64-2
-                      while ($r>=0)
-                        %ripple_id_history[$r+1] := %ripple_id_history[$r]
-                        dec($r)
-                      end while
-                      %ripple_id_history[0] := $_note_id2
-                      $_fade_in_time := 0
-                      if ($_do_legato=0)
-                        $_fade_in_time := $menu_latency*1000
-                        if ($_fade_in_time=0)
-                          $_fade_in_time := 0
-                        end if
-                      else
-                        $_real_pos_in_ripple := ($_real_legato_time+$_real_ripple_length-ticks_to_ms(48)) mod $_real_ripple_length
-                        $_time_til_end_of_ripple := $_real_ripple_length-$_real_pos_in_ripple
-                        if ($cur_artic=$artic__sixteenths)
-                          if ($_real_pos_in_ripple<($_real_ripple_length/4))
-                            $_real_pitch_length := $_real_ripple_length/4
-                            $_real_pos_in_pitch := $_real_pos_in_ripple mod $_real_pitch_length
-                            $_time_til_end_of_pitch := $_real_pitch_length-$_real_pos_in_pitch
-                          else
-                            $_time_til_end_of_pitch := $_real_ripple_length-$_real_pos_in_ripple
-                          end if
-                        else
-                          $_real_pitch_length := $_real_ripple_length/2
-                          $_real_pos_in_pitch := $_real_legato_time mod $_real_pitch_length
-                          $_time_til_end_of_pitch := $_real_pitch_length-$_real_pos_in_pitch
-                        end if
-                        if (in_range($_velocity8,1,48))
-                          $_fade_in_time := $_time_til_end_of_ripple
-                        else
-                          if (in_range($_velocity8,49,96))
-                            $_fade_in_time := $_time_til_end_of_pitch
-                          else
-                            if (in_range($_velocity8,97,127))
-                              $_fade_in_time := $_time_til_end_of_pitch/2
-                            end if
-                          end if
-                        end if
-                        if ($_fade_in_time<ticks_to_ms(192))
-                          $_fade_in_time := ticks_to_ms(192)
-                        end if
-                      end if
-                      fade_in($_note_id2,$_fade_in_time)
                     else
-                      $_ext_first_note := $_first_note
-                      $_ext_second_note := $_second_note
-                      $_ext_low_note := $_low_note2
-                      $_ext_high_note := $_high_note2
-                      $_ext_artic := $cur_artic
-                      $_wait_time := $_ext_mode_real_legato_time
-                      if ($_wait_time>0)
-                        select (real_to_int(?xypad_legato[0]*int_to_real(4)))
-                          case $legatoMode__syncToPitch
-                            $_wait_time := $_real_pitch_length-($_wait_time mod $_real_pitch_length)
-                          case $legatoMode__syncToRipple
-                            if ($_wait_time mod $_real_ripple_length<=$_real_pitch_length)
-                              $_note_chooser := 1
-                            end if
-                            $_wait_time := $_real_pitch_length-($_wait_time mod $_real_pitch_length)
-                          case $legatoMode__syncToSwell
-                            if ($_wait_time mod $_real_ripple_length<=$_real_pitch_length)
-                              $_note_chooser := 1
-                            end if
-                            $_ext_pitch := $_wait_time/$_real_pitch_length
-                            $_wait_time := $_real_pitch_length-($_wait_time mod $_real_pitch_length)
-                        end select
-                      end if
-                      $_low_vel := %velo[$_note8]-35
-                      $_high_vel := $_low_vel+35
-                      if ($_high_vel>127)
-                        $_high_vel := 127
-                      end if
-                      if ($_low_vel<1)
-                        $_low_vel := 1
-                      end if
-                      if ($_wait_time>0)
-                        wait($_wait_time)
-                      end if
-                      while (%key_active[$_note8]=1)
-                        if ($_note_chooser=0)
-                          $_ext_note := $_ext_first_note
+                      $_real_pos_in_ripple := ($_real_legato_time+$_real_ripple_length-ticks_to_ms(48)) mod $_real_ripple_length
+                      $_time_til_end_of_ripple := $_real_ripple_length-$_real_pos_in_ripple
+                      if ($cur_artic=$artic__sixteenths)
+                        if ($_real_pos_in_ripple<($_real_ripple_length/4))
+                          $_real_pitch_length := $_real_ripple_length/4
+                          $_real_pos_in_pitch := $_real_pos_in_ripple mod $_real_pitch_length
+                          $_time_til_end_of_pitch := $_real_pitch_length-$_real_pos_in_pitch
                         else
-                          $_ext_note := $_ext_second_note
-                        end if
-                        ~_vel_norm := int_to_real($slider_vol)/1000000.0*(int_to_real(%velo[$_note8])/127.0)
-                        $_vel3 := real_to_int(~_vel_norm*int_to_real(127-60))+30
-                        if (in_range($_ext_pitch,0,7))
-                          $_vel3 := real_to_int(int_to_real($_vel3-30)+((int_to_real($_ext_pitch)-int_to_real(0))/(int_to_real(7)-int_to_real(0))*(int_to_real($_vel3+30)-int_to_real($_vel3-30))))
-                        else
-                          $_vel3 := real_to_int(int_to_real($_vel3+30)+((int_to_real($_ext_pitch)-int_to_real(8))/(int_to_real(15)-int_to_real(8))*(int_to_real($_vel3-30)-int_to_real($_vel3+30))))
-                        end if
-                        if ($_note_chooser=1)
-                          $_vel3 := $_vel3-20
-                        end if
-                        if ($_vel3<1)
-                          $_vel3 := 1
-                        end if
-                        if ($_vel3>127)
-                          $_vel3 := 127
-                        end if
-                        if ($_ext_artic=$artic__sixteenths)
-                          if ($_note_chooser=0)
-                            $_len := ticks_to_ms(%ripple_length_ticks[$_ext_artic]/4)
-                          else
-                            $_len := ticks_to_ms(%ripple_length_ticks[$_ext_artic]/4*3)
-                          end if
-                        else
-                          $_len := ticks_to_ms(%ripple_length_ticks[$_ext_artic]/2)
-                        end if
-                        $_note_id2 := play_note($_ext_note,$_vel3,0,$_len)
-                        if ($_ext_artic=$artic__sixteenths)
-                          if ($_note_chooser=0)
-                            $_wait_time := ticks_to_ms(%ripple_length_ticks[$_ext_artic]/4)
-                          else
-                            $_wait_time := ticks_to_ms(%ripple_length_ticks[$_ext_artic]/4*3)
-                          end if
-                        else
-                          $_wait_time := ticks_to_ms(%ripple_length_ticks[$_ext_artic]/2)
-                        end if
-                        $_wait_time := real_to_int(int_to_real($_wait_time)*?speeds[real_to_int(?xypad_speed[0]*int_to_real(5))])
-                        if ($_wait_time>0)
-                          wait($_wait_time)
-                        end if
-                        $_ext_pitch := ($_ext_pitch+1) mod 16
-                        $_note_chooser := 1-$_note_chooser
-                      end while
-                      if ($_note_chooser=0)
-                        $_ext_note := $_ext_first_note
-                      else
-                        $_ext_note := $_ext_second_note
-                      end if
-                      ~_vel_norm := int_to_real($slider_vol)/1000000.0*(int_to_real(%velo[$_note8])/127.0)
-                      $_vel3 := real_to_int(~_vel_norm*int_to_real(127-60))+30
-                      if (in_range($_ext_pitch,0,7))
-                        $_vel3 := real_to_int(int_to_real($_vel3-30)+((int_to_real($_ext_pitch)-int_to_real(0))/(int_to_real(7)-int_to_real(0))*(int_to_real($_vel3+30)-int_to_real($_vel3-30))))
-                      else
-                        $_vel3 := real_to_int(int_to_real($_vel3+30)+((int_to_real($_ext_pitch)-int_to_real(8))/(int_to_real(15)-int_to_real(8))*(int_to_real($_vel3-30)-int_to_real($_vel3+30))))
-                      end if
-                      if ($_note_chooser=1)
-                        $_vel3 := $_vel3-20
-                      end if
-                      if ($_vel3<1)
-                        $_vel3 := 1
-                      end if
-                      if ($_vel3>127)
-                        $_vel3 := 127
-                      end if
-                      if ($_ext_artic=$artic__sixteenths)
-                        if ($_note_chooser=0)
-                          $_len := ticks_to_ms(%ripple_length_ticks[$_ext_artic]/4)
-                        else
-                          $_len := ticks_to_ms(%ripple_length_ticks[$_ext_artic]/4*3)
+                          $_time_til_end_of_pitch := $_real_ripple_length-$_real_pos_in_ripple
                         end if
                       else
-                        $_len := ticks_to_ms(%ripple_length_ticks[$_ext_artic]/2)
+                        $_real_pitch_length := $_real_ripple_length/2
+                        $_real_pos_in_pitch := $_real_legato_time mod $_real_pitch_length
+                        $_time_til_end_of_pitch := $_real_pitch_length-$_real_pos_in_pitch
                       end if
-                      $_note_id2 := play_note($_ext_note,$_vel3,0,$_len)
-                      if ($_ext_artic=$artic__sixteenths)
-                        if ($_note_chooser=0)
-                          $_wait_time := ticks_to_ms(%ripple_length_ticks[$_ext_artic]/4)
-                        else
-                          $_wait_time := ticks_to_ms(%ripple_length_ticks[$_ext_artic]/4*3)
-                        end if
+                      if (in_range($_velocity8,1,48))
+                        $_fade_in_time := $_time_til_end_of_ripple
                       else
-                        $_wait_time := ticks_to_ms(%ripple_length_ticks[$_ext_artic]/2)
-                      end if
-                      $_wait_time := real_to_int(int_to_real($_wait_time)*?speeds[real_to_int(?xypad_speed[0]*int_to_real(5))])
-                      if ($_wait_time>0)
-                        wait($_wait_time)
-                      end if
-                      $_ext_pitch := ($_ext_pitch+1) mod 16
-                      $_note_chooser := 1-$_note_chooser
-                      if ($_note_chooser=0)
-                        if ($_note_chooser=0)
-                          $_ext_note := $_ext_first_note
+                        if (in_range($_velocity8,49,96))
+                          $_fade_in_time := $_time_til_end_of_pitch
                         else
-                          $_ext_note := $_ext_second_note
-                        end if
-                        ~_vel_norm := int_to_real($slider_vol)/1000000.0*(int_to_real(%velo[$_note8])/127.0)
-                        $_vel3 := real_to_int(~_vel_norm*int_to_real(127-60))+30
-                        if (in_range($_ext_pitch,0,7))
-                          $_vel3 := real_to_int(int_to_real($_vel3-30)+((int_to_real($_ext_pitch)-int_to_real(0))/(int_to_real(7)-int_to_real(0))*(int_to_real($_vel3+30)-int_to_real($_vel3-30))))
-                        else
-                          $_vel3 := real_to_int(int_to_real($_vel3+30)+((int_to_real($_ext_pitch)-int_to_real(8))/(int_to_real(15)-int_to_real(8))*(int_to_real($_vel3-30)-int_to_real($_vel3+30))))
-                        end if
-                        if ($_note_chooser=1)
-                          $_vel3 := $_vel3-20
-                        end if
-                        if ($_vel3<1)
-                          $_vel3 := 1
-                        end if
-                        if ($_vel3>127)
-                          $_vel3 := 127
-                        end if
-                        if ($_ext_artic=$artic__sixteenths)
-                          if ($_note_chooser=0)
-                            $_len := ticks_to_ms(%ripple_length_ticks[$_ext_artic]/4)
-                          else
-                            $_len := ticks_to_ms(%ripple_length_ticks[$_ext_artic]/4*3)
+                          if (in_range($_velocity8,97,127))
+                            $_fade_in_time := $_time_til_end_of_pitch/2
                           end if
-                        else
-                          $_len := ticks_to_ms(%ripple_length_ticks[$_ext_artic]/2)
                         end if
-                        $_note_id2 := play_note($_ext_note,$_vel3,0,$_len)
-                        if ($_ext_artic=$artic__sixteenths)
-                          if ($_note_chooser=0)
-                            $_wait_time := ticks_to_ms(%ripple_length_ticks[$_ext_artic]/4)
-                          else
-                            $_wait_time := ticks_to_ms(%ripple_length_ticks[$_ext_artic]/4*3)
-                          end if
-                        else
-                          $_wait_time := ticks_to_ms(%ripple_length_ticks[$_ext_artic]/2)
-                        end if
-                        $_wait_time := real_to_int(int_to_real($_wait_time)*?speeds[real_to_int(?xypad_speed[0]*int_to_real(5))])
-                        if ($_wait_time>0)
-                          wait($_wait_time)
-                        end if
-                        $_ext_pitch := ($_ext_pitch+1) mod 16
-                        $_note_chooser := 1-$_note_chooser
+                      end if
+                      if ($_fade_in_time<ticks_to_ms(192))
+                        $_fade_in_time := ticks_to_ms(192)
                       end if
                     end if
+                    fade_in($_note_id2,$_fade_in_time)
                   end if
                   inc($ripple_i)
                 end while

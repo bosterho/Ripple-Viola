@@ -511,7 +511,6 @@ on init
 	set_control_par_str(INST_ICON_ID, CONTROL_PAR_PICTURE, "insticon")
 
 	label_version -> hide := HIDE_WHOLE_CONTROL
-	label_midiOutputModeCover -> hide := HIDE_WHOLE_CONTROL
 
 	// Title pages
 	define NUM_TITLE_PAGES := 4
@@ -569,16 +568,12 @@ on init
 
 	// Latency
 	menu_latency -> textpos_y := 100
-	add_menu_item(menu_latency, "Start Time: Tightened: 0 ms delay", 0)
-	add_menu_item(menu_latency, "Start Time: Middle, slight adjustment: 50 ms delay", 50)
-	add_menu_item(menu_latency, "Start Time: Natural, as played: 100 ms delay", 100)
+	add_menu_item(menu_latency, "Lateness: 0ms", 0)
+	add_menu_item(menu_latency, "Lateness: 50ms", 50)
+	add_menu_item(menu_latency, "Lateness: 100ms", 100)
 	label_latency -> font_type := get_font_id("Khula Bold Size 11 on")
 	label_latency -> text_alignment := 1
 	update_latency_graphics()
-
-	// Midi output mode
-	label_midiOutputModeCover -> hide := hide_states[switch_midiOutputMode]
-
 
 	// Z layers
 
@@ -1000,449 +995,200 @@ function note_callback(note, velocity, event_id)
 				end if
 			end if
 
-			if switch_midiOutputMode = 0
-				// Trigger ripples that were found in the above code
-				copy_array(notes, played_notes)
-				copy_array(intervals, played_intervals)
-				for ripple_i := 0 to num_ripples - 1
-					// Swap notes and intervals to change directions
-					if direction_ctrl = directionMode.UP
-						if intervals[ripple_i] < 0
-							notes[ripple_i]     := notes[ripple_i] + intervals[ripple_i]
-							intervals[ripple_i] := -intervals[ripple_i]
-						end if
-					else if direction_ctrl = directionMode.DOWN
-						if intervals[ripple_i] > 0
-							notes[ripple_i]     := notes[ripple_i] + intervals[ripple_i]
-							intervals[ripple_i] := -intervals[ripple_i]
-						end if
-					end if
-
-					// Get low and high notes
+			// Trigger ripples that were found in the above code
+			copy_array(notes, played_notes)
+			copy_array(intervals, played_intervals)
+			for ripple_i := 0 to num_ripples - 1
+				// Swap notes and intervals to change directions
+				if direction_ctrl = directionMode.UP
 					if intervals[ripple_i] < 0
-						declare low_note := notes[ripple_i] + intervals[ripple_i]
-						declare high_note := notes[ripple_i]
-					else
-						low_note := notes[ripple_i]
-						high_note := notes[ripple_i] + intervals[ripple_i]
+						notes[ripple_i]     := notes[ripple_i] + intervals[ripple_i]
+						intervals[ripple_i] := -intervals[ripple_i]
 					end if
-
-					// Direction
-					declare ripple_dir
+				else if direction_ctrl = directionMode.DOWN
 					if intervals[ripple_i] > 0
-						ripple_dir := UP
-					else
-						ripple_dir := DOWN
+						notes[ripple_i]     := notes[ripple_i] + intervals[ripple_i]
+						intervals[ripple_i] := -intervals[ripple_i]
 					end if
-
-					// Origin, Destination (for Up and Down modes)
-					declare origin_note := notes[ripple_i]
-					declare dest_note := notes[ripple_i] + intervals[ripple_i]
-
-					// First note, Second note
-					declare first_note := played_notes[ripple_i]
-					declare second_note := played_notes[ripple_i] + played_intervals[ripple_i]
-
-					// Update Sync lengths' real time
-					declare real_ripple_length := rec_time_to_real_time(rec_time_ripple_lengths[cur_artic])
-					declare real_pitch_length := real_ripple_length / pitch_fractions[cur_artic]
-					declare real_sample_length := rec_time_to_real_time(rec_time_sample_lengths[cur_artic])
-
-					// Decide whether to do legato
-					declare do_legato
-					if all_keys_inactive = 1
-						do_legato := 0
-					else
-						do_legato := 1
-					end if
-					all_keys_inactive := 0
-
-					if legato_ctrl = 0
-						do_legato := 0
-					end if
-
-					// Get sample offset
-					declare offset_real_time
-					declare offset_rec_time
-					declare real_legato_time
-					declare latency_real_time
-					if do_legato = 0
-						first_ripple_timestamp := ENGINE_UPTIME
-						real_legato_time := 0
-						offset_real_time := 0
-						declare ext_mode_real_legato_time := 0
-						// offset_real_time := ticks_to_ms(30) // For when you add a ripple using grid-snapped notes.
-					else
-						real_legato_time := (ENGINE_UPTIME - first_ripple_timestamp) * 1000
-						ext_mode_real_legato_time := real_legato_time
-						select legato_ctrl
-							case legatoMode.syncToPitch
-								real_legato_time := real_legato_time + ticks_to_ms(30) // For when you add a ripple using grid-snapped notes. Make it wrap a tiny bit earlier.
-								offset_real_time := real_legato_time mod real_pitch_length
-								offset_real_time := offset_real_time - ticks_to_ms(30) // Undo the offset
-							case legatoMode.syncToRipple
-								real_legato_time := real_legato_time + ticks_to_ms(30)
-								offset_real_time := real_legato_time mod real_ripple_length
-								offset_real_time := offset_real_time - ticks_to_ms(30)
-							case legatoMode.syncToSwell
-								offset_real_time := real_legato_time mod real_sample_length
-						end select
-
-						// In case undo-ing the offset made it negative
-						if offset_real_time < 0
-							offset_real_time := 0
-						end if
-					end if
-
-					// Compensate for latency
-					latency_real_time := int(float(menu_latency) / speeds[speed_ctrl])
-					offset_real_time := offset_real_time + (rec_time_to_real_time(LEADING_SILENCE) - latency_real_time) * 1000
-
-					// Convert to recorded time
-					offset_rec_time := real_time_to_rec_time(offset_real_time)
-
-					if switch_velToSampleStart = 1
-						// Override what ripple it was on
-						offset_rec_time := offset_rec_time mod rec_time_ripple_lengths[cur_artic]
-
-						// Set ripple according to velocity
-						declare vel_offset := (velo[second_note] / 26) * rec_time_ripple_lengths[cur_artic]
-						offset_rec_time := offset_rec_time + vel_offset
-
-						// Keep it in bounds of the entire sample
-						offset_rec_time := offset_rec_time mod real_sample_length
-					end if
-
-					// Keep exact duplicates from happening
-					declare already_playing := 0
-					for r := 0 to MAX_RIPPLE_HISTORY - 1
-						if event_status(ripple_id_history[r]) = EVENT_STATUS_NOTE_QUEUE
-							if ((event[ripple_id_history[r]].low_note = low_note and event[ripple_id_history[r]].high_note = high_note) ...
-								or (event[ripple_id_history[r]].origin_note = origin_note and event[ripple_id_history[r]].dest_note = dest_note)) ...
-							and event[ripple_id_history[r]].direction = ripple_dir ...
-							and event[ripple_id_history[r]].releasing = 0 ...
-							and ripple_id_history[r] -> play_pos - offset_rec_time < 5000
-								already_playing := 1
-								event[ripple_id_history[r]].marked_for_release := 0 // If you didn't do this, then....
-							end if
-						end if
-					end for
-
-					// Play note
-					if already_playing = 0
-						declare note_id := play_note(notes[ripple_i], 64 + intervals[ripple_i], offset_rec_time, 0)
-						if switch_velToSampleStart = 0
-							declare volume  := map_i_2i_2i_i(velocity, 1, 127, -7000, 3000)
-							change_vol(note_id, volume, CHANGE_ABSOLUTE)
-						end if
-						set_event_par_arr(note_id, EVENT_PAR_ALLOW_GROUP, 0, ALL_GROUPS)
-						set_event_par_arr(note_id, EVENT_PAR_ALLOW_GROUP, 1, cur_artic)
-						event[note_id].artic       := cur_artic
-						event[note_id].note        := note
-						event[note_id].low_note    := low_note
-						event[note_id].high_note   := high_note
-						event[note_id].origin_note := origin_note
-						event[note_id].dest_note   := dest_note
-						event[note_id].first_note  := first_note
-						event[note_id].second_note := second_note
-						event[note_id].velocity    := velocity
-						event[note_id].direction   := ripple_dir
-						event[note_id].source      := OUTSIDE_SOURCE
-						event[note_id].triggered_by_mf := event[event_id].triggered_by_mf
-
-						// Push note id to ripple history
-						for r := MAX_RIPPLE_HISTORY - 2 downto 0
-							ripple_id_history[r + 1] := ripple_id_history[r]
-						end for
-						ripple_id_history[0] := note_id
-
-						// Fade in
-						declare fade_in_time := 0
-						if do_legato = 0
-							fade_in_time := menu_latency * 1000
-							if fade_in_time = 0
-								// tmpro causes a bit of a bump sometimes. This hides that.
-								fade_in_time := 0
-							end if
-						else
-							declare real_pos_in_ripple := (real_legato_time + real_ripple_length - ticks_to_ms(48)) mod real_ripple_length
-							declare time_til_end_of_ripple := real_ripple_length - real_pos_in_ripple
-							if cur_artic = artic.sixteenths
-								if real_pos_in_ripple < real_ripple_length / 4
-									real_pitch_length := real_ripple_length / 4
-									declare real_pos_in_pitch := real_pos_in_ripple mod real_pitch_length
-									declare time_til_end_of_pitch := real_pitch_length - real_pos_in_pitch
-								else
-									time_til_end_of_pitch := real_ripple_length - real_pos_in_ripple
-								end if 
-							else
-								real_pitch_length := real_ripple_length / 2
-								real_pos_in_pitch := real_legato_time mod real_pitch_length
-								time_til_end_of_pitch := real_pitch_length - real_pos_in_pitch
-							end if
-							if in_range(velocity, 1, 48)
-								fade_in_time := time_til_end_of_ripple
-							else if in_range(velocity, 49, 96)
-								fade_in_time := time_til_end_of_pitch
-							else if in_range(velocity, 97, 127)
-								// fade_in_time := map_i_2i_2i_i(velocity, 65, 127, ticks_to_ms(240), ticks_to_ms(48))
-								fade_in_time := time_til_end_of_pitch / 2
-							end if
-							if fade_in_time < ticks_to_ms(192)
-								fade_in_time := ticks_to_ms(192)
-							end if
-						end if
-						fade_in(note_id, fade_in_time)
-					end if
-				end for
-			else if switch_midiOutputMode = 1
-				while key_active[note] = 1
-					macro note_logic()
-						// Trigger ripples that were found in the above code
-						copy_array(notes, played_notes)
-						copy_array(intervals, played_intervals)
-						for ripple_i := 0 to num_ripples - 1
-							// Swap notes and intervals to change directions
-							if direction_ctrl = directionMode.UP
-								if intervals[ripple_i] < 0
-									notes[ripple_i]     := notes[ripple_i] + intervals[ripple_i]
-									intervals[ripple_i] := -intervals[ripple_i]
-								end if
-							else if direction_ctrl = directionMode.DOWN
-								if intervals[ripple_i] > 0
-									notes[ripple_i]     := notes[ripple_i] + intervals[ripple_i]
-									intervals[ripple_i] := -intervals[ripple_i]
-								end if
-							end if
-
-							// Get low and high notes
-							if intervals[ripple_i] < 0
-								declare low_note := notes[ripple_i] + intervals[ripple_i]
-								declare high_note := notes[ripple_i]
-							else
-								low_note := notes[ripple_i]
-								high_note := notes[ripple_i] + intervals[ripple_i]
-							end if
-
-							// Direction
-							declare ripple_dir
-							if intervals[ripple_i] > 0
-								ripple_dir := UP
-							else
-								ripple_dir := DOWN
-							end if
-
-							// Origin, Destination (for Up and Down modes)
-							declare origin_note := notes[ripple_i]
-							declare dest_note := notes[ripple_i] + intervals[ripple_i]
-
-							// First note, Second note
-							declare first_note := played_notes[ripple_i]
-							declare second_note := played_notes[ripple_i] + played_intervals[ripple_i]
-
-							// Update Sync lengths' real time
-							declare real_ripple_length := rec_time_to_real_time(rec_time_ripple_lengths[cur_artic])
-							declare real_pitch_length := real_ripple_length / pitch_fractions[cur_artic]
-							declare real_sample_length := rec_time_to_real_time(rec_time_sample_lengths[cur_artic])
-
-							// Decide whether to do legato
-							declare do_legato
-							if all_keys_inactive = 1
-								do_legato := 0
-							else
-								do_legato := 1
-							end if
-							all_keys_inactive := 0
-
-							if legato_ctrl = 0
-								do_legato := 0
-							end if
-
-							// Get sample offset
-							declare offset_real_time
-							declare offset_rec_time
-							declare real_legato_time
-							declare latency_real_time
-							if do_legato = 0
-								first_ripple_timestamp := ENGINE_UPTIME
-								real_legato_time := 0
-								offset_real_time := 0
-								declare ext_mode_real_legato_time := 0
-								// offset_real_time := ticks_to_ms(30) // For when you add a ripple using grid-snapped notes.
-							else
-								real_legato_time := (ENGINE_UPTIME - first_ripple_timestamp) * 1000
-								ext_mode_real_legato_time := real_legato_time
-								select legato_ctrl
-									case legatoMode.syncToPitch
-										real_legato_time := real_legato_time + ticks_to_ms(30) // For when you add a ripple using grid-snapped notes. Make it wrap a tiny bit earlier.
-										offset_real_time := real_legato_time mod real_pitch_length
-										offset_real_time := offset_real_time - ticks_to_ms(30) // Undo the offset
-									case legatoMode.syncToRipple
-										real_legato_time := real_legato_time + ticks_to_ms(30)
-										offset_real_time := real_legato_time mod real_ripple_length
-										offset_real_time := offset_real_time - ticks_to_ms(30)
-									case legatoMode.syncToSwell
-										offset_real_time := real_legato_time mod real_sample_length
-								end select
-
-								// In case undo-ing the offset made it negative
-								if offset_real_time < 0
-									offset_real_time := 0
-								end if
-							end if
-
-							// Compensate for latency
-							latency_real_time := int(float(menu_latency) / speeds[speed_ctrl])
-							offset_real_time := offset_real_time + (rec_time_to_real_time(LEADING_SILENCE) - latency_real_time) * 1000
-
-							// Convert to recorded time
-							offset_rec_time := real_time_to_rec_time(offset_real_time)
-
-							if switch_velToSampleStart = 1
-								// Override what ripple it was on
-								offset_rec_time := offset_rec_time mod rec_time_ripple_lengths[cur_artic]
-
-								// Set ripple according to velocity
-								declare vel_offset := (velo[second_note] / 26) * rec_time_ripple_lengths[cur_artic]
-								offset_rec_time := offset_rec_time + vel_offset
-
-								// Keep it in bounds of the entire sample
-								offset_rec_time := offset_rec_time mod real_sample_length
-							end if
-
-							// Keep exact duplicates from happening
-							declare already_playing := 0
-							for r := 0 to MAX_RIPPLE_HISTORY - 1
-								if event_status(ripple_id_history[r]) = EVENT_STATUS_NOTE_QUEUE
-									if ((event[ripple_id_history[r]].low_note = low_note and event[ripple_id_history[r]].high_note = high_note) ...
-										or (event[ripple_id_history[r]].origin_note = origin_note and event[ripple_id_history[r]].dest_note = dest_note)) ...
-									and event[ripple_id_history[r]].direction = ripple_dir ...
-									and event[ripple_id_history[r]].releasing = 0 ...
-									and ripple_id_history[r] -> play_pos - offset_rec_time < 5000
-										already_playing := 1
-										event[ripple_id_history[r]].marked_for_release := 0 // If you didn't do this, then....
-									end if
-								end if
-							end for
-
-							// Play notes
-							declare polyphonic ext_first_note := first_note
-							declare polyphonic ext_second_note := second_note
-							declare polyphonic ext_low_note := low_note
-							declare polyphonic ext_high_note := high_note
-							declare polyphonic ext_artic := cur_artic
-							declare polyphonic note_chooser
-							declare polyphonic ext_pitch
-							declare ext_note
-							declare ~vel_norm
-							declare len
-							declare polyphonic last_time
-
-
-							declare wait_time := ext_mode_real_legato_time
-							if wait_time > 0 // So it doesn't wait til the next pitch
-								select legato_ctrl
-									case legatoMode.syncToPitch
-										wait_time := real_pitch_length - (wait_time mod real_pitch_length)
-									case legatoMode.syncToRipple
-										if wait_time mod real_ripple_length <= real_pitch_length // Start on the second note
-											note_chooser := 1
-										end if
-										wait_time := real_pitch_length - (wait_time mod real_pitch_length) // Only wait til the next pitch
-									case legatoMode.syncToSwell
-										if wait_time mod real_ripple_length <= real_pitch_length // Start on the second note
-											note_chooser := 1
-										end if
-										ext_pitch := wait_time / real_pitch_length
-										wait_time := real_pitch_length - (wait_time mod real_pitch_length) // Only wait til the next pitch
-								end select
-							end if
-
-
-							declare polyphonic low_vel
-							declare polyphonic high_vel
-							define SWELL_AMT := 35
-							declare vel
-							low_vel := velo[note] - SWELL_AMT
-							high_vel := low_vel + SWELL_AMT
-							if high_vel > 127
-								high_vel := 127
-							end if
-							if low_vel < 1
-								low_vel := 1
-							end if
-
-							// For Sync modes
-							if wait_time > 0
-								wait(wait_time)
-							end if
-
-							// Note
-							if note_chooser = 0
-								ext_note := ext_first_note
-							else
-								ext_note := ext_second_note
-							end if
-
-							// Velocity, factoring in expression slider and note velocity
-							~vel_norm := (float(slider_vol) / 1000000.0) * (float(velo[note]) / 127.0)
-							vel := int(vel_norm * float(127-60)) + 30
-							
-							// Velocity across swell
-							if in_range(ext_pitch, 0, 7)
-								vel := map_i_2i_2i_i(ext_pitch, 0, 7, vel - 30, vel + 30)
-							else
-								vel := map_i_2i_2i_i(ext_pitch, 8, 15, vel + 30, vel - 30)
-							end if
-							
-							// Velocity between pitches
-							if note_chooser = 1
-								vel := vel - 20
-							end if
-							constrain(vel, 1, 127)
-
-							// Length
-							if ext_artic = artic.sixteenths
-								if note_chooser = 0
-									len := ticks_to_ms(ripple_length_ticks[ext_artic] / 4)
-								else
-									len := ticks_to_ms(ripple_length_ticks[ext_artic] / 4 * 3)
-								end if
-							else
-								len := ticks_to_ms(ripple_length_ticks[ext_artic] / 2)
-							end if
-
-							// Trigger note
-							note_id := play_note(ext_note, vel, 0, len)
-
-							// Wait
-							if ext_artic = artic.sixteenths
-								if note_chooser = 0
-									wait_time := ticks_to_ms(ripple_length_ticks[ext_artic] / 4)
-								else
-									wait_time := ticks_to_ms(ripple_length_ticks[ext_artic] / 4 * 3)
-								end if
-							else
-								wait_time := ticks_to_ms(ripple_length_ticks[ext_artic] / 2)
-							end if
-							wait_time := int(float(wait_time) * speeds[speed_ctrl])
-							if wait_time > 0
-								wait(wait_time)
-							end if
-
-							// Increment
-							ext_pitch := (ext_pitch + 1) mod 16
-							note_chooser := 1 - note_chooser
-						end for
-					end macro
-					note_logic()
-				end while
-				note_logic()
-				if note_chooser = 0
-					note_logic()
 				end if
 
-			end if
+				// Get low and high notes
+				if intervals[ripple_i] < 0
+					declare low_note := notes[ripple_i] + intervals[ripple_i]
+					declare high_note := notes[ripple_i]
+				else
+					low_note := notes[ripple_i]
+					high_note := notes[ripple_i] + intervals[ripple_i]
+				end if
+
+				// Direction
+				declare ripple_dir
+				if intervals[ripple_i] > 0
+					ripple_dir := UP
+				else
+					ripple_dir := DOWN
+				end if
+
+				// Origin, Destination (for Up and Down modes)
+				declare origin_note := notes[ripple_i]
+				declare dest_note := notes[ripple_i] + intervals[ripple_i]
+
+				// First note, Second note
+				declare first_note := played_notes[ripple_i]
+				declare second_note := played_notes[ripple_i] + played_intervals[ripple_i]
+
+				// Update Sync lengths' real time
+				declare real_ripple_length := rec_time_to_real_time(rec_time_ripple_lengths[cur_artic])
+				declare real_pitch_length := real_ripple_length / pitch_fractions[cur_artic]
+				declare real_sample_length := rec_time_to_real_time(rec_time_sample_lengths[cur_artic])
+
+				// Decide whether to do legato
+				declare do_legato
+				if all_keys_inactive = 1
+					do_legato := 0
+				else
+					do_legato := 1
+				end if
+				all_keys_inactive := 0
+
+				if legato_ctrl = 0
+					do_legato := 0
+				end if
+
+				// Get sample offset
+				declare offset_real_time
+				declare offset_rec_time
+				declare real_legato_time
+				declare latency_real_time
+				if do_legato = 0
+					first_ripple_timestamp := ENGINE_UPTIME
+					real_legato_time := 0
+					offset_real_time := 0
+					declare ext_mode_real_legato_time := 0
+					// offset_real_time := ticks_to_ms(30) // For when you add a ripple using grid-snapped notes.
+				else
+					real_legato_time := (ENGINE_UPTIME - first_ripple_timestamp) * 1000
+					ext_mode_real_legato_time := real_legato_time
+					select legato_ctrl
+						case legatoMode.syncToPitch
+							real_legato_time := real_legato_time + ticks_to_ms(30) // For when you add a ripple using grid-snapped notes. Make it wrap a tiny bit earlier.
+							offset_real_time := real_legato_time mod real_pitch_length
+							offset_real_time := offset_real_time - ticks_to_ms(30) // Undo the offset
+						case legatoMode.syncToRipple
+							real_legato_time := real_legato_time + ticks_to_ms(30)
+							offset_real_time := real_legato_time mod real_ripple_length
+							offset_real_time := offset_real_time - ticks_to_ms(30)
+						case legatoMode.syncToSwell
+							offset_real_time := real_legato_time mod real_sample_length
+					end select
+
+					// In case undo-ing the offset made it negative
+					if offset_real_time < 0
+						offset_real_time := 0
+					end if
+				end if
+
+				// Compensate for latency
+				latency_real_time := int(float(menu_latency) / speeds[speed_ctrl])
+				offset_real_time := offset_real_time + (rec_time_to_real_time(LEADING_SILENCE) - latency_real_time) * 1000
+
+				// Convert to recorded time
+				offset_rec_time := real_time_to_rec_time(offset_real_time)
+
+				if switch_velToSampleStart = 1
+					// Override what ripple it was on
+					offset_rec_time := offset_rec_time mod rec_time_ripple_lengths[cur_artic]
+
+					// Set ripple according to velocity
+					declare vel_offset := (velo[second_note] / 26) * rec_time_ripple_lengths[cur_artic]
+					offset_rec_time := offset_rec_time + vel_offset
+
+					// Keep it in bounds of the entire sample
+					offset_rec_time := offset_rec_time mod real_sample_length
+				end if
+
+				// Keep exact duplicates from happening
+				declare already_playing := 0
+				for r := 0 to MAX_RIPPLE_HISTORY - 1
+					if event_status(ripple_id_history[r]) = EVENT_STATUS_NOTE_QUEUE
+						if ((event[ripple_id_history[r]].low_note = low_note and event[ripple_id_history[r]].high_note = high_note) ...
+							or (event[ripple_id_history[r]].origin_note = origin_note and event[ripple_id_history[r]].dest_note = dest_note)) ...
+						and event[ripple_id_history[r]].direction = ripple_dir ...
+						and event[ripple_id_history[r]].releasing = 0 ...
+						and ripple_id_history[r] -> play_pos - offset_rec_time < 5000
+							already_playing := 1
+							event[ripple_id_history[r]].marked_for_release := 0 // If you didn't do this, then....
+						end if
+					end if
+				end for
+
+				// Play note
+				if already_playing = 0
+					declare note_id := play_note(notes[ripple_i], 64 + intervals[ripple_i], offset_rec_time, 0)
+					if switch_velToSampleStart = 0
+						declare volume  := map_i_2i_2i_i(velocity, 1, 127, -7000, 3000)
+						change_vol(note_id, volume, CHANGE_ABSOLUTE)
+					end if
+					set_event_par_arr(note_id, EVENT_PAR_ALLOW_GROUP, 0, ALL_GROUPS)
+					set_event_par_arr(note_id, EVENT_PAR_ALLOW_GROUP, 1, cur_artic)
+					event[note_id].artic       := cur_artic
+					event[note_id].note        := note
+					event[note_id].low_note    := low_note
+					event[note_id].high_note   := high_note
+					event[note_id].origin_note := origin_note
+					event[note_id].dest_note   := dest_note
+					event[note_id].first_note  := first_note
+					event[note_id].second_note := second_note
+					event[note_id].velocity    := velocity
+					event[note_id].direction   := ripple_dir
+					event[note_id].source      := OUTSIDE_SOURCE
+					event[note_id].triggered_by_mf := event[event_id].triggered_by_mf
+
+					// Push note id to ripple history
+					for r := MAX_RIPPLE_HISTORY - 2 downto 0
+						ripple_id_history[r + 1] := ripple_id_history[r]
+					end for
+					ripple_id_history[0] := note_id
+
+					// Fade in
+					declare fade_in_time := 0
+					if do_legato = 0
+						fade_in_time := menu_latency * 1000
+						if fade_in_time = 0
+							// tmpro causes a bit of a bump sometimes. This hides that.
+							fade_in_time := 0
+						end if
+					else
+						declare real_pos_in_ripple := (real_legato_time + real_ripple_length - ticks_to_ms(48)) mod real_ripple_length
+						declare time_til_end_of_ripple := real_ripple_length - real_pos_in_ripple
+						if cur_artic = artic.sixteenths
+							if real_pos_in_ripple < real_ripple_length / 4
+								real_pitch_length := real_ripple_length / 4
+								declare real_pos_in_pitch := real_pos_in_ripple mod real_pitch_length
+								declare time_til_end_of_pitch := real_pitch_length - real_pos_in_pitch
+							else
+								time_til_end_of_pitch := real_ripple_length - real_pos_in_ripple
+							end if 
+						else
+							real_pitch_length := real_ripple_length / 2
+							real_pos_in_pitch := real_legato_time mod real_pitch_length
+							time_til_end_of_pitch := real_pitch_length - real_pos_in_pitch
+						end if
+						if in_range(velocity, 1, 48)
+							fade_in_time := time_til_end_of_ripple
+						else if in_range(velocity, 49, 96)
+							fade_in_time := time_til_end_of_pitch
+						else if in_range(velocity, 97, 127)
+							// fade_in_time := map_i_2i_2i_i(velocity, 65, 127, ticks_to_ms(240), ticks_to_ms(48))
+							fade_in_time := time_til_end_of_pitch / 2
+						end if
+						if fade_in_time < ticks_to_ms(192)
+							fade_in_time := ticks_to_ms(192)
+						end if
+					end if
+					fade_in(note_id, fade_in_time)
+				end if
+			end for
 		end if
 	end if
 end function
@@ -1483,9 +1229,6 @@ function release_callback(note, event_id)
 		end for
 
 		if CC[64] < 10
-			if switch_midiOutputMode = 1
-				key_down[note] := 0
-			end if
 			key_active[note] := 0
 			call release_marked_ripples
 		end if
@@ -1729,12 +1472,6 @@ on ui_control(switch_closeMidi2)
 	call stop_all_clips_and_ripples
 	call update_midi_visibility
 end on
-
-// Midi Output
-on ui_control (switch_midiOutputMode)
-	label_midiOutputModeCover -> hide := hide_states[switch_midiOutputMode]
-end on
-
 
 // Latency
 on ui_control (menu_latency)
