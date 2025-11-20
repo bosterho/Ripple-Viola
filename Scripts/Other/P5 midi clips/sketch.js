@@ -11,7 +11,7 @@ let hex_colors = []
 function preload() {
   ks_image = loadImage('assets/ks_image.png')
   clipOutline = loadImage('assets/clipOutline.png')
-  hex_colors = loadStrings('assets/channel colors.txt') 
+  hex_colors = loadStrings('assets/channel colors.txt'``) 
 }
 
 function setup() {
