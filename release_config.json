@@ -1,0 +1,14 @@
+{
+  "last_version": "0.9.0",
+  "dropbox_path": "C:/Users/ben/Polyverse Dropbox/Benjamin Osterhouse/Osterhouse Sounds Kontakt Development/Ripple Viola beta",
+  "files_to_include": [
+    "Ripple Viola.nki"
+  ],
+  "folders_to_include": [
+    "Midi",
+    "Samples"
+  ],
+  "folders_to_exclude": [
+    "Samples/Resources"
+  ]
+}
