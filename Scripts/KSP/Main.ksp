@@ -205,7 +205,7 @@ on init
 	declare release_group[NUM_artics]
 	release_group[artic.quarters]   := find_group("quarters releases")
 	release_group[artic.eighths]    := find_group("eighths releases")
-	release_group[artic.sixteenths] := find_group("eighths releases")
+	release_group[artic.sixteenths] := find_group("sixteenths releases")
 
 	{{ Keyswitch constants }}
 	declare const LOWEST_KEY  := 36

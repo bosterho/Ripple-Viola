@@ -15,18 +15,20 @@ function find_in_table(table, str)
         end
     end
 end
-  
+
 fs = filesystem
 
-samplesPath = "D:/Kontakt Development/Osterhouse Sounds/Ripple Cello/Development/Samples wav/"
-groups = {"quarters", "eighths", "sixteenths"}
+samplesPath = scriptPath .. "/../../Samples wav/"
+groups[1] = "quarters"
+groups[2] = "eighths"
+groups[3] = "sixteenths"
 
 for index, artic in pairs(groups) do
     if index > 1 then
         instrument.groups:add(Group())
     end
     instrument.groups[index-1].name = artic
-end 
+end
 
 for _, file in fs.directory(samplesPath) do
     if fs.extension(file) == ".wav" then

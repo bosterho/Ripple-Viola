@@ -1,6 +1,4 @@
-{ Compiled on Tue Sep 24 14:27:34 2024 }
 on init
-  declare $sksp_dummy
   declare $concat_it
   declare $concat_offset
   declare $string_it
@@ -338,7 +336,7 @@ on init
   declare %release_group[3]
   %release_group[$artic__quarters] := find_group("quarters releases")
   %release_group[$artic__eighths] := find_group("eighths releases")
-  %release_group[$artic__sixteenths] := find_group("eighths releases")
+  %release_group[$artic__sixteenths] := find_group("sixteenths releases")
   declare const $LOWEST_KEY := 36
   declare const $HIGHEST_KEY := 72
   declare %articulation_keyswitches[3] := (31, 32, 33)
@@ -3200,7 +3198,6 @@ end on
 
 on release
   if (%custom_event_triggered_by_mf[$EVENT_ID mod 1000000]>0 and (%custom_event_active[$EVENT_ID mod 1000000]=0))
-    $sksp_dummy := $sksp_dummy
     exit
   end if
   %key_down[$EVENT_NOTE] := 0
