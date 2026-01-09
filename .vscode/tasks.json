@@ -1,0 +1,27 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Run sKSP Compiler",
+            "type": "shell",
+            "command": "python",
+            "args": [
+                "${userHome}/AppData/Roaming/Sublime Text/Packages/KSP (Kontakt Script Processor)/compiler/ksp_compiler.py",
+                "${workspaceFolder}/Scripts/KSP/Main.ksp"
+            ],
+            "problemMatcher": [],
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared",
+                "showReuseMessage": true,
+                "clear": false
+            },
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        }
+    ]
+}
