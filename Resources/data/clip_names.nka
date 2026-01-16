@@ -1,0 +1,81 @@
+!clip_names
+01 Getting Started - Hello World
+01 Getting Started - Quarters
+01 Getting Started - Eighths
+01 Getting Started - Sixteenths
+01 Getting Started - High range
+01 Getting Started - Low range
+01 Getting Started - Fast triplets
+01 Getting Started - Upward melody
+02 Velocity to Start - Basic demonstration
+02 Velocity to Start - Starting at the swell's peak
+02 Velocity to Start - Only offsetting starts for added ripples
+02 Velocity to Start - Starting swells offset from each other
+02 Velocity to Start - Different velocities back and forth (set latency to 50ms)
+02 Velocity to Start - Idea - Wide
+02 Velocity to Start - Idea - Serious
+02 Velocity to Start - Idea - Sweet
+03 Sync Off - Minor cluster
+03 Sync Off - Major cluster
+03 Sync Off - Dorian cluster
+03 Sync Off - Giant major 7th
+03 Sync Off - Idea - Cascading octaves
+03 Sync Off - Idea - Dreamy chords in 3-4
+03 Sync off - Idea - Breezy
+03 Sync Off - Idea - Pensive
+04 Sync to Pitches - Basic demonstration
+04 Sync to Pitches - Interlocking quarters
+04 Sync to Pitches - Interlocking eighths
+04 Sync to Pitches - Interlocking sixteenths
+04 Sync to Pitches - Idea - Melodic eighths
+04 Sync to Pitches - Idea - Darting sixteenths
+04 Sync to Pitches - Off-grid key mashing
+04 Sync to Pitches - Idea - Mysterious descending 16ths
+05 Sync to Ripples - Basic demonstration
+05 Sync to Ripples - Dynamic attack time demonstration
+05 Sync to Ripples - Dynamic attack time in practice
+05 Sync to Ripples - Ripples above pedal-tone
+05 Sync to Ripples - Cascading chords with pedal down
+05 Sync to Ripples - Descending dom 7th chords
+05 Sync to Ripples - Idea - Legato Sixteenths
+05 Sync to Ripples - Idea - Deep
+06 Sync to Swells - Basic demonstration
+06 Sync to Swells - Using silent note
+06 Sync to Swells - Using pedal
+06 Sync to Swells - Idea - Wide, pensive
+06 Sync to Swells - Idea - Parallel motion
+06 Sync to Swells - Idea - 7th chords
+06 Sync to Swells - Idea - Augmented
+06 Sync to Swells - Idea - Major
+07 Release Samples - Off (fade-out varies)
+07 Release Samples - Auto (release sample varies)
+07 Release Samples - Auto (different releases happening at once)
+07 Release Samples - Release keyswitches (they are velocity sensitive)
+07 Release Samples - Dynamic 1
+07 Release Samples - Dynamic 2
+07 Release Samples - Dynamic 3
+07 Release Samples - Dynamic 4
+08 Ideas - Black Sands
+08 Ideas - Deadwater
+08 Ideas - Echo Lake
+08 Ideas - Murmur
+08 Ideas - Eddys
+08 Ideas - Frost
+08 Ideas - Goodbye
+08 Ideas - Mist
+09 Ideas - Sunrise
+09 Ideas - The Duke
+09 Ideas - Deep Pools
+09 Ideas - Light March
+09 Ideas - Dense
+09 Ideas - Deep Arc
+09 Ideas - Mysterious Riplets
+09 Ideas - Riversong
+10 Ideas - Walking
+10 Ideas - Downward melody
+10 Ideas - Changing articulations mid-ripple
+10 Ideas - Changing speed to get different rhythms
+10 Ideas - Slowing down and speeding up
+10 Ideas - Lazy triplets
+10 Ideas - Keyswitching release samples (Set latency to 50ms)
+10 Ideas - Searching 16th snippets
