@@ -12,6 +12,7 @@ on init
 
 	set_key_pressed_support(1)
 	set_snapshot_type(3)
+	set_script_title("Main")
 
 	declare dev_mode[1]
 	load_array(dev_mode, 2)
@@ -208,17 +209,17 @@ on init
 	release_group[artic.sixteenths] := find_group("sixteenths releases")
 
 	{{ Keyswitch constants }}
-	declare const LOWEST_KEY  := 36
-	declare const HIGHEST_KEY := 72
+	declare const LOWEST_KEY  := 48
+	declare const HIGHEST_KEY := 84
 	
 	// Old keyswitches can be found in the old Reaper notemap
-	declare articulation_keyswitches[NUM_artics]               := (31, 32, 33)
-	declare speed_keyswitches[NUM_speedModes]                  := (72+5, 72+6, 72+7, 72+8, 72+9)
-	declare direction_keyswitches[NUM_directionModes]          := (72+13, 72+14, 72+15)
-	declare legato_keyswitches[NUM_legatoModes]                := (72+17, 72+18, 72+19, 72+20)
-	declare vel_to_start_keyswitches[2]                        := (72+21, 72+22)
-	declare release_sample_keyswitches[NUM_releaseSamplesModes] := (72+24, 72+25, 72+26, 72+27, 72+28, 72+29)
-	declare release_trigger_keyswitches[2]                     := (24, 108)
+	declare articulation_keyswitches[NUM_artics]                := (43, 44, 45)
+	declare speed_keyswitches[NUM_speedModes]                   := (84+5, 84+6, 84+7, 84+8, 84+9)
+	declare direction_keyswitches[NUM_directionModes]           := (84+13, 84+14, 84+15)
+	declare legato_keyswitches[NUM_legatoModes]                 := (84+17, 84+18, 84+19, 84+20)
+	declare vel_to_start_keyswitches[2]                         := (84+21, 84+22)
+	declare release_sample_keyswitches[NUM_releaseSamplesModes] := (84+24, 84+25, 84+26, 84+27, 84+28, 84+29)
+	declare release_trigger_keyswitches[2]                      := (36, 120)
 		
 	// Formatted for Reascript:
 	// articulation_keyswitches   = {29, 31, 33}
@@ -625,7 +626,7 @@ on init
 		key_ids[#i# + LOWEST_KEY + 12*2] := get_ui_id(label_oct2.note#i#)
 	end macro
 	iterate_macro(assign_key_id) := 0 to 11
-	key_ids[72] := get_ui_id(label_oct2.note12)
+	key_ids[HIGHEST_KEY] := get_ui_id(label_oct2.note12)
 
 	for key_i := LOWEST_KEY to HIGHEST_KEY
 		key_ids[key_i] -> value := 0

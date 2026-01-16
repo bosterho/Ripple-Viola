@@ -176,6 +176,7 @@ on init
   pgs_set_key_val(TCM_EXCEPTION,$CURRENT_SCRIPT_SLOT,0)
   set_key_pressed_support(1)
   set_snapshot_type(3)
+  set_script_title("Main")
   declare %dev_mode[1]
   load_array(%dev_mode,2)
   set_listener($NI_SIGNAL_TIMER_MS,1000000/30)
@@ -337,15 +338,15 @@ on init
   %release_group[$artic__quarters] := find_group("quarters releases")
   %release_group[$artic__eighths] := find_group("eighths releases")
   %release_group[$artic__sixteenths] := find_group("sixteenths releases")
-  declare const $LOWEST_KEY := 36
-  declare const $HIGHEST_KEY := 72
-  declare %articulation_keyswitches[3] := (31, 32, 33)
-  declare %speed_keyswitches[5] := (72+5, 72+6, 72+7, 72+8, 72+9)
-  declare %direction_keyswitches[3] := (72+13, 72+14, 72+15)
-  declare %legato_keyswitches[4] := (72+17, 72+18, 72+19, 72+20)
-  declare %vel_to_start_keyswitches[2] := (72+21, 72+22)
-  declare %release_sample_keyswitches[6] := (72+24, 72+25, 72+26, 72+27, 72+28, 72+29)
-  declare %release_trigger_keyswitches[2] := (24, 108)
+  declare const $LOWEST_KEY := 48
+  declare const $HIGHEST_KEY := 84
+  declare %articulation_keyswitches[3] := (43, 44, 45)
+  declare %speed_keyswitches[5] := (84+5, 84+6, 84+7, 84+8, 84+9)
+  declare %direction_keyswitches[3] := (84+13, 84+14, 84+15)
+  declare %legato_keyswitches[4] := (84+17, 84+18, 84+19, 84+20)
+  declare %vel_to_start_keyswitches[2] := (84+21, 84+22)
+  declare %release_sample_keyswitches[6] := (84+24, 84+25, 84+26, 84+27, 84+28, 84+29)
+  declare %release_trigger_keyswitches[2] := (36, 120)
   declare %all_keyswitches[64]
   declare $total_num_keyswitches
   $i := 0
@@ -1553,7 +1554,7 @@ on init
   %key_ids[11+$LOWEST_KEY] := get_ui_id($label_oct0__note11)
   %key_ids[11+$LOWEST_KEY+12] := get_ui_id($label_oct1__note11)
   %key_ids[11+$LOWEST_KEY+(12*2)] := get_ui_id($label_oct2__note11)
-  %key_ids[72] := get_ui_id($label_oct2__note12)
+  %key_ids[$HIGHEST_KEY] := get_ui_id($label_oct2__note12)
   $key_i := $LOWEST_KEY
   while ($key_i<=$HIGHEST_KEY)
     set_control_par(%key_ids[$key_i],$CONTROL_PAR_VALUE,0)
@@ -1943,8 +1944,9 @@ end on
 function set_key_colors_and_types_and_names
   $key_i := 0
   while ($key_i<=127)
-    set_key_type($key_i,$NI_KEY_TYPE_NONE)
+    set_key_color($key_i,$KEY_COLOR_INACTIVE)
     set_key_name($key_i,"")
+    set_key_type($key_i,$NI_KEY_TYPE_NONE)
     $_index := search(%articulation_keyswitches,$key_i)
     if ($_index # -1)
       set_key_color($key_i,$KEY_COLOR_RED)

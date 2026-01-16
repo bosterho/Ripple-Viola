@@ -185,8 +185,9 @@ function set_key_colors_and_types_and_names
 		// 	set_key_color(key_i, KEY_COLOR_WHITE)
 		// end if
 
-		set_key_type(key_i, NI_KEY_TYPE_NONE)
+		set_key_color(key_i, KEY_COLOR_INACTIVE)
 		set_key_name(key_i, "")
+		set_key_type(key_i, NI_KEY_TYPE_NONE)
 
 		declare index := search(articulation_keyswitches, key_i)
 		if index # -1
